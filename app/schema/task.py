@@ -10,7 +10,7 @@ from . import EBaseModel, logger, md, config
 from .scoring import Scoring, DynamicKKSScoring, StaticScoring
 
 
-def template_format_time(date: datetime) -> str:  # from alb1or1x_shit.py
+def template_format_time(date: datetime.datetime) -> str:  # from alb1or1x_shit.py
     if Task.is_date_after_migration(date):
         return date.strftime("%H:%M:%S.%f %d.%m.%Y")  # str(round(date.timestamp(), 2))
     else:

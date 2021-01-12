@@ -1,5 +1,5 @@
 import uuid
-from typing import Optional
+from typing import Optional, Union
 from datetime import datetime, timedelta
 
 from fastapi import Request, HTTPException, status, Depends
@@ -25,18 +25,22 @@ class OAuth2PasswordBearerWithCookie(OAuth2):
         super().__init__(flows=flows, scheme_name=scheme_name, auto_error=auto_error)
 
     async def __call__(self, request: Request) -> Optional[str]:
-        authorization: str = request.cookies.get("access_token")
+        authorization: Optional[str] = request.cookies.get("access_token")
+
+        if not authorization:
+            raise HTTPException(
+                status_code=status.HTTP_401_UNAUTHORIZED,
+                detail="No cookie",
+                headers={"WWW-Authenticate": "Bearer"},
+            )
 
         scheme, param = get_authorization_scheme_param(authorization)
-        if not authorization or scheme.lower() != "bearer":
-            if self.auto_error:
-                raise HTTPException(
-                    status_code=status.HTTP_401_UNAUTHORIZED,
-                    detail="Not authenticated",
-                    headers={"WWW-Authenticate": "Bearer"},
-                )
-            else:
-                return None
+        if scheme.lower() != "bearer":
+            raise HTTPException(
+                status_code=status.HTTP_401_UNAUTHORIZED,
+                detail="Not authenticated",
+                headers={"WWW-Authenticate": "Bearer"},
+            )
 
         return param
 
@@ -44,12 +48,12 @@ class OAuth2PasswordBearerWithCookie(OAuth2):
 oauth2_scheme = OAuth2PasswordBearerWithCookie(tokenUrl="/api/users/login")
 
 
-async def authenticate_user(username: str, password: str) -> schema.User:
+async def authenticate_user(username: str, password: str) -> Optional[schema.User]:
     user = await db.get_user(username)
     if not user:
-        return False
+        return None
     if user.password_hash is None or password != user.password_hash:
-        return False
+        return None
     return user
 
 
@@ -76,7 +80,7 @@ async def get_current_user(token: str = Depends(oauth2_scheme)):
         detail="Could not validate credentials",
         headers={"WWW-Authenticate": "Bearer"},
     )
-    user_id: str = None
+    user_id: Union[str, uuid.UUID, None] = None
     try:
         payload = jwt.decode(token, config.JWT_SECRET_KEY, algorithms=[config.JWT_ALGORITHM])  # no "alg:none"
         user_id = payload.get("user_id")

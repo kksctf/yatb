@@ -60,6 +60,7 @@ async def api_task_solve_internal(flag: str, user: schema.User):
         )
 
     if task.task_id in user.solved_tasks or user.user_id in task.pwned_by:
+        _task_yes_user_not = task.task_id in user.solved_tasks and user.user_id not in task.pwned_by
         _user_yes_task_not = task.task_id not in user.solved_tasks and user.user_id in task.pwned_by
         if _task_yes_user_not or _user_yes_task_not:
             logger.warning(f"Wtf, user and task misreferenced!!! {task} {user}")

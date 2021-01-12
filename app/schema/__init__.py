@@ -1,4 +1,5 @@
 from __future__ import annotations
+from typing import Dict, Set, Union
 from pydantic import BaseModel, validator, Extra
 
 import pprint
@@ -16,10 +17,13 @@ from ..utils import md
 logger = logging.getLogger("yatb.schema")
 
 
+Filter_fields_type = Union[Set[str], Dict[str, object]]
+
+
 class EBaseModel(BaseModel):
-    __public_fields__ = set()
-    __admin_only_fields__ = set()
-    __private_fields__ = set()
+    __public_fields__: Filter_fields_type = set()
+    __admin_only_fields__: Filter_fields_type = set()
+    __private_fields__: Filter_fields_type = set()
 
     def do_args(self, args, kwargs):
         if len(self.__public_fields__) == 0 and len(self.__admin_only_fields__) == 0:
@@ -47,7 +51,7 @@ class EBaseModel(BaseModel):
     def recursive_load(in_fields: dict, out_fields: dict, *args, **kwargs):
         for key, val in in_fields.items():
             if val != ... and issubclass(val, EBaseModel):
-                ev = set()
+                ev: Filter_fields_type = set()
                 for subclass in [val] + val.__subclasses__():
                     tmp = subclass.get_include_fieds(*args, **kwargs)
                     if isinstance(tmp, dict):

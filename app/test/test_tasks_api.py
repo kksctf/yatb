@@ -47,7 +47,7 @@ def test_task_create(client: TestClient):
         task_obj = schema.Task(**task)
         task_obj.hidden = False
         resp_show = client.post(
-            app.url_path_for("api_admin_task_edit", task_id=task_obj.task_id), data=task_obj.json(), headers={"Content-Type": "application/json"}
+            app.url_path_for("api_admin_task_edit", task_id=str(task_obj.task_id)), data=task_obj.json(), headers={"Content-Type": "application/json"}
         )
         assert resp_show.status_code == 200, f"{task['task_name']} {resp_show.text}"
 

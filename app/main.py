@@ -33,20 +33,23 @@ if config._DEGUG:
         import fastapi  # noqa
         import pydantic  # noqa
 
-        app.add_middleware(ServerTimingMiddleware, calls_to_track={
-            "1deps": (fastapi.routing.solve_dependencies,),
-            "2main": (fastapi.routing.run_endpoint_function,),
-            # "3valid": (pydantic.fields.ModelField.validate,),
-            "4encode": (fastapi.encoders.jsonable_encoder,),
-            "5render": (
-                fastapi.responses.JSONResponse.render,
-                fastapi.responses.ORJSONResponse.render,
-                fastapi.responses.HTMLResponse.render,
-                fastapi.responses.PlainTextResponse.render,
-            ),
-            "6tasks": (api_tasks.api_tasks_get_internal,),
-            "6task": (api_tasks.api_task_get_internal,),
-        })
+        app.add_middleware(
+            ServerTimingMiddleware,
+            calls_to_track={
+                "1deps": (fastapi.routing.solve_dependencies,),
+                "2main": (fastapi.routing.run_endpoint_function,),
+                # "3valid": (pydantic.fields.ModelField.validate,),
+                "4encode": (fastapi.encoders.jsonable_encoder,),
+                "5render": (
+                    fastapi.responses.JSONResponse.render,
+                    fastapi.responses.ORJSONResponse.render,
+                    fastapi.responses.HTMLResponse.render,
+                    fastapi.responses.PlainTextResponse.render,
+                ),
+                "6tasks": (api_tasks.api_tasks_get_internal,),
+                "6task": (api_tasks.api_task_get_internal,),
+            },
+        )
 
     except Exception:
         pass

@@ -26,5 +26,6 @@ def client(request):
     request.addfinalizer(client_teardown)
     return client
 
+
 # from . import test_auth  # noqa
 # from . import test_main  # noqa

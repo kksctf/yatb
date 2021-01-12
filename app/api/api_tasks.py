@@ -60,8 +60,7 @@ async def api_task_solve_internal(flag: str, user: schema.User):
         )
 
     if task.task_id in user.solved_tasks or user.user_id in task.pwned_by:
-        _task_yes_user_not = (task.task_id in user.solved_tasks and user.user_id not in task.pwned_by)
-        _user_yes_task_not = (task.task_id not in user.solved_tasks and user.user_id in task.pwned_by)
+        _user_yes_task_not = task.task_id not in user.solved_tasks and user.user_id in task.pwned_by
         if _task_yes_user_not or _user_yes_task_not:
             logger.warning(f"Wtf, user and task misreferenced!!! {task} {user}")
             if _task_yes_user_not:
@@ -95,7 +94,7 @@ async def api_task_solve_internal(flag: str, user: schema.User):
     "/",
     response_model=List[schema.Task],
     response_model_include=schema.Task.get_include_fieds(False),
-    response_model_exclude=schema.Task.get_exclude_fields()
+    response_model_exclude=schema.Task.get_exclude_fields(),
 )
 async def api_tasks_get():
     tasks = await api_tasks_get_internal(False)
@@ -112,7 +111,7 @@ async def api_task_submit_flag(flag: schema.FlagForm, user: schema.User = Depend
     "/{task_id}",
     response_model=schema.Task,
     response_model_include=schema.Task.get_include_fieds(False),
-    response_model_exclude=schema.Task.get_exclude_fields()
+    response_model_exclude=schema.Task.get_exclude_fields(),
 )
 async def api_task_get(task_id: uuid.UUID):
     task = await api_task_get_internal(task_id)

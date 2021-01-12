@@ -12,7 +12,7 @@ from .scoring import Scoring, DynamicKKSScoring, StaticScoring
 
 def template_format_time(date: datetime) -> str:  # from alb1or1x_shit.py
     if Task.is_date_after_migration(date):
-        return date.strftime('%H:%M:%S.%f %d.%m.%Y')  # str(round(date.timestamp(), 2))
+        return date.strftime("%H:%M:%S.%f %d.%m.%Y")  # str(round(date.timestamp(), 2))
     else:
         return "unknown"
 
@@ -54,7 +54,7 @@ class Task(EBaseModel):
     def __init__(self, *args, **kwargs):
         super().__init__(*args, **kwargs)
 
-    @validator('task_id', pre=True, always=True)
+    @validator("task_id", pre=True, always=True)
     def set_id(cls, v):
         return v or uuid.uuid4()
 
@@ -67,13 +67,13 @@ class Task(EBaseModel):
         return md.markdownCSS(content, config.MD_CLASSES_TASKS, config.MD_ATTRS_TASKS)
 
     # it's time for crazy solution. Taken from https://github.com/samuelcolvin/pydantic/issues/619#issuecomment-635784061
-    @validator('scoring', pre=True)
+    @validator("scoring", pre=True)
     def validate_scoring(cls, value):
         if isinstance(value, EBaseModel):
             return value
         if not isinstance(value, dict):
-            raise ValueError('value must be dict')
-        classtype = value.get('classtype')
+            raise ValueError("value must be dict")
+        classtype = value.get("classtype")
         if classtype == "Scoring":
             return Scoring(**value)
         elif classtype == "StaticScoring":

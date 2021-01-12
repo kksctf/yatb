@@ -15,6 +15,7 @@ from .. import schema, auth, config, db
 
 from ..api import api_tasks as api_tasks
 from ..api import api_users as api_users
+
 logger = logging.getLogger("yatb.view")
 
 _base_path = os.path.dirname(os.path.abspath(__file__))
@@ -51,7 +52,9 @@ async def get_user_safe(request: Request) -> Optional[schema.User]:
         user = None
     return user
 
+
 from . import admin  # noqa
+
 router.include_router(admin.router)
 
 
@@ -69,40 +72,48 @@ async def tasks_get_all(request: Request):
         admin = True
     tasks_list = await api_tasks.api_tasks_get_internal(admin)
     return templ.TemplateResponse(
-        "tasks.jhtml", {
+        "tasks.jhtml",
+        {
             "request": request,
             "curr_user": user,
             "tasks": tasks_list,
-        })
+        },
+    )
 
 
 @router.get("/scoreboard")
 async def scoreboard_get(request: Request):
     scoreboard = await api_users.api_scoreboard_get_internal()
     return templ.TemplateResponse(
-        "scoreboard.jhtml", {
+        "scoreboard.jhtml",
+        {
             "request": request,
             "curr_user": await get_user_safe(request),
             "scoreboard": scoreboard,
             "enumerate": enumerate,
-        })
+        },
+    )
 
 
 @router.get("/login")
 async def login_get(request: Request):
     return templ.TemplateResponse(
-        "login.jhtml", {
+        "login.jhtml",
+        {
             "request": request,
             "curr_user": await get_user_safe(request),
-        })
+        },
+    )
 
 
 @router.get("/tasks/{task_id}")
 async def tasks_get_task(request: Request, task_id: uuid.UUID):
     task = await api_tasks.api_task_get_internal(task_id)
     return templ.TemplateResponse(
-        "task.jhtml", {
+        "task.jhtml",
+        {
             "request": request,
             "curr_user": await get_user_safe(request),
             "selected_task": task,
-        })
+        },
+    )

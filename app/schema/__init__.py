@@ -12,6 +12,7 @@ except ModuleNotFoundError:
 
 from .. import config
 from ..utils import md
+
 logger = logging.getLogger("yatb.schema")
 
 
@@ -59,8 +60,9 @@ class EBaseModel(BaseModel):
     @classmethod
     # @functools.lru_cache(maxsize=1024, typed=True)
     def get_include_fieds(cls, admin=False):
-        if (isinstance(cls.__public_fields__, dict) and not isinstance(cls.__admin_only_fields__, dict)) \
-                or (not isinstance(cls.__public_fields__, dict) and isinstance(cls.__admin_only_fields__, dict)):
+        if (isinstance(cls.__public_fields__, dict) and not isinstance(cls.__admin_only_fields__, dict)) or (
+            not isinstance(cls.__public_fields__, dict) and isinstance(cls.__admin_only_fields__, dict)
+        ):
             print(cls, cls.__public_fields__, cls.__admin_only_fields__, type(cls.__public_fields__), type(cls.__admin_only_fields__))
             raise Exception("WTF why public fields and admin only fields have different types?!")
 
@@ -106,7 +108,7 @@ class EBaseModel(BaseModel):
             skip_defaults=skip_defaults,
             exclude_unset=exclude_unset,
             exclude_defaults=exclude_defaults,
-            exclude_none=exclude_none
+            exclude_none=exclude_none,
         )
         props = self.get_properties()
         # Include and exclude properties

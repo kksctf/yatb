@@ -52,7 +52,7 @@ class User(EBaseModel):
             self.is_admin = True
 
     def admin_checker(self):
-        if (self.oauth_id == -1 and self.username == "Rubikoid"):
+        if self.oauth_id == -1 and self.username == "Rubikoid":
             return True
 
         if self.oauth_id in config.OAUTH_ADMIN_IDs:  # TODO: to config
@@ -60,7 +60,7 @@ class User(EBaseModel):
 
         return False
 
-    @validator('user_id', pre=True, always=True)
+    @validator("user_id", pre=True, always=True)
     def set_id(cls, v):
         return v or uuid.uuid4()
 

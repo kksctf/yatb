@@ -32,7 +32,7 @@ _DEGUG = env_bool("YATB_DEBUG", "True")
 TOKEN_PATH = "/api/users/login"  # strange setting, but idk for what i can use it
 
 
-if '.git' in os.listdir('.'):
+if ".git" in os.listdir("."):
     VERSION = subprocess.check_output(["git", "rev-parse", "HEAD"]).decode()[:8]
     VERSION += "-Modified" if len(subprocess.check_output(["git", "status", "--porcelain"])) > 0 else ""
 else:

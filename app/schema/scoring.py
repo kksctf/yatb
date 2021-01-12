@@ -8,7 +8,7 @@ class Scoring(EBaseModel):
         "classtype",
         "points",
     }
-    classtype: Literal['Scoring'] = "Scoring"
+    classtype: Literal["Scoring"] = "Scoring"
 
     @property
     def points(self) -> int:
@@ -19,15 +19,14 @@ class Scoring(EBaseModel):
 
     def reset(self):
         pass
+
     # class Config:
     #    extra = Extra.allow
 
 
 class StaticScoring(Scoring):
-    __admin_only_fields__ = {
-        "static_points"
-    }
-    classtype: Literal['StaticScoring'] = "StaticScoring"
+    __admin_only_fields__ = {"static_points"}
+    classtype: Literal["StaticScoring"] = "StaticScoring"
 
     static_points: int
 
@@ -40,13 +39,8 @@ class StaticScoring(Scoring):
 
 
 class DynamicKKSScoring(Scoring):
-    __admin_only_fields__ = {
-        "solves",
-        "decay",
-        "minimum",
-        "maximum"
-    }
-    classtype: Literal['DynamicKKSScoring'] = "DynamicKKSScoring"
+    __admin_only_fields__ = {"solves", "decay", "minimum", "maximum"}
+    classtype: Literal["DynamicKKSScoring"] = "DynamicKKSScoring"
 
     solves: int = 0
     decay: int = 50
@@ -60,7 +54,7 @@ class DynamicKKSScoring(Scoring):
         if self.solves >= self.decay:
             return self.minimum
         else:
-            coeff = 495 - (1 - math.pow(self.decay / (10**6), 0.25)) * 65.91 * math.log(self.decay)
+            coeff = 495 - (1 - math.pow(self.decay / (10 ** 6), 0.25)) * 65.91 * math.log(self.decay)
             out = self.maximum - coeff * math.log(self.solves)
             if out > self.maximum:
                 logger.warning(f"Wtf why more than maximum at {self}")

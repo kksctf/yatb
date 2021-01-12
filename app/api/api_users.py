@@ -32,7 +32,7 @@ async def api_scoreboard_get_internal() -> List[schema.User]:
     "/scoreboard",
     response_model=List[schema.User],
     response_model_include=schema.User.get_include_fieds(False),
-    response_model_exclude=schema.User.get_exclude_fields()
+    response_model_exclude=schema.User.get_exclude_fields(),
 )
 async def api_scoreboard_get():
     users = await api_scoreboard_get_internal()
@@ -72,6 +72,7 @@ async def api_task_get_ctftime_scoreboard(fullScoreboard: bool = False):
         return {
             "standings": standings,
         }
+
 
 # =============== ONLY DEBUG ===============
 
@@ -114,6 +115,8 @@ async def api_users_register(resp: Response, form_data: schema.UserForm):
     resp.set_cookie(key="access_token", value=f"Bearer {access_token}", httponly=True)
 
     return "ok"
+
+
 # =============== ONLY DEBUG ===============
 
 
@@ -129,7 +132,7 @@ async def api_oauth_callback(req: Request, resp: Response, code: str, state: str
                     "redirect_uri": req.url_for("api_oauth_callback"),
                     "client_id": config.OAUTH_CLIENT_ID,
                     "client_secret": config.OAUTH_CLIENT_SECRET,
-                }
+                },
             )
         ).json()
         logger.debug(f"oauth token data: {oauth_token}")
@@ -166,7 +169,7 @@ async def api_oauth_callback(req: Request, resp: Response, code: str, state: str
     "/me",
     response_model=schema.User,
     response_model_include=schema.User.get_include_fieds(False),
-    response_model_exclude=schema.User.get_exclude_fields()
+    response_model_exclude=schema.User.get_exclude_fields(),
 )
 async def api_users_me(user: schema.User = Depends(auth.get_current_user)):
     return user
@@ -184,7 +187,7 @@ async def api_users_logout(req: Request, resp: Response, user: schema.User = Dep
     "/{user_id}",
     response_model=schema.User,
     response_model_include=schema.User.get_include_fieds(False),
-    response_model_exclude=schema.User.get_exclude_fields()
+    response_model_exclude=schema.User.get_exclude_fields(),
 )
 async def api_users_get(user_id: uuid.UUID, user: schema.User = Depends(auth.get_current_user)):
     req_user = await db.get_user_uuid(user_id)

@@ -3,6 +3,7 @@ import logging
 
 
 from .. import config, schema
+
 logger = logging.getLogger("yatb.api")
 
 
@@ -14,7 +15,7 @@ def to_tg(data: dict, path: str) -> requests.Response:
 
 
 def encoder(text: str) -> str:
-    bad = ['_', '*', '[', ']', '(', ')', '~', '`', '>', '#', '+', '-', '=', '|', '{', '}', '.', '!']
+    bad = ["_", "*", "[", "]", "(", ")", "~", "`", ">", "#", "+", "-", "=", "|", "{", "}", ".", "!"]
     ret = text
     for b in bad:
         ret = ret.replace(b, f"\\{b}")
@@ -28,7 +29,8 @@ def send_message(text):
             "text": text,
             "parse_mode": "MarkdownV2",
         },
-        path="sendMessage")
+        path="sendMessage",
+    )
 
 
 def display_fb_msg(what: schema.Task, by: schema.User):

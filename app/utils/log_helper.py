@@ -11,7 +11,7 @@ from typing import List
 def generate_loggers(
     base_name: str = "yatb",
     base_folder: str = "logs",
-    modules: List[str] = ['schema', 'api'],
+    modules: List[str] = ["schema", "api"],
     root_format: str = "%(asctime)s - %(name)s - %(levelname)s - %(funcName)s:%(lineno)d - %(message)s",
     module_format: str = "%(asctime)s - %(levelname)s - %(funcName)s:%(lineno)d - %(message)s",
 ):

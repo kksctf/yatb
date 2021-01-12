@@ -2,6 +2,7 @@ import uuid
 import logging
 from datetime import datetime
 from asyncio import Lock
+
 # import markdown2
 
 from typing import List, Dict, Union, Optional
@@ -10,28 +11,33 @@ from .. import schema, config
 from ..utils import md, metrics
 
 from . import update_entry, db_users
+
 logger = logging.getLogger("yatb.db.tasks")
 db_lock = Lock()
 
 
 async def get_task_uuid(uuid: uuid.UUID) -> schema.Task:
     from . import _db
+
     if uuid in _db._index["tasks"]:
         return _db._index["tasks"][uuid]
 
 
 async def get_all_tasks() -> Dict[uuid.UUID, schema.Task]:
     from . import _db
+
     return _db._index["tasks"]
 
 
 async def check_task_uuid(uuid: uuid.UUID) -> bool:
     from . import _db
+
     return uuid in _db._index["tasks"]
 
 
 async def insert_task(new_task: schema.TaskForm, author: schema.User) -> schema.Task:
     from . import _db
+
     # task = schema.Task.parse_obj(new_task)  # WTF: SHITCODE
     task = schema.Task(
         task_name=new_task.task_name,
@@ -40,7 +46,7 @@ async def insert_task(new_task: schema.TaskForm, author: schema.User) -> schema.
         description=new_task.description,
         description_html=schema.Task.regenerate_md(new_task.description),  # md.markdownCSS(new_task.description, config.MD_CLASSES_TASKS),
         flag=new_task.flag,
-        author=(new_task.author if new_task.author != "" else f"@{author.username}")
+        author=(new_task.author if new_task.author != "" else f"@{author.username}"),
     )
     _db._db["tasks"][task.task_id] = task
     _db._index["tasks"][task.task_id] = task
@@ -49,16 +55,20 @@ async def insert_task(new_task: schema.TaskForm, author: schema.User) -> schema.
 
 async def update_task(task: schema.Task, new_task: schema.Task) -> schema.Task:
     from . import _db
+
     logger.debug(f"Update task {task} to {new_task}")
 
-    update_entry(task, new_task.dict(
-        exclude={
-            "task_id",
-            "description_html",
-            "scoring",
-            "pwned_by",
-        }
-    ))
+    update_entry(
+        task,
+        new_task.dict(
+            exclude={
+                "task_id",
+                "description_html",
+                "scoring",
+                "pwned_by",
+            }
+        ),
+    )
     task.scoring = new_task.scoring  # fix for json-ing scoring on edit
 
     logger.debug(f"Resulting task={task}")
@@ -68,6 +78,7 @@ async def update_task(task: schema.Task, new_task: schema.Task) -> schema.Task:
 
 async def remove_task(task: schema.Task):
     from . import _db
+
     # TODO: check for task in article, recalc score and something else.
     del _db._db["tasks"][task.task_id]
     del _db._index["tasks"][task.task_id]
@@ -77,9 +88,9 @@ async def find_task_by_flag(flag: str) -> Union[schema.Task, None]:
     from . import _db
 
     # TODO: normal flag sanitization
-    if 'kks{' in flag:
-        flag = flag.replace("kks{", '', 1)
-    if flag[-1] == '}':
+    if "kks{" in flag:
+        flag = flag.replace("kks{", "", 1)
+    if flag[-1] == "}":
         flag = flag[:-1]
     flag = "kks{" + flag + "}"
 

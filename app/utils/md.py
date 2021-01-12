@@ -38,7 +38,7 @@ class ClassAdderExtension(markdown.Extension):
     def extendMarkdown(self, md, md_globals):
         treeprocessor = ClassAdderTreeprocessor(md)
         treeprocessor.set_config(self)
-        md.treeprocessors.register(treeprocessor, 'class-ext', 0)
+        md.treeprocessors.register(treeprocessor, "class-ext", 0)
 
 
 class AttributeTreeprocessor(markdown.treeprocessors.Treeprocessor):
@@ -76,13 +76,13 @@ class AttributeExtension(markdown.Extension):
     def extendMarkdown(self, md, md_globals):
         treeprocessor = AttributeTreeprocessor(md)
         treeprocessor.set_config(self)
-        md.treeprocessors.register(treeprocessor, 'attrib-ext', 0)
+        md.treeprocessors.register(treeprocessor, "attrib-ext", 0)
         # ['css'] =
 
 
 def markdownCSS(txt, config, attrs_config={}):
     ext = ClassAdderExtension(replace=config)
     ext_attrs = AttributeExtension(attrs=attrs_config)
-    md = markdown.Markdown(extensions=[ext, ext_attrs], safe_mode='escape')
+    md = markdown.Markdown(extensions=[ext, ext_attrs], safe_mode="escape")
     html = md.convert(txt)
     return html

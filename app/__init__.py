@@ -21,7 +21,7 @@ app.mount("/static", StaticFiles(directory=os.path.join(_base_path, "view", "sta
 
 root_logger = utils.log_helper.generate_loggers(
     base_name="yatb",
-    modules=['schema', 'api', 'api.admin', 'db', 'db.tasks', 'db.users', 'view'],
+    modules=["schema", "api", "api.admin", "db", "db.tasks", "db.users", "view"],
 )
 
 logging.getLogger("yatb.schema").propagate = False  # disable logging schema debug shit to everything upper

@@ -8,6 +8,7 @@ from pydantic import BaseModel
 from typing import List
 
 from .. import config, app, schema, db
+
 real_logger = logging.getLogger("yatb.db")
 
 
@@ -99,7 +100,7 @@ async def startup_event():
         }
     else:
         try:
-            with open(config.DB_NAME, 'rb') as f:
+            with open(config.DB_NAME, "rb") as f:
                 _db._db = pickle.load(f)
         except Exception as ex:
             _db._db = {
@@ -119,7 +120,7 @@ async def shutdown_event():
     global _db
     if config.DB_NAME is None:
         return
-    with open(config.DB_NAME, 'wb') as f:
+    with open(config.DB_NAME, "wb") as f:
         pickle.dump(_db._db, f)
     real_logger.warning("FileDB saved")
 

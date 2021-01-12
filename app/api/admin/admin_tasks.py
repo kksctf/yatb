@@ -140,6 +140,7 @@ class InternalObjTasksListDecay(InternalObjTasksList):
     tasks: List[uuid.UUID]
     decay: int
 
+
 # not work.
 @router.post(
     "/tasks/bulk_edit_decay"

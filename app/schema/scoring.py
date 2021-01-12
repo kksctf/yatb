@@ -60,8 +60,8 @@ class DynamicKKSScoring(Scoring):
         if self.solves >= self.decay:
             return self.minimum
         else:
-            coeff = 495 - (1 - math.pow(self.decay/(10**6), 1/4))*65.91*math.log(self.decay)
-            out = self.maximum - coeff*math.log(self.solves)
+            coeff = 495 - (1 - math.pow(self.decay / (10**6), 0.25)) * 65.91 * math.log(self.decay)
+            out = self.maximum - coeff * math.log(self.solves)
             if out > self.maximum:
                 logger.warning(f"Wtf why more than maximum at {self}")
             return min(max(self.minimum, math.ceil(out)), self.maximum)

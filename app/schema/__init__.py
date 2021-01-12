@@ -59,7 +59,8 @@ class EBaseModel(BaseModel):
     @classmethod
     # @functools.lru_cache(maxsize=1024, typed=True)
     def get_include_fieds(cls, admin=False):
-        if (isinstance(cls.__public_fields__, dict) and not isinstance(cls.__admin_only_fields__, dict)) or (not isinstance(cls.__public_fields__, dict) and isinstance(cls.__admin_only_fields__, dict)):
+        if (isinstance(cls.__public_fields__, dict) and not isinstance(cls.__admin_only_fields__, dict)) \
+                or (not isinstance(cls.__public_fields__, dict) and isinstance(cls.__admin_only_fields__, dict)):
             print(cls, cls.__public_fields__, cls.__admin_only_fields__, type(cls.__public_fields__), type(cls.__admin_only_fields__))
             raise Exception("WTF why public fields and admin only fields have different types?!")
 
@@ -96,15 +97,6 @@ class EBaseModel(BaseModel):
         exclude_none: bool = False,
     ):  # -> 'DictStrAny':
         # self.do_args(args, kwargs)
-        d = {
-            'include': include,
-            'exclude': exclude,
-            'by_alias': by_alias,
-            'skip_defaults': skip_defaults,
-            'exclude_unset': exclude_unset,
-            'exclude_defaults': exclude_defaults,
-            'exclude_none': exclude_none
-        }
         # logger.debug(f"Export:\n\t({self.__class__})\t{self}\n\tWITH KWARGS\n\t{d}")
         attribs = super().dict(
             *args,

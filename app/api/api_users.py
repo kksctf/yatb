@@ -51,7 +51,7 @@ async def api_task_get_ctftime_scoreboard(fullScoreboard: bool = False):
         tasks = list(map(lambda x: x.task_name, tasks_list))
     for i, user in enumerate(scoreboard):
         obj = {
-            "pos": i+1,
+            "pos": i + 1,
             "team": user.username,
             "score": user.score,
         }

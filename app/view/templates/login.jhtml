@@ -52,25 +52,25 @@
                             <form id="debug_register_form">
                                 <input type="hidden" name="username" value="Rubikoid">
                                 <input type="hidden" name="password" value="123">
-                                <button class="btn btn-primary btn-block mt-3" type="submit">DEBUG REGISTER</button>
+                                <button class="btn btn-primary btn-block mt-3" type="submit">ADMIN DEBUG REGISTER</button>
                             </form>
 
                             <form id="debug_login_form">
                                 <input type="hidden" name="username" value="Rubikoid">
                                 <input type="hidden" name="password" value="123">
-                                <button class="btn btn-primary btn-block mt-3" type="submit">DEBUG LOGIN</button>
+                                <button class="btn btn-primary btn-block mt-3" type="submit">ADMIN DEBUG LOGIN</button>
                             </form>
 
                             <form id="debug_register_form_2">
                                 <input type="hidden" name="username" value="Rubikoid1">
                                 <input type="hidden" name="password" value="12321">
-                                <button class="btn btn-primary btn-block mt-3" type="submit">SECOND DEBUG REGISTER</button>
+                                <button class="btn btn-primary btn-block mt-3" type="submit">USER DEBUG REGISTER</button>
                             </form>
 
                             <form id="debug_login_form_2">
                                 <input type="hidden" name="username" value="Rubikoid1">
                                 <input type="hidden" name="password" value="12321">
-                                <button class="btn btn-primary btn-block mt-3" type="submit">SECOND DEBUG LOGIN</button>
+                                <button class="btn btn-primary btn-block mt-3" type="submit">USER DEBUG LOGIN</button>
                             </form>
 
                     </div>

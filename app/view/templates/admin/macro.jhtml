@@ -1,0 +1,128 @@
+{%- macro get_input(
+    prop_name,
+    prop,
+    attribs,
+    schema,
+    value=None,
+    type_override=None)
+%}
+    {% set type = prop['type'] if not type_override else type_override %}
+    {% set inner_value = (prop['const'] if 'const' in prop else (value if value else (prop['default'] if 'default' in prop else ''))) %}
+    {% set inner_value_2 = prop.get('const', value or prop.get('default', '')) %}
+    <!-- inner_value_old={{ inner_value }}, new={{ inner_value_2 }}, equal={{ inner_value==inner_value_2 }}-->
+    {# <!-- {{ (attribs) }} --> #}
+    {% if type == "string" %}
+        <input class="form-control" type="text" name="{{ prop_name }}" placeholder="{{ prop['title'] }}" value="{{ inner_value }}" {{ ' '.join(attribs) }}>
+    {% elif type == "integer" %}
+        <input type="number" name="{{ prop_name }}" value="{{ inner_value }}" {{ ' '.join(attribs) }}>
+    {% elif type == "boolean" %}
+        <input class="my-2 form-check-input" type="checkbox" name="{{ prop_name }}" {{ ' '.join(attribs) }} {{ 'checked' if value else '' }}>
+    {% elif type == "textarea" %}
+        <textarea type="text" name="{{ prop_name }}" {{ ' '.join(attribs) }}>{{ inner_value }}</textarea>
+    {% elif type == "array" %}
+        {# <textarea class="form-control" type="text" name="{{ prop_name }}" style="resize:none;" disabled>{{ inner_value }}</textarea> #}
+        ARRAY_TEXTAREA_DISABLED_DUE_TO_THIS_BROKES_EVERYTHING!!!!
+    {% elif type == "html" %}
+        <input class="form-control" type="hidden" name="{{ prop_name }}" placeholder="{{ prop['title'] }}" value="{{ inner_value }}" disabled {{ ' '.join(attribs) }}>
+        <button class="btn btn-primary" type="button" data-toggle="collapse" data-target="#html-collapse-{{ prop_name }}" aria-expanded="false" aria-controls="html-collapse-{{ prop_name }}">
+            Display server MD preview
+        </button>
+        <div class="collapse" id="html-collapse-{{ prop_name }}">
+            <div class="card card-body">
+                {{ inner_value | safe }}
+            </div>
+        </div>
+    {% elif type == "class" and 'anyOf' in prop %} {# anyof check due to narrow list of usages #}
+        <select class="form-control form_class_selector"> {# {{ ' '.join(attribs) }} #}
+            {% for ref in prop['anyOf'] %}
+                {% set ref = ref['$ref'].split('/')[-1] %}
+                {% if ref not in schema['definitions'] %}
+                    <option> WTF WTF: {{ ref }} </option>
+                {% else %}
+                    <option value="{{ ref }}" {{ 'selected' if inner_value['classtype'] == ref else '' }}>{{ ref }}</option>
+                {% endif %}
+            {% endfor %}
+        </select>
+        <div class="form_class_selector_list">
+            {% for ref in prop['anyOf'] %}
+                {% set ref = ref['$ref'].split('/')[-1] %}
+                {% if ref in schema['definitions'] %}
+                    <div class="form_class_selector_class" data-ref="{{ ref }}">
+                    {% set defin = schema['definitions'][ref] %}
+                    {% if not isinstance(attribs, {}.__class__) %}
+                        WTF WITH ATTRIBS : {{ attribs }}
+                        {% set attribs = {} %}
+                    {% endif %}
+                    {# {% if not isinstance(inner_value, {}.__class__) %}
+                        WTF WITH inner_value : {{ inner_value }}
+                        {% set inner_value = {} %}
+                    {% endif %} #}
+                    {% if inner_value == '' %}
+                        {% set inner_value = {} %}
+                    {% endif %}
+                    {% set args = {
+                        "schema": schema,
+                        "selected_props": defin["properties"],
+                        "values": inner_value,
+                        "attribs": attribs,
+                        "prop_name_root": prop_name,
+                    } %}
+                    {{ generate_form_inner(**args) }}
+                    </div>
+                {% endif %}
+            {% endfor %}
+        </div>
+    {% else %}
+        _NOT_KNOWN_TYPE_{{ type }}_
+    {% endif %}
+{%- endmacro %}
+
+{% macro generate_form_inner(
+    schema,
+    selected_props,
+    values = {},
+    overrides = {},
+    attribs = {},
+    prop_name_root = None)
+%}
+    {% for prop_name, prop in selected_props.items() %}
+        <p class="my-1">
+            {% set args = {
+                "prop_name": (prop_name_root + "." if prop_name_root else "") + prop_name,
+                "prop": prop,
+                "attribs": attribs.get(prop_name, []),
+                'schema': schema,
+                "value": values.get(prop_name, None),
+                'type_override': overrides.get(prop_name, None)
+            } %}
+            {% if prop_name in schema["required"] and isinstance(args["attribs"], [].__class__) %}
+                {% set _ = args.update(attribs=args["attribs"] + ["required"]) %}
+            {% endif %}
+            <div class="form-group row">
+                <label class="col-2 col-form-label">{{ prop['title'] }}</label>
+                <div class="col"> {{ get_input(**args) }} </div>
+            </div>
+        </p>
+    {% endfor %}
+{% endmacro %}
+
+{% macro generate_form(
+    schema,
+    form_id = "",
+    form_class = "",
+    values = {},
+    overrides = {},
+    attribs = {})
+%}
+    <form id="{{ form_id }}" class="{{ form_class }}">
+        {% set args = {
+            "schema": schema,
+            "selected_props": schema["properties"],
+            "values": values,
+            "overrides": overrides,
+            "attribs": attribs,
+        } %}
+        {{ generate_form_inner(**args) }}
+        <button class="btn btn-primary btn-block mt-3" accesskey="s" type="submit">submit</button>
+    </form>
+{% endmacro %}

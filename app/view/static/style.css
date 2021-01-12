@@ -1,0 +1,104 @@
+@media (min-width: 34em) {
+    .card-columns {
+        -webkit-column-count: 2;
+        -moz-column-count: 2;
+        column-count: 2;
+    }
+}
+
+@media (min-width: 48em) {
+    .card-columns {
+        -webkit-column-count: 2;
+        -moz-column-count: 2;
+        column-count: 2;
+    }
+}
+
+@media (min-width: 62em) {
+    .card-columns {
+        -webkit-column-count: 3;
+        -moz-column-count: 3;
+        column-count: 3;
+    }
+}
+
+@media (min-width: 75em) {
+    .card-columns {
+        -webkit-column-count: 4;
+        -moz-column-count: 4;
+        column-count: 4;
+    }
+}
+
+@media (min-width: 100em) {
+    .card-columns {
+        -webkit-column-count: 5;
+        -moz-column-count: 5;
+        column-count: 5;
+    }
+}
+
+html {
+    position: relative;
+    min-height: 100%;
+}
+
+body {
+    margin-top: 48px; /* Margin top by header height */
+    margin-bottom: 60px; /* Margin bottom by footer height */
+    background-color: #585858;
+}
+
+body > nav {
+    background-color: #404040;
+}
+
+.footer {
+    position: absolute;
+    bottom: 0;
+    width: 100%;
+    /* Set the fixed height of the footer here */
+    height: 60px;
+    line-height: 60px; /* Vertically center the text there */
+    color: #909090;
+    background-color: #404040;
+}
+
+div.card > * a {
+    text-decoration: none;
+}
+
+div.card.solved {
+    background: repeating-linear-gradient(
+        135deg,
+        #404040,
+        #404040 20px,
+        #585858 20px,
+        #585858 40px
+    );
+    color: white;
+}
+
+div.card.solved > div.card-header > * > * {
+    color: greenyellow;
+}
+
+div.card.solved > .card-body > .card-text > a {
+    color: #a2d5f2;
+}
+
+div.card.crypto:not(.solved) > * .task-category {
+    color: rgb(0, 160, 0);
+}
+
+div.card.binary:not(.solved) > * .task-category {
+    color: red;
+}
+
+div.card.web:not(.solved) > * .task-category {
+    color: blue;
+}
+
+div.card.other:not(.solved) > * .task-category {
+    color: rgb(151, 91, 0);
+}

@@ -1,0 +1,87 @@
+<!DOCTYPE html>
+
+<html lang="ru">
+    <head>
+        {% block head %}
+            <title>{% block title %}YATB ADMIN{% endblock %}</title>
+
+            <meta charset="utf-8">
+            <meta name="viewport" content="width=device-width, initial-scale=1">
+            <link rel="icon" type="image/png" href="{{ url_for('static', path='kksctf_logo_32.png') }}" />
+
+            <!-- Bootstrap CSS -->
+                        <link rel="stylesheet" href="https://stackpath.bootstrapcdn.com/bootstrap/5.0.0-alpha1/css/bootstrap.min.css"
+                integrity="sha384-r4NyP46KrjDleawBgD5tp8Y7UzmLA05oM1iAEQ17CSuDqnUK2+k9luXQOfXJCJ4I" crossorigin="anonymous">
+            {% block css %}
+                <link rel="stylesheet" href="https://unpkg.com/easymde/dist/easymde.min.css">
+                <link rel="stylesheet" type="text/css" href="{{ url_for('static', path='style.css') }}">
+                <link rel="stylesheet" type="text/css" href="{{ url_for('static', path='toast.css') }}">
+            {% endblock %}
+        {% endblock %}
+    </head>
+    <body>
+        
+        {% set header_data = namespace() %}
+        {% set header_data.page_name = "YATB ADMIN" %}
+        
+        {% set header_data.pages = {
+            ("TASKS ADMIN",): url_for('admin_tasks'), 
+            ("USERS ADMIN",): url_for('admin_users'),
+            ("Back to board",): url_for('index'),
+        } %}
+
+
+        {% block header %}
+            <div class="container-fluid bg-secondary">
+                <div class="row">
+                    <div class="col">
+                        <a href="{{ url_for('admin_index') }}" class="text-warning"><h3 class="mt-1"><img src="{{ url_for('static', path='kksctf_logo_32.png') }}" height="32"> {{ header_data.page_name }}</h3></a>
+                    </div>
+                    
+                    {% for page in header_data.pages %}
+                        {# {% if header_data.page_name not in page %} #}
+                            <a class="col-auto my-1 btn btn-secondary" role="button" href="{{ header_data.pages[page] }}">{{ page[0] }}</a>
+                        {# {% endif %} #}
+                    {% endfor %}
+                </div>
+            </div>
+        {% endblock %}
+
+        {# {% block toasts %}
+        <div aria-live="polite" aria-atomic="true" style="position: relative; min-height: 200px;">
+            <div id="toast_container" style="position: absolute; top: 0; right: 0;"></div>
+        </div>
+        {% endblock %} #}
+
+        {% block content %}{% endblock %}
+        
+        <footer class="footer">
+            {% block footer %}
+                <div class="container-fluid">
+                    <div class="row">
+                        <div class="col">
+                            <center>[{{ version_string() }}] made by kks</center>
+                        </div>
+                    </div>
+                </div>
+            {% endblock %}
+        </footer>
+        
+        {% block scripts %}
+            <script src="https://code.jquery.com/jquery-1.10.2.min.js"></script>
+            <!-- Bootstrap JS -->
+            <script src="https://cdn.jsdelivr.net/npm/popper.js@1.16.1/dist/umd/popper.min.js" integrity="sha384-9/reFTGAW83EW2RDu2S0VKaIzap3H66lZH81PoYlFhbGU+6BZp6G7niu735Sk7lN" crossorigin="anonymous"></script>
+            <script src="https://stackpath.bootstrapcdn.com/bootstrap/5.0.0-alpha2/js/bootstrap.min.js" integrity="sha384-5h4UG+6GOuV9qXh6HqOLwZMY4mnLPraeTrjT5v07o347pj6IkfuoASuGBhfDsp3d" crossorigin="anonymous"></script>
+            <script src="https://unpkg.com/easymde/dist/easymde.min.js"></script>
+            <script src="{{ url_for('static', path='toast.js') }}"></script>
+            <script src="{{ url_for('static', path='api_magic.js') }}"></script>
+            <script src="{{ url_for('static', path='easy_mde_runner.js') }}"></script>
+            <script>
+                api_url['solve_task'] = "{{ url_for('api_task_submit_flag') }}";
+                api_url['get_user'] = "{{ url_for('api_users_get_username', user_id=None) }}";
+                api_url['get_task'] = "{{ url_for('api_admin_task_get', task_id=None) }}";
+            </script>
+            <script src="{{ url_for('static', path='id_resolver.js') }}"></script>
+        {% endblock %}
+    </body>
+</html>

@@ -1,0 +1,101 @@
+{% extends "admin/base.jhtml" %}
+{% import "admin/macro.jhtml" as a_macro with context %}
+{% import "macro.jhtml" as macro with context %}
+
+{% block header %}
+    {% set header_data.page_name = "USERS ADMIN" %}
+    {{ super() }}
+{% endblock %}
+
+{% block content %}
+    <div class="container">
+         <div class="mb-3">
+            {% if not selected_user %}
+                {# {{ a_macro.generate_form(
+                    user_form_class.schema(), 
+                    form_id="user_create_form", 
+                    overrides = {
+                        "description": "textarea",
+                        "scoring": "class",
+                    },
+                    attribs={
+                        "scoring": {
+                            "classtype": ["readonly"]
+                        }
+                    }) 
+                }} #}
+                no form ;(
+            {% else %}
+                {{ a_macro.generate_form(
+                    user_class.schema(), 
+                    form_id="user_edit_form", 
+                    values=selected_user.dict(), 
+                    overrides = { }, 
+                    attribs={
+                        'user_id':  ['readonly'],
+                        'password_hash':  ['readonly'],
+                        'score':  ['readonly'],
+                        'solved_tasks':  ['readonly'],
+                        'oauth_id':  ['readonly'],
+                    }) 
+                }}
+            {% endif %}
+        </div>
+        <hr>
+        <table class="table">
+            <thead>
+                <tr>
+                    <th scope="col">Username</th>
+                    <th scope="col">Score</th>
+                    <th scope="col">Admin</th>
+                    <th scope="col">Solved tasks</th>
+                    <th scope="col">Actions</th>
+                </tr>
+            </thead>
+            <tbody>
+                {% for user in users_list %}
+                    <tr>
+                        <th>
+                            {% if user.oauth_id != -1 %}
+                                <a target="_blank" rel="noopener noreferrer" href='https://ctftime.org/team/{{ user.oauth_id }}'>
+                            {% else %}
+                                <a disabled>
+                            {% endif %}
+                                {{ user.username }}
+                            </a>
+                        </th>
+                        <td>{{ user.score }}</td>
+                        <td>{{ 'Admin' if user.is_admin else '' }}</td>
+                        <td>
+                            {% for solved_uuid in user.solved_tasks %}
+                                <span style='display: none;' class='task_id_resolve'>{{ solved_uuid }}</span>;
+                            {% endfor %}
+                        </td>
+                        <td>
+                            <a class="btn btn-primary mx-1 users_button_edit" data-id="{{ user.user_id }}" href="{{ url_for('admin_user_get', user_id=user.user_id) }}">Edit</a>
+                            {# <button class="btn btn-danger mx-1 users_button_unsolve disabled" data-id="{{ user.user_id }}">Unsolve</button> #}
+                            {# <button class="btn btn-danger mx-1 users_button_delete disabled" data-id="{{ user.user_id }}">Delete (Удаление таска с солвами убивает всё нахуй)</button> #}
+                        </td>
+                    </tr>
+                {% endfor %}
+            </tbody>
+        </table>
+    </div>
+{% endblock %}
+
+{% block scripts %}
+    {{ super() }}
+     <script>
+        api_url['edit_user'] = "{{ url_for('api_admin_user_edit', user_id=selected_user.user_id if selected_user else None) }}";
+        $(document).ready(function x() {
+            $("#user_edit_form").submit(function(event) {
+                event.preventDefault();
+                api_req(this, api_url['edit_user'], 'Edit user');
+            });
+        });
+    </script>
+{% endblock %}
+
+{% block footer %}
+    {{ super() }}
+{% endblock %}

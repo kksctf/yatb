@@ -1,0 +1,52 @@
+{% extends "base.jhtml" %}
+{% import "macro.jhtml" as macro with context %}
+
+{% block head %}
+    {% set head_data.page_name = "Scoreboard" %}
+    {{ super() }}
+{% endblock %}
+
+{% block content %}
+    <div class="container">
+        <table class="table mt-1 bg-light border">
+            <thead>
+                <tr>
+                    <th scope="col">#</th>
+                    <th scope="col">username</th>
+                    <th scope="col">score</th>
+                    <th scope="col">latest</th>
+                    <th scope="col">timestamp</th>
+                </tr>
+            </thead>
+            <tbody>
+                {% for i, user in enumerate(scoreboard) %}
+                    <tr>
+                        <th scope="row">{{ i + 1 }}</th>
+                        <td>{{ user.username }}</td>
+                        <td>{{ user.score }}</td>
+                        <td>
+                            {% if len(user.solved_tasks) > 0 %}
+                                {% set last_solve_info = user.get_last_solve_time() %}
+                                <span style='display: none;' class='task_id_resolve'>{{ last_solve_info[0] }}</span>
+                            {% else %}
+                                ¯\_(ツ)_/¯
+                            {% endif %}
+                        </td>
+                        <td>
+                            {% if len(user.solved_tasks) > 0 %}
+                                {% set last_solve_info = user.get_last_solve_time() %}
+                                {{ template_format_time(last_solve_info[1]) }}
+                            {% else %}
+                                ¯\_(ツ)_/¯
+                            {% endif %}
+                        </td>
+                    </tr>
+                {% endfor %}
+            </tbody>
+        </table>
+    </div>
+{% endblock %}
+
+{% block footer %}
+    {{ super() }}
+{% endblock %}

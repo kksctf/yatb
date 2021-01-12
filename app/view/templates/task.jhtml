@@ -1,0 +1,22 @@
+{% extends "base.jhtml" %}
+{% import "macro.jhtml" as macro with context %}
+
+{% block head %}
+    {# {% set head_data.page_name = "All tasks" %} #}
+    {{ super() }}
+{% endblock %}
+
+{% block header %}
+    {% set header_data.yatb_logo_target = url_for('tasks_get_all') %}
+    {{ super() }}
+{% endblock %}
+
+{% block content %}
+    <div class="container mt-2">
+        {{ macro.task_show(selected_task, curr_user, False, True, True) }}
+    </div>
+{% endblock %}
+
+{% block footer %}
+    {{ super() }}
+{% endblock %}

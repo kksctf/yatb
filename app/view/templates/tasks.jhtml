@@ -1,0 +1,141 @@
+{% extends "base.jhtml" %}
+{% import "macro.jhtml" as macro with context %}
+
+{% block head %}
+    {% set head_data.page_name = "All tasks" %}
+    {{ super() }}
+{% endblock %}
+
+{% block right_header_buttons %}
+    <li class="nav-item dropdown">
+        <a class="nav-link dropdown-toggle" href="#" id="navbarCategoryDropdown" role="button" data-bs-toggle="dropdown" aria-expanded="false">
+            Task categories
+        </a>
+        <div class="dropdown-menu" aria-labelledby="navbarCategoryDropdown">
+            <a class="dropdown-item" id="showAllTasks" href="#">All tasks</a>
+            <div class="dropdown-divider"></div>
+            <a class="dropdown-item" id="showCryptoTasks" href="#">Only <kbd>crypto</kbd></a>
+            <a class="dropdown-item" id="showBinaryTasks" href="#">Only <kbd>binary</kbd></a>
+            <a class="dropdown-item" id="showWebTasks" href="#">Only <kbd>web</kbd></a>
+            <a class="dropdown-item" id="showOtherTasks" href="#">Only <kbd>other</kbd></a>
+        </div>
+    </li>
+    <li class="nav-item form-switch">
+        <label class="nav-link" for="showSolvedTasks">
+            <input class="form-check-input" type="checkbox" checked autocomplete="off" id="showSolvedTasks">
+                <span class="navbar-text">
+                    Show solved
+                </span>
+        </label>
+    </li>
+    {{ super() }}
+    {# <a class="col-auto m-1 btn btn-light active" role="button" href="#">Hide solved</a> #}
+{% endblock %}
+
+{% block content %}
+    <div class="container-fluid px-0">
+        <div class="card-columns" style="column-gap: 4px;">
+            {% for task in tasks|sort(attribute='scoring.points') %}
+                {{ macro.task_show(task, curr_user) }}
+            {% endfor %}
+        </div>
+    </div>
+{% endblock %}
+
+{% block footer %}
+    {{ super() }}
+{% endblock %}
+
+{% block scripts %}
+    {{ super() }}
+    <script>
+        function redrawVisible () {
+            for (var k of Object.keys(categorySelector.categories)) {
+                if (categorySelector.categories[k] == true) {
+                    $("." + k).show()
+                    if (categorySelector.showSolved == false) {
+                        $(".solved").hide();
+                    }
+                } else {
+                    $("." + k).hide()
+                }
+            }
+        }
+
+        var categorySelector = JSON.parse(localStorage.getItem("categorySelector"))
+        if (categorySelector == null) {
+            categorySelector = {
+                "categories": {
+                    "crypto": true,
+                    "web": true,
+                    "binary": true,
+                    "other": true,
+                },
+                "showSolved": true,
+            }
+            localStorage.setItem("categorySelector", JSON.stringify(categorySelector))
+        } else {
+            $("#showSolvedTasks").prop('checked', categorySelector.showSolved);
+            redrawVisible();
+        }
+
+        function setOnlyCategory (target) {
+            if (target in categorySelector.categories) {
+                for (var k in categorySelector.categories) {
+                    categorySelector.categories[k] = false;
+                }
+                categorySelector.categories[target] = true;
+                localStorage.setItem("categorySelector", JSON.stringify(categorySelector))
+            }
+            else {
+                alert("unknown category in setOnlyCategory")
+            }
+        }
+
+        function setAllCategories () {
+            for (var k in categorySelector.categories) {
+                categorySelector.categories[k] = true;
+            }
+            localStorage.setItem("categorySelector", JSON.stringify(categorySelector))
+        }
+
+        $(function () {
+            $("#showSolvedTasks").click(function () {
+                categorySelector.showSolved = $(this).is(":checked")
+                localStorage.setItem("categorySelector", JSON.stringify(categorySelector))
+                redrawVisible();
+            });
+        });
+
+        $(function () {
+            $("#showAllTasks").click(function () {
+                setAllCategories();
+                redrawVisible();
+            });
+        });
+        $(function () {
+            $("#showCryptoTasks").click(function () {
+                setOnlyCategory("crypto");
+                redrawVisible();
+            });
+        });
+        $(function () {
+            $("#showBinaryTasks").click(function () {
+                setOnlyCategory("binary");
+                redrawVisible();
+            });
+        });
+        $(function () {
+            $("#showWebTasks").click(function () {
+                setOnlyCategory("web");
+                redrawVisible();
+            });
+        });
+        $(function () {
+            $("#showOtherTasks").click(function () {
+                setOnlyCategory("other");
+                redrawVisible();
+            });
+        });
+    </script>
+{% endblock %}

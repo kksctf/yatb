@@ -1,0 +1,17 @@
+{% extends "admin/base.jhtml" %}
+
+{% block header %}
+    {{ super() }}
+{% endblock %}
+
+{% block content %}
+    <div class="container-fluid">
+        {% for page in header_data.pages %}
+            <a class="btn btn-secondary" role="button" href="{{ header_data.pages[page] }}">{{ page[0] }}</a> <br>
+        {% endfor %}
+    </div>
+{% endblock %}
+
+{% block footer %}
+    {{ super() }}
+{% endblock %}

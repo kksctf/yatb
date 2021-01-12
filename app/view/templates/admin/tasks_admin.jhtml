@@ -1,0 +1,145 @@
+{% extends "admin/base.jhtml" %}
+{% import "admin/macro.jhtml" as a_macro with context %}
+{% import "macro.jhtml" as macro with context %}
+
+{% block header %}
+    {% set header_data.page_name = "TASKS ADMIN" %}
+    {{ super() }}
+{% endblock %}
+
+{% block content %}
+    <div class="container">
+        <div class="mb-3">
+            {% if not selected_task %}
+                {{ a_macro.generate_form(
+                    task_form_class.schema(), 
+                    form_id="task_create_form", 
+                    overrides = {
+                        "description": "textarea",
+                        "scoring": "class",
+                    },
+                    attribs={
+                        "scoring": {
+                            "classtype": ["readonly"]
+                        }
+                    }) 
+                }}
+            {% else %}
+                {{ a_macro.generate_form(
+                    task_class.schema(), 
+                    form_id="task_edit_form", 
+                    values=selected_task.dict(), 
+                    overrides = {
+                        "description": "textarea",
+                        "scoring": "class",
+                        'description_html': 'html',
+                    }, 
+                    attribs={
+                        'task_id':  ['readonly'],
+                        
+                        "scoring": {
+                            "classtype": ["readonly"]
+                        }
+                    }) 
+                }}
+            {% endif %}
+        </div>
+        <hr>
+        <button class="btn btn-danger mx-1 inverse_hidden_button">Inverse hidden</button>
+        <button class="btn btn-danger mx-1 decay_edit_button">Inverse hidden</button>
+        {# <form id="task_bulk_select"> #}
+            <table class="table">
+                <thead>
+                    <tr>
+                        <th scope="col"> <input type="checkbox" id="mass_checkbox_checkbox" class="form_class_disabled"> </th>
+                        <th scope="col">Task name</th>
+                        <th scope="col">Category</th>
+                        <th scope="col">Points</th>
+                        <th scope="col">Solve Count</th>
+                        <th scope="col">Actions</th>
+                    </tr>
+                </thead>
+                <tbody>
+                    {% for task in tasks_list %}
+                        <tr>
+                            <th> <input type="checkbox" class="task_checkbox" name="tasks" value="{{ task.task_id }}"> </th>
+                            <th>{{ task.task_name }}</th>
+                            <td>{{ task.category }}</td>
+                            <td>{{ task.scoring.points }} {{ 'HIDDEN' if task.hidden else '' }}</td>
+                            <td>{{ len(task.pwned_by) }}</td>
+                            <td>
+                                <a class="btn btn-primary mx-1 tasks_button_edit" data-id="{{ task.task_id }}" href="{{ url_for('admin_task_get', task_id=task.task_id) }}">Edit</a>
+                                <button class="btn btn-danger mx-1 tasks_button_unsolve disabled" data-id="{{ task.task_id }}">Unsolve</button>
+                                <button class="btn btn-danger mx-1 tasks_button_delete disabled" data-id="{{ task.task_id }}">Delete (Удаление таска с солвами убивает всё нахуй)</button>
+                            </td>
+                        </tr>
+                    {% endfor %}
+                </tbody>
+            </table>
+        {# </form> #}
+    </div>
+{% endblock %}
+
+{% block scripts %}
+    {# TODO: this is a little whack to make url_for and fastapi happy, but think about making this nice #}
+    {{ super() }}
+    <script>
+        api_url['get_tasks'] = "{{ url_for('api_admin_tasks') }}";
+        api_url['create_task'] = "{{ url_for('api_admin_task_create') }}";
+        api_url['edit_task'] = "{{ url_for('api_admin_task_edit', task_id=selected_task.task_id if selected_task else None) }}";
+        api_url['delete_task'] = "{{ url_for('api_admin_task_delete', task_id=None) }}";
+        api_url['unsolve_task'] = "{{ url_for('api_admin_task_unsolve', task_id=None) }}";
+        api_url['bulk_unhide'] = "{{ url_for('api_admin_tasks_bulk_unhide') }}";
+        api_url['bulk_edit_decay'] = "{{ url_for('api_admin_tasks_bulk_edit_decay') }}";
+        $(document).ready(function x() {
+            $.ajax({
+                type: "GET",
+                url: api_url['get_tasks'], 
+                success: function(data) {
+                    console.log("OnSucc", data);
+                },
+            });
+
+            easy_mde_runner($('textarea[name=description]')[0], "{{ selected_task.task_id if selected_task else 'draft' }}");
+            //$('textarea[name=description]')[0].required = false;
+
+            $("#task_create_form").submit(function(event) {
+                event.preventDefault();
+                api_req(this, api_url['create_task'], 'Create task');
+            });
+
+            $("#task_edit_form").submit(function(event) {
+                event.preventDefault();
+                api_req(this, api_url['edit_task'], 'Edit task');
+            });
+            
+            $(".tasks_button_delete").click(function(event) {
+                id = $(this).data("id");
+                api_req(undefined, api_url['delete_task'].replace("None", id), 'Delete task', method='GET');
+            });
+
+            $(".tasks_button_unsolve").click(function(event) {
+                id = $(this).data("id");
+                api_req(undefined, api_url['unsolve_task'].replace("None", id), 'Unsolve task', method='GET');
+            });
+
+            /*$("#task_bulk_select").submit(function(event) {
+                event.preventDefault();
+                api_req(this, api_url['bulk_unhide'], 'Bulk unhide');
+            });*/
+
+            $("#mass_checkbox_checkbox").click(function(event) {
+                if($(this).is(':checked'))
+                    $('.task_checkbox').prop('checked', true);
+                else
+                    $('.task_checkbox').prop('checked', false);
+            });
+
+            init_form_class();
+        });
+    </script>
+{% endblock %}
+
+{% block footer %}
+    {{ super() }}
+{% endblock %}

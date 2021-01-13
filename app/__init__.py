@@ -52,6 +52,7 @@ Instrumentator(
     env_var_name="ENABLE_METRICS",
 ).instrument(app).expose(app, endpoint=expose_url)
 # utils.metrics.bad_solves_per_user
+
 """
 @app.on_event("startup")
 def startup_event():

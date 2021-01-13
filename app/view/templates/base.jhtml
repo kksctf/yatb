@@ -22,7 +22,6 @@
             <link href="https://cdn.jsdelivr.net/npm/bootstrap@5.0.0-beta1/dist/css/bootstrap.min.css" rel="stylesheet" integrity="sha384-giJF6kkoqNQ00vy+HMDP7azOuL0xtbfIcaT9wjKHr8RbDVddVHyTfAAsrekwKmP1" crossorigin="anonymous">
             {% block css %}
                 <link rel="stylesheet" type="text/css" href="{{ url_for('static', path='style.css') }}">
-                {# TODO: REMOVE THIS FROM THERE, TEMPORARY SOLUTION!!!!! #}
                 <link rel="stylesheet" type="text/css" href="{{ url_for('static', path='toast.css') }}">
             {% endblock %}
         {% endblock %}
@@ -108,7 +107,6 @@
 
             <script src="https://cdn.jsdelivr.net/npm/bootstrap@5.0.0-beta1/dist/js/bootstrap.bundle.min.js" integrity="sha384-ygbV9kiqUc6oa4msXn9868pTtWMgiQaeYH7/t7LECLbyPA2x65Kgf80OJFdroafW" crossorigin="anonymous"></script>
 
-            {# TODO: REMOVE THIS FROM HERE, TEMPRORATY SOLUTION !!!! !!! !! #}
             <script src="{{ url_for('static', path='toast.js') }}"></script>
             <script src="{{ url_for('static', path='api_magic.js') }}"></script>
             <script src="{{ url_for('static', path='easy_mde_runner.js') }}"></script>

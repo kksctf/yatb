@@ -3,7 +3,7 @@
 {% import "macro.jhtml" as macro with context %}
 
 {% block header %}
-    {% set header_data.page_name = "TASKS ADMIN" %}
+    {% set header_data.yatb_logo_text = "TASKS ADMIN" %}
     {{ super() }}
 {% endblock %}
 
@@ -12,8 +12,8 @@
         <div class="mb-3">
             {% if not selected_task %}
                 {{ a_macro.generate_form(
-                    task_form_class.schema(), 
-                    form_id="task_create_form", 
+                    task_form_class.schema(),
+                    form_id="task_create_form",
                     overrides = {
                         "description": "textarea",
                         "scoring": "class",
@@ -22,25 +22,25 @@
                         "scoring": {
                             "classtype": ["readonly"]
                         }
-                    }) 
+                    })
                 }}
             {% else %}
                 {{ a_macro.generate_form(
-                    task_class.schema(), 
-                    form_id="task_edit_form", 
-                    values=selected_task.dict(), 
+                    task_class.schema(),
+                    form_id="task_edit_form",
+                    values=selected_task.dict(),
                     overrides = {
                         "description": "textarea",
                         "scoring": "class",
                         'description_html': 'html',
-                    }, 
+                    },
                     attribs={
                         'task_id':  ['readonly'],
-                        
+
                         "scoring": {
                             "classtype": ["readonly"]
                         }
-                    }) 
+                    })
                 }}
             {% endif %}
         </div>
@@ -94,7 +94,7 @@
         $(document).ready(function x() {
             $.ajax({
                 type: "GET",
-                url: api_url['get_tasks'], 
+                url: api_url['get_tasks'],
                 success: function(data) {
                     console.log("OnSucc", data);
                 },
@@ -112,7 +112,7 @@
                 event.preventDefault();
                 api_req(this, api_url['edit_task'], 'Edit task');
             });
-            
+
             $(".tasks_button_delete").click(function(event) {
                 id = $(this).data("id");
                 api_req(undefined, api_url['delete_task'].replace("None", id), 'Delete task', method='GET');

@@ -3,7 +3,7 @@
 {% import "macro.jhtml" as macro with context %}
 
 {% block header %}
-    {% set header_data.page_name = "USERS ADMIN" %}
+    {% set header_data.yatb_logo_text = "USERS ADMIN" %}
     {{ super() }}
 {% endblock %}
 
@@ -12,8 +12,8 @@
          <div class="mb-3">
             {% if not selected_user %}
                 {# {{ a_macro.generate_form(
-                    user_form_class.schema(), 
-                    form_id="user_create_form", 
+                    user_form_class.schema(),
+                    form_id="user_create_form",
                     overrides = {
                         "description": "textarea",
                         "scoring": "class",
@@ -22,22 +22,22 @@
                         "scoring": {
                             "classtype": ["readonly"]
                         }
-                    }) 
+                    })
                 }} #}
                 no form ;(
             {% else %}
                 {{ a_macro.generate_form(
-                    user_class.schema(), 
-                    form_id="user_edit_form", 
-                    values=selected_user.dict(), 
-                    overrides = { }, 
+                    user_class.schema(),
+                    form_id="user_edit_form",
+                    values=selected_user.dict(),
+                    overrides = { },
                     attribs={
                         'user_id':  ['readonly'],
                         'password_hash':  ['readonly'],
                         'score':  ['readonly'],
                         'solved_tasks':  ['readonly'],
                         'oauth_id':  ['readonly'],
-                    }) 
+                    })
                 }}
             {% endif %}
         </div>

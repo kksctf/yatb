@@ -2,49 +2,64 @@
 
 <html lang="ru">
     <head>
+
+        {% set head_data = namespace() %}
+        {% set head_data.page_name = "YATB ADMIN" %}
+
+        {% set head_data.pages = {
+            ("TASKS ADMIN",): url_for('admin_tasks'),
+            ("USERS ADMIN",): url_for('admin_users'),
+            ("Back to board",): url_for('index'),
+        } %}
+
         {% block head %}
-            <title>{% block title %}YATB ADMIN{% endblock %}</title>
+            <title>{% block title %} {{ head_data.page_name }} {% endblock %}</title>
 
             <meta charset="utf-8">
             <meta name="viewport" content="width=device-width, initial-scale=1">
             <link rel="icon" type="image/png" href="{{ url_for('static', path='kksctf_logo_32.png') }}" />
 
-            <!-- Bootstrap CSS -->
-                        <link rel="stylesheet" href="https://stackpath.bootstrapcdn.com/bootstrap/5.0.0-alpha1/css/bootstrap.min.css"
-                integrity="sha384-r4NyP46KrjDleawBgD5tp8Y7UzmLA05oM1iAEQ17CSuDqnUK2+k9luXQOfXJCJ4I" crossorigin="anonymous">
+            <link href="https://cdn.jsdelivr.net/npm/bootstrap@5.0.0-beta1/dist/css/bootstrap.min.css" rel="stylesheet" integrity="sha384-giJF6kkoqNQ00vy+HMDP7azOuL0xtbfIcaT9wjKHr8RbDVddVHyTfAAsrekwKmP1" crossorigin="anonymous">
             {% block css %}
                 <link rel="stylesheet" href="https://unpkg.com/easymde/dist/easymde.min.css">
-                <link rel="stylesheet" type="text/css" href="{{ url_for('static', path='style.css') }}">
+                <link rel="stylesheet" type="text/css" href="{{ url_for('static', path='admin.css') }}">
                 <link rel="stylesheet" type="text/css" href="{{ url_for('static', path='toast.css') }}">
             {% endblock %}
         {% endblock %}
     </head>
-    <body>
-        
-        {% set header_data = namespace() %}
-        {% set header_data.page_name = "YATB ADMIN" %}
-        
-        {% set header_data.pages = {
-            ("TASKS ADMIN",): url_for('admin_tasks'), 
-            ("USERS ADMIN",): url_for('admin_users'),
-            ("Back to board",): url_for('index'),
-        } %}
 
+    <body>
+        {% set header_data = namespace() %}
+        {% set header_data.yatb_logo_target = "/admin" %}
+        {% set header_data.yatb_logo_text = "YATB ADMIN" %}
 
         {% block header %}
-            <div class="container-fluid bg-secondary">
-                <div class="row">
-                    <div class="col">
-                        <a href="{{ url_for('admin_index') }}" class="text-warning"><h3 class="mt-1"><img src="{{ url_for('static', path='kksctf_logo_32.png') }}" height="32"> {{ header_data.page_name }}</h3></a>
-                    </div>
-                    
-                    {% for page in header_data.pages %}
-                        {# {% if header_data.page_name not in page %} #}
-                            <a class="col-auto my-1 btn btn-secondary" role="button" href="{{ header_data.pages[page] }}">{{ page[0] }}</a>
-                        {# {% endif %} #}
-                    {% endfor %}
+        <nav class="navbar navbar-expand-lg navbar-dark fixed-top py-1 px-1">
+            <div class="container-fluid px-0">
+                <a class="navbar-brand" href="{{ header_data.yatb_logo_target }}">
+                    <img src="{{ url_for('static', path='kksctf_logo_32.png') }}" height="30" class="rounded d-inline-block align-top" alt="">
+                    {{ header_data.yatb_logo_text }}
+                </a>
+                <button class="navbar-toggler" type="button" data-bs-toggle="collapse" data-bs-target="#navbarNav" aria-controls="navbarText" aria-expanded="false" aria-label="Toggle navigation">
+                    <span class="navbar-toggler-icon"></span>
+                </button>
+                <div class="collapse navbar-collapse justify-content-between" id="navbarNav">
+                    <ul class="navbar-nav mr-auto">
+                    {% block left_header_buttons %}
+                    {% endblock %}
+                    </ul>
+                    <ul class="navbar-nav">
+                    {% block right_header_buttons %}
+                        {% for page in head_data.pages %}
+                            <li class="nav-item">
+                                <a class="nav-link" href="{{ head_data.pages[page] }}">{{ page[0] }}</a>
+                            </li>
+                        {% endfor %}
+                    {% endblock %}
+                    </ul>
                 </div>
             </div>
+        </nav>
         {% endblock %}
 
         {# {% block toasts %}
@@ -54,28 +69,24 @@
         {% endblock %} #}
 
         {% block content %}{% endblock %}
-        
+
         <footer class="footer">
             {% block footer %}
                 <div class="container-fluid">
-                    <div class="row">
-                        <div class="col">
-                            <center>[{{ version_string() }}] made by kks</center>
-                        </div>
-                    </div>
+                    <span>[{{ version_string() }}]</span>
                 </div>
             {% endblock %}
         </footer>
-        
+
         {% block scripts %}
             <script src="https://code.jquery.com/jquery-1.10.2.min.js"></script>
-            <!-- Bootstrap JS -->
-            <script src="https://cdn.jsdelivr.net/npm/popper.js@1.16.1/dist/umd/popper.min.js" integrity="sha384-9/reFTGAW83EW2RDu2S0VKaIzap3H66lZH81PoYlFhbGU+6BZp6G7niu735Sk7lN" crossorigin="anonymous"></script>
-            <script src="https://stackpath.bootstrapcdn.com/bootstrap/5.0.0-alpha2/js/bootstrap.min.js" integrity="sha384-5h4UG+6GOuV9qXh6HqOLwZMY4mnLPraeTrjT5v07o347pj6IkfuoASuGBhfDsp3d" crossorigin="anonymous"></script>
+            <script src="https://cdn.jsdelivr.net/npm/bootstrap@5.0.0-beta1/dist/js/bootstrap.bundle.min.js" integrity="sha384-ygbV9kiqUc6oa4msXn9868pTtWMgiQaeYH7/t7LECLbyPA2x65Kgf80OJFdroafW" crossorigin="anonymous"></script>
+
             <script src="https://unpkg.com/easymde/dist/easymde.min.js"></script>
             <script src="{{ url_for('static', path='toast.js') }}"></script>
             <script src="{{ url_for('static', path='api_magic.js') }}"></script>
             <script src="{{ url_for('static', path='easy_mde_runner.js') }}"></script>
+
             <script>
                 api_url['solve_task'] = "{{ url_for('api_task_submit_flag') }}";
                 api_url['get_user'] = "{{ url_for('api_users_get_username', user_id=None) }}";

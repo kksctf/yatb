@@ -1,0 +1,26 @@
+html {
+    position: relative;
+    min-height: 100%;
+}
+
+body {
+    margin-top: 48px; /* Margin top by header height */
+    margin-bottom: 60px; /* Margin bottom by footer height */
+    background-color: white;
+}
+
+body > nav {
+    background-color: #404040;
+}
+
+.footer {
+    position: absolute;
+    bottom: 0;
+    width: 100%;
+    /* Set the fixed height of the footer here */
+    height: 60px;
+    line-height: 60px; /* Vertically center the text there */
+    color: #909090;
+    background-color: #404040;
+}
+

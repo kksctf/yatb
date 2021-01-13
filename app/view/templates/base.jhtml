@@ -30,14 +30,14 @@
     <body>
         {% set header_data = namespace() %}
         {% set header_data.yatb_logo_target = "/" %}
-        {% set header_data.ctf_name = "#kksctf open 2020" %}
+        {% set header_data.yatb_logo_text = "#kksctf open 2020" %}
 
         {% block header %}
         <nav class="navbar navbar-expand-lg navbar-dark fixed-top py-1 px-1">
             <div class="container-fluid px-0">
                 <a class="navbar-brand" href="{{ header_data.yatb_logo_target }}">
                     <img src="{{ url_for('static', path='kksctf_logo_32.png') }}" height="30" class="rounded d-inline-block align-top" alt="">
-                    {{ header_data.ctf_name }}
+                    {{ header_data.yatb_logo_text }}
                 </a>
                 <button class="navbar-toggler" type="button" data-bs-toggle="collapse" data-bs-target="#navbarNav" aria-controls="navbarText" aria-expanded="false" aria-label="Toggle navigation">
                     <span class="navbar-toggler-icon"></span>

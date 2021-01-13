@@ -58,7 +58,6 @@ if True:
     OAUTH_TOKEN_ENDPOINT = env_val("OAUTH_TOKEN_ENDPOINT", "https://oauth.ctftime.org/token")
     OAUTH_API_ENDPOINT = env_val("OAUTH_API_ENDPOINT", "https://oauth.ctftime.org/user")
 
-    # TODO: hardcoded shitcode, fix in release
     EVENT_START_TIME = datetime.datetime(1077, 12, 12, 9, 0)
     EVENT_END_TIME = datetime.datetime(2077, 12, 13, 9, 0)
 # ==== CTFTime OAuth ====

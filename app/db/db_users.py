@@ -99,7 +99,7 @@ async def insert_oauth_user(oauth_id: int, username: str, country: str):
 
 async def update_user(user_id: uuid.UUID, new_user: schema.UserUpdateForm):
     from . import _db
-
+    
     user: schema.User = _db._index["users"][user_id]
     user.parse_obj(new_user)  # WTF: crazy updater?
 

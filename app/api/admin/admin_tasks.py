@@ -113,8 +113,7 @@ async def api_admin_task_delete_all(user: schema.User = Depends(admin_checker)):
     return "ok, you dead."
 
 
-# WTF: ГОВНОКОООООД
-
+# TODO: А можно ли это сделать нормально?
 
 class InternalObjTasksList(schema.BaseModel):
     tasks: List[uuid.UUID]

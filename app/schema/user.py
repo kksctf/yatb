@@ -7,7 +7,8 @@ import datetime
 import hashlib
 import hmac
 
-from . import EBaseModel, logger, md, config
+from . import EBaseModel, logger, md
+from ..config import settings
 
 
 class User(EBaseModel):
@@ -55,7 +56,7 @@ class User(EBaseModel):
         if self.oauth_id == -1 and self.username == "Rubikoid":
             return True
 
-        if self.oauth_id in config.OAUTH_ADMIN_IDs:  # TODO: to config
+        if self.oauth_id in settings.OAUTH_ADMIN_IDS:
             return True
 
         return False

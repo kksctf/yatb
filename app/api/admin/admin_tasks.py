@@ -4,7 +4,8 @@ from typing import List, Dict
 
 from fastapi import FastAPI, Cookie, Request, Response, HTTPException, status, Depends
 from . import admin_checker, router, logger
-from ... import schema, auth, config, db
+from ... import schema, auth, db
+from ...config import settings
 
 
 async def get_task(task_id: uuid.UUID) -> schema.Task:
@@ -36,7 +37,7 @@ async def api_admin_recalc_scoreboard(user: schema.User = Depends(admin_checker)
 
 @router.get("/unsolve_tasks")
 async def api_admin_unsolve_tasks(user: schema.User = Depends(admin_checker)):
-    if not config._DEGUG:
+    if not settings.DEBUG:
         logger.critical(f"Какой-то еблан {user.short_desc()} ПЫТАЛСЯ сбросить таски на проде, ахтунг!")
         return "Ты ебанулся, на проде эту хуйню запускать?!"
 
@@ -102,7 +103,7 @@ async def api_admin_task_delete(task: schema.Task = Depends(get_task), user: sch
 
 @router.get("/task/delete_all")
 async def api_admin_task_delete_all(user: schema.User = Depends(admin_checker)):
-    if not config._DEGUG:  # danger function!
+    if not settings.DEBUG:  # danger function!
         logger.critical(f"Какой-то еблан {user.short_desc()} ПЫТАЛСЯ УДАЛИТЬ таски на проде, ахтунг!")
         return "пащоль в жёпу (c) химичка Димона"
 

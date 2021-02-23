@@ -5,15 +5,15 @@ from fastapi import FastAPI
 from fastapi.staticfiles import StaticFiles
 from fastapi.templating import Jinja2Templates
 
-from . import config
+from .config import settings
 from . import schema
 
 from . import utils  # utils, and no circullar imports!!
 
 app = FastAPI(
-    docs_url=config.FASTAPI_DOCS_URL,
-    redoc_url=config.FASTAPI_REDOC_URL,
-    openapi_url=config.FASTAPI_OPENAPI_URL,
+    docs_url=settings.FASTAPI_DOCS_URL,
+    redoc_url=settings.FASTAPI_REDOC_URL,
+    openapi_url=settings.FASTAPI_OPENAPI_URL,
 )
 
 _base_path = os.path.dirname(os.path.abspath(__file__))
@@ -44,7 +44,7 @@ app.include_router(view.router)
 
 # prometheus
 from prometheus_fastapi_instrumentator import Instrumentator  # noqa
-expose_url = config.MONITORING_URL
+expose_url = settings.MONITORING_URL
 
 Instrumentator(
     excluded_handlers=[".*admin.*", expose_url],

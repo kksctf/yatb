@@ -44,7 +44,7 @@ async def insert_task(new_task: schema.TaskForm, author: schema.User) -> schema.
         category=new_task.category,
         scoring=new_task.scoring,
         description=new_task.description,
-        description_html=schema.Task.regenerate_md(new_task.description),  # md.markdownCSS(new_task.description, config.MD_CLASSES_TASKS),
+        description_html=schema.Task.regenerate_md(new_task.description),
         flag=new_task.flag,
         author=(new_task.author if new_task.author != "" else f"@{author.username}"),
     )
@@ -72,7 +72,7 @@ async def update_task(task: schema.Task, new_task: schema.Task) -> schema.Task:
     task.scoring = new_task.scoring  # fix for json-ing scoring on edit
 
     logger.debug(f"Resulting task={task}")
-    task.description_html = schema.Task.regenerate_md(task.description)  # md.markdownCSS(task.description, config.MD_CLASSES_TASKS)
+    task.description_html = schema.Task.regenerate_md(task.description)
     return task
 
 
@@ -102,10 +102,10 @@ async def find_task_by_flag(flag: str) -> Union[schema.Task, None]:
 
 
 async def solve_task(task: schema.Task, solver: schema.User):
-    if solver.is_admin and not config._DEGUG:  # if you admin, you can't solve task.
+    if solver.is_admin and not settings.DEBUG:  # if you admin, you can't solve task.
         return task.task_id
 
-    if datetime.utcnow() > config.EVENT_END_TIME:
+    if datetime.utcnow() > settings.EVENT_END_TIME:
         return task.task_id
 
     #  WTF: UNTEDTED: i belive this will work as a monkey patch for rAcE c0nDiTioN

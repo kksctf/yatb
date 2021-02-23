@@ -7,7 +7,8 @@ import logging
 from pydantic import BaseModel
 from typing import List
 
-from .. import config, app, schema, db
+from .. import app, schema, db
+from ..config import settings
 
 real_logger = logging.getLogger("yatb.db")
 
@@ -74,7 +75,7 @@ class FileDB(object):
             user.is_admin = True
 
         # debug login
-        if config._DEGUG and user.username == "Rubikoid":
+        if settings.DEBUG and user.username == "Rubikoid":
             user.password_hash = "123"
         elif user.username == "Rubikoid":  # debug login should never work on prod
             user.password_hash = None
@@ -88,19 +89,19 @@ _db = FileDB()
 @app.on_event("startup")
 async def startup_event():
     global _db
-    if config.DB_NAME is None:
+    if settings.DB_NAME is None:
         _db.reset_db()
         real_logger.warning("TESTING_FileDB loaded")
         return
 
-    if not os.path.exists(config.DB_NAME):
+    if not os.path.exists(settings.DB_NAME):
         _db._db = {
             "tasks": {},
             "users": {},
         }
     else:
         try:
-            with open(config.DB_NAME, "rb") as f:
+            with open(settings.DB_NAME, "rb") as f:
                 _db._db = pickle.load(f)
         except Exception as ex:
             _db._db = {
@@ -118,9 +119,9 @@ async def startup_event():
 @app.on_event("shutdown")
 async def shutdown_event():
     global _db
-    if config.DB_NAME is None:
+    if settings.DB_NAME is None:
         return
-    with open(config.DB_NAME, "wb") as f:
+    with open(settings.DB_NAME, "wb") as f:
         pickle.dump(_db._db, f)
     real_logger.warning("FileDB saved")
 

@@ -5,7 +5,8 @@ from typing import List
 from fastapi import Depends, HTTPException, status, APIRouter
 
 from . import logger
-from .. import schema, auth, db, config, utils
+from .. import schema, auth, db, utils
+from ..config import settings
 from ..utils import metrics, tg
 
 
@@ -34,7 +35,7 @@ async def api_task_get_internal(task_id: uuid.UUID, admin: bool = False) -> sche
 
 
 async def api_task_solve_internal(flag: str, user: schema.User):
-    if datetime.utcnow() < config.EVENT_START_TIME:
+    if datetime.utcnow() < settings.EVENT_START_TIME:
         raise HTTPException(
             status_code=status.HTTP_425_TOO_EARLY,
             detail="CTF has not started yet",

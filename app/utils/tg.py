@@ -2,13 +2,14 @@ import requests
 import logging
 
 
-from .. import config, schema
+from .. import schema
+from ..config import settings
 
 logger = logging.getLogger("yatb.api")
 
 
 def to_tg(data: dict, path: str) -> requests.Response:
-    url = f"https://api.telegram.org/bot{config.BOT_TOKEN}/{path}"
+    url = f"https://api.telegram.org/bot{settings.BOT_TOKEN}/{path}"
     ret = requests.post(url, data=data)
     logger.info(f"TG info={ret.text}")
     return ret
@@ -25,7 +26,7 @@ def encoder(text: str) -> str:
 def send_message(text):
     return to_tg(
         data={
-            "chat_id": config.CHAT_ID,
+            "chat_id": settings.CHAT_ID,
             "text": text,
             "parse_mode": "MarkdownV2",
         },

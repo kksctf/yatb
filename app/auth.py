@@ -8,7 +8,8 @@ from fastapi.openapi.models import OAuthFlows as OAuthFlowsModel
 from fastapi.security.utils import get_authorization_scheme_param
 from jose import JWTError, jwt
 
-from . import config, schema, db
+from . import schema, db
+from .config import settings
 
 
 class OAuth2PasswordBearerWithCookie(OAuth2):
@@ -64,12 +65,12 @@ def create_access_token(data: dict, expires_delta: Optional[timedelta] = None):
     else:
         expire = datetime.utcnow() + timedelta(minutes=15)
     to_encode.update({"exp": expire})
-    encoded_jwt = jwt.encode(to_encode, config.JWT_SECRET_KEY, algorithm=config.JWT_ALGORITHM)
+    encoded_jwt = jwt.encode(to_encode, settings.JWT_SECRET_KEY, algorithm=settings.JWT_ALGORITHM)
     return encoded_jwt
 
 
 def create_user_token(user: schema.User):
-    access_token_expires = timedelta(minutes=config.JWT_ACCESS_TOKEN_EXPIRE_MINUTES)
+    access_token_expires = timedelta(minutes=settings.JWT_ACCESS_TOKEN_EXPIRE_MINUTES)
     access_token = create_access_token(data={"user_id": str(user.user_id)}, expires_delta=access_token_expires)
     return access_token
 
@@ -82,7 +83,7 @@ async def get_current_user(token: str = Depends(oauth2_scheme)):
     )
     user_id: Union[str, uuid.UUID, None] = None
     try:
-        payload = jwt.decode(token, config.JWT_SECRET_KEY, algorithms=[config.JWT_ALGORITHM])  # no "alg:none"
+        payload = jwt.decode(token, settings.JWT_SECRET_KEY, algorithms=[settings.JWT_ALGORITHM])  # no "alg:none"
         user_id = payload.get("user_id")
         if user_id is None:
             raise credentials_exception

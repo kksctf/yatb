@@ -7,7 +7,8 @@ from asyncio import Lock
 
 from typing import List, Dict, Union, Optional
 
-from .. import schema, config
+from .. import schema
+from ..config import settings
 from ..utils import md, metrics
 
 from . import update_entry, db_users
@@ -88,11 +89,11 @@ async def find_task_by_flag(flag: str) -> Union[schema.Task, None]:
     from . import _db
 
     # TODO: normal flag sanitization
-    if "kks{" in flag:
-        flag = flag.replace("kks{", "", 1)
+    if settings.FLAG_BASE + "{" in flag:
+        flag = flag.replace(settings.FLAG_BASE + "{", "", 1)
     if flag[-1] == "}":
         flag = flag[:-1]
-    flag = "kks{" + flag + "}"
+    flag = settings.FLAG_BASE + "{" + flag + "}"
 
     for task_id, task in _db._db["tasks"].items():
         task: schema.Task  # strange solution, but no other ideas

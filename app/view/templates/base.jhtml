@@ -29,7 +29,7 @@
     <body>
         {% set header_data = namespace() %}
         {% set header_data.yatb_logo_target = "/" %}
-        {% set header_data.yatb_logo_text = "#kksctf open 2020" %}
+        {% set header_data.yatb_logo_text = CTF_NAME %}
 
         {% block header %}
         <nav class="navbar navbar-expand-lg navbar-dark fixed-top py-1 px-1">
@@ -58,7 +58,7 @@
                                 <form class="d-flex form-inline" id="flag_submit_form">
                                     <div class="row mx-0">
                                         <div class="col-auto input-group-prepend mx-0 p-0">
-                                            <span class="input-group-text" style="border-radius: 4px 0 0 4px;">kks{</span>
+                                            <span class="input-group-text" style="border-radius: 4px 0 0 4px;">{{ FLAG_BASE }}{</span>
                                         </div>
                                         <input type="text" class="col form-control rounded-0" name="flag" id="flag" placeholder="sampl3_fl4g" required>
                                         <div class="col-auto input-group-prepend mx-0 p-0">

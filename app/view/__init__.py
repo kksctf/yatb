@@ -32,11 +32,14 @@ def version_string():
 
 
 templ.env.globals["version_string"] = version_string
-templ.env.globals["DEBUG"] = settings.DEBUG
 templ.env.globals["len"] = len
 templ.env.globals["template_format_time"] = schema.task.template_format_time
 templ.env.globals["set"] = set
 templ.env.globals["isinstance"] = isinstance
+
+templ.env.globals["DEBUG"] = settings.DEBUG
+templ.env.globals["FLAG_BASE"] = settings.FLAG_BASE
+templ.env.globals["CTF_NAME"] = settings.CTF_NAME
 templ.env.globals["OAUTH_CONFIG"] = {
     "OAUTH_CLIENT_ID": settings.OAUTH_CLIENT_ID,
     "OAUTH_CLIENT_SECRET": settings.OAUTH_CLIENT_SECRET,

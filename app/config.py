@@ -12,7 +12,7 @@ class Settings(BaseSettings):
     TOKEN_PATH: str = "/api/users/login"
 
     # bot token for notifications
-    BOT_TOKEN: str = ""
+    BOT_TOKEN: Optional[str] = None
     CHAT_ID: int = 0
 
     # OAUTH
@@ -47,6 +47,9 @@ class Settings(BaseSettings):
     VERSION: str = ""
     COMMIT: Optional[str] = None
 
+    FLAG_BASE: str = "kks"
+    CTF_NAME: str = "#kksctf open 2020"
+
     def __init__(self, *args, **kwargs) -> None:
         super().__init__(*args, **kwargs)
         self.version_solver()
@@ -59,7 +62,6 @@ class Settings(BaseSettings):
             self.VERSION += "a0.2.12"
             if self.COMMIT:
                 self.VERSION += f"-{self.COMMIT[:8]}"
-            # self.DEBUG = False
 
         if self.DEBUG:
             self.VERSION += "-dev"

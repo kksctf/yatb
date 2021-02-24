@@ -9,6 +9,8 @@ logger = logging.getLogger("yatb.api")
 
 
 def to_tg(data: dict, path: str) -> requests.Response:
+    if not settings.BOT_TOKEN:
+        return
     url = f"https://api.telegram.org/bot{settings.BOT_TOKEN}/{path}"
     ret = requests.post(url, data=data)
     logger.info(f"TG info={ret.text}")

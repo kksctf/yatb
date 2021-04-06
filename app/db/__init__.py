@@ -128,7 +128,7 @@ async def shutdown_event():
 
 def update_entry(obj: BaseModel, data: dict):
     for i in data:
-        if i in obj.fields:
+        if i in obj.__fields__:
             setattr(obj, i, data[i])
 
 

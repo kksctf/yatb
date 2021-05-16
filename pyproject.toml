@@ -1,0 +1,63 @@
+[project]
+name = "YATB"
+version = "a0.2.15"
+description = "Yet another fast and furious jeopardy-CTF taskboard"
+authors = [
+  "Rubikoid <rubikoid@kksctf.ru>",
+  "Maxim Anfinogenov <anfinogenov@kksctf.ru>",
+]
+
+license = "Apache-2.0"
+
+homepage = "https://github.com/kksctf/yatb"
+repository = "https://github.com/kksctf/yatb"
+documentation = "https://github.com/kksctf/yatb"
+readme = "README.md"
+
+python = "^3.8"
+
+keywords = ["ctf", "jeopardy", "ctf-platform", "fastapi"]
+
+classifiers = [
+  "Topic :: Software Development",
+]
+
+# black config disabled.
+# [tool.black]
+# line-length = 150
+# target_version = ['py38']
+# include = '\.pyi?$'
+# exclude = '''
+# 
+# (
+#   /(
+#       \.eggs         # exclude a few common directories in the
+#     | \.git          # root of the project
+#     | \.hg
+#     | \.mypy_cache
+#     | \.tox
+#     | \.venv
+#     | _build
+#     | buck-out
+#     | build
+#     | dist
+#   )/
+# )
+# '''
+
+[tool.autopep8]
+# diff = true
+aggressive = 3
+in-place = true
+line-length = 150
+recursive = true
+
+[tool.pytest.ini_options]
+addopts = "--pyargs app --cov=app"
+env = [
+  "YATB_DEBUG=True",
+  "ENABLE_METRICS=false",
+]
+filterwarnings = [
+  "ignore::DeprecationWarning",
+]

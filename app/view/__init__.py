@@ -11,7 +11,8 @@ from fastapi import FastAPI, Cookie, Request, Response, HTTPException, status, D
 from fastapi.staticfiles import StaticFiles
 from fastapi.templating import Jinja2Templates
 
-from .. import schema, auth, config, db
+from .. import schema, auth, db
+from ..config import settings
 
 from ..api import api_tasks as api_tasks
 from ..api import api_users as api_users
@@ -27,19 +28,22 @@ router = APIRouter(
 
 
 def version_string():
-    return f"kks-tb-{config.VERSION}"
+    return f"kks-tb-{settings.VERSION}"
 
 
 templ.env.globals["version_string"] = version_string
-templ.env.globals["DEBUG"] = config._DEGUG
 templ.env.globals["len"] = len
 templ.env.globals["template_format_time"] = schema.task.template_format_time
 templ.env.globals["set"] = set
 templ.env.globals["isinstance"] = isinstance
+
+templ.env.globals["DEBUG"] = settings.DEBUG
+templ.env.globals["FLAG_BASE"] = settings.FLAG_BASE
+templ.env.globals["CTF_NAME"] = settings.CTF_NAME
 templ.env.globals["OAUTH_CONFIG"] = {
-    "OAUTH_CLIENT_ID": config.OAUTH_CLIENT_ID,
-    "OAUTH_CLIENT_SECRET": config.OAUTH_CLIENT_SECRET,
-    "OAUTH_ENDPOINT": config.OAUTH_ENDPOINT,
+    "OAUTH_CLIENT_ID": settings.OAUTH_CLIENT_ID,
+    "OAUTH_CLIENT_SECRET": settings.OAUTH_CLIENT_SECRET,
+    "OAUTH_ENDPOINT": settings.OAUTH_ENDPOINT,
     # ""
 }
 

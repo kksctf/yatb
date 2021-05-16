@@ -8,7 +8,8 @@ from fastapi import Request, Response, HTTPException, status, Depends, APIRouter
 from starlette.responses import RedirectResponse
 
 from . import logger
-from .. import schema, auth, config, db
+from .. import schema, auth, db
+from ..config import settings
 from ..utils import metrics
 
 router = APIRouter(
@@ -19,7 +20,7 @@ router = APIRouter(
 
 async def api_scoreboard_get_internal() -> List[schema.User]:
     users = await db.get_all_users()
-    if not config._DEGUG:
+    if not settings.DEBUG:
         users = filter(lambda x: not x.is_admin, users.values())
     else:
         users = users.values()
@@ -79,7 +80,7 @@ async def api_task_get_ctftime_scoreboard(fullScoreboard: bool = False):
 
 @router.post("/login")
 async def api_token(resp: Response, form_data: schema.UserForm):
-    if not config._DEGUG:
+    if not settings.DEBUG:
         raise HTTPException(
             status_code=status.HTTP_404_NOT_FOUND,
             detail="No.",
@@ -99,7 +100,7 @@ async def api_token(resp: Response, form_data: schema.UserForm):
 
 @router.post("/register")
 async def api_users_register(resp: Response, form_data: schema.UserForm):
-    if not config._DEGUG:
+    if not settings.DEBUG:
         raise HTTPException(
             status_code=status.HTTP_404_NOT_FOUND,
             detail="No.",
@@ -125,13 +126,13 @@ async def api_oauth_callback(req: Request, resp: Response, code: str, state: str
     async with aiohttp.ClientSession() as session:
         oauth_token = await (
             await session.post(
-                config.OAUTH_TOKEN_ENDPOINT,
+                settings.OAUTH_TOKEN_ENDPOINT,
                 params={
                     "grant_type": "authorization_code",
                     "code": code,
                     "redirect_uri": req.url_for("api_oauth_callback"),
-                    "client_id": config.OAUTH_CLIENT_ID,
-                    "client_secret": config.OAUTH_CLIENT_SECRET,
+                    "client_id": settings.OAUTH_CLIENT_ID,
+                    "client_secret": settings.OAUTH_CLIENT_SECRET,
                 },
             )
         ).json()
@@ -142,7 +143,7 @@ async def api_oauth_callback(req: Request, resp: Response, code: str, state: str
                 detail="CTFTime error",
             )
 
-        user_data = await (await session.get(config.OAUTH_API_ENDPOINT, headers={"Authorization": f"Bearer {oauth_token['access_token']}"})).json()
+        user_data = await (await session.get(settings.OAUTH_API_ENDPOINT, headers={"Authorization": f"Bearer {oauth_token['access_token']}"})).json()
         logger.debug(f"User api token data: {user_data}")
         if "team" not in user_data or "id" not in user_data["team"] or "name" not in user_data["team"]:
             raise HTTPException(

@@ -3,15 +3,80 @@ import hashlib
 import subprocess
 import distutils.util
 import datetime
+from typing import List, Optional
+from pydantic import BaseSettings
 
 
-def env_bool(var: str, default: str) -> bool:
-    return bool(distutils.util.strtobool(os.environ.get(var, default=default)))
+class Settings(BaseSettings):
+    DEBUG: bool = False
+    TOKEN_PATH: str = "/api/users/login"
+
+    # bot token for notifications
+    BOT_TOKEN: Optional[str] = None
+    CHAT_ID: int = 0
+
+    # OAUTH
+    OAUTH_ADMIN_IDS: List[int] = [32621]
+    OAUTH_CLIENT_ID: str = ""
+    OAUTH_CLIENT_SECRET: str = ""
+    OAUTH_ENDPOINT: str = "https://oauth.ctftime.org/authorize"
+    OAUTH_TOKEN_ENDPOINT: str = "https://oauth.ctftime.org/token"
+    OAUTH_API_ENDPOINT: str = "https://oauth.ctftime.org/user"
+
+    # event time
+    EVENT_START_TIME: datetime.datetime = datetime.datetime(1077, 12, 12, 9, 0)
+    EVENT_END_TIME: datetime.datetime = datetime.datetime(2077, 12, 13, 9, 0)
+
+    # database name
+    DB_NAME: str = os.path.join(".", "file_db") + ".db"
+
+    # JWT settings
+    JWT_SECRET_KEY: str = "CHANGE_ME_OR_DIE13434523465"
+    JWT_ALGORITHM: str = "HS256"
+    JWT_ACCESS_TOKEN_EXPIRE_MINUTES: int = 60 * 24 * 2  # two days
+
+    # rename docs. Why? Idk, but you maybe want this
+    FASTAPI_DOCS_URL: str = "/kek_docs"
+    FASTAPI_REDOC_URL: str = "/kek_redoc"
+    FASTAPI_OPENAPI_URL: str = "/kek_openapi.json"
+
+    # if you enable metrics - you must change that URL, metrics can expose some sensitive info
+    MONITORING_URL: str = "/kek_metrics"
+
+    # version magic
+    VERSION: str = ""
+    COMMIT: Optional[str] = None
+
+    FLAG_BASE: str = "kks"
+    CTF_NAME: str = "#kksctf open 2020"
+
+    def __init__(self, *args, **kwargs) -> None:
+        super().__init__(*args, **kwargs)
+        self.version_solver()
+
+    def version_solver(self):
+        if ".git" in os.listdir("."):
+            self.VERSION += subprocess.check_output(["git", "rev-parse", "HEAD"]).decode()[:8]
+            self.VERSION += "-Modified" if len(subprocess.check_output(["git", "status", "--porcelain"])) > 0 else ""
+        else:
+            self.VERSION += "a0.2.15"
+            if self.COMMIT:
+                self.VERSION += f"-{self.COMMIT[:8]}"
+
+        if self.DEBUG:
+            self.VERSION += "-dev"
+        else:
+            self.VERSION += "-prod"
+
+        self.VERSION += "-ctf"
+
+    class Config:
+        env_prefix = "YATB_"
+        env_file = "yatb.env"
+        env_file_encoding = "utf-8"
 
 
-def env_val(var: str, default: str):
-    return os.environ.get(var, default=default)
-
+settings = Settings()
 
 # ==== CLASSES FOR MD RENDERER ====
 MD_CLASSES_TASKS = {
@@ -26,72 +91,3 @@ MD_ATTRS_TASKS = {
     }
 }
 # ==== CLASSES FOR MD RENDERER ====
-
-# ==== Some options ====
-_DEGUG = env_bool("YATB_DEBUG", "True")
-TOKEN_PATH = "/api/users/login"  # strange setting, but idk for what i can use it
-
-
-if ".git" in os.listdir("."):
-    VERSION = subprocess.check_output(["git", "rev-parse", "HEAD"]).decode()[:8]
-    VERSION += "-Modified" if len(subprocess.check_output(["git", "status", "--porcelain"])) > 0 else ""
-else:
-    commit = os.environ.get("COMMIT_SHA", None)
-    VERSION = "a0.2.11"
-    if commit:
-        VERSION += f"-{commit[:8]}"
-    _DEGUG = False
-# ==== Some options ====
-
-# ==== Bot token for notif ====
-
-BOT_TOKEN = env_val("TG_BOT_TOKEN", "")
-CHAT_ID = 0
-# ==== Bot token for notif ====
-
-# ==== CTFTime OAuth ====
-if True:
-    OAUTH_ADMIN_IDs = [32621]
-    OAUTH_CLIENT_ID = env_val("OAUTH_CLIENT_ID", "")
-    OAUTH_CLIENT_SECRET = env_val("OAUTH_CLIENT_SECRET", "")
-    OAUTH_ENDPOINT = env_val("OAUTH_ENDPOINT", "https://oauth.ctftime.org/authorize")
-    OAUTH_TOKEN_ENDPOINT = env_val("OAUTH_TOKEN_ENDPOINT", "https://oauth.ctftime.org/token")
-    OAUTH_API_ENDPOINT = env_val("OAUTH_API_ENDPOINT", "https://oauth.ctftime.org/user")
-
-    EVENT_START_TIME = datetime.datetime(1077, 12, 12, 9, 0)
-    EVENT_END_TIME = datetime.datetime(2077, 12, 13, 9, 0)
-# ==== CTFTime OAuth ====
-
-# ==== Generic debug/prod settings ====
-if _DEGUG:
-    DB_NAME = env_val("DB_NAME", os.path.join(".", "file_db") + ".db")
-
-    JWT_SECRET_KEY = "DEBUG_CHANGE_ME"
-    JWT_ALGORITHM = "HS256"
-    JWT_ACCESS_TOKEN_EXPIRE_MINUTES = 60 * 24  # one day
-
-    FASTAPI_DOCS_URL = "/docs"
-    FASTAPI_REDOC_URL = "/redoc"
-    FASTAPI_OPENAPI_URL = "/openapi.json"
-
-    MONITORING_URL = "/metrics"
-
-    VERSION += "-dev"
-else:
-    DB_NAME = env_val("DB_NAME", os.path.join(".", "file_db") + ".db")
-
-    JWT_SECRET_KEY = "CHANGE_ME_OR_DIE"
-    JWT_ALGORITHM = "HS256"
-    JWT_ACCESS_TOKEN_EXPIRE_MINUTES = 60 * 24 * 2  # two days
-
-    FASTAPI_DOCS_URL = "/kek_docs"
-    FASTAPI_REDOC_URL = "/kek_redoc"
-    FASTAPI_OPENAPI_URL = "/kek_openapi.json"
-
-    MONITORING_URL = "/kek_metrics"
-
-    VERSION += "-prod"
-# ==== Generic debug/prod settings ====
-
-if True:
-    VERSION += "-ctf"

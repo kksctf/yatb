@@ -12,7 +12,8 @@ from fastapi import FastAPI, Cookie, Request, Response, HTTPException, status, D
 
 from fastapi.security import OAuth2PasswordBearer, OAuth2PasswordRequestForm, OAuth2
 
-from . import app, config, auth, db, schema, root_logger
+from . import app, auth, db, schema, root_logger
+from .config import settings
 from .api import api_tasks
 
 """
@@ -25,7 +26,7 @@ async def session_middleware(request: Request, call_next):
     return response
 """
 
-if config._DEGUG:
+if settings.DEBUG:
     try:
         root_logger.warning("Timing debug loaded")
 

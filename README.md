@@ -17,8 +17,6 @@
 * `--forwarded-allow-ips *`: if you want nginx
 
 ## Dev
-You can enable YATB_DEBUG env (`True` by default) and login through `/docs` or debug buttons on login page.
+You can enable YATB_DEBUG env (`False` by default) and login through `/docs` or debug buttons on login page.
 
 First pair of buttons signing up and signing in as admin, second - as basic user
-
-# Some production guides you can find in [production.md](production.md)

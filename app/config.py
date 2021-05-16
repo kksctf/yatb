@@ -31,7 +31,7 @@ class Settings(BaseSettings):
     DB_NAME: str = os.path.join(".", "file_db") + ".db"
 
     # JWT settings
-    JWT_SECRET_KEY: str = "CHANGE_ME_OR_DIE"
+    JWT_SECRET_KEY: str = "CHANGE_ME_OR_DIE13434523465"
     JWT_ALGORITHM: str = "HS256"
     JWT_ACCESS_TOKEN_EXPIRE_MINUTES: int = 60 * 24 * 2  # two days
 
@@ -40,7 +40,7 @@ class Settings(BaseSettings):
     FASTAPI_REDOC_URL: str = "/kek_redoc"
     FASTAPI_OPENAPI_URL: str = "/kek_openapi.json"
 
-    # if you enable metrics - you must change that URL.
+    # if you enable metrics - you must change that URL, metrics can expose some sensitive info
     MONITORING_URL: str = "/kek_metrics"
 
     # version magic
@@ -59,7 +59,7 @@ class Settings(BaseSettings):
             self.VERSION += subprocess.check_output(["git", "rev-parse", "HEAD"]).decode()[:8]
             self.VERSION += "-Modified" if len(subprocess.check_output(["git", "status", "--porcelain"])) > 0 else ""
         else:
-            self.VERSION += "a0.2.12"
+            self.VERSION += "a0.2.15"
             if self.COMMIT:
                 self.VERSION += f"-{self.COMMIT[:8]}"
 
@@ -71,9 +71,9 @@ class Settings(BaseSettings):
         self.VERSION += "-ctf"
 
     class Config:
-        env_prefix = 'YATB_'
-        env_file = 'yatb.env'
-        env_file_encoding = 'utf-8'
+        env_prefix = "YATB_"
+        env_file = "yatb.env"
+        env_file_encoding = "utf-8"
 
 
 settings = Settings()

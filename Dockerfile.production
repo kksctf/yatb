@@ -10,4 +10,4 @@ COPY ./main.py .
 
 # /usr/local/bin/uvicorn
 ENTRYPOINT [ "python3", "-m", "uvicorn", "main:app"]
-CMD ["--log-level=warning", "--host", "0.0.0.0", "--port", "80", "--proxy-headers", "--forwarded-allow-ips", "*"]
+CMD ["--log-level=warning", "--host", "0.0.0.0", "--port", "80"]

@@ -12,7 +12,7 @@ from . import api_users
 
 router = APIRouter(
     prefix="/tasks",
-    tags=["tasks"]
+    tags=["tasks"],
 )
 
 

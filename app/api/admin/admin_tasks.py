@@ -116,6 +116,7 @@ async def api_admin_task_delete_all(user: schema.User = Depends(admin_checker)):
 
 # TODO: А можно ли это сделать нормально?
 
+
 class InternalObjTasksList(schema.BaseModel):
     tasks: List[uuid.UUID]
 

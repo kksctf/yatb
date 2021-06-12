@@ -20,7 +20,7 @@ class User(EBaseModel):
         "solved_tasks",
         "affilation",
         "country",
-        "profile_pic"
+        "profile_pic",
     }
     __admin_only_fields__ = {
         "is_admin",
@@ -55,8 +55,8 @@ class User(EBaseModel):
 
     def hash_value(self):
         salt = os.urandom(16)
-        key = (hashlib.pbkdf2_hmac('sha256', self.username.encode('utf-8'), salt, 1, dklen=8))
-        user_hash = (binascii.hexlify(key)).decode('ascii')
+        key = hashlib.pbkdf2_hmac("sha256", self.username.encode("utf-8"), salt, 1, dklen=8)
+        user_hash = (binascii.hexlify(key)).decode("ascii")
 
         return user_hash
 

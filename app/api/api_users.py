@@ -14,7 +14,7 @@ from ..utils import metrics
 
 router = APIRouter(
     prefix="/users",
-    tags=["users"]
+    tags=["users"],
 )
 
 

@@ -48,7 +48,6 @@ async def insert_task(new_task: schema.TaskForm, author: schema.User) -> schema.
         scoring=new_task.scoring,
         description=new_task.description,
         description_html=schema.Task.regenerate_md(new_task.description),
-
         flag=new_task.flag,
         author=(new_task.author if new_task.author != "" else f"@{author.username}"),
     )
@@ -94,11 +93,10 @@ async def remove_task(task: schema.Task):
 async def find_task_by_flag(flag: str, username: str) -> Union[schema.Task, None]:
     from . import _db
 
-    #flag_in_format: str
+    # flag_in_format: str
 
     for task_id, task in _db._db["tasks"].items():
         task: schema.Task  # strange solution, but no other ideas
-     #   flag_in_format = task.flag.sanitization(flag)
         if task.flag.flag_checker(flag, username):
             return task
 

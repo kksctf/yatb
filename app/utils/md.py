@@ -23,8 +23,10 @@ class ClassAdderTreeprocessor(markdown.treeprocessors.Treeprocessor):
 class ClassAdderExtension(markdown.Extension):
     def __init__(self, *args, **kwargs):
         self.config = {
-            'replace': [{},
-                        "replace - Default: {}"]
+            "replace": [
+                {},
+                "replace - Default: {}",
+            ],
         }
         # Override defaults with user settings
         for key, value in kwargs.items():
@@ -60,10 +62,7 @@ class AttributeTreeprocessor(markdown.treeprocessors.Treeprocessor):
 
 class AttributeExtension(markdown.Extension):
     def __init__(self, *args, **kwargs):
-        self.config = {
-            'attrs': [{},
-                      "attrs - Default: {}"]
-        }
+        self.config = {"attrs": [{}, "attrs - Default: {}"]}
         # Override defaults with user settings
         for key, value in kwargs.items():
             self.setConfig(key, value)

@@ -16,7 +16,7 @@ async def admin_checker(user: schema.User = Depends(auth.get_current_user)):
 logger = logging.getLogger("yatb.api.admin")
 router = APIRouter(
     prefix="/admin",
-    tags=["admin"]
+    tags=["admin"],
 )
 
 

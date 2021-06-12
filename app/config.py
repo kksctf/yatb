@@ -34,6 +34,7 @@ class Settings(BaseSettings):
     JWT_SECRET_KEY: str = "CHANGE_ME_OR_DIE13434523465"
     JWT_ALGORITHM: str = "HS256"
     JWT_ACCESS_TOKEN_EXPIRE_MINUTES: int = 60 * 24 * 2  # two days
+    FLAG_SIGN_KEY: str = "YOU_ALSO_NEED_TO_CHANGE_ME"
 
     # rename docs. Why? Idk, but you maybe want this
     FASTAPI_DOCS_URL: str = "/kek_docs"

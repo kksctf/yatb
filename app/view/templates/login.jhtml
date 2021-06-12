@@ -88,27 +88,29 @@
     {{ super() }}
     {% if DEBUG %}
         <script>
+            redirect = (ret) => { location.pathname="/"; }
+
             api_url['login'] = "{{ url_for('api_token') }}";
             api_url['register'] = "{{ url_for('api_users_register') }}";
             
             $("#debug_login_form").submit(function(event) {
                 event.preventDefault();
-                api_req(this, api_url['login'], 'login', method='POST');
+                api_req(this, api_url['login'], 'login', method='POST', ok_callback = redirect);
             });
 
             $("#debug_register_form").submit(function(event) {
                 event.preventDefault();
-                api_req(this, api_url['register'], 'register', method='POST');
+                api_req(this, api_url['register'], 'register', method='POST', ok_callback = redirect);
             });
 
             $("#debug_login_form_2").submit(function(event) {
                 event.preventDefault();
-                api_req(this, api_url['login'], 'login', method='POST');
+                api_req(this, api_url['login'], 'login', method='POST', ok_callback = redirect);
             });
 
             $("#debug_register_form_2").submit(function(event) {
                 event.preventDefault();
-                api_req(this, api_url['register'], 'register', method='POST');
+                api_req(this, api_url['register'], 'register', method='POST', ok_callback = redirect);
             });
             
         </script>

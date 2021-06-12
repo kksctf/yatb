@@ -60,7 +60,7 @@ class Settings(BaseSettings):
             self.VERSION += subprocess.check_output(["git", "rev-parse", "HEAD"]).decode()[:8]
             self.VERSION += "-Modified" if len(subprocess.check_output(["git", "status", "--porcelain"])) > 0 else ""
         else:
-            self.VERSION += "a0.2.15"
+            self.VERSION += "a0.3.1"
             if self.COMMIT:
                 self.VERSION += f"-{self.COMMIT[:8]}"
 

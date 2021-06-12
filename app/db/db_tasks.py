@@ -1,3 +1,4 @@
+from app.schema.user import User
 import uuid
 import logging
 from datetime import datetime
@@ -8,12 +9,11 @@ from asyncio import Lock
 from typing import List, Dict, Union, Optional
 
 from .. import schema
-from ..schema.flags import StaticFlag, DynamicKKSFlags, Flag
+from ..schema.flags import StaticFlag, DynamicKKSFlag, Flag
 from ..config import settings
 from ..utils import md, metrics
 
 from . import update_entry, db_users
-
 
 logger = logging.getLogger("yatb.db.tasks")
 db_lock = Lock()
@@ -51,8 +51,6 @@ async def insert_task(new_task: schema.TaskForm, author: schema.User) -> schema.
         flag=new_task.flag,
         author=(new_task.author if new_task.author != "" else f"@{author.username}"),
     )
-    if task.flag.dynamic_type_checker:
-        await db_users.set_flag_for_all(task)
 
     _db._db["tasks"][task.task_id] = task
     _db._index["tasks"][task.task_id] = task
@@ -90,14 +88,12 @@ async def remove_task(task: schema.Task):
     del _db._index["tasks"][task.task_id]
 
 
-async def find_task_by_flag(flag: str, username: str) -> Union[schema.Task, None]:
+async def find_task_by_flag(flag: str, user: schema.User) -> Union[schema.Task, None]:
     from . import _db
-
-    # flag_in_format: str
 
     for task_id, task in _db._db["tasks"].items():
         task: schema.Task  # strange solution, but no other ideas
-        if task.flag.flag_checker(flag, username):
+        if task.flag.flag_checker(flag, user):
             return task
 
     return None

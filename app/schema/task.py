@@ -8,7 +8,7 @@ import uuid
 
 from . import EBaseModel, logger, md, config
 from .scoring import Scoring, DynamicKKSScoring, StaticScoring
-from .flags import Flag, StaticFlag, DynamicKKSFlags
+from .flags import Flag, StaticFlag, DynamicKKSFlag
 
 
 def template_format_time(date: datetime.datetime) -> str:  # from alb1or1x_shit.py
@@ -44,11 +44,11 @@ class Task(EBaseModel):
     description: str
     description_html: str
 
-    flag: Union[Flag, StaticFlag, DynamicKKSFlags]
+    flag: Union[Flag, StaticFlag, DynamicKKSFlag]
 
     pwned_by: Dict[uuid.UUID, datetime.datetime] = {}
 
-    hidden: bool = False
+    hidden: bool = True
 
     author: str
 
@@ -93,10 +93,10 @@ class Task(EBaseModel):
         classtype = value.get("classtype")
         if classtype == "Flag":
             return Flag(**value)
-        elif classtype == "DynamicKKSFlags":
-            return DynamicKKSFlags(**value)
         elif classtype == "StaticFlag":
             return StaticFlag(**value)
+        elif classtype == "DynamicKKSFlag":
+            return DynamicKKSFlag(**value)
 
         else:
             raise ValueError(f"Unkonwn classtype {classtype}")
@@ -149,5 +149,5 @@ class TaskForm(EBaseModel):
     category: str
     scoring: Union[Scoring, StaticScoring, DynamicKKSScoring]
     description: str
-    flag: Union[Flag, StaticFlag, DynamicKKSFlags]
+    flag: Union[Flag, StaticFlag, DynamicKKSFlag]
     author: str = ""

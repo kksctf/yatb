@@ -8,7 +8,6 @@ from . import logger
 from .. import schema, auth, db, utils
 from ..config import settings
 from ..utils import metrics, tg
-from . import api_users
 
 router = APIRouter(
     prefix="/tasks",
@@ -41,7 +40,7 @@ async def api_task_solve_internal(flag: str, user: schema.User):
             detail="CTF has not started yet",
         )
 
-    task = await db.find_task_by_flag(flag, user.username)
+    task = await db.find_task_by_flag(flag, user)
     if task:
         logger.info(f"[{user.short_desc()}] Found task with flag {flag}, task={task.short_desc()}.")
     else:

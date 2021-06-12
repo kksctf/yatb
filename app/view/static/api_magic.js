@@ -48,10 +48,11 @@ function getFormData(f) {
 function init_form_class() {
     $("select.form_class_selector").change(function () {
         var selected = this.value;
-        var div = $(".form_class_selector_list > .form_class_selector_class[data-ref=" + selected + "]");
-        var other_div = $(".form_class_selector_list > .form_class_selector_class[data-ref!=" + selected + "]");
-        div.find(":input").removeClass("form_class_disabled");
-        other_div.find(":input").addClass("form_class_disabled");
+        var propname = this.dataset["propname"];
+        var div = $(".form_class_selector_list > .form_class_selector_class[data-ref=" + selected + "][data-propname=" + propname + "]");
+        var other_div = $(".form_class_selector_list > .form_class_selector_class[data-ref!=" + selected + "][data-propname=" + propname + "]");
+        div.find(":input").removeClass("form_class_disabled").prop( "disabled", false);
+        other_div.find(":input").addClass("form_class_disabled").prop( "disabled", true);
         div.show();
         other_div.hide();
         console.log(selected, div, other_div);

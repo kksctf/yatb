@@ -97,6 +97,15 @@ async def insert_oauth_user(oauth_id: int, username: str, country: str):
     return user
 
 
+async def dynamic_flags_for_new_usr(user: schema.User):
+    from . import _db
+
+    for task_id, task in _db._db["tasks"].items():
+        task: schema.Task
+        if task.flag.dynamic_type_checker:
+            task.flag.flag_for_all(user.username, task.flag.flag_value + user.hash_value() + "}")
+
+
 async def update_user(user_id: uuid.UUID, new_user: schema.UserUpdateForm):
     from . import _db
 
@@ -125,3 +134,12 @@ async def update_user_admin(user_id: uuid.UUID, new_user: schema.User):
     # user.parse_obj(new_user)
     logger.debug(f"Resulting user={user}")
     return user
+
+
+async def set_flag_for_all(task: schema.Task):
+
+    from . import _db
+
+    for user_id, user in _db._db["users"].items():
+        user: schema.User
+        task.flag.flag_for_all(user.username, task.flag.flag_value + user.hash_value() + "}")

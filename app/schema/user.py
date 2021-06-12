@@ -5,8 +5,9 @@ from pydantic import BaseModel, validator, Extra
 import uuid
 import datetime
 import hashlib
+import binascii
 import hmac
-
+import os
 from . import EBaseModel, logger, md
 from ..config import settings
 
@@ -51,6 +52,13 @@ class User(EBaseModel):
         if self.admin_checker():
             logger.warning(f"Promoting {self} to admin")
             self.is_admin = True
+
+    def hash_value(self):
+        salt = os.urandom(16)
+        key = (hashlib.pbkdf2_hmac('sha256', self.username.encode('utf-8'), salt, 1, dklen=8))
+        user_hash = (binascii.hexlify(key)).decode('ascii')
+
+        return user_hash
 
     def admin_checker(self):
         if self.oauth_id == -1 and self.username == "Rubikoid":

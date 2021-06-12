@@ -111,6 +111,7 @@ async def api_users_register(resp: Response, form_data: schema.UserForm):
             detail="Username exists",
         )
     user = await db.insert_user(form_data.username, form_data.password)
+    await db.dynamic_flags_for_new_usr(user)
 
     access_token = auth.create_user_token(user)
     resp.set_cookie(key="access_token", value=f"Bearer {access_token}", httponly=True)

@@ -8,10 +8,12 @@ from asyncio import Lock
 from typing import List, Dict, Union, Optional
 
 from .. import schema
+from ..schema.flags import StaticFlag, DynamicKKSFlags, Flag
 from ..config import settings
 from ..utils import md, metrics
 
 from . import update_entry, db_users
+
 
 logger = logging.getLogger("yatb.db.tasks")
 db_lock = Lock()
@@ -46,9 +48,13 @@ async def insert_task(new_task: schema.TaskForm, author: schema.User) -> schema.
         scoring=new_task.scoring,
         description=new_task.description,
         description_html=schema.Task.regenerate_md(new_task.description),
+
         flag=new_task.flag,
         author=(new_task.author if new_task.author != "" else f"@{author.username}"),
     )
+    if task.flag.dynamic_type_checker:
+        await db_users.set_flag_for_all(task)
+
     _db._db["tasks"][task.task_id] = task
     _db._index["tasks"][task.task_id] = task
     return task
@@ -85,20 +91,17 @@ async def remove_task(task: schema.Task):
     del _db._index["tasks"][task.task_id]
 
 
-async def find_task_by_flag(flag: str) -> Union[schema.Task, None]:
+async def find_task_by_flag(flag: str, username: str) -> Union[schema.Task, None]:
     from . import _db
 
-    # TODO: normal flag sanitization
-    if settings.FLAG_BASE + "{" in flag:
-        flag = flag.replace(settings.FLAG_BASE + "{", "", 1)
-    if flag[-1] == "}":
-        flag = flag[:-1]
-    flag = settings.FLAG_BASE + "{" + flag + "}"
+    #flag_in_format: str
 
     for task_id, task in _db._db["tasks"].items():
         task: schema.Task  # strange solution, but no other ideas
-        if task.flag == flag:
+     #   flag_in_format = task.flag.sanitization(flag)
+        if task.flag.flag_checker(flag, username):
             return task
+
     return None
 
 

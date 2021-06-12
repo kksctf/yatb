@@ -8,6 +8,7 @@ import uuid
 
 from . import EBaseModel, logger, md, config
 from .scoring import Scoring, DynamicKKSScoring, StaticScoring
+from .flags import Flag, StaticFlag, DynamicKKSFlags
 
 
 def template_format_time(date: datetime.datetime) -> str:  # from alb1or1x_shit.py
@@ -28,7 +29,7 @@ class Task(EBaseModel):
     }
     __admin_only_fields__ = {
         "description": ...,
-        "flag": ...,
+        "flag": Flag,
         "hidden": ...,
     }
 
@@ -43,11 +44,11 @@ class Task(EBaseModel):
     description: str
     description_html: str
 
-    flag: str
+    flag: Union[Flag, StaticFlag, DynamicKKSFlags]
 
     pwned_by: Dict[uuid.UUID, datetime.datetime] = {}
 
-    hidden: bool = True
+    hidden: bool = False
 
     author: str
 
@@ -80,6 +81,23 @@ class Task(EBaseModel):
             return StaticScoring(**value)
         elif classtype == "DynamicKKSScoring":
             return DynamicKKSScoring(**value)
+        else:
+            raise ValueError(f"Unkonwn classtype {classtype}")
+
+    @validator("flag", pre=True)
+    def validate_flags(cls, value):
+        if isinstance(value, EBaseModel):
+            return value
+        if not isinstance(value, dict):
+            raise ValueError("value must be dict")
+        classtype = value.get("classtype")
+        if classtype == "Flag":
+            return Flag(**value)
+        elif classtype == "DynamicKKSFlags":
+            return DynamicKKSFlags(**value)
+        elif classtype == "StaticFlag":
+            return StaticFlag(**value)
+
         else:
             raise ValueError(f"Unkonwn classtype {classtype}")
 
@@ -131,5 +149,5 @@ class TaskForm(EBaseModel):
     category: str
     scoring: Union[Scoring, StaticScoring, DynamicKKSScoring]
     description: str
-    flag: str
+    flag: Union[Flag, StaticFlag, DynamicKKSFlags]
     author: str = ""

@@ -128,6 +128,7 @@ class EBaseModel(BaseModel):
 from .scoring import Scoring, StaticScoring, DynamicKKSScoring  # noqa
 from .task import Task, TaskForm  # noqa
 from .user import User, UserForm, UserUpdateForm  # noqa
+from .flags import Flag, StaticFlag, DynamicKKSFlags  # noqa
 
 
 class FlagForm(BaseModel):

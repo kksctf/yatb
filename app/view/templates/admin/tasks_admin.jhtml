@@ -17,12 +17,16 @@
                     overrides = {
                         "description": "textarea",
                         "scoring": "class",
+			"flag": "class",
                     },
                     attribs={
                         "scoring": {
                             "classtype": ["readonly"]
-                        }
-                    })
+                        },
+			"flag":{
+			     "classtype": ["readonly"]
+			}	                   
+		 })
                 }}
             {% else %}
                 {{ a_macro.generate_form(
@@ -33,13 +37,17 @@
                         "description": "textarea",
                         "scoring": "class",
                         'description_html': 'html',
+			"flag": "class",
                     },
                     attribs={
                         'task_id':  ['readonly'],
 
                         "scoring": {
                             "classtype": ["readonly"]
-                        }
+                        },
+			"flag":{
+			     "classtype": ["readonly"]
+			}	
                     })
                 }}
             {% endif %}

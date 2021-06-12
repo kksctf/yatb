@@ -69,11 +69,13 @@ async def update_task(task: schema.Task, new_task: schema.Task) -> schema.Task:
                 "task_id",
                 "description_html",
                 "scoring",
+                "flag",
                 "pwned_by",
             }
         ),
     )
     task.scoring = new_task.scoring  # fix for json-ing scoring on edit
+    task.flag = new_task.flag  # fix for json-ing flag on edit
 
     logger.debug(f"Resulting task={task}")
     task.description_html = schema.Task.regenerate_md(task.description)

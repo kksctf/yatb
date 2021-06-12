@@ -53,13 +53,6 @@ class User(EBaseModel):
             logger.warning(f"Promoting {self} to admin")
             self.is_admin = True
 
-    def hash_value(self):
-        salt = os.urandom(16)
-        key = hashlib.pbkdf2_hmac("sha256", self.username.encode("utf-8"), salt, 1, dklen=8)
-        user_hash = (binascii.hexlify(key)).decode("ascii")
-
-        return user_hash
-
     def admin_checker(self):
         if self.oauth_id == -1 and self.username == "Rubikoid":
             return True

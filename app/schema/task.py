@@ -85,7 +85,7 @@ class Task(EBaseModel):
             raise ValueError(f"Unkonwn classtype {classtype}")
 
     @validator("flag", pre=True)
-    def validate_flags(cls, value):
+    def validate_flag(cls, value):
         if isinstance(value, EBaseModel):
             return value
         if not isinstance(value, dict):
@@ -97,7 +97,6 @@ class Task(EBaseModel):
             return StaticFlag(**value)
         elif classtype == "DynamicKKSFlag":
             return DynamicKKSFlag(**value)
-
         else:
             raise ValueError(f"Unkonwn classtype {classtype}")
 

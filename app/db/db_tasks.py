@@ -1,3 +1,4 @@
+from app.schema.user import User
 import uuid
 import logging
 from datetime import datetime
@@ -8,6 +9,7 @@ from asyncio import Lock
 from typing import List, Dict, Union, Optional
 
 from .. import schema
+from ..schema.flags import StaticFlag, DynamicKKSFlag, Flag
 from ..config import settings
 from ..utils import md, metrics
 
@@ -49,6 +51,7 @@ async def insert_task(new_task: schema.TaskForm, author: schema.User) -> schema.
         flag=new_task.flag,
         author=(new_task.author if new_task.author != "" else f"@{author.username}"),
     )
+
     _db._db["tasks"][task.task_id] = task
     _db._index["tasks"][task.task_id] = task
     return task
@@ -66,11 +69,13 @@ async def update_task(task: schema.Task, new_task: schema.Task) -> schema.Task:
                 "task_id",
                 "description_html",
                 "scoring",
+                "flag",
                 "pwned_by",
             }
         ),
     )
     task.scoring = new_task.scoring  # fix for json-ing scoring on edit
+    task.flag = new_task.flag  # fix for json-ing flag on edit
 
     logger.debug(f"Resulting task={task}")
     task.description_html = schema.Task.regenerate_md(task.description)
@@ -85,20 +90,14 @@ async def remove_task(task: schema.Task):
     del _db._index["tasks"][task.task_id]
 
 
-async def find_task_by_flag(flag: str) -> Union[schema.Task, None]:
+async def find_task_by_flag(flag: str, user: schema.User) -> Union[schema.Task, None]:
     from . import _db
-
-    # TODO: normal flag sanitization
-    if settings.FLAG_BASE + "{" in flag:
-        flag = flag.replace(settings.FLAG_BASE + "{", "", 1)
-    if flag[-1] == "}":
-        flag = flag[:-1]
-    flag = settings.FLAG_BASE + "{" + flag + "}"
 
     for task_id, task in _db._db["tasks"].items():
         task: schema.Task  # strange solution, but no other ideas
-        if task.flag == flag:
+        if task.flag.flag_checker(flag, user):
             return task
+
     return None
 
 

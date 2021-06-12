@@ -33,7 +33,7 @@
             </div>
         </div>
     {% elif type == "class" and 'anyOf' in prop %} {# anyof check due to narrow list of usages #}
-        <select class="form-control form_class_selector"> {# {{ ' '.join(attribs) }} #}
+        <select class="form-control form_class_selector" id="class-selector-{{ prop_name }}" data-propname="{{ prop_name }}"> {# {{ ' '.join(attribs) }} #}
             {% for ref in prop['anyOf'] %}
                 {% set ref = ref['$ref'].split('/')[-1] %}
                 {% if ref not in schema['definitions'] %}
@@ -47,7 +47,7 @@
             {% for ref in prop['anyOf'] %}
                 {% set ref = ref['$ref'].split('/')[-1] %}
                 {% if ref in schema['definitions'] %}
-                    <div class="form_class_selector_class" data-ref="{{ ref }}">
+                    <div class="form_class_selector_class" id="class-selector-forms-{{ prop_name }}" data-propname="{{ prop_name }}" data-ref="{{ ref }}">
                     {% set defin = schema['definitions'][ref] %}
                     {% if not isinstance(attribs, {}.__class__) %}
                         WTF WITH ATTRIBS : {{ attribs }}

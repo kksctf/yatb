@@ -44,13 +44,15 @@ app.include_router(view.router)
 
 # prometheus
 from prometheus_fastapi_instrumentator import Instrumentator  # noqa
+
 expose_url = settings.MONITORING_URL
 
-Instrumentator(
+instrumentator = Instrumentator(
     excluded_handlers=[".*admin.*", expose_url],
     should_respect_env_var=True,
     env_var_name="ENABLE_METRICS",
-).instrument(app).expose(app, endpoint=expose_url)
+)
+instrumentator.instrument(app).expose(app, endpoint=expose_url)
 # utils.metrics.bad_solves_per_user
 
 """

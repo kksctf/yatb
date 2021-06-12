@@ -5,8 +5,9 @@ from pydantic import BaseModel, validator, Extra
 import uuid
 import datetime
 import hashlib
+import binascii
 import hmac
-
+import os
 from . import EBaseModel, logger, md
 from ..config import settings
 
@@ -19,7 +20,7 @@ class User(EBaseModel):
         "solved_tasks",
         "affilation",
         "country",
-        "profile_pic"
+        "profile_pic",
     }
     __admin_only_fields__ = {
         "is_admin",

@@ -23,7 +23,7 @@ _base_path = os.path.dirname(os.path.abspath(__file__))
 templ = Jinja2Templates(directory=os.path.join(_base_path, "templates"))
 router = APIRouter(
     prefix="",
-    tags=["view"]
+    tags=["view"],
 )
 
 

@@ -125,9 +125,10 @@ class EBaseModel(BaseModel):
         return attribs
 
 
-from .scoring import Scoring, StaticScoring, DynamicKKSScoring  # noqa
-from .task import Task, TaskForm  # noqa
 from .user import User, UserForm, UserUpdateForm  # noqa
+from .scoring import Scoring, StaticScoring, DynamicKKSScoring  # noqa
+from .flags import Flag, StaticFlag, DynamicKKSFlag  # noqa
+from .task import Task, TaskForm  # noqa
 
 
 class FlagForm(BaseModel):

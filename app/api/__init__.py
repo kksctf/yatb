@@ -5,7 +5,7 @@ from .. import config, schema
 logger = logging.getLogger("yatb.api")
 router = APIRouter(
     prefix="/api",
-    tags=["api"]
+    tags=["api"],
 )
 
 

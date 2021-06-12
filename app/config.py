@@ -34,6 +34,7 @@ class Settings(BaseSettings):
     JWT_SECRET_KEY: str = "CHANGE_ME_OR_DIE13434523465"
     JWT_ALGORITHM: str = "HS256"
     JWT_ACCESS_TOKEN_EXPIRE_MINUTES: int = 60 * 24 * 2  # two days
+    FLAG_SIGN_KEY: str = "YOU_ALSO_NEED_TO_CHANGE_ME"
 
     # rename docs. Why? Idk, but you maybe want this
     FASTAPI_DOCS_URL: str = "/kek_docs"
@@ -59,7 +60,7 @@ class Settings(BaseSettings):
             self.VERSION += subprocess.check_output(["git", "rev-parse", "HEAD"]).decode()[:8]
             self.VERSION += "-Modified" if len(subprocess.check_output(["git", "status", "--porcelain"])) > 0 else ""
         else:
-            self.VERSION += "a0.2.15"
+            self.VERSION += "a0.3.1"
             if self.COMMIT:
                 self.VERSION += f"-{self.COMMIT[:8]}"
 

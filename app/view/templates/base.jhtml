@@ -19,7 +19,7 @@
             <link rel="icon" type="image/png" href="{{ url_for('static', path='kksctf_logo_32.png') }}" />
 
             <!-- Bootstrap CSS -->
-            <link href="https://cdn.jsdelivr.net/npm/bootstrap@5.0.0-beta1/dist/css/bootstrap.min.css" rel="stylesheet" integrity="sha384-giJF6kkoqNQ00vy+HMDP7azOuL0xtbfIcaT9wjKHr8RbDVddVHyTfAAsrekwKmP1" crossorigin="anonymous">
+            <link href="https://cdn.jsdelivr.net/npm/bootstrap@5.0.1/dist/css/bootstrap.min.css" rel="stylesheet" integrity="sha384-+0n0xVW2eSR5OomGNYDnhzAbDsOXxcvSN1TPprVMTNDbiYZCxYbOOl7+AMvyTG2x" crossorigin="anonymous">
             {% block css %}
                 <link rel="stylesheet" type="text/css" href="{{ url_for('static', path='style.css') }}">
                 <link rel="stylesheet" type="text/css" href="{{ url_for('static', path='toast.css') }}">
@@ -41,8 +41,8 @@
                 <button class="navbar-toggler" type="button" data-bs-toggle="collapse" data-bs-target="#navbarNav" aria-controls="navbarText" aria-expanded="false" aria-label="Toggle navigation">
                     <span class="navbar-toggler-icon"></span>
                 </button>
-                <div class="collapse navbar-collapse justify-content-between" id="navbarNav">
-                    <ul class="navbar-nav mr-auto">
+                <div class="collapse navbar-collapse" id="navbarNav">
+                    <ul class="navbar-nav me-auto">
                     {% block left_header_buttons %}
                         {% for page in head_data.pages %}
                             <li class="nav-item">
@@ -51,41 +51,44 @@
                         {% endfor %}
                     {% endblock %}
                     </ul>
+
                     <ul class="navbar-nav">
                     {% block right_header_buttons %}
-                        {% if curr_user %}
-                            <li class="nav-item mx-lg-1">
-                                <form class="d-flex form-inline" id="flag_submit_form">
-                                    <div class="row mx-0">
-                                        <div class="col-auto input-group-prepend mx-0 p-0">
-                                            <span class="input-group-text" style="border-radius: 4px 0 0 4px;">{{ FLAG_BASE }}{</span>
-                                        </div>
-                                        <input type="text" class="col form-control rounded-0" name="flag" id="flag" placeholder="sampl3_fl4g" required>
-                                        <div class="col-auto input-group-prepend mx-0 p-0">
-                                            <span class="input-group-text rounded-0">}</span>
-                                        </div>
-                                        <button class="col-auto btn btn-outline-light mx-0" style="border-radius: 0 4px 4px 0;" type="submit">Submit</button>
-                                    </div>
-                                </form>
-                            </li>
-                            <li class="nav-item dropdown mx-lg-1">
-                                <a class="nav-link dropdown-toggle text-light" id="userActions" role="button" data-bs-toggle="dropdown" aria-expanded="false">
-                                    {{ curr_user.username }}
-                                </a>
-                                <div class="dropdown-menu dropdown-menu-end" aria-labelledby="userActions">
-                                    {# <a class="dropdown-item btn btn-secondary" role="button" href="profile.html">Profile</a> #}
-                                    {% if curr_user.is_admin %}
-                                        <a class="dropdown-item btn btn-secondary" role="button" href="{{ url_for('admin_index') }}">Admin panel</a>
-                                    {% endif %}
-                                    <a class="dropdown-item btn btn-secondary" role="button" href="{{ url_for('api_users_logout') }}">Logout</a>
-                                </div>
-                            </li>
-                        {% else %}
-                            <li class="nav-item">
-                                <a class="nav-link" role="button" href="{{ url_for('login_get') }}">Login</a>
-                            </li>
-                        {% endif %}
                     {% endblock %}
+                    </ul>
+
+                    <form class="nav-item" id="flag_submit_form">
+                        <div class="input-group">
+                            <div class="input-group-prepend mx-0 p-0">
+                                <span class="input-group-text" style="border-radius: 4px 0 0 4px;">{{ FLAG_BASE }}{</span>
+                            </div>
+                            <input type="text" class="form-control rounded-0" name="flag" id="flag" placeholder="sampl3_fl4g" required>
+                            <div class="input-group-prepend mx-0 p-0">
+                                <span class="input-group-text rounded-0">}</span>
+                            </div>
+                            <button class="btn btn-outline-light" style="border-radius: 0 4px 4px 0;" type="submit">Submit</button>
+                        </div>
+                    </form>
+
+                    <ul class="navbar-nav">
+                    {% if curr_user %}
+                        <li class="nav-item dropdown">
+                            <a class="nav-link dropdown-toggle" href="#" id="userActions" role="button" data-bs-toggle="dropdown" aria-expanded="false">
+                                {{ curr_user.username }}
+                            </a>
+                            <ul class="dropdown-menu dropdown-menu-end" aria-labelledby="userActions">
+                                {# <a class="dropdown-item btn btn-secondary" role="button" href="profile.html">Profile</a> #}
+                                {% if curr_user.is_admin %}
+                                    <li><a class="dropdown-item" href="{{ url_for('admin_index') }}">Admin panel</a></li>
+                                {% endif %}
+                                <li><a class="dropdown-item" href="{{ url_for('api_users_logout') }}">Logout</a></li>
+                            </ul>
+                        </li>
+                    {% else %}
+                        <li class="nav-item">
+                            <a class="nav-link" role="button" href="{{ url_for('login_get') }}">Login</a>
+                        </li>
+                    {% endif %}
                     </ul>
                 </div>
             </div>
@@ -105,7 +108,7 @@
         {% block scripts %}
             <script src="https://code.jquery.com/jquery-1.10.2.min.js"></script>
 
-            <script src="https://cdn.jsdelivr.net/npm/bootstrap@5.0.0-beta1/dist/js/bootstrap.bundle.min.js" integrity="sha384-ygbV9kiqUc6oa4msXn9868pTtWMgiQaeYH7/t7LECLbyPA2x65Kgf80OJFdroafW" crossorigin="anonymous"></script>
+            <script src="https://cdn.jsdelivr.net/npm/bootstrap@5.0.1/dist/js/bootstrap.bundle.min.js" integrity="sha384-gtEjrD/SeCtmISkJkNUaaKMoLD0//ElJ19smozuHV6z3Iehds+3Ulb9Bn9Plx0x4" crossorigin="anonymous"></script>
 
             <script src="{{ url_for('static', path='toast.js') }}"></script>
             <script src="{{ url_for('static', path='api_magic.js') }}"></script>

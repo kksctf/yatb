@@ -83,27 +83,37 @@
         <script>
             redirect = (ret) => { location.pathname="/"; }
 
-            api_url['login'] = "{{ url_for('api_token') }}";
-            api_url['register'] = "{{ url_for('api_users_register') }}";
-            
             $("#debug_login_form_admin").submit(function(event) {
                 event.preventDefault();
-                api_req(this, api_url['login'], 'login', method='POST', ok_callback = redirect);
+                req(api_list["api_token"], { data: getFormData(this), })
+                    .then(get_json)
+                    .then(redirect)
+                    .catch(nok_toast_generator("login"));
             });
 
             $("#debug_register_form_admin").submit(function(event) {
                 event.preventDefault();
-                api_req(this, api_url['register'], 'register', method='POST', ok_callback = redirect);
+                req(api_list["api_users_register"], { data: getFormData(this), })
+                    .then(get_json)
+                    .then(redirect)
+                    .catch(nok_toast_generator("register"));
+                //.then(redirect);
             });
 
             $("#debug_login_form_user").submit(function(event) {
                 event.preventDefault();
-                api_req(this, api_url['login'], 'login', method='POST', ok_callback = redirect);
+                req(api_list["api_token"], { data: getFormData(this), })
+                    .then(get_json)
+                    .then(redirect)
+                    .catch(nok_toast_generator("login"));
             });
 
             $("#debug_register_form_user").submit(function(event) {
                 event.preventDefault();
-                api_req(this, api_url['register'], 'register', method='POST', ok_callback = redirect);
+                req(api_list["api_users_register"], { data: getFormData(this), })
+                    .then(get_json)
+                    .then(redirect)
+                    .catch(nok_toast_generator("register"));
             });
             
         </script>

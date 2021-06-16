@@ -51,8 +51,8 @@ function init_form_class() {
         var propname = this.dataset["propname"];
         var div = $(".form_class_selector_list > .form_class_selector_class[data-ref=" + selected + "][data-propname=" + propname + "]");
         var other_div = $(".form_class_selector_list > .form_class_selector_class[data-ref!=" + selected + "][data-propname=" + propname + "]");
-        div.find(":input").removeClass("form_class_disabled").prop( "disabled", false);
-        other_div.find(":input").addClass("form_class_disabled").prop( "disabled", true);
+        div.find(":input").removeClass("form_class_disabled").prop("disabled", false);
+        other_div.find(":input").addClass("form_class_disabled").prop("disabled", true);
         div.show();
         other_div.hide();
         console.log(selected, div, other_div);
@@ -60,11 +60,39 @@ function init_form_class() {
     $("select.form_class_selector").change();
 }
 
+function ok_toast_generator(toast_name) {
+    return (data) => {
+        $.toast({
+            type: 'success',
+            title: toast_name,
+            subtitle: 'now',
+            content: '<pre>' + JSON.stringify(data.json) + '</pre>',
+            delay: 5000,
+        });
+        return data;
+    };
+}
+
+function nok_toast_generator(toast_name, pass=false) {
+    return (data) => {
+        $.toast({
+            type: 'error',
+            title: toast_name,
+            subtitle: 'now',
+            content: data,
+            delay: 5000,
+        });
+        if (pass)
+            throw data;
+    };
+}
+
 function api_req(form, api, toast_name, method = "POST", ok_callback = (data) => { }, error_callback = (data) => { }, supress_ok = false, async = true) {
     var data = undefined;
     if (form != undefined)
         var data = getFormData(form);
-    $.ajax({
+    console.log("Hello there", api, toast_name);
+    /*$.ajax({
         type: method,
         url: api,
         data: data ? JSON.stringify(data) : undefined,
@@ -94,7 +122,5 @@ function api_req(form, api, toast_name, method = "POST", ok_callback = (data) =>
             });
             error_callback(data);
         },
-    });
+    }); */
 }
-
-var api_url = {};

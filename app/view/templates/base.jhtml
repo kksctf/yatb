@@ -57,18 +57,9 @@
                     {% endblock %}
                     </ul>
 
-                    <form class="nav-item" id="flag_submit_form">
-                        <div class="input-group">
-                            <div class="input-group-prepend mx-0 p-0">
-                                <span class="input-group-text" style="border-radius: 4px 0 0 4px;">{{ FLAG_BASE }}{</span>
-                            </div>
-                            <input type="text" class="form-control rounded-0" name="flag" id="flag" placeholder="sampl3_fl4g" required>
-                            <div class="input-group-prepend mx-0 p-0">
-                                <span class="input-group-text rounded-0">}</span>
-                            </div>
-                            <button class="btn btn-outline-light" style="border-radius: 0 4px 4px 0;" type="submit">Submit</button>
-                        </div>
-                    </form>
+                    {% if curr_user %}
+                    {{ macro.flag_box() }}
+                    {% endif %}
 
                     <ul class="navbar-nav">
                     {% if curr_user %}

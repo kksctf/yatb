@@ -11,7 +11,7 @@
         <a class="nav-link dropdown-toggle" href="#" id="navbarCategoryDropdown" role="button" data-bs-toggle="dropdown" aria-expanded="false">
             Settings
         </a>
-        <div class="dropdown-menu" aria-labelledby="navbarCategoryDropdown">
+        <div class="dropdown-menu dropdown-menu-end" aria-labelledby="navbarCategoryDropdown">
             <a class="dropdown-item" id="showAllTasks" href="#">Show all tasks</a>
             <a class="dropdown-item" id="showCryptoTasks" href="#">Show only <kbd>crypto</kbd></a>
             <a class="dropdown-item" id="showBinaryTasks" href="#">Show only <kbd>binary</kbd></a>

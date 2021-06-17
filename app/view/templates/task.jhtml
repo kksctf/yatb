@@ -13,7 +13,7 @@
 
 {% block content %}
     <div class="container mt-2">
-        {{ macro.task_show(selected_task, curr_user, False, True, True) }}
+        {{ macro.task_show(selected_task, curr_user, False, True, True, True) }}
     </div>
 {% endblock %}
 

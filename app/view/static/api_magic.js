@@ -92,7 +92,7 @@ function api_req(form, api, toast_name, method = "POST", ok_callback = (data) =>
     if (form != undefined)
         var data = getFormData(form);
     console.log("Hello there", api, toast_name);
-    /*$.ajax({
+    $.ajax({
         type: method,
         url: api,
         data: data ? JSON.stringify(data) : undefined,
@@ -122,5 +122,7 @@ function api_req(form, api, toast_name, method = "POST", ok_callback = (data) =>
             });
             error_callback(data);
         },
-    }); */
+    });
 }
+
+api_url = {};

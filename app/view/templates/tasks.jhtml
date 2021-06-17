@@ -9,24 +9,22 @@
 {% block right_header_buttons %}
     <li class="nav-item dropdown">
         <a class="nav-link dropdown-toggle" href="#" id="navbarCategoryDropdown" role="button" data-bs-toggle="dropdown" aria-expanded="false">
-            Task categories
+            Settings
         </a>
         <div class="dropdown-menu" aria-labelledby="navbarCategoryDropdown">
-            <a class="dropdown-item" id="showAllTasks" href="#">All tasks</a>
+            <a class="dropdown-item" id="showAllTasks" href="#">Show all tasks</a>
+            <a class="dropdown-item" id="showCryptoTasks" href="#">Show only <kbd>crypto</kbd></a>
+            <a class="dropdown-item" id="showBinaryTasks" href="#">Show only <kbd>binary</kbd></a>
+            <a class="dropdown-item" id="showWebTasks" href="#">Show only <kbd>web</kbd></a>
+            <a class="dropdown-item" id="showOtherTasks" href="#">Show only <kbd>other</kbd></a>
             <div class="dropdown-divider"></div>
-            <a class="dropdown-item" id="showCryptoTasks" href="#">Only <kbd>crypto</kbd></a>
-            <a class="dropdown-item" id="showBinaryTasks" href="#">Only <kbd>binary</kbd></a>
-            <a class="dropdown-item" id="showWebTasks" href="#">Only <kbd>web</kbd></a>
-            <a class="dropdown-item" id="showOtherTasks" href="#">Only <kbd>other</kbd></a>
-        </div>
-    </li>
-    <li class="nav-item form-switch">
-        <label class="nav-link" for="showSolvedTasks">
-            <input class="form-check-input" type="checkbox" checked autocomplete="off" id="showSolvedTasks">
-                <span class="navbar-text">
+            <label class="dropdown-item form-inline" for="showSolvedTasks">
+                <input class="form-check-input" type="checkbox" checked autocomplete="off" id="showSolvedTasks">
+                <span>
                     Show solved
                 </span>
-        </label>
+            </label>
+        </div>
     </li>
     {{ super() }}
     {# <a class="col-auto m-1 btn btn-light active" role="button" href="#">Hide solved</a> #}
@@ -96,6 +94,8 @@
             for (var k in categorySelector.categories) {
                 categorySelector.categories[k] = true;
             }
+            categorySelector.showSolved = true;
+            $("#showSolvedTasks").prop('checked', true);
             localStorage.setItem("categorySelector", JSON.stringify(categorySelector))
         }
 

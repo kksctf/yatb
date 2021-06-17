@@ -55,7 +55,6 @@ function init_form_class() {
         other_div.find(":input").addClass("form_class_disabled").prop("disabled", true);
         div.show();
         other_div.hide();
-        console.log(selected, div, other_div);
     });
     $("select.form_class_selector").change();
 }
@@ -86,43 +85,3 @@ function nok_toast_generator(toast_name, pass=false) {
             throw data;
     };
 }
-
-function api_req(form, api, toast_name, method = "POST", ok_callback = (data) => { }, error_callback = (data) => { }, supress_ok = false, async = true) {
-    var data = undefined;
-    if (form != undefined)
-        var data = getFormData(form);
-    console.log("Hello there", api, toast_name);
-    $.ajax({
-        type: method,
-        url: api,
-        data: data ? JSON.stringify(data) : undefined,
-        contentType: 'application/json',
-        async: async,
-        success: function (data) {
-            console.log("OnSucc", data);
-            if (!supress_ok) {
-                $.toast({
-                    type: 'success',
-                    title: toast_name,
-                    subtitle: 'now',
-                    content: '<pre>' + JSON.stringify(data) + '</pre>',
-                    delay: 5000,
-                });
-            }
-            ok_callback(data);
-        },
-        error: function (data) {
-            console.warn("ERROR", data);
-            $.toast({
-                type: 'error',
-                title: toast_name,
-                subtitle: 'now',
-                content: data.responseText,
-                delay: 5000,
-            });
-            error_callback(data);
-        },
-    });
-}
-
-api_url = {};

@@ -116,11 +116,6 @@
             <script src="{{ url_for('static', path='easy_mde_runner.js') }}"></script>
 
             <script>
-                api_url['solve_task'] = "{{ url_for('api_task_submit_flag') }}";
-                api_url['get_user'] = "{{ url_for('api_users_get_username', user_id=None) }}";
-                api_url['get_task'] = "{{ url_for('api_task_get', task_id=None) }}";
-            </script>
-            <script>
                 let api_list = {{ api_list.__str__() | safe }}
             </script>
 

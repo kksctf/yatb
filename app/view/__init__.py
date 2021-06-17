@@ -27,11 +27,13 @@ router = APIRouter(
 )
 
 
-def route_generator(req: Request, base_path="/api") -> Dict[str, str]:
+def route_generator(req: Request, base_path="/api", ignore_admin=True) -> Dict[str, str]:
     router: Router = req.scope["router"]
     ret = {}
     for r in router.routes:
         if r.path.startswith(base_path):
+            if ignore_admin and r.path.startswith(f"{base_path}/admin"):
+                continue
             dummy_params = {i: f"NONE_{i}" for i in set(r.param_convertors.keys())}
             ret[r.name] = req.url_for(name=r.name, **dummy_params)
     return ret
@@ -45,10 +47,11 @@ def response_generator(
     headers: dict = None,
     media_type: str = None,
     background=None,
+    ignore_admin=True,
 ) -> Response:
     context_base = {
         "request": req,
-        "api_list": route_generator(req),
+        "api_list": route_generator(req, ignore_admin=ignore_admin),
     }
     context_base.update(context)
     return templ.TemplateResponse(

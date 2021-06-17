@@ -32,6 +32,7 @@ async def admin_index(req: Request, resp: Response, user: schema.User = Depends(
             "request": req,
             "curr_user": user,
         },
+        ignore_admin=False,
     )
 
 
@@ -48,6 +49,7 @@ async def admin_tasks(req: Request, resp: Response, user: schema.User = Depends(
             "task_form_class": schema.TaskForm,
             "tasks_list": tasks_list,
         },
+        ignore_admin=False,
     )
 
 
@@ -66,6 +68,7 @@ async def admin_task_get(req: Request, resp: Response, task_id: uuid.UUID, user:
             "tasks_list": tasks_list,
             "selected_task": selected_task,
         },
+        ignore_admin=False,
     )
 
 
@@ -82,6 +85,7 @@ async def admin_users(req: Request, resp: Response, user: schema.User = Depends(
             "user_form_class": schema.UserForm,
             "users_list": users_dict.values(),
         },
+        ignore_admin=False,
     )
 
 
@@ -100,4 +104,5 @@ async def admin_user_get(req: Request, resp: Response, user_id: uuid.UUID, user:
             "users_list": users_dict.values(),
             "selected_user": selected_user,
         },
+        ignore_admin=False,
     )

@@ -1,7 +1,8 @@
-// user_id_cache = JSON.parse(localStorage.getItem("user_id_cache")) || {};
-// task_id_cache = JSON.parse(localStorage.getItem("task_id_cache")) || {};
-user_id_cache = {};
-task_id_cache = {};
+user_id_cache = JSON.parse(localStorage.getItem("user_id_cache")) || {};
+task_id_cache = JSON.parse(localStorage.getItem("task_id_cache")) || {};
+
+// user_id_cache = {};
+// task_id_cache = {};
 
 $("#flag_submit_form").submit(function (event) {
     event.preventDefault();

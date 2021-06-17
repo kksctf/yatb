@@ -13,10 +13,10 @@
         </a>
         <div class="dropdown-menu dropdown-menu-end" aria-labelledby="navbarCategoryDropdown">
             <a class="dropdown-item" id="showAllTasks" href="#">Show all tasks</a>
-            <a class="dropdown-item" id="showCryptoTasks" href="#">Show only <kbd>crypto</kbd></a>
-            <a class="dropdown-item" id="showBinaryTasks" href="#">Show only <kbd>binary</kbd></a>
-            <a class="dropdown-item" id="showWebTasks" href="#">Show only <kbd>web</kbd></a>
-            <a class="dropdown-item" id="showOtherTasks" href="#">Show only <kbd>other</kbd></a>
+            <a class="dropdown-item" id="showCryptoTasks" href="#">Show only <span class="crypto-color">crypto {{ macro.task_ico("crypto") }}</span></a>
+            <a class="dropdown-item" id="showBinaryTasks" href="#">Show only <span class="binary-color">binary {{ macro.task_ico("binary") }}</span></a>
+            <a class="dropdown-item" id="showWebTasks" href="#">Show only <span class="web-color">web {{ macro.task_ico("web") }}</span></a>
+            <a class="dropdown-item" id="showOtherTasks" href="#">Show only <span class="other-color">other {{ macro.task_ico("other") }}</span></a>
             <div class="dropdown-divider"></div>
             <label class="dropdown-item form-inline" for="showSolvedTasks">
                 <input class="form-check-input" type="checkbox" checked autocomplete="off" id="showSolvedTasks">

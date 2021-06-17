@@ -87,18 +87,18 @@ div.card.solved > .card-body > .card-text > a {
     color: #a2d5f2;
 }
 
-div.card.crypto:not(.solved) > * .task-category {
+div.card.crypto:not(.solved) > * .task-category, .crypto-color {
     color: rgb(0, 160, 0);
 }
 
-div.card.binary:not(.solved) > * .task-category {
+div.card.binary:not(.solved) > * .task-category, .binary-color {
     color: red;
 }
 
-div.card.web:not(.solved) > * .task-category {
+div.card.web:not(.solved) > * .task-category, .web-color {
     color: blue;
 }
 
-div.card.other:not(.solved) > * .task-category {
+div.card.other:not(.solved) > * .task-category, .other-color {
     color: rgb(151, 91, 0);
 }

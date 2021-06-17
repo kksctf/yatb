@@ -57,9 +57,7 @@
                     {% endblock %}
                     </ul>
 
-                    {% if curr_user %}
-                    {{ macro.flag_box() }}
-                    {% endif %}
+                    {{ macro.flag_box(curr_user) }}
 
                     <ul class="navbar-nav">
                     {% if curr_user %}

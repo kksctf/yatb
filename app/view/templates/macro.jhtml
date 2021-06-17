@@ -1,4 +1,5 @@
-{%- macro flag_box() -%}
+{%- macro flag_box(user=None) -%}
+{% if user %}
 <form class="nav-item" id="flag_submit_form">
     <div class="input-group">
         <div class="input-group-prepend mx-0 p-0">
@@ -11,6 +12,7 @@
         <button class="btn btn-outline-light" style="border-radius: 0 4px 4px 0;" type="submit">Submit</button>
     </div>
 </form>
+{% endif %}
 {%- endmacro -%}
 
 {%- macro task_classes(task, user=None, solved_status=True) -%}
@@ -99,7 +101,7 @@
     </div>
 
     {% if with_flag_box %}
-    {{ flag_box() }}
+    {{ flag_box(user) }}
     {% endif %}
 
     {% if False and solved_list %} {# TODO: дописать это дерьмо! #}

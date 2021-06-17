@@ -144,7 +144,8 @@ async def unsolve_task(task: schema.Task):
             if task.task_id in user.solved_tasks:
                 user.solved_tasks.pop(task.task_id)
         # task.scoring
-        await recalc_scoreboard()
+
+    await recalc_scoreboard()
     return task
 
 

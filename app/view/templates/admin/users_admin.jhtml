@@ -86,11 +86,12 @@
 {% block scripts %}
     {{ super() }}
      <script>
-        api_url['edit_user'] = "{{ url_for('api_admin_user_edit', user_id=selected_user.user_id if selected_user else None) }}";
         $(document).ready(function x() {
             $("#user_edit_form").submit(function(event) {
                 event.preventDefault();
-                api_req(this, api_url['edit_user'], 'Edit user');
+                preq(api_list["api_admin_user_edit"], {"user_id": "{{ selected_user.user_id if selected_user else None }}"}, { data: getFormData(this), })
+                    .then(get_json)
+                    .then(ok_toast_generator("Edit user"), nok_toast_generator("Edit user"))
             });
         });
     </script>

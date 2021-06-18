@@ -1,10 +1,23 @@
-user_id_cache = JSON.parse(localStorage.getItem("user_id_cache")) || {};
-task_id_cache = JSON.parse(localStorage.getItem("task_id_cache")) || {};
+const resolver_settings = [
+    {
+        class: "user_id_resolve",
+        api_url: "api_users_get_username",
+        path_key: "user_id",
+        result_key: "",
+        cache: {},
+        cache_key: "user_id_cache"
+    },
+    {
+        class: "task_id_resolve",
+        api_url: "api_task_get",
+        path_key: "task_id",
+        result_key: "task_name",
+        cache: {},
+        cache_key: "user_id_cache"
+    },
+]
 
-// user_id_cache = {};
-// task_id_cache = {};
-
-$("#flag_submit_form").submit(function (event) {
+$(".flag_submit_form").submit(function (event) {
     event.preventDefault();
 
     req(api_list["api_task_submit_flag"], { data: getFormData(this), })
@@ -12,7 +25,7 @@ $("#flag_submit_form").submit(function (event) {
         .then(ok_toast_generator("Solve flag"), nok_toast_generator("Solve flag"))
         .then((resp) => {
             console.log(resp);
-            if (resp.json.includes('-')) {
+            if (typeof (resp.json) == "string" && resp.json.includes('-')) {
                 var task = $("div[data-id=" + resp.json + "]");
                 task.addClass("solved");
                 console.log("found task", task);
@@ -21,11 +34,9 @@ $("#flag_submit_form").submit(function (event) {
 });
 
 $(function () {
-    const resolver_settings = [
-        { class: "user_id_resolve", api_url: "api_users_get_username", path_key: "user_id", result_key: "", cache: user_id_cache },
-        { class: "task_id_resolve", api_url: "api_task_get", path_key: "task_id", result_key: "task_name", cache: task_id_cache },
-    ]
     resolver_settings.forEach(async function (item) {
+        item.cache = JSON.parse(localStorage.getItem(item.cache_key)) || item.cache;
+
         let item_list = [];
         $("." + item.class).each(function (index) { item_list.push(this); });
         for (item_index in item_list) {
@@ -42,7 +53,6 @@ $(function () {
                 path_params[item.path_key] = id;
 
                 result = await preq(api_list[item.api_url], path_params, { method: "GET", }).then(get_json);
-                console.log(item, item_index, result);
                 let result_data = (item.result_key != "" ? result.json[item.result_key] : result.json);
                 item.cache[id] = result_data;
                 jthis.text(result_data);
@@ -51,7 +61,6 @@ $(function () {
 
             }
         }
+        localStorage.setItem(item.cache_key, JSON.stringify(item.cache));
     });
-    localStorage.setItem("user_id_cache", JSON.stringify(user_id_cache));
-    localStorage.setItem("task_id_cache", JSON.stringify(task_id_cache));
 });

@@ -1,16 +1,16 @@
-from app.api.api_tasks import api_tasks_get_internal
 import uuid
-import aiohttp
-from typing import List, Optional
 from datetime import timedelta
+from typing import List, Optional
 
-from fastapi import Request, Response, HTTPException, status, Depends, APIRouter
+import aiohttp
+from fastapi import APIRouter, Depends, HTTPException, Request, Response, status
 from starlette.responses import RedirectResponse
 
-from . import logger
-from .. import schema, auth, db
+from .. import auth, db, schema
 from ..config import settings
 from ..utils import metrics
+from . import logger
+from .api_tasks import api_tasks_get
 
 router = APIRouter(
     prefix="/users",
@@ -47,7 +47,7 @@ async def api_task_get_ctftime_scoreboard(fullScoreboard: bool = False):
     tasks = None
     full_tasks_list = None
     if fullScoreboard:
-        tasks_list = await api_tasks_get_internal(False)  # we don't need to export hidden tasks
+        tasks_list = await api_tasks_get(None)  # we don't need to export hidden tasks
         full_tasks_list = await db.get_all_tasks()  # this used only for uuid resolve # TODO: maybe it can be done normally?
         tasks = list(map(lambda x: x.task_name, tasks_list))
     for i, user in enumerate(scoreboard):

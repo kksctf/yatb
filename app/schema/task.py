@@ -6,7 +6,7 @@ from pydantic import BaseModel, validator, Extra
 
 import uuid
 
-from . import EBaseModel, logger, md, config
+from . import EBaseModel, logger, md, config, User
 from .scoring import Scoring, DynamicKKSScoring, StaticScoring
 from .flags import Flag, StaticFlag, DynamicKKSFlag
 
@@ -54,6 +54,15 @@ class Task(EBaseModel):
 
     def __init__(self, *args, **kwargs):
         super().__init__(*args, **kwargs)
+
+    def visible_for_user(self, user: User = None) -> bool:
+        if self.hidden:
+            if user and user.is_admin:
+                return True
+            else:
+                return False
+        else:
+            return True
 
     @validator("task_id", pre=True, always=True)
     def set_id(cls, v):

@@ -38,7 +38,7 @@ async def admin_index(req: Request, resp: Response, user: schema.User = Depends(
 
 @router.get("/tasks")
 async def admin_tasks(req: Request, resp: Response, user: schema.User = Depends(admin_checker)):
-    tasks_list = await api_tasks.api_tasks_get_internal(admin=True)
+    tasks_list = await api_tasks.api_tasks_get(user)
     return response_generator(
         req,
         "admin/tasks_admin.jhtml",
@@ -55,8 +55,8 @@ async def admin_tasks(req: Request, resp: Response, user: schema.User = Depends(
 
 @router.get("/task/{task_id}")
 async def admin_task_get(req: Request, resp: Response, task_id: uuid.UUID, user: schema.User = Depends(admin_checker)):
-    tasks_list = await api_tasks.api_tasks_get_internal(admin=True)
-    selected_task = await api_tasks.api_task_get_internal(task_id, admin=True)
+    tasks_list = await api_tasks.api_tasks_get(user)
+    selected_task = await api_tasks.api_task_get(task_id, user)
     return response_generator(
         req,
         "admin/tasks_admin.jhtml",

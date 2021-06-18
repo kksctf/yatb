@@ -84,16 +84,6 @@ templ.env.globals["OAUTH_CONFIG"] = {
     # ""
 }
 
-
-async def get_user_safe(request: Request) -> Optional[schema.User]:
-    user = None
-    try:
-        user = await auth.get_current_user(await auth.oauth2_scheme(request))
-    except HTTPException:
-        user = None
-    return user
-
-
 from . import admin  # noqa
 
 router.include_router(admin.router)
@@ -101,17 +91,13 @@ router.include_router(admin.router)
 
 @router.get("/")
 @router.get("/index")
-async def index(req: Request, resp: Response):
-    return await tasks_get_all(req, resp)
+async def index(req: Request, resp: Response, user: schema.User = Depends(auth.get_current_user_safe)):
+    return await tasks_get_all(req, resp, user)
 
 
 @router.get("/tasks")
-async def tasks_get_all(req: Request, resp: Response):
-    user = await get_user_safe(req)
-    admin = False
-    if user and user.is_admin:
-        admin = True
-    tasks_list = await api_tasks.api_tasks_get_internal(admin)
+async def tasks_get_all(req: Request, resp: Response, user: schema.User = Depends(auth.get_current_user_safe)):
+    tasks_list = await api_tasks.api_tasks_get(user)
     return response_generator(
         req,
         "tasks.jhtml",
@@ -124,14 +110,14 @@ async def tasks_get_all(req: Request, resp: Response):
 
 
 @router.get("/scoreboard")
-async def scoreboard_get(req: Request, resp: Response):
+async def scoreboard_get(req: Request, resp: Response, user: schema.User = Depends(auth.get_current_user_safe)):
     scoreboard = await api_users.api_scoreboard_get_internal()
     return response_generator(
         req,
         "scoreboard.jhtml",
         {
             "request": req,
-            "curr_user": await get_user_safe(req),
+            "curr_user": user,
             "scoreboard": scoreboard,
             "enumerate": enumerate,
         },
@@ -139,26 +125,26 @@ async def scoreboard_get(req: Request, resp: Response):
 
 
 @router.get("/login")
-async def login_get(req: Request, resp: Response):
+async def login_get(req: Request, resp: Response, user: schema.User = Depends(auth.get_current_user_safe)):
     return response_generator(
         req,
         "login.jhtml",
         {
             "request": req,
-            "curr_user": await get_user_safe(req),
+            "curr_user": user,
         },
     )
 
 
 @router.get("/tasks/{task_id}")
-async def tasks_get_task(req: Request, resp: Response, task_id: uuid.UUID):
-    task = await api_tasks.api_task_get_internal(task_id)
+async def tasks_get_task(req: Request, resp: Response, task_id: uuid.UUID, user: schema.User = Depends(auth.get_current_user_safe)):
+    task = await api_tasks.api_task_get(task_id)
     return response_generator(
         req,
         "task.jhtml",
         {
             "request": req,
-            "curr_user": await get_user_safe(req),
+            "curr_user": user,
             "selected_task": task,
         },
     )

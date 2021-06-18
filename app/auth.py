@@ -94,3 +94,12 @@ async def get_current_user(token: str = Depends(oauth2_scheme)):
     if user is None:
         raise credentials_exception
     return user
+
+
+async def get_current_user_safe(request: Request) -> Optional[schema.User]:
+    user = None
+    try:
+        user = await get_current_user(await oauth2_scheme(request))
+    except HTTPException:
+        user = None
+    return user

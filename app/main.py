@@ -47,8 +47,8 @@ if settings.DEBUG:
                     fastapi.responses.HTMLResponse.render,
                     fastapi.responses.PlainTextResponse.render,
                 ),
-                "6tasks": (api_tasks.api_tasks_get_internal,),
-                "6task": (api_tasks.api_task_get_internal,),
+                "6tasks": (api_tasks.api_tasks_get,),
+                "6task": (api_tasks.api_task_get,),
             },
         )
 

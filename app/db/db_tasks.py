@@ -85,7 +85,8 @@ async def update_task(task: schema.Task, new_task: schema.Task) -> schema.Task:
 async def remove_task(task: schema.Task):
     from . import _db
 
-    # TODO: check for task in article, recalc score and something else.
+    # TODO: recalc score and something else.
+    await unsolve_task(task)
     del _db._db["tasks"][task.task_id]
     del _db._index["tasks"][task.task_id]
 
@@ -134,7 +135,7 @@ async def solve_task(task: schema.Task, solver: schema.User):
     return task.task_id
 
 
-async def unsolve_task(task: schema.Task):
+async def unsolve_task(task: schema.Task) -> schema.Task:
     # add references
     global db_lock
     async with db_lock:
@@ -149,12 +150,16 @@ async def unsolve_task(task: schema.Task):
     return task
 
 
-async def recalc_user_score(user: schema.User, _task_cache: Dict[uuid.UUID, schema.Task] = {}):
+async def recalc_user_score(user: schema.User, _task_cache: Dict[uuid.UUID, schema.Task] = None):
+    if _task_cache is None:
+        _task_cache = {}
     old_score = user.score
     user.score = 0
     for task_id in user.solved_tasks:
         if task_id not in _task_cache:
             _task_cache[task_id] = await get_task_uuid(task_id)
+        if _task_cache[task_id] is None:
+            continue
         user.score += _task_cache[task_id].scoring.points
     if old_score != user.score:
         logger.warning(f"Recalc: smth wrong with {user.short_desc()}, {old_score} != {user.score}!")

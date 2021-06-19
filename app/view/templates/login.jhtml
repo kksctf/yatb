@@ -85,28 +85,28 @@
 
             $("#debug_login_form_admin").submit(function(event) {
                 event.preventDefault();
-                req(api_list["api_token"], { data: getFormData(this), })
+                req(api_list["api_auth_simple_login"], { data: getFormData(this), })
                     .then(get_json)
                     .then(redirect, nok_toast_generator("login"))
             });
 
             $("#debug_register_form_admin").submit(function(event) {
                 event.preventDefault();
-                req(api_list["api_users_register"], { data: getFormData(this), })
+                req(api_list["api_auth_simple_register"], { data: getFormData(this), })
                     .then(get_json)
                     .then(redirect, nok_toast_generator("register"))
             });
 
             $("#debug_login_form_user").submit(function(event) {
                 event.preventDefault();
-                req(api_list["api_token"], { data: getFormData(this), })
+                req(api_list["api_auth_simple_login"], { data: getFormData(this), })
                     .then(get_json)
                     .then(redirect, nok_toast_generator("login"))
             });
 
             $("#debug_register_form_user").submit(function(event) {
                 event.preventDefault();
-                req(api_list["api_users_register"], { data: getFormData(this), })
+                req(api_list["api_auth_simple_register"], { data: getFormData(this), })
                     .then(get_json)
                     .then(redirect, nok_toast_generator("register"))
             });

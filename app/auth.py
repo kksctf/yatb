@@ -15,14 +15,13 @@ from .config import settings
 class OAuth2PasswordBearerWithCookie(OAuth2):
     def __init__(
         self,
-        tokenUrl: str,
         scheme_name: str = None,
         scopes: dict = None,
         auto_error: bool = True,
     ):
         if not scopes:
             scopes = {}
-        flows = OAuthFlowsModel(password={"tokenUrl": tokenUrl, "scopes": scopes})
+        flows = OAuthFlowsModel()  # password={"tokenUrl": tokenUrl, "scopes": scopes}
         super().__init__(flows=flows, scheme_name=scheme_name, auto_error=auto_error)
 
     async def __call__(self, request: Request) -> Optional[str]:
@@ -46,7 +45,7 @@ class OAuth2PasswordBearerWithCookie(OAuth2):
         return param
 
 
-oauth2_scheme = OAuth2PasswordBearerWithCookie(tokenUrl="/api/users/login")
+oauth2_scheme = OAuth2PasswordBearerWithCookie()
 
 
 async def authenticate_user(username: str, password: str) -> Optional[schema.User]:

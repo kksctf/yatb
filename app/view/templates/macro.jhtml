@@ -20,15 +20,7 @@
     {% if solved_status and user and user.user_id in task.pwned_by %}
         {% set _ = cl.append("solved") %}
     {% endif %}
-    {% if task.category.lower() == "crypto" %}
-        {% set _ = cl.append("crypto") %}
-    {% elif task.category.lower() == "web" %}
-        {% set _ = cl.append("web") %}
-    {% elif task.category.lower() in ["binary", "reverse", "pwn"] %}
-        {% set _ = cl.append("binary") %}
-    {% else %}
-        {% set _ = cl.append("other") %}
-    {% endif %}
+    {% set _ = cl.append(task.color_category) %}
     {{ " ".join(cl) }}
 {%- endmacro -%}
 
@@ -44,10 +36,9 @@
     {% endif %}
 {%- endmacro -%}
 
-{% macro task_show(task, user=None, solved_status=True, full_description=False, solved_list=False, with_flag_box=False) %}
-
+{% macro task_show(task, user=None, solved_status=True, full_description=False, solved_list=False, with_flag_box=False, style="display: inline-block;") %}
     {# {{ 'text-dark' or 'text-muted' }} {{ '' or 'bg-dark' }} #}
-    <div class="{{ task_classes(task, user, solved_status) }}" data-id="{{ task.task_id }}" style="display: inline-block;">
+    <div class="{{ task_classes(task, user, solved_status) }}" data-id="{{ task.task_id }}" id="task-{{ task.task_id }}" style="{{ style }}">
         {% if task.img_src %}
         <img class="card-img-top" src="{{ task.img_src }}">
         {% endif %}

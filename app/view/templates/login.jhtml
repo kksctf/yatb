@@ -43,28 +43,40 @@
                     </button>
                 </p>
                 <div class="collapse" id="collapseDebug">
-                    <form id="debug_register_form_admin">
+                    <form class="debug_register_form">
                         <input type="hidden" name="username" value="Rubikoid">
                         <input type="hidden" name="password" value="123">
                         <button class="w-100 btn btn-warning mt-1" type="submit">Register as admin</button>
                     </form>
 
-                    <form id="debug_login_form_admin">
+                    <form class="debug_login_form">
                         <input type="hidden" name="username" value="Rubikoid">
                         <input type="hidden" name="password" value="123">
                         <button class="w-100 btn btn-warning mt-1" type="submit">Login as admin</button>
                     </form>
 
-                    <form id="debug_register_form_user">
+                    <form class="debug_register_form">
                         <input type="hidden" name="username" value="Rubikoid1">
                         <input type="hidden" name="password" value="12321">
                         <button class="w-100 btn btn-success mt-1" type="submit">Register as user</button>
                     </form>
 
-                    <form id="debug_login_form_user">
+                    <form class="debug_login_form">
                         <input type="hidden" name="username" value="Rubikoid1">
                         <input type="hidden" name="password" value="12321">
                         <button class="w-100 btn btn-success mt-1" type="submit">Login as user</button>
+                    </form>
+
+                    <form class="debug_register_form">
+                        <input type="hidden" class="generic_login" name="username" value="placeholder">
+                        <input type="hidden" name="password" value="12321">
+                        <button class="w-100 btn btn-success mt-1" type="submit">Register as generic debug user (uniq per browser)</button>
+                    </form>
+
+                    <form class="debug_login_form">
+                        <input type="hidden" class="generic_login" name="username" value="placeholder">
+                        <input type="hidden" name="password" value="12321">
+                        <button class="w-100 btn btn-success mt-1" type="submit">Login as as generic debug user (uniq per browser)</button>
                     </form>
                 </div>
             {% endif %}
@@ -81,36 +93,40 @@
     {{ super() }}
     {% if DEBUG %}
         <script>
+            const cyrb53 = function(str, seed = 0) {
+                let h1 = 0xdeadbeef ^ seed, h2 = 0x41c6ce57 ^ seed;
+                for (let i = 0, ch; i < str.length; i++) {
+                    ch = str.charCodeAt(i);
+                    h1 = Math.imul(h1 ^ ch, 2654435761);
+                    h2 = Math.imul(h2 ^ ch, 1597334677);
+                }
+                h1 = Math.imul(h1 ^ (h1>>>16), 2246822507) ^ Math.imul(h2 ^ (h2>>>13), 3266489909);
+                h2 = Math.imul(h2 ^ (h2>>>16), 2246822507) ^ Math.imul(h1 ^ (h1>>>13), 3266489909);
+                return 4294967296 * (2097151 & h2) + (h1>>>0);
+            };
+
+            function generate_token() {
+                data = `${screen.width}.${screen.height}.${navigator.userAgent}`
+                return `user${cyrb53(data)}`
+            }
+
             redirect = (ret) => { location.pathname="/"; }
 
-            $("#debug_login_form_admin").submit(function(event) {
+            $(".debug_login_form").submit(function(event) {
                 event.preventDefault();
                 req(api_list["api_auth_simple_login"], { data: getFormData(this), })
                     .then(get_json)
                     .then(redirect, nok_toast_generator("login"))
             });
 
-            $("#debug_register_form_admin").submit(function(event) {
+            $(".debug_register_form").submit(function(event) {
                 event.preventDefault();
                 req(api_list["api_auth_simple_register"], { data: getFormData(this), })
                     .then(get_json)
                     .then(redirect, nok_toast_generator("register"))
             });
 
-            $("#debug_login_form_user").submit(function(event) {
-                event.preventDefault();
-                req(api_list["api_auth_simple_login"], { data: getFormData(this), })
-                    .then(get_json)
-                    .then(redirect, nok_toast_generator("login"))
-            });
-
-            $("#debug_register_form_user").submit(function(event) {
-                event.preventDefault();
-                req(api_list["api_auth_simple_register"], { data: getFormData(this), })
-                    .then(get_json)
-                    .then(redirect, nok_toast_generator("register"))
-            });
-            
+            $(".generic_login").val(generate_token());
         </script>
     {% endif %}
 {% endblock %}

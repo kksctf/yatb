@@ -55,6 +55,16 @@ class Task(EBaseModel):
     def __init__(self, *args, **kwargs):
         super().__init__(*args, **kwargs)
 
+    @property
+    def color_category(self):
+        if self.category.lower() == "crypto":
+            return "crypto"
+        elif self.category.lower() == "web":
+            return "web"
+        elif self.category.lower() in ["binary", "reverse", "pwn"]:
+            return "binary"
+        return "other"
+
     def visible_for_user(self, user: User = None) -> bool:
         if self.hidden:
             if user and user.is_admin:

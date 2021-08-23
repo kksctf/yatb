@@ -117,7 +117,7 @@ async def api_admin_task_edit(new_task: schema.Task, task: schema.Task = Depends
 # TODO: А можно ли это сделать нормально?
 
 
-class InternalObjTasksList(schema.BaseModel):
+class InternalObjTasksList(schema.EBaseModel):
     tasks: List[uuid.UUID]
 
 

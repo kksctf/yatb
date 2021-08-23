@@ -77,12 +77,6 @@ templ.env.globals["isinstance"] = isinstance
 templ.env.globals["DEBUG"] = settings.DEBUG
 templ.env.globals["FLAG_BASE"] = settings.FLAG_BASE
 templ.env.globals["CTF_NAME"] = settings.CTF_NAME
-templ.env.globals["OAUTH_CONFIG"] = {
-    "OAUTH_CLIENT_ID": settings.OAUTH_CLIENT_ID,
-    "OAUTH_CLIENT_SECRET": settings.OAUTH_CLIENT_SECRET,
-    "OAUTH_ENDPOINT": settings.OAUTH_ENDPOINT,
-    # ""
-}
 
 from . import admin  # noqa
 
@@ -132,12 +126,18 @@ async def login_get(req: Request, resp: Response, user: schema.User = Depends(au
         {
             "request": req,
             "curr_user": user,
+            "auth_ways": schema.auth.ENABLED_AUTH_WAYS,
         },
     )
 
 
 @router.get("/tasks/{task_id}")
-async def tasks_get_task(req: Request, resp: Response, task_id: uuid.UUID, user: schema.User = Depends(auth.get_current_user_safe)):
+async def tasks_get_task(
+    req: Request,
+    resp: Response,
+    task_id: uuid.UUID,
+    user: schema.User = Depends(auth.get_current_user_safe),
+):
     task = await api_tasks.api_task_get(task_id)
     return response_generator(
         req,

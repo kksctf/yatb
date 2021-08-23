@@ -1,15 +1,17 @@
-from typing import List, Dict, Optional, Union, Type
-from fastapi import Query, HTTPException, status
-from pydantic import BaseModel, validator, Extra
-
-import uuid
+import binascii
 import datetime
 import hashlib
-import binascii
 import hmac
 import os
-from . import EBaseModel, logger, md
+import uuid
+from typing import Dict, List, Optional, Type, Union
+
+from fastapi import HTTPException, Query, status
+from pydantic import BaseModel, Extra, validator
+
 from ..config import settings
+from .auth import TYPING_AUTH
+from . import EBaseModel, logger, md
 
 
 class User(EBaseModel):
@@ -26,14 +28,11 @@ class User(EBaseModel):
         "is_admin",
         "oauth_id",
     }
-    __private_fields__ = {
-        "password_hash",
-    }
+    __private_fields__ = {}
 
     user_id: uuid.UUID = None
 
-    username: str
-    password_hash: Optional[str] = None
+    username: str = "unknown"
 
     score: int = 0
 
@@ -45,22 +44,17 @@ class User(EBaseModel):
 
     profile_pic: Optional[str] = None
 
-    oauth_id: int = -1
+    auth_source: TYPING_AUTH
 
     def __init__(self, *args, **kwargs):
         super().__init__(*args, **kwargs)
+        self.username = self.auth_source.generate_username()
         if self.admin_checker():
             logger.warning(f"Promoting {self} to admin")
             self.is_admin = True
 
     def admin_checker(self):
-        if self.oauth_id == -1 and self.username == "Rubikoid":
-            return True
-
-        if self.oauth_id in settings.OAUTH_ADMIN_IDS:
-            return True
-
-        return False
+        return self.auth_source.is_admin()
 
     @validator("user_id", pre=True, always=True)
     def set_id(cls, v):
@@ -73,15 +67,4 @@ class User(EBaseModel):
             return ("", datetime.datetime.fromtimestamp(0))
 
     def short_desc(self):
-        return f"id={self.user_id};name={self.username}"
-
-
-class UserForm(EBaseModel):
-    username: str
-    password: str
-
-
-class UserUpdateForm(EBaseModel):
-    username: str
-    affilation: str
-    country: str
+        return f"id={self.user_id}; name={self.username}; src={self.auth_source.classtype}"

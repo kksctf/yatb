@@ -1,7 +1,7 @@
 from app.db import update_entry
 import uuid
 import logging
-from typing import List, Dict, Optional
+from typing import Hashable, List, Dict, Optional, Type
 
 from .. import schema
 
@@ -26,13 +26,14 @@ async def get_user_uuid(uuid: uuid.UUID) -> Optional[schema.User]:
         return _db._index["users"][uuid]
 
 
-async def get_user_oauth_id(id: int) -> schema.User:
+async def get_user_uniq_field(base: Type[schema.auth.AuthBase.AuthModel], field: Hashable) -> schema.User:
     from . import _db
 
-    if id == -1:
-        return None
     for i in _db._index["users"]:
-        if _db._index["users"][i].oauth_id == id:
+        if (
+            type(_db._index["users"][i].auth_source) == base
+            and _db._index["users"][i].auth_source.get_uniq_field() == field
+        ):
             return _db._index["users"][i]
     return None
 
@@ -58,30 +59,29 @@ async def check_user_uuid(uuid: uuid.UUID) -> bool:
     return uuid in _db._index["users"]
 
 
-async def check_user_oauth_id(id: int) -> bool:
+async def check_user_uniq_field(base: Type[schema.auth.AuthBase.AuthModel], field: Hashable) -> bool:
     from . import _db
 
-    if id == -1:
-        return False
     for i in _db._index["users"]:
-        if _db._index["users"][i].oauth_id == id:
+        if (
+            type(_db._index["users"][i].auth_source) == base
+            and _db._index["users"][i].auth_source.get_uniq_field() == field
+        ):
             return True
     return False
 
 
-async def insert_user(username: str, password: str):
+async def insert_user(auth: schema.auth.TYPING_AUTH):
     from . import _db
 
-    # WTF: SHITCODE
-    user = schema.User(
-        username=username,
-        password_hash=password,
-    )
+    # WTF: SHITCODE or not.... :thonk:
+    user = schema.User(auth_source=auth)
     _db._db["users"][user.user_id] = user
     _db._index["users"][user.user_id] = user
     return user
 
 
+"""
 async def insert_oauth_user(oauth_id: int, username: str, country: str):
     from . import _db
 
@@ -95,13 +95,7 @@ async def insert_oauth_user(oauth_id: int, username: str, country: str):
     _db._db["users"][user.user_id] = user
     _db._index["users"][user.user_id] = user
     return user
-
-
-async def update_user(user_id: uuid.UUID, new_user: schema.UserUpdateForm):
-    from . import _db
-
-    user: schema.User = _db._index["users"][user_id]
-    user.parse_obj(new_user)  # WTF: crazy updater?
+"""
 
 
 async def update_user_admin(user_id: uuid.UUID, new_user: schema.User):

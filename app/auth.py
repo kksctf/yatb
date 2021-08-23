@@ -48,15 +48,6 @@ class OAuth2PasswordBearerWithCookie(OAuth2):
 oauth2_scheme = OAuth2PasswordBearerWithCookie()
 
 
-async def authenticate_user(username: str, password: str) -> Optional[schema.User]:
-    user = await db.get_user(username)
-    if not user:
-        return None
-    if user.password_hash is None or password != user.password_hash:
-        return None
-    return user
-
-
 def create_access_token(data: dict, expires_delta: Optional[timedelta] = None):
     to_encode = data.copy()
     if expires_delta:

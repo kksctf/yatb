@@ -29,9 +29,9 @@ class TelegramAuth(AuthBase):
 
         def is_admin(self) -> bool:
             is_admin: bool = False
-            if self.tg_username and self.tg_username.lower() is TelegramAuth.auth_settings.ADMIN_USERNAMES:
+            if self.tg_username and self.tg_username.lower() in TelegramAuth.auth_settings.ADMIN_USERNAMES:
                 is_admin = True
-            if self.tg_id is TelegramAuth.auth_settings.ADMIN_UIDS:
+            if self.tg_id in TelegramAuth.auth_settings.ADMIN_UIDS:
                 is_admin = True
             return is_admin
 

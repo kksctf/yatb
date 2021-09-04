@@ -147,8 +147,8 @@ class GithubOAuth(OAuth):
         id: int
         login: str
         avatar_url: str
-        name: str
-        email: str
+        name: Optional[str]
+        email: Optional[str]
         url: str
 
         def is_admin(self) -> bool:
@@ -158,7 +158,7 @@ class GithubOAuth(OAuth):
             return self.id
 
         def generate_username(self) -> str:
-            return self.name
+            return self.name or self.login
 
     class Form(OAuth.Form):
         async def populate(self, req: Request, resp: Response) -> "GithubOAuth.AuthModel":
@@ -183,7 +183,7 @@ class GithubOAuth(OAuth):
             env_prefix = "AUTH_GITHUB_"
 
     auth_settings = AuthSettings()
-    scope = ""
+    scope = "user:email,user:read"
     router_params = {
         "path": "/github_callback",
         "name": "api_auth_github_callback",

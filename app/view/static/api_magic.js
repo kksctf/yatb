@@ -72,7 +72,7 @@ function ok_toast_generator(toast_name) {
     };
 }
 
-function nok_toast_generator(toast_name, pass=false) {
+function nok_toast_generator(toast_name, pass = false) {
     return (data) => {
         $.toast({
             type: 'error',
@@ -85,3 +85,5 @@ function nok_toast_generator(toast_name, pass=false) {
             throw data;
     };
 }
+
+redirect = (ret) => { location.pathname = "/"; }

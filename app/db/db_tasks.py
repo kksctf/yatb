@@ -161,6 +161,7 @@ async def recalc_user_score(user: schema.User, _task_cache: Dict[uuid.UUID, sche
         if _task_cache[task_id] is None:
             continue
         user.score += _task_cache[task_id].scoring.points
+        _task_cache[task_id].scoring.set_solves(len(_task_cache[task_id].pwned_by))
     if old_score != user.score:
         logger.warning(f"Recalc: smth wrong with {user.short_desc()}, {old_score} != {user.score}!")
 

@@ -138,7 +138,7 @@ async def tasks_get_task(
     task_id: uuid.UUID,
     user: schema.User = Depends(auth.get_current_user_safe),
 ):
-    task = await api_tasks.api_task_get(task_id)
+    task = await api_tasks.api_task_get(task_id, user)
     return response_generator(
         req,
         "task.jhtml",

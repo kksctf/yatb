@@ -66,7 +66,7 @@ async def api_task_submit_flag(flag: schema.FlagForm, user: schema.User = Depend
             if _user_yes_task_not:
                 # task.pwned_by.remove(user.solved_tasks)
                 pass
-            db.recalc_user_score(user)
+            await db.recalc_user_score(user)
             raise HTTPException(
                 status_code=status.HTTP_500_INTERNAL_SERVER_ERROR,
                 detail="пятисотОЧКА!!1<br>Попробуйте решить таск ещё раз.",
@@ -82,7 +82,7 @@ async def api_task_submit_flag(flag: schema.FlagForm, user: schema.User = Depend
     ret = await db.solve_task(task, user)
 
     if len(task.pwned_by) == 1:
-        tg.display_fb_msg(task, user)
+        pass  # tg.display_fb_msg(task, user)
 
     return ret
 

@@ -67,14 +67,14 @@ class SimpleAuth(AuthBase):
     def generate_html(cls: Type["SimpleAuth"], url_for: Callable) -> str:
         return """
         <form class="login_form">
-            <input type="text" name="username" value="Rubikoid">
-            <input type="text" name="password" value="123">
-            <button class="w-100 btn btn-warning mt-1" type="submit">Login as admin</button>
+            <input type="text" name="username" value="">
+            <input type="text" name="password" value="">
+            <button class="w-100 btn btn-warning mt-1" type="submit">Login</button>
         </form>
         <form class="register_form">
-            <input type="text" name="username" value="Rubikoid">
-            <input type="text" name="password" value="123">
-            <button class="w-100 btn btn-warning mt-1" type="submit">Register as admin</button>
+            <input type="text" name="username" value="">
+            <input type="text" name="password" value="">
+            <button class="w-100 btn btn-warning mt-1" type="submit">Register</button>
         </form>
         """
 

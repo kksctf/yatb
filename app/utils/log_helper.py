@@ -21,7 +21,7 @@ def generate_loggers(
     root_logger = logging.getLogger(base_name)
     root_logger.setLevel(logging.DEBUG)
     formatter = logging.Formatter(root_format)
-    fh = logging.FileHandler(os.path.join(base_folder, f"{base_name}.log"))
+    fh = logging.FileHandler(os.path.join(base_folder, f"{base_name}.log"), encoding='utf-8')
     fh.setLevel(logging.DEBUG)
     ch = logging.StreamHandler()
     ch.setLevel(logging.INFO)
@@ -34,7 +34,7 @@ def generate_loggers(
         logger = logging.getLogger(f"{base_name}.{module}")
         logger.setLevel(logging.DEBUG)
 
-        fh = logging.FileHandler(os.path.join(base_folder, f"{base_name}.{module}.log"))
+        fh = logging.FileHandler(os.path.join(base_folder, f"{base_name}.{module}.log"), encoding='utf-8')
         fh.setLevel(logging.DEBUG)
 
         # ch = logging.StreamHandler()

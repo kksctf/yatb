@@ -28,9 +28,12 @@ class TelegramAuth(AuthBase):
         tg_last_name: Optional[str] = None
 
         def is_admin(self) -> bool:
-            if self.tg_username:
-                return self.tg_username.lower() == "rubikoid"
-            return False
+            is_admin: bool = False
+            if self.tg_username and self.tg_username.lower() is TelegramAuth.auth_settings.ADMIN_USERNAMES:
+                is_admin = True
+            if self.tg_id is TelegramAuth.auth_settings.ADMIN_UIDS:
+                is_admin = True
+            return is_admin
 
         def get_uniq_field(self) -> int:
             return self.tg_id
@@ -86,6 +89,9 @@ class TelegramAuth(AuthBase):
     class AuthSettings(BaseSettings):
         BOT_TOKEN: str = ""
         BOT_USERNAME: str = ""
+
+        ADMIN_USERNAMES: List[str] = []
+        ADMIN_UIDS: List[int] = []
 
         class Config(AuthBase.AuthSettings.BaseConfig):
             env_prefix = "AUTH_TG_"

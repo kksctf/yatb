@@ -61,7 +61,7 @@ class AuthBase(object):
         return """"""
 
 
-from .oauth import CTFTimeOAuth, GithubOAuth, OAuth  # noqa
+from .oauth import CTFTimeOAuth, GithubOAuth, DiscordOAuth, OAuth  # noqa
 from .simple import SimpleAuth  # noqa
 from .tg import TelegramAuth  # noqa
 
@@ -75,7 +75,8 @@ TYPING_AUTH = Union[
 ]
 ENABLED_AUTH_WAYS = [
     CTFTimeOAuth,
-    GithubOAuth,
     SimpleAuth,
     TelegramAuth,
+    GithubOAuth,
+    DiscordOAuth,
 ]

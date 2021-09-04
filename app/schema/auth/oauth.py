@@ -1,6 +1,6 @@
 import datetime
 import hmac
-from typing import Callable, Hashable, List, Optional, Type
+from typing import Callable, Dict, Hashable, List, Optional, Type
 import aiohttp
 
 from fastapi import HTTPException, Query, status, Request, Response
@@ -187,5 +187,81 @@ class GithubOAuth(OAuth):
     router_params = {
         "path": "/github_callback",
         "name": "api_auth_github_callback",
+        "methods": ["GET"],
+    }
+
+
+class DiscordOAuth(OAuth):
+    class AuthModel(OAuth.AuthModel):
+        __admin_only_fields__ = {
+            "id",
+            "username",
+            "discriminator",
+        }
+        classtype: Literal["DiscordOAuth"] = "DiscordOAuth"
+
+        id: int
+        username: str
+        discriminator: str
+
+        def is_admin(self) -> bool:
+            return self.id in DiscordOAuth.auth_settings.OAUTH_ADMIN_IDS
+
+        def get_uniq_field(self) -> int:
+            return self.id
+
+        def generate_username(self) -> str:
+            return self.username
+
+    class Form(OAuth.Form):
+        async def get_token(self, req: Request, cls: Type["OAuth"], session: aiohttp.ClientSession):
+            oauth_token = await (
+                await session.post(
+                    cls.auth_settings.OAUTH_TOKEN_ENDPOINT,
+                    data={
+                        "grant_type": "authorization_code",
+                        "code": self.code,
+                        "redirect_uri": req.url_for(cls.router_params["name"]),
+                        "client_id": cls.auth_settings.OAUTH_CLIENT_ID,
+                        "client_secret": cls.auth_settings.OAUTH_CLIENT_SECRET,
+                        "scope": DiscordOAuth.scope,
+                    },
+                    headers={"Accept": "application/json"},
+                )
+            ).json()
+            logger.debug(f"oauth token data: {oauth_token}")
+            if "access_token" not in oauth_token:
+                raise HTTPException(
+                    status_code=status.HTTP_500_INTERNAL_SERVER_ERROR,
+                    detail="OAuth error",
+                )
+            return oauth_token
+
+        async def populate(self, req: Request, resp: Response) -> "DiscordOAuth.AuthModel":
+            async with aiohttp.ClientSession() as session:
+                oauth_token = await self.get_token(req, DiscordOAuth, session)
+                user_data = await (
+                    await session.get(
+                        DiscordOAuth.auth_settings.OAUTH_API_ENDPOINT,
+                        headers={"Authorization": f"Bearer {oauth_token['access_token']}"},
+                    )
+                ).json()
+                logger.debug(f"User api token data: {user_data}")
+                return DiscordOAuth.AuthModel.parse_obj(user_data)
+
+    class AuthSettings(OAuth.OAuthSettings):
+        OAUTH_ADMIN_IDS: List[int] = []
+        OAUTH_ENDPOINT: str = "https://discord.com/api/oauth2/authorize"
+        OAUTH_TOKEN_ENDPOINT: str = "https://discord.com/api/oauth2/token"
+        OAUTH_API_ENDPOINT: str = "https://discord.com/api/users/@me"
+
+        class Config(AuthBase.AuthSettings.BaseConfig):
+            env_prefix = "AUTH_DISCORD_"
+
+    auth_settings = AuthSettings()
+    scope = "identify"
+    router_params = {
+        "path": "/discord_callback",
+        "name": "api_auth_discord_callback",
         "methods": ["GET"],
     }

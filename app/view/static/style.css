@@ -68,7 +68,7 @@ div.card > * a {
     text-decoration: none;
 }
 
-div.card.solved {
+div.card.solved:not(.secondary) {
     background: repeating-linear-gradient(
         135deg,
         #404040,
@@ -76,6 +76,11 @@ div.card.solved {
         #585858 20px,
         #585858 40px
     );
+    color: white;
+}
+
+div.card.solved.secondary {
+    background: #404040;
     color: white;
 }
 
@@ -87,18 +92,18 @@ div.card.solved > .card-body > .card-text > a {
     color: #a2d5f2;
 }
 
-div.card.crypto:not(.solved) > * .task-category {
+div.card.crypto:not(.solved) > * .task-category, .crypto-color {
     color: rgb(0, 160, 0);
 }
 
-div.card.binary:not(.solved) > * .task-category {
+div.card.binary:not(.solved) > * .task-category, .binary-color {
     color: red;
 }
 
-div.card.web:not(.solved) > * .task-category {
+div.card.web:not(.solved) > * .task-category, .web-color {
     color: blue;
 }
 
-div.card.other:not(.solved) > * .task-category {
+div.card.other:not(.solved) > * .task-category, .other-color {
     color: rgb(151, 91, 0);
 }

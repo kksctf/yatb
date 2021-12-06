@@ -9,24 +9,45 @@
 {% block right_header_buttons %}
     <li class="nav-item dropdown">
         <a class="nav-link dropdown-toggle" href="#" id="navbarCategoryDropdown" role="button" data-bs-toggle="dropdown" aria-expanded="false">
-            Task categories
+            Settings
         </a>
-        <div class="dropdown-menu" aria-labelledby="navbarCategoryDropdown">
-            <a class="dropdown-item" id="showAllTasks" href="#">All tasks</a>
-            <div class="dropdown-divider"></div>
-            <a class="dropdown-item" id="showCryptoTasks" href="#">Only <kbd>crypto</kbd></a>
-            <a class="dropdown-item" id="showBinaryTasks" href="#">Only <kbd>binary</kbd></a>
-            <a class="dropdown-item" id="showWebTasks" href="#">Only <kbd>web</kbd></a>
-            <a class="dropdown-item" id="showOtherTasks" href="#">Only <kbd>other</kbd></a>
-        </div>
-    </li>
-    <li class="nav-item form-switch">
-        <label class="nav-link" for="showSolvedTasks">
-            <input class="form-check-input" type="checkbox" checked autocomplete="off" id="showSolvedTasks">
-                <span class="navbar-text">
+        <div class="dropdown-menu dropdown-menu-end mega-dropdown" aria-labelledby="navbarCategoryDropdown">
+            <p class="dropdown-header">Show options</p>
+            
+            <a class="dropdown-item" id="showAllTasks" href="#">Show all tasks</a>
+            
+            <label class="dropdown-item form-inline" for="showCryptoTasks">
+                <input class="form-check-input" type="checkbox" checked autocomplete="off" id="showCryptoTasks">
+                <span class="crypto-color">crypto {{ macro.task_ico("crypto") }}</span>
+            </label>
+            <label class="dropdown-item form-inline" for="showBinaryTasks">
+                <input class="form-check-input" type="checkbox" checked autocomplete="off" id="showBinaryTasks">
+                <span class="binary-color">binary {{ macro.task_ico("binary") }}</span>
+            </label>
+            <label class="dropdown-item form-inline" for="showWebTasks">
+                <input class="form-check-input" type="checkbox" checked autocomplete="off" id="showWebTasks">
+                <span class="web-color">web {{ macro.task_ico("web") }}</span>
+            </label>
+            <label class="dropdown-item form-inline" for="showOtherTasks">
+                <input class="form-check-input" type="checkbox" checked autocomplete="off" id="showOtherTasks">
+                <span class="other-color">other {{ macro.task_ico("other") }}</span>
+            </label>
+            
+            <label class="dropdown-item form-inline" for="showSolvedTasks">
+                <input class="form-check-input" type="checkbox" checked autocomplete="off" id="showSolvedTasks">
+                <span>
                     Show solved
                 </span>
-        </label>
+            </label>
+
+            <div class="dropdown-divider"></div>
+            <p class="dropdown-header">Personalization</p>
+
+            <label class="dropdown-item form-inline" for="anotherSolvedTheme">
+                <input class="form-check-input" type="checkbox" checked autocomplete="off" id="anotherSolvedTheme">
+                <span>Another theme for solved tasks</span>
+            </label>
+        </div>
     </li>
     {{ super() }}
     {# <a class="col-auto m-1 btn btn-light active" role="button" href="#">Hide solved</a> #}
@@ -49,6 +70,36 @@
 {% block scripts %}
     {{ super() }}
     <script>
+        function capitalizeFirstLetter(string) {
+            return string.charAt(0).toUpperCase() + string.slice(1);
+        }
+
+        var categorySelector = JSON.parse(localStorage.getItem("categorySelector"))
+        if (categorySelector == null) {
+            categorySelector = {
+                "categories": {
+                    "crypto": true,
+                    "web": true,
+                    "binary": true,
+                    "other": true,
+                },
+                "showSolved": true,
+                "anotherSolvedTheme": false,
+            }
+            save_state()
+        } else {
+            for (var k in categorySelector.categories) {
+                $("#show" + capitalizeFirstLetter(k) + "Tasks").prop('checked', categorySelector.categories[k]);
+            }
+            $("#showSolvedTasks").prop('checked', categorySelector.showSolved);
+            redrawVisible();
+        }
+        setAnotherSolvedTheme(categorySelector.anotherSolvedTheme);
+
+        function save_state() {
+            localStorage.setItem("categorySelector", JSON.stringify(categorySelector))
+        }
+
         function redrawVisible () {
             for (var k of Object.keys(categorySelector.categories)) {
                 if (categorySelector.categories[k] == true) {
@@ -62,47 +113,30 @@
             }
         }
 
-        var categorySelector = JSON.parse(localStorage.getItem("categorySelector"))
-        if (categorySelector == null) {
-            categorySelector = {
-                "categories": {
-                    "crypto": true,
-                    "web": true,
-                    "binary": true,
-                    "other": true,
-                },
-                "showSolved": true,
-            }
-            localStorage.setItem("categorySelector", JSON.stringify(categorySelector))
-        } else {
-            $("#showSolvedTasks").prop('checked', categorySelector.showSolved);
-            redrawVisible();
-        }
-
-        function setOnlyCategory (target) {
+        function setCategory (target, status) {
             if (target in categorySelector.categories) {
-                for (var k in categorySelector.categories) {
-                    categorySelector.categories[k] = false;
-                }
-                categorySelector.categories[target] = true;
-                localStorage.setItem("categorySelector", JSON.stringify(categorySelector))
+                categorySelector.categories[target] = status;
+                save_state()
             }
             else {
-                alert("unknown category in setOnlyCategory")
+                alert("unknown category in setCategory")
             }
         }
 
         function setAllCategories () {
             for (var k in categorySelector.categories) {
                 categorySelector.categories[k] = true;
+                $("#show" + capitalizeFirstLetter(k) + "Tasks").prop('checked', true);
             }
-            localStorage.setItem("categorySelector", JSON.stringify(categorySelector))
+            categorySelector.showSolved = true;
+            $("#showSolvedTasks").prop('checked', true);
+            save_state()
         }
 
         $(function () {
             $("#showSolvedTasks").click(function () {
                 categorySelector.showSolved = $(this).is(":checked")
-                localStorage.setItem("categorySelector", JSON.stringify(categorySelector))
+                save_state()
                 redrawVisible();
             });
         });
@@ -115,27 +149,65 @@
         });
         $(function () {
             $("#showCryptoTasks").click(function () {
-                setOnlyCategory("crypto");
+                setCategory("crypto", $(this).is(":checked"));
                 redrawVisible();
             });
         });
         $(function () {
             $("#showBinaryTasks").click(function () {
-                setOnlyCategory("binary");
+                setCategory("binary", $(this).is(":checked"));
                 redrawVisible();
             });
         });
         $(function () {
             $("#showWebTasks").click(function () {
-                setOnlyCategory("web");
+                setCategory("web", $(this).is(":checked"));
                 redrawVisible();
             });
         });
         $(function () {
             $("#showOtherTasks").click(function () {
-                setOnlyCategory("other");
+                setCategory("other", $(this).is(":checked"));
                 redrawVisible();
             });
+        });
+
+        function setAnotherSolvedTheme(status) {
+            if (status) { 
+                $(".solved").addClass("secondary")
+            } else {
+                $(".secondary").removeClass("secondary")
+            }
+            categorySelector.anotherSolvedTheme = status;
+            $("#anotherSolvedTheme").prop('checked', categorySelector.anotherSolvedTheme);
+            save_state();
+        }
+
+        $(function () {
+            $("#anotherSolvedTheme").click(function () {
+                setAnotherSolvedTheme($(this).is(":checked"))
+            });
+        });
+
+        $('.mega-dropdown').on('click', function(event){
+            var events = $._data(document, 'events') || {};
+            events = events.click || [];
+            for(var i = 0; i < events.length; i++) {
+                if(events[i].selector) {
+
+                    //Check if the clicked element matches the event selector
+                    if($(event.target).is(events[i].selector)) {
+                        events[i].handler.call(event.target, event);
+                    }
+
+                    // Check if any of the clicked element parents matches the 
+                    // delegated event selector (Emulating propagation)
+                    $(event.target).parents(events[i].selector).each(function(){
+                        events[i].handler.call(this, event);
+                    });
+                }
+            }
+            event.stopPropagation(); //Always stop propagation
         });
     </script>
 {% endblock %}

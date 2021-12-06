@@ -15,14 +15,13 @@ from .config import settings
 class OAuth2PasswordBearerWithCookie(OAuth2):
     def __init__(
         self,
-        tokenUrl: str,
         scheme_name: str = None,
         scopes: dict = None,
         auto_error: bool = True,
     ):
         if not scopes:
             scopes = {}
-        flows = OAuthFlowsModel(password={"tokenUrl": tokenUrl, "scopes": scopes})
+        flows = OAuthFlowsModel()  # password={"tokenUrl": tokenUrl, "scopes": scopes}
         super().__init__(flows=flows, scheme_name=scheme_name, auto_error=auto_error)
 
     async def __call__(self, request: Request) -> Optional[str]:
@@ -46,16 +45,7 @@ class OAuth2PasswordBearerWithCookie(OAuth2):
         return param
 
 
-oauth2_scheme = OAuth2PasswordBearerWithCookie(tokenUrl="/api/users/login")
-
-
-async def authenticate_user(username: str, password: str) -> Optional[schema.User]:
-    user = await db.get_user(username)
-    if not user:
-        return None
-    if user.password_hash is None or password != user.password_hash:
-        return None
-    return user
+oauth2_scheme = OAuth2PasswordBearerWithCookie()
 
 
 def create_access_token(data: dict, expires_delta: Optional[timedelta] = None):
@@ -93,4 +83,13 @@ async def get_current_user(token: str = Depends(oauth2_scheme)):
     user = await db.get_user_uuid(uuid=user_id)
     if user is None:
         raise credentials_exception
+    return user
+
+
+async def get_current_user_safe(request: Request) -> Optional[schema.User]:
+    user = None
+    try:
+        user = await get_current_user(await oauth2_scheme(request))
+    except HTTPException:
+        user = None
     return user

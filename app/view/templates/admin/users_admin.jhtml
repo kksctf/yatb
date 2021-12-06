@@ -46,6 +46,7 @@
             <thead>
                 <tr>
                     <th scope="col">Username</th>
+                    <th scope="col">Provider</th>
                     <th scope="col">Score</th>
                     <th scope="col">Admin</th>
                     <th scope="col">Solved tasks</th>
@@ -56,14 +57,11 @@
                 {% for user in users_list %}
                     <tr>
                         <th>
-                            {% if user.oauth_id != -1 %}
-                                <a target="_blank" rel="noopener noreferrer" href='https://ctftime.org/team/{{ user.oauth_id }}'>
-                            {% else %}
-                                <a disabled>
-                            {% endif %}
+                            <a disabled>
                                 {{ user.username }}
                             </a>
                         </th>
+                        <th>{{ user.auth_source.classtype }}</th>
                         <td>{{ user.score }}</td>
                         <td>{{ 'Admin' if user.is_admin else '' }}</td>
                         <td>
@@ -86,11 +84,12 @@
 {% block scripts %}
     {{ super() }}
      <script>
-        api_url['edit_user'] = "{{ url_for('api_admin_user_edit', user_id=selected_user.user_id if selected_user else None) }}";
         $(document).ready(function x() {
             $("#user_edit_form").submit(function(event) {
                 event.preventDefault();
-                api_req(this, api_url['edit_user'], 'Edit user');
+                preq(api_list["api_admin_user_edit"], {"user_id": "{{ selected_user.user_id if selected_user else None }}"}, { data: getFormData(this), })
+                    .then(get_json)
+                    .then(ok_toast_generator("Edit user"), nok_toast_generator("Edit user"))
             });
         });
     </script>

@@ -15,14 +15,6 @@ class Settings(BaseSettings):
     BOT_TOKEN: Optional[str] = None
     CHAT_ID: int = 0
 
-    # OAUTH
-    OAUTH_ADMIN_IDS: List[int] = [32621]
-    OAUTH_CLIENT_ID: str = ""
-    OAUTH_CLIENT_SECRET: str = ""
-    OAUTH_ENDPOINT: str = "https://oauth.ctftime.org/authorize"
-    OAUTH_TOKEN_ENDPOINT: str = "https://oauth.ctftime.org/token"
-    OAUTH_API_ENDPOINT: str = "https://oauth.ctftime.org/user"
-
     # event time
     EVENT_START_TIME: datetime.datetime = datetime.datetime(1077, 12, 12, 9, 0)
     EVENT_END_TIME: datetime.datetime = datetime.datetime(2077, 12, 13, 9, 0)
@@ -60,7 +52,7 @@ class Settings(BaseSettings):
             self.VERSION += subprocess.check_output(["git", "rev-parse", "HEAD"]).decode()[:8]
             self.VERSION += "-Modified" if len(subprocess.check_output(["git", "status", "--porcelain"])) > 0 else ""
         else:
-            self.VERSION += "a0.3.1"
+            self.VERSION += "a0.4.0"
             if self.COMMIT:
                 self.VERSION += f"-{self.COMMIT[:8]}"
 
@@ -68,8 +60,6 @@ class Settings(BaseSettings):
             self.VERSION += "-dev"
         else:
             self.VERSION += "-prod"
-
-        self.VERSION += "-ctf"
 
     class Config:
         env_prefix = "YATB_"

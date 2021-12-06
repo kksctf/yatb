@@ -15,7 +15,7 @@ from ...api.admin import admin_checker
 
 logger = logging.getLogger("yatb.view")
 
-from .. import templ  # noqa
+from .. import response_generator  # noqa
 
 router = APIRouter(
     prefix="/admin",
@@ -24,69 +24,85 @@ router = APIRouter(
 
 
 @router.get("/")
-async def admin_index(request: Request, user: schema.User = Depends(admin_checker)):
-    return templ.TemplateResponse(
+async def admin_index(req: Request, resp: Response, user: schema.User = Depends(admin_checker)):
+    return response_generator(
+        req,
         "admin/index.jhtml",
         {
-            "request": request,
+            "request": req,
             "curr_user": user,
         },
+        ignore_admin=False,
     )
 
 
 @router.get("/tasks")
-async def admin_tasks(request: Request, user: schema.User = Depends(admin_checker)):
-    tasks_list = await api_tasks.api_tasks_get_internal(admin=True)
-    return templ.TemplateResponse(
+async def admin_tasks(req: Request, resp: Response, user: schema.User = Depends(admin_checker)):
+    tasks_list = await api_tasks.api_tasks_get(user)
+    return response_generator(
+        req,
         "admin/tasks_admin.jhtml",
         {
-            "request": request,
+            "request": req,
             "curr_user": user,
             "task_class": schema.Task,
             "task_form_class": schema.TaskForm,
             "tasks_list": tasks_list,
         },
+        ignore_admin=False,
     )
 
 
 @router.get("/task/{task_id}")
-async def admin_task_get(request: Request, task_id: uuid.UUID, user: schema.User = Depends(admin_checker)):
-    tasks_list = await api_tasks.api_tasks_get_internal(admin=True)
-    selected_task = await api_tasks.api_task_get_internal(task_id, admin=True)
-    return templ.TemplateResponse(
+async def admin_task_get(req: Request, resp: Response, task_id: uuid.UUID, user: schema.User = Depends(admin_checker)):
+    tasks_list = await api_tasks.api_tasks_get(user)
+    selected_task = await api_tasks.api_task_get(task_id, user)
+    return response_generator(
+        req,
         "admin/tasks_admin.jhtml",
         {
-            "request": request,
+            "request": req,
             "curr_user": user,
             "task_class": schema.Task,
             "task_form_class": schema.TaskForm,
             "tasks_list": tasks_list,
             "selected_task": selected_task,
         },
+        ignore_admin=False,
     )
 
 
 @router.get("/users")
-async def admin_users(request: Request, user: schema.User = Depends(admin_checker)):
+async def admin_users(req: Request, resp: Response, user: schema.User = Depends(admin_checker)):
     users_dict = await api_admin_users.api_admin_users_internal()
-    return templ.TemplateResponse(
+    return response_generator(
+        req,
         "admin/users_admin.jhtml",
-        {"request": request, "curr_user": user, "user_class": schema.User, "user_form_class": schema.UserForm, "users_list": users_dict.values()},
+        {
+            "request": req,
+            "curr_user": user,
+            "user_class": schema.User,
+            # "user_form_class": schema.UserForm,
+            "users_list": users_dict.values(),
+        },
+        ignore_admin=False,
     )
 
 
 @router.get("/user/{user_id}")
-async def admin_user_get(request: Request, user_id: uuid.UUID, user: schema.User = Depends(admin_checker)):
+async def admin_user_get(req: Request, resp: Response, user_id: uuid.UUID, user: schema.User = Depends(admin_checker)):
     users_dict = await api_admin_users.api_admin_users_internal()
     selected_user = await api_admin_users.api_admin_user_get_internal(user_id)
-    return templ.TemplateResponse(
+    return response_generator(
+        req,
         "admin/users_admin.jhtml",
         {
-            "request": request,
+            "request": req,
             "curr_user": user,
             "user_class": schema.User,
-            "user_form_class": schema.UserForm,
+            # "user_form_class": schema.UserForm,
             "users_list": users_dict.values(),
             "selected_user": selected_user,
         },
+        ignore_admin=False,
     )

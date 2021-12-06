@@ -73,6 +73,26 @@ async def api_admin_task_create(new_task: schema.TaskForm, user: schema.User = D
     return task
 
 
+@router.get("/task/delete_all")
+async def api_admin_task_delete_all(user: schema.User = Depends(admin_checker)):
+    if not settings.DEBUG:  # danger function!
+        logger.critical(f"Какой-то еблан {user.short_desc()} ПЫТАЛСЯ УДАЛИТЬ таски на проде, ахтунг!")
+        return "пащоль в жёпу (c) химичка Димона"
+
+    logger.critical(f"[{user.short_desc()}] removing EVERYTHING")
+    tasks = await db.get_all_tasks()
+    for task in list(tasks.values()):
+        await db.remove_task(task)
+    return "ok, you dead."
+
+
+@router.get("/task/delete/{task_id}")
+async def api_admin_task_delete(task: schema.Task = Depends(get_task), user: schema.User = Depends(admin_checker)):
+    await db.remove_task(task)
+    logger.warning(f"[{user.short_desc()}] removing task {task}")
+    return "ok"
+
+
 @router.get(
     "/task/{task_id}",
     response_model=schema.Task,
@@ -94,30 +114,10 @@ async def api_admin_task_edit(new_task: schema.Task, task: schema.Task = Depends
     return task
 
 
-@router.get("/task/delete/{task_id}")
-async def api_admin_task_delete(task: schema.Task = Depends(get_task), user: schema.User = Depends(admin_checker)):
-    await db.remove_task(task)
-    logger.warning(f"[{user.short_desc()}] removing task {task}")
-    return "ok"
-
-
-@router.get("/task/delete_all")
-async def api_admin_task_delete_all(user: schema.User = Depends(admin_checker)):
-    if not settings.DEBUG:  # danger function!
-        logger.critical(f"Какой-то еблан {user.short_desc()} ПЫТАЛСЯ УДАЛИТЬ таски на проде, ахтунг!")
-        return "пащоль в жёпу (c) химичка Димона"
-
-    logger.critical(f"[{user.short_desc()}] removing EVERYTHING")
-    tasks = await db.get_all_tasks()
-    for task in tasks:
-        await db.remove_task(task)
-    return "ok, you dead."
-
-
 # TODO: А можно ли это сделать нормально?
 
 
-class InternalObjTasksList(schema.BaseModel):
+class InternalObjTasksList(schema.EBaseModel):
     tasks: List[uuid.UUID]
 
 

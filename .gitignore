@@ -145,5 +145,4 @@ cython_debug/
 *.sqlite
 *.db.local
 
-simple.py
 logs/

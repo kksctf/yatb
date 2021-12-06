@@ -2,7 +2,7 @@ html, body {
     height: 100%;
 }
 
-body {
+.container-fluid {
     display: -ms-flexbox;
     display: flex;
     -ms-flex-align: center;

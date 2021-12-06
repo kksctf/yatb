@@ -65,20 +65,10 @@ class FileDB(object):
             old = user.solved_tasks
             user.solved_tasks = {i: migration_datetime for i in old}
 
-        # 04.12.2020 migration for oauth data
-        if "oauth_id" not in user.__fields_set__:
-            user.oauth_id = -1
-
         # admin promote
         if user.admin_checker() and not user.is_admin:
             real_logger.warning(f"INIT: Promoting {user} to admin")
             user.is_admin = True
-
-        # debug login
-        if settings.DEBUG and user.username == "Rubikoid":
-            user.password_hash = "123"
-        elif user.username == "Rubikoid":  # debug login should never work on prod
-            user.password_hash = None
 
         return user
 

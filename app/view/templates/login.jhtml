@@ -8,7 +8,6 @@
             text-anchor: middle;
             -webkit-user-select: none;
             -moz-user-select: none;
-            -ms-user-select: none;
             user-select: none;
         }
 
@@ -30,52 +29,69 @@
 {% endblock %}
 
 {% block content %}
-    <div class="container text-center">
+    <div class="container-fluid text-center h-100">
         <div class="form-signin">
             <img class="mb-4 rounded border" src="{{ url_for('static', path='kksctf_logo_72.png') }}" alt="" width="72" height="72">
-            <h1 class="h3 mb-3 font-weight-normal">Please log in</h1>
-                {# TODO: make fancy design for ctftime login, @alb1or1x #}
-                <a href='{{ OAUTH_CONFIG["OAUTH_ENDPOINT"] }}?response_type=code&client_id={{ OAUTH_CONFIG["OAUTH_CLIENT_ID"] }}&redirect_uri={{ url_for("api_oauth_callback") }}&scope=team:read&state=TEST_STATE'>Login using CTFTime</a>
+            <h1 class="h3 mb-3 fw-normal">Please log in</h1>
 
-                {% if DEBUG %}
-                    <p class="mt-3">
-                        <button class="btn btn-sm btn-outline-dark" type="button" data-bs-toggle="collapse" data-bs-target="#collapseExample" aria-expanded="false" aria-controls="collapseExample">
-                            Why _DEBUG?
-                        </button>
-                    </p>
-                    <div class="collapse" id="collapseExample">
-                        <ul class="list-group">
-                            <li class="list-group-item">Debug!</li>
-                            <li class="list-group-item">Debug debug!</li>
-                        </ul>
+            {# TODO: make fancy design for ctftime login, @alb1or1x #}
+            {% for auth_way in auth_ways %}
+                {% set aw_type = auth_way.__name__ %}
+                <p class="mt-3">
+                    <button class="btn btn-sm btn-outline-dark" type="button" data-bs-toggle="collapse" data-bs-target="#collapse_aw_{{ aw_type }}" aria-expanded="false" aria-controls="collapse_aw_{{ aw_type }}">
+                        Auth using: {{ aw_type }}
+                    </button>
+                </p>
+                <div class="collapse" id="collapse_aw_{{ aw_type }}">
+                    {{ auth_way.generate_html(request.url_for) | safe }}
+                </div>
+            {% endfor %}
 
-                            <form id="debug_register_form">
-                                <input type="hidden" name="username" value="Rubikoid">
-                                <input type="hidden" name="password" value="123">
-                                <button class="btn btn-primary btn-block mt-3" type="submit">ADMIN DEBUG REGISTER</button>
-                            </form>
+            {% if DEBUG %}
+                <p class="mt-3">
+                    <button class="btn btn-sm btn-outline-dark" type="button" data-bs-toggle="collapse" data-bs-target="#collapseDebug" aria-expanded="false" aria-controls="collapseDebug">
+                        Debug buttonz
+                    </button>
+                </p>
+                <div class="collapse" id="collapseDebug">
+                    <form class="debug_register_form">
+                        <input type="hidden" name="username" value="Rubikoid">
+                        <input type="hidden" name="password" value="123">
+                        <button class="w-100 btn btn-warning mt-1" type="submit">Register as admin</button>
+                    </form>
 
-                            <form id="debug_login_form">
-                                <input type="hidden" name="username" value="Rubikoid">
-                                <input type="hidden" name="password" value="123">
-                                <button class="btn btn-primary btn-block mt-3" type="submit">ADMIN DEBUG LOGIN</button>
-                            </form>
+                    <form class="debug_login_form">
+                        <input type="hidden" name="username" value="Rubikoid">
+                        <input type="hidden" name="password" value="123">
+                        <button class="w-100 btn btn-warning mt-1" type="submit">Login as admin</button>
+                    </form>
 
-                            <form id="debug_register_form_2">
-                                <input type="hidden" name="username" value="Rubikoid1">
-                                <input type="hidden" name="password" value="12321">
-                                <button class="btn btn-primary btn-block mt-3" type="submit">USER DEBUG REGISTER</button>
-                            </form>
+                    <form class="debug_register_form">
+                        <input type="hidden" name="username" value="Rubikoid1">
+                        <input type="hidden" name="password" value="12321">
+                        <button class="w-100 btn btn-success mt-1" type="submit">Register as user</button>
+                    </form>
 
-                            <form id="debug_login_form_2">
-                                <input type="hidden" name="username" value="Rubikoid1">
-                                <input type="hidden" name="password" value="12321">
-                                <button class="btn btn-primary btn-block mt-3" type="submit">USER DEBUG LOGIN</button>
-                            </form>
+                    <form class="debug_login_form">
+                        <input type="hidden" name="username" value="Rubikoid1">
+                        <input type="hidden" name="password" value="12321">
+                        <button class="w-100 btn btn-success mt-1" type="submit">Login as user</button>
+                    </form>
 
-                    </div>
-                {% endif %}
-            <p class="text-muted mt-3">&copy; #kksctf 2020</p>
+                    <form class="debug_register_form">
+                        <input type="hidden" class="generic_login" name="username" value="placeholder">
+                        <input type="hidden" name="password" value="12321">
+                        <button class="w-100 btn btn-success mt-1" type="submit">Register as generic debug user (uniq per browser)</button>
+                    </form>
+
+                    <form class="debug_login_form">
+                        <input type="hidden" class="generic_login" name="username" value="placeholder">
+                        <input type="hidden" name="password" value="12321">
+                        <button class="w-100 btn btn-success mt-1" type="submit">Login as as generic debug user (uniq per browser)</button>
+                    </form>
+                </div>
+            {% endif %}
+            <p class="text-muted mt-3">&copy; #kksctf 2020-2021</p>
         </div>
     </div>
 {% endblock %}
@@ -86,33 +102,49 @@
 
 {% block scripts %}
     {{ super() }}
+    {% for auth_way in auth_ways %}
+        {% set aw_type = auth_way.__name__ %}
+        <script>
+            {{- auth_way.generate_script(request.url_for) | safe -}}
+        </script>
+    {% endfor %}
+
     {% if DEBUG %}
         <script>
+            const cyrb53 = function(str, seed = 0) {
+                let h1 = 0xdeadbeef ^ seed, h2 = 0x41c6ce57 ^ seed;
+                for (let i = 0, ch; i < str.length; i++) {
+                    ch = str.charCodeAt(i);
+                    h1 = Math.imul(h1 ^ ch, 2654435761);
+                    h2 = Math.imul(h2 ^ ch, 1597334677);
+                }
+                h1 = Math.imul(h1 ^ (h1>>>16), 2246822507) ^ Math.imul(h2 ^ (h2>>>13), 3266489909);
+                h2 = Math.imul(h2 ^ (h2>>>16), 2246822507) ^ Math.imul(h1 ^ (h1>>>13), 3266489909);
+                return 4294967296 * (2097151 & h2) + (h1>>>0);
+            };
+
+            function generate_token() {
+                data = `${screen.width}.${screen.height}.${navigator.userAgent}`
+                return `user${cyrb53(data)}`
+            }
+
             redirect = (ret) => { location.pathname="/"; }
 
-            api_url['login'] = "{{ url_for('api_token') }}";
-            api_url['register'] = "{{ url_for('api_users_register') }}";
-            
-            $("#debug_login_form").submit(function(event) {
+            $(".debug_login_form").submit(function(event) {
                 event.preventDefault();
-                api_req(this, api_url['login'], 'login', method='POST', ok_callback = redirect);
+                req(api_list["api_auth_simple_login"], { data: getFormData(this), })
+                    .then(get_json)
+                    .then(redirect, nok_toast_generator("login"))
             });
 
-            $("#debug_register_form").submit(function(event) {
+            $(".debug_register_form").submit(function(event) {
                 event.preventDefault();
-                api_req(this, api_url['register'], 'register', method='POST', ok_callback = redirect);
+                req(api_list["api_auth_simple_register"], { data: getFormData(this), })
+                    .then(get_json)
+                    .then(redirect, nok_toast_generator("register"))
             });
 
-            $("#debug_login_form_2").submit(function(event) {
-                event.preventDefault();
-                api_req(this, api_url['login'], 'login', method='POST', ok_callback = redirect);
-            });
-
-            $("#debug_register_form_2").submit(function(event) {
-                event.preventDefault();
-                api_req(this, api_url['register'], 'register', method='POST', ok_callback = redirect);
-            });
-            
+            $(".generic_login").val(generate_token());
         </script>
     {% endif %}
 {% endblock %}

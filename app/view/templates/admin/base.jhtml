@@ -21,7 +21,7 @@
 
             <link href="https://cdn.jsdelivr.net/npm/bootstrap@5.0.0-beta1/dist/css/bootstrap.min.css" rel="stylesheet" integrity="sha384-giJF6kkoqNQ00vy+HMDP7azOuL0xtbfIcaT9wjKHr8RbDVddVHyTfAAsrekwKmP1" crossorigin="anonymous">
             {% block css %}
-                <link rel="stylesheet" href="https://unpkg.com/easymde/dist/easymde.min.css">
+                <link rel="stylesheet" type="text/css" href="https://unpkg.com/easymde/dist/easymde.min.css">
                 <link rel="stylesheet" type="text/css" href="{{ url_for('static', path='admin.css') }}">
                 <link rel="stylesheet" type="text/css" href="{{ url_for('static', path='toast.css') }}">
             {% endblock %}
@@ -81,17 +81,18 @@
         {% block scripts %}
             <script src="https://code.jquery.com/jquery-1.10.2.min.js"></script>
             <script src="https://cdn.jsdelivr.net/npm/bootstrap@5.0.0-beta1/dist/js/bootstrap.bundle.min.js" integrity="sha384-ygbV9kiqUc6oa4msXn9868pTtWMgiQaeYH7/t7LECLbyPA2x65Kgf80OJFdroafW" crossorigin="anonymous"></script>
-
+            <script src="https://cdn.jsdelivr.net/gh/Rubikoid/fastapi-js-requester@v1.1/api.js"> </script>
             <script src="https://unpkg.com/easymde/dist/easymde.min.js"></script>
+
+            {# <script src="{{ url_for('static', path='api.js') }}"></script> #}
             <script src="{{ url_for('static', path='toast.js') }}"></script>
             <script src="{{ url_for('static', path='api_magic.js') }}"></script>
             <script src="{{ url_for('static', path='easy_mde_runner.js') }}"></script>
 
             <script>
-                api_url['solve_task'] = "{{ url_for('api_task_submit_flag') }}";
-                api_url['get_user'] = "{{ url_for('api_users_get_username', user_id=None) }}";
-                api_url['get_task'] = "{{ url_for('api_admin_task_get', task_id=None) }}";
+                let api_list = {{ api_list.__str__() | safe }}
             </script>
+
             <script src="{{ url_for('static', path='id_resolver.js') }}"></script>
         {% endblock %}
     </body>

@@ -15,7 +15,7 @@ def test_task_create(client: TestClient):
             category="web",
             scoring=schema.StaticScoring(static_points=1337),
             description="test_task_decription",
-            flag="kks{test_task}",
+            flag=schema.StaticFlag(flag_base="kks", flag="test_task"),
         ).json(),
         headers={"Content-Type": "application/json"},
     )
@@ -28,7 +28,7 @@ def test_task_create(client: TestClient):
             category="pwn",
             scoring=schema.StaticScoring(static_points=1338),
             description="second_test_task_description",
-            flag="kks{other_test_task}",
+            flag=schema.StaticFlag(flag_base="kks", flag="other_test_task"),
         ).json(),
         headers={"Content-Type": "application/json"},
     )
@@ -41,7 +41,7 @@ def test_task_create(client: TestClient):
 
     resp4 = client.get(app.url_path_for("api_tasks_get"))
     assert resp4.status_code == 200, resp4.text
-    assert len(resp4.json()) == 0
+    assert len(resp4.json()) == 2, resp4.json()
 
     for task_id, task in resp3.json().items():
         task_obj = schema.Task(**task)

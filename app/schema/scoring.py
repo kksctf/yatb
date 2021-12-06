@@ -17,6 +17,9 @@ class Scoring(EBaseModel):
     def solve_task(self) -> bool:
         return False
 
+    def set_solves(self, count: int):
+        pass
+
     def reset(self):
         pass
 
@@ -64,5 +67,8 @@ class DynamicKKSScoring(Scoring):
         self.solves += 1
         return True
 
+    def set_solves(self, count: int):
+        self.solves = count
+
     def reset(self):
-        self.solves = 0
+        self.set_solves(0)

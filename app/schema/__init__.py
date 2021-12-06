@@ -125,15 +125,16 @@ class EBaseModel(BaseModel):
         return attribs
 
 
-from .user import User, UserForm, UserUpdateForm  # noqa
+from .user import User  # noqa
 from .scoring import Scoring, StaticScoring, DynamicKKSScoring  # noqa
 from .flags import Flag, StaticFlag, DynamicKKSFlag  # noqa
 from .task import Task, TaskForm  # noqa
+from .auth import AuthBase, SimpleAuth, TelegramAuth, OAuth, CTFTimeOAuth  # noqa
 
 
-class FlagForm(BaseModel):
+class FlagForm(EBaseModel):
     flag: str
 
 
-for i in [Task, User, UserForm, UserUpdateForm, TaskForm]:
+for i in [Task, User]:
     logger.debug(f"Schema of {i} is {pprint.pformat(i.schema())}")

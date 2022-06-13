@@ -10,8 +10,8 @@ from fastapi import HTTPException, Query, status
 from pydantic import BaseModel, Extra, validator
 
 from ..config import settings
+from . import EBaseModel, logger
 from .auth import TYPING_AUTH
-from . import EBaseModel, logger, md
 
 
 class User(EBaseModel):
@@ -49,6 +49,9 @@ class User(EBaseModel):
     def __init__(self, *args, **kwargs):
         super().__init__(*args, **kwargs)
         self.username = self.auth_source.generate_username()
+        if self.admin_checker():
+            logger.warning(f"Promoting {self} to admin")
+            self.is_admin = True
 
     def admin_checker(self):
         return self.auth_source.is_admin()

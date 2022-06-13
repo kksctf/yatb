@@ -1,6 +1,6 @@
 import uuid
 from datetime import timedelta
-from typing import Callable, List, Literal, Optional, Type
+from typing import Callable, List, Literal, Optional, Type, cast
 
 import aiohttp
 from fastapi import APIRouter, Depends, HTTPException, Request, Response, status
@@ -69,6 +69,15 @@ async def api_auth_simple_login(req: Request, resp: Response, form: schema.Simpl
             status_code=status.HTTP_401_UNAUTHORIZED,
             detail="Incorrect username or password",
         )
+
+    auth_source = cast(schema.SimpleAuth.AuthModel, user.auth_source)
+    real_hash = form.get_hashed_password(auth_source.password_hash[0])
+    if auth_source.password_hash != real_hash:
+        raise HTTPException(
+            status_code=status.HTTP_401_UNAUTHORIZED,
+            detail="Incorrect username or password",
+        )
+
     metrics.logons_per_user.labels(user_id=user.user_id, username=user.username).inc()
 
     access_token = auth.create_user_token(user)

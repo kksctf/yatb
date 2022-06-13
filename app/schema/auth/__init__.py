@@ -1,10 +1,7 @@
-import datetime
-import hmac
 import logging
 from typing import Callable, Hashable, List, Optional, Type, Union
 
-import aiohttp
-from fastapi import HTTPException, Query, Request, Response, status, APIRouter
+from fastapi import APIRouter, HTTPException, Query, Request, Response, status
 from pydantic import BaseSettings, Extra, validator
 
 from ...config import settings
@@ -61,19 +58,18 @@ class AuthBase(object):
         return """"""
 
 
-from .oauth import CTFTimeOAuth, GithubOAuth, DiscordOAuth, OAuth  # noqa
+from .oauth import CTFTimeOAuth, DiscordOAuth, GithubOAuth, OAuth  # noqa
 from .simple import SimpleAuth  # noqa
 from .tg import TelegramAuth  # noqa
 
-# commented out due to 'AuthBase.AuthModel' is a base class, and nothing in childs would be used
-TYPING_AUTH = AuthBase.AuthModel
-# Union[
-#     ,
-#     # SimpleAuth.AuthModel,
-#     # TelegramAuth.AuthModel,
-#     # OAuth.AuthModel,
-#     # CTFTimeOAuth.AuthModel,
-# ]
+TYPING_AUTH = Union[
+    CTFTimeOAuth.AuthModel,
+    SimpleAuth.AuthModel,
+    TelegramAuth.AuthModel,
+    GithubOAuth.AuthModel,
+    OAuth.AuthModel,
+    AuthBase.AuthModel,
+]
 
 ENABLED_AUTH_WAYS = [
     CTFTimeOAuth,

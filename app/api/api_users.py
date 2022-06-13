@@ -48,7 +48,9 @@ async def api_task_get_ctftime_scoreboard(fullScoreboard: bool = False):
     full_tasks_list = None
     if fullScoreboard:
         tasks_list = await api_tasks_get(None)  # we don't need to export hidden tasks
-        full_tasks_list = await db.get_all_tasks()  # this used only for uuid resolve # TODO: maybe it can be done normally?
+        full_tasks_list = (
+            await db.get_all_tasks()
+        )  # this used only for uuid resolve # TODO: maybe it can be done normally?
         tasks = list(map(lambda x: x.task_name, tasks_list))
     for i, user in enumerate(scoreboard):
         obj = {

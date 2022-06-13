@@ -2,13 +2,14 @@ import datetime
 import humanize
 import time
 from typing import List, Dict, Optional, Union, Type
-from pydantic import BaseModel, validator, Extra
+from pydantic import validator, Extra
 
 import uuid
 
-from . import EBaseModel, logger, md, config, User
+from . import EBaseModel, logger, config, User
 from .scoring import Scoring, DynamicKKSScoring, StaticScoring
 from .flags import Flag, StaticFlag, DynamicKKSFlag
+from ..utils import md
 
 
 def template_format_time(date: datetime.datetime) -> str:  # from alb1or1x_shit.py

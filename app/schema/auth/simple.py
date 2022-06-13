@@ -52,11 +52,11 @@ class SimpleAuth(AuthBase):
 
         internal: _Internal
 
-        def get_hashed_password(self, salt: Optional[bytes] = None):
-            return hash_password(self.internal.password, salt)
+        def check_password(self, model: "SimpleAuth.AuthModel") -> bool:
+            return check_password(model.password_hash[0], model.password_hash[1], self.internal.password)
 
         async def populate(self, req: Request, resp: Response) -> "SimpleAuth.AuthModel":
-            password_hash = self.get_hashed_password()
+            password_hash = hash_password(self.internal.password)
             return SimpleAuth.AuthModel(username=self.internal.username, password_hash=password_hash)
 
     class AuthSettings(BaseSettings):

@@ -71,8 +71,7 @@ async def api_auth_simple_login(req: Request, resp: Response, form: schema.Simpl
         )
 
     auth_source = cast(schema.SimpleAuth.AuthModel, user.auth_source)
-    real_hash = form.get_hashed_password(auth_source.password_hash[0])
-    if auth_source.password_hash != real_hash:
+    if not form.check_password(auth_source):
         raise HTTPException(
             status_code=status.HTTP_401_UNAUTHORIZED,
             detail="Incorrect username or password",

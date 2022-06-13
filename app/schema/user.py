@@ -30,7 +30,7 @@ class User(EBaseModel):
     }
     __private_fields__ = {}
 
-    user_id: uuid.UUID = None
+    user_id: uuid.UUID = None  # type: ignore # yes i know, but factory in pydantic needed this shit.
 
     username: str = "unknown"
 
@@ -49,9 +49,6 @@ class User(EBaseModel):
     def __init__(self, *args, **kwargs):
         super().__init__(*args, **kwargs)
         self.username = self.auth_source.generate_username()
-        if self.admin_checker():
-            logger.warning(f"Promoting {self} to admin")
-            self.is_admin = True
 
     def admin_checker(self):
         return self.auth_source.is_admin()

@@ -18,21 +18,36 @@ router = APIRouter(
 
 
 def generic_handler_generator(cls: Type[schema.auth.AuthBase]) -> Callable:
+    """
+    This is a little crazy "generic generator" for handling universal auth way.
+    Should work for most of possible authentification ways.
+    """
+
     async def generic_handler(
         req: Request,
         resp: Response,
         form: "schema.auth.AuthBase.Form" = Depends(),
     ) -> Literal["ok"]:
 
+        # create model from form.
         model = await form.populate(req, resp)
 
+        # extract primary (unique) field from model, and check
+        # is user with that field exists
         user = await db.get_user_uniq_field(cls.AuthModel, model.get_uniq_field())
         if user is None:
+            # if not: create new user
             user = await db.insert_user(model)
             metrics.users.inc()
+        else:
+            # if exist: check for admin
+            if user.admin_checker() and not user.is_admin:
+                logger.warning(f"Promoting old {user} to admin")
+                user.is_admin = True
 
         metrics.logons_per_user.labels(user_id=user.user_id, username=user.username).inc()
 
+        # create token for user, and put it in cookie
         access_token = auth.create_user_token(user)
         resp.set_cookie(key="access_token", value=f"Bearer {access_token}", httponly=True)
 
@@ -46,6 +61,7 @@ def generic_handler_generator(cls: Type[schema.auth.AuthBase]) -> Callable:
 
 
 async def api_auth_simple_login(req: Request, resp: Response, form: schema.SimpleAuth.Form = Depends()):
+    # almost the same generic, but for login/password form, due to additional login.
     model = await form.populate(req, resp)
     user = await db.get_user_uniq_field(schema.SimpleAuth.AuthModel, model.get_uniq_field())
     if not user:
@@ -62,6 +78,7 @@ async def api_auth_simple_login(req: Request, resp: Response, form: schema.Simpl
 
 
 async def api_auth_simple_register(req: Request, resp: Response, form: schema.SimpleAuth.Form = Depends()):
+    # almost the same generic, but for login/password form, due to additional login.
     model = await form.populate(req, resp)
     user = await db.get_user_uniq_field(schema.SimpleAuth.AuthModel, model.get_uniq_field())
     if user:
@@ -79,6 +96,8 @@ async def api_auth_simple_register(req: Request, resp: Response, form: schema.Si
     return "ok"
 
 
+# Create routes for all enabled auth ways
+# also, handle login/password way especially...
 for auth_way in schema.auth.ENABLED_AUTH_WAYS:
     if auth_way != schema.auth.SimpleAuth:
         router.add_api_route(

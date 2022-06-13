@@ -66,13 +66,15 @@ from .simple import SimpleAuth  # noqa
 from .tg import TelegramAuth  # noqa
 
 # commented out due to 'AuthBase.AuthModel' is a base class, and nothing in childs would be used
-TYPING_AUTH = Union[
-    AuthBase.AuthModel,
-    # SimpleAuth.AuthModel,
-    # TelegramAuth.AuthModel,
-    # OAuth.AuthModel,
-    # CTFTimeOAuth.AuthModel,
-]
+TYPING_AUTH = AuthBase.AuthModel
+# Union[
+#     ,
+#     # SimpleAuth.AuthModel,
+#     # TelegramAuth.AuthModel,
+#     # OAuth.AuthModel,
+#     # CTFTimeOAuth.AuthModel,
+# ]
+
 ENABLED_AUTH_WAYS = [
     CTFTimeOAuth,
     SimpleAuth,

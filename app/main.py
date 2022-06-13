@@ -28,7 +28,7 @@ async def session_middleware(request: Request, call_next):
 
 if settings.DEBUG:
     try:
-        root_logger.warning("Timing debug loaded")
+        root_logger.warning("Timing debug loadeding")
 
         from asgi_server_timing import ServerTimingMiddleware  # noqa
         import fastapi  # noqa
@@ -51,6 +51,7 @@ if settings.DEBUG:
                 "6task": (api_tasks.api_task_get,),
             },
         )
+        root_logger.warning("Timing debug loaded")
 
     except Exception:
         pass

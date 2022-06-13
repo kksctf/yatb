@@ -45,11 +45,11 @@ class FileDB(object):
         task.description_html = schema.Task.regenerate_md(task.description)
 
         # 25.09.2020 migration
-        if "hidden" not in task.__fields_set__:
+        if "hidden" not in task.__fields__:
             task.hidden = False
 
         # 25.11.2020 migration, for task authors
-        if "author" not in task.__fields_set__:
+        if "author" not in task.__fields__:
             task.author = "@kksctf"  # uuid.UUID(int=0)  # zero guid
 
         # 11.11.2020 migration from list to dict in pwned_by/solved_tasks

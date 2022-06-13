@@ -41,7 +41,7 @@ class Settings(BaseSettings):
     COMMIT: Optional[str] = None
 
     FLAG_BASE: str = "kks"
-    CTF_NAME: str = "#kksctf open 2020"
+    CTF_NAME: str = "YATB-dev"
 
     def __init__(self, *args, **kwargs) -> None:
         super().__init__(*args, **kwargs)
@@ -52,7 +52,7 @@ class Settings(BaseSettings):
             self.VERSION += subprocess.check_output(["git", "rev-parse", "HEAD"]).decode()[:8]
             self.VERSION += "-Modified" if len(subprocess.check_output(["git", "status", "--porcelain"])) > 0 else ""
         else:
-            self.VERSION += "a0.4.0"
+            self.VERSION += "a0.5.0"
             if self.COMMIT:
                 self.VERSION += f"-{self.COMMIT[:8]}"
 

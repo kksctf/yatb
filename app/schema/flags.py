@@ -1,8 +1,9 @@
-import hmac, binascii
+import binascii
+import hmac
 
+from ..config import settings
 from . import EBaseModel, Literal, logger
 from .user import User
-from ..config import settings
 
 
 class Flag(EBaseModel):

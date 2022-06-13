@@ -5,7 +5,7 @@ from datetime import datetime, timedelta
 from typing import Any, Dict, List, Optional
 
 from fastapi import Cookie, Depends, FastAPI, HTTPException, Request, Response, status
-from fastapi.routing import APIRouter
+from fastapi.routing import APIRoute, APIRouter
 from fastapi.staticfiles import StaticFiles
 from fastapi.templating import Jinja2Templates
 from pydantic import parse_obj_as
@@ -30,7 +30,8 @@ router = APIRouter(
 def route_generator(req: Request, base_path="/api", ignore_admin=True) -> Dict[str, str]:
     router: Router = req.scope["router"]
     ret = {}
-    for r in router.routes:
+    for r in router.routes:  # type: ignore # i'm 100% sure, that there should be only APIRoute objects
+        r: APIRoute
         if r.path.startswith(base_path):
             if ignore_admin and r.path.startswith(f"{base_path}/admin"):
                 continue

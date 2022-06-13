@@ -11,7 +11,7 @@ from ..config import settings  # noqa
 from .. import app  # noqa
 
 # this disables real connection to db/creating db-in-file, and forces to use only in-memory db
-settings.DB_NAME = None
+settings.DB_NAME = None  # type: ignore
 
 
 @pytest.fixture()

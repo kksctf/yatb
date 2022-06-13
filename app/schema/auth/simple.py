@@ -13,8 +13,8 @@ from .. import EBaseModel, Literal
 from . import AuthBase, logger
 
 
-def hash_password(password: str) -> Tuple[bytes, bytes]:
-    salt = os.urandom(32)
+def hash_password(password: str, salt: Optional[bytes] = None) -> Tuple[bytes, bytes]:
+    salt = salt or os.urandom(32)
     pw_hash = hashlib.pbkdf2_hmac("sha256", password.encode(), salt, 100000)
     return salt, pw_hash
 
@@ -46,14 +46,17 @@ class SimpleAuth(AuthBase):
             return self.username
 
     class Form(AuthBase.Form):
-        class __Internal(EBaseModel):
+        class _Internal(EBaseModel):
             username: str
             password: str
 
-        internal: __Internal
+        internal: _Internal
+
+        def get_hashed_password(self, salt: Optional[bytes] = None):
+            return hash_password(self.internal.password, salt)
 
         async def populate(self, req: Request, resp: Response) -> "SimpleAuth.AuthModel":
-            password_hash = hash_password(self.internal.password)
+            password_hash = self.get_hashed_password()
             return SimpleAuth.AuthModel(username=self.internal.username, password_hash=password_hash)
 
     class AuthSettings(BaseSettings):
@@ -83,18 +86,18 @@ class SimpleAuth(AuthBase):
 
     @classmethod
     def generate_script(cls: Type["SimpleAuth"], url_for: Callable) -> str:
-        return f"""
-        $(".login_form").submit(function(event) {{
+        return """
+        $(".login_form").submit(function(event) {
             event.preventDefault();
-            req(api_list["api_auth_simple_login"], {{ data: getFormData(this), }})
+            req(api_list["api_auth_simple_login"], { data: getFormData(this), })
                 .then(get_json)
                 .then(redirect, nok_toast_generator("login"))
-        }});
+        });
 
-        $(".register_form").submit(function(event) {{
+        $(".register_form").submit(function(event) {
             event.preventDefault();
-            req(api_list["api_auth_simple_register"], {{ data: getFormData(this), }})
+            req(api_list["api_auth_simple_register"], { data: getFormData(this), })
                 .then(get_json)
                 .then(redirect, nok_toast_generator("register"))
-        }});
+        });
         """

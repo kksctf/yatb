@@ -32,9 +32,6 @@ loggers = loggers + [logging.getLogger(name) for name in logging.root.manager.lo
 for i in loggers:
     print(f"LOGGER: {i}")
 
-if True:
-    root_logger.warning("Running in CTF mode")
-
 from . import main  # noqa
 from . import api  # noqa
 from . import view  # noqa

@@ -2,18 +2,22 @@ import datetime
 import humanize
 import time
 from typing import List, Dict, Optional, Union, Type
-from pydantic import BaseModel, validator, Extra
+from pydantic import validator, Extra
 
 import uuid
 
-from . import EBaseModel, logger, md, config, User
+from . import EBaseModel, logger, config, User
 from .scoring import Scoring, DynamicKKSScoring, StaticScoring
 from .flags import Flag, StaticFlag, DynamicKKSFlag
+from ..utils import md
 
 
 def template_format_time(date: datetime.datetime) -> str:  # from alb1or1x_shit.py
     if Task.is_date_after_migration(date):
-        return date.strftime("%H:%M:%S.%f %d.%m.%Y")  # str(round(date.timestamp(), 2))
+        # return date.strftime("%H:%M:%S.%f %d.%m.%Y")  # str(round(date.timestamp(), 2))
+        t = datetime.datetime.now() - date
+        ret = f"{Task.humanize_time(t)} ago / {date.strftime('%H:%M:%S')}"
+        return ret
     else:
         return "unknown"
 
@@ -33,7 +37,7 @@ class Task(EBaseModel):
         "hidden": ...,
     }
 
-    task_id: uuid.UUID = None
+    task_id: uuid.UUID = None  # type: ignore # yes i know, but factory in pydantic needed this shit.
 
     task_name: str
     category: str
@@ -65,7 +69,7 @@ class Task(EBaseModel):
             return "binary"
         return "other"
 
-    def visible_for_user(self, user: User = None) -> bool:
+    def visible_for_user(self, user: Optional[User] = None) -> bool:
         if self.hidden:
             if user and user.is_admin:
                 return True
@@ -86,7 +90,8 @@ class Task(EBaseModel):
     def regenerate_md(content):
         return md.markdownCSS(content, config.MD_CLASSES_TASKS, config.MD_ATTRS_TASKS)
 
-    # it's time for crazy solution. Taken from https://github.com/samuelcolvin/pydantic/issues/619#issuecomment-635784061
+    # it's time for crazy solution.
+    # Taken from https://github.com/samuelcolvin/pydantic/issues/619#issuecomment-635784061
     @validator("scoring", pre=True)
     def validate_scoring(cls, value):
         if isinstance(value, EBaseModel):

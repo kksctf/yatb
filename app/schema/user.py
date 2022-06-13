@@ -10,8 +10,8 @@ from fastapi import HTTPException, Query, status
 from pydantic import BaseModel, Extra, validator
 
 from ..config import settings
+from . import EBaseModel, logger
 from .auth import TYPING_AUTH
-from . import EBaseModel, logger, md
 
 
 class User(EBaseModel):
@@ -30,7 +30,7 @@ class User(EBaseModel):
     }
     __private_fields__ = {}
 
-    user_id: uuid.UUID = None
+    user_id: uuid.UUID = None  # type: ignore # yes i know, but factory in pydantic needed this shit.
 
     username: str = "unknown"
 

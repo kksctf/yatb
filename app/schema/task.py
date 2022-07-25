@@ -2,7 +2,7 @@ import datetime
 import humanize
 import time
 from typing import List, Dict, Optional, Union, Type
-from pydantic import validator, Extra
+from pydantic import Field, validator, Extra
 
 import uuid
 
@@ -37,7 +37,7 @@ class Task(EBaseModel):
         "hidden": ...,
     }
 
-    task_id: uuid.UUID = None  # type: ignore # yes i know, but factory in pydantic needed this shit.
+    task_id: uuid.UUID = Field(default_factory=lambda: uuid.uuid4())
 
     task_name: str
     category: str
@@ -77,10 +77,6 @@ class Task(EBaseModel):
                 return False
         else:
             return True
-
-    @validator("task_id", pre=True, always=True)
-    def set_id(cls, v):
-        return v or uuid.uuid4()
 
     # @validator('description_html', pre=True, always=True)
     # def set_html(cls, v):

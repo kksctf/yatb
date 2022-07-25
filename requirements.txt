@@ -3,11 +3,11 @@ aiohttp==3.8.1
 python-jose[cryptography]==3.3.0
 pydantic==1.9.1
 fastapi==0.78.0
-Jinja2==2.10.1
-requests==2.23.0
-markdown==3.2.2
+Jinja2==3.1.2
+requests==2.27.1
+markdown==3.3.7
 uvicorn==0.17.6
-humanize==3.1.0
+humanize==4.1.0
 prometheus-fastapi-instrumentator==5.6.0
-python-dotenv==0.15.0
+python-dotenv==0.19.2
 markupsafe==2.0.1

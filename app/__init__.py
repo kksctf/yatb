@@ -24,7 +24,8 @@ root_logger = utils.log_helper.generate_loggers(
     modules=["schema", "schema.auth", "api", "api.admin", "db", "db.tasks", "db.users", "view"],
 )
 
-logging.getLogger("yatb.schema").propagate = False  # disable logging schema debug shit to everything upper
+# logging.getLogger("yatb.schema").propagate = False  # disable logging schema debug shit to everything upper
+logging.getLogger("yatb").propagate = False  # disable logging anything upper
 
 loggers = [logging.getLogger()]  # get the root logger
 loggers = loggers + [logging.getLogger(name) for name in logging.root.manager.loggerDict]

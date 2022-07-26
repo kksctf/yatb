@@ -63,4 +63,4 @@ class User(EBaseModel):
             return ("", datetime.datetime.fromtimestamp(0))
 
     def short_desc(self):
-        return f"id={self.user_id}; name={self.username}; src={self.auth_source.classtype}"
+        return f"user_id={self.user_id} username={self.username} authsrc={self.auth_source.classtype}"

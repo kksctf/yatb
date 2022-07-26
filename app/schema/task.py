@@ -160,7 +160,7 @@ class Task(EBaseModel):
         return first_pwn[0], result_time
 
     def short_desc(self):
-        return f"id={self.task_id};name={self.task_name}"
+        return f"task_id={self.task_id} task_name={self.task_name} hidden={self.hidden} points={self.scoring.points}"
 
 
 class TaskForm(EBaseModel):

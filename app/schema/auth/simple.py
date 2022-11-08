@@ -71,14 +71,14 @@ class SimpleAuth(AuthBase):
         return """
         Login:<br>
         <form class="login_form">
-            <input type="text" name="username" value="" placeholder="username">
+            <input type="text" name="username" value="" placeholder="team name">
             <input type="password" name="password" value="" placeholder="password">
             <button class="w-100 btn btn-warning mt-1" type="submit">Login</button>
         </form>
 
         Register:<br>
         <form class="register_form">
-            <input type="text" name="username" value="" placeholder="username">
+            <input type="text" name="username" value="" placeholder="team name">
             <input type="password" name="password" value="" placeholder="password">
             <button class="w-100 btn btn-warning mt-1" type="submit">Register</button>
         </form>

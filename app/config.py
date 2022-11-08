@@ -40,8 +40,8 @@ class Settings(BaseSettings):
     VERSION: str = ""
     COMMIT: Optional[str] = None
 
-    FLAG_BASE: str = "kks"
-    CTF_NAME: str = "YATB-dev"
+    FLAG_BASE: str = "nimda"
+    CTF_NAME: str = "Nimda"
 
     def __init__(self, *args, **kwargs) -> None:
         super().__init__(*args, **kwargs)

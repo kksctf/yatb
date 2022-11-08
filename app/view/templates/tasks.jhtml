@@ -81,6 +81,7 @@
                     "crypto": true,
                     "web": true,
                     "binary": true,
+                    "stegano": true,
                     "other": true,
                 },
                 "showSolved": true,
@@ -114,6 +115,8 @@
         }
 
         function setCategory (target, status) {
+        console.log(target)
+        console.log(categorySelector)
             if (target in categorySelector.categories) {
                 categorySelector.categories[target] = status;
                 save_state()
@@ -162,6 +165,12 @@
         $(function () {
             $("#showWebTasks").click(function () {
                 setCategory("web", $(this).is(":checked"));
+                redrawVisible();
+            });
+        });
+        $(function () {
+            $("#showSteganoTasks").click(function () {
+                setCategory("stegano", $(this).is(":checked"));
                 redrawVisible();
             });
         });

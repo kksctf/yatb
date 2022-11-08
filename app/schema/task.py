@@ -8,7 +8,7 @@ import uuid
 
 from . import EBaseModel, logger, config, User
 from .scoring import Scoring, DynamicKKSScoring, StaticScoring
-from .flags import Flag, StaticFlag, DynamicKKSFlag
+from .flags import Flag, StaticFlag, DynamicKKSFlag, RegexFlag
 from ..utils import md
 
 
@@ -48,7 +48,7 @@ class Task(EBaseModel):
     description: str
     description_html: str
 
-    flag: Union[Flag, StaticFlag, DynamicKKSFlag]
+    flag: Union[Flag, StaticFlag, DynamicKKSFlag, RegexFlag]
 
     pwned_by: Dict[uuid.UUID, datetime.datetime] = {}
 
@@ -121,6 +121,8 @@ class Task(EBaseModel):
             return StaticFlag(**value)
         elif classtype == "DynamicKKSFlag":
             return DynamicKKSFlag(**value)
+        elif classtype == "RegexFlag":
+            return RegexFlag(**value)
         else:
             raise ValueError(f"Unkonwn classtype {classtype}")
 
@@ -172,5 +174,5 @@ class TaskForm(EBaseModel):
     category: str
     scoring: Union[Scoring, StaticScoring, DynamicKKSScoring]
     description: str
-    flag: Union[Flag, StaticFlag, DynamicKKSFlag]
+    flag: Union[Flag, StaticFlag, DynamicKKSFlag, RegexFlag]
     author: str = ""

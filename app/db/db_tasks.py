@@ -9,7 +9,7 @@ from asyncio import Lock
 from typing import List, Dict, Union, Optional
 
 from .. import schema
-from ..schema.flags import StaticFlag, DynamicKKSFlag, Flag
+from ..schema.flags import StaticFlag, DynamicKKSFlag, Flag, RegexFlag
 from ..config import settings
 from ..utils import md, metrics
 

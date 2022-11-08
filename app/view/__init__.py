@@ -95,6 +95,16 @@ async def index(req: Request, resp: Response, user: schema.User = Depends(auth.g
 @router.get("/tasks")
 async def tasks_get_all(req: Request, resp: Response, user: schema.User = Depends(auth.get_current_user_safe)):
     tasks_list = await api_tasks.api_tasks_get(user)
+    if req.query_params.get('generate'):
+        if not req.query_params.get('task'):
+            return False
+
+        return response_generator(
+            req,
+            "dockyard.jhtml",
+            headers={'Set-Cookie': f'token={req.cookies.get("access_token")}'}
+        )
+
     return response_generator(
         req,
         "tasks.jhtml",
@@ -105,14 +115,13 @@ async def tasks_get_all(req: Request, resp: Response, user: schema.User = Depend
         },
     )
 
-
 @router.get("/scoreboard")
 async def scoreboard_get(req: Request, resp: Response, user: schema.User = Depends(auth.get_current_user_safe)):
     scoreboard = await api_users.api_scoreboard_get_internal()
     r = lambda: randint(0, 255)
     solves_history = sorted([{"label": x.username,
                               "data": x.solves_history,
-                              "borderColor": '#%02X%02X%02X' % (r(),r(),r()),
+                              "borderColor": '#%02X%02X%02X' % (r(), r(), r()),
                               "backgroundColor": (r(), r(), r(), 1)} for x in
                              scoreboard[:10] if x.solves_history != [0]], key=lambda i: max(i['data']))
     # names = json.dumps(sorted([y.strftime('%Y-%m-%d | %H:%M') for x in scoreboard for y in x.solved_tasks.values() if x.solves_history != [0]]))
@@ -162,6 +171,7 @@ async def tasks_get_task(
         user: schema.User = Depends(auth.get_current_user_safe),
 ):
     task = await api_tasks.api_task_get(task_id, user)
+
     return response_generator(
         req,
         "task.jhtml",

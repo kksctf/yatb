@@ -72,9 +72,9 @@ TYPING_AUTH = Union[
 ]
 
 ENABLED_AUTH_WAYS = [
-    CTFTimeOAuth,
+    # CTFTimeOAuth,
     SimpleAuth,
-    TelegramAuth,
-    GithubOAuth,
-    DiscordOAuth,
+    # TelegramAuth,
+    # GithubOAuth,
+    # DiscordOAuth,
 ]

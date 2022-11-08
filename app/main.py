@@ -48,7 +48,7 @@ if settings.DEBUG:
                     fastapi.responses.PlainTextResponse.render,
                 ),
                 "6tasks": (api_tasks.api_tasks_get,),
-                "6task": (api_tasks.api_task_get,),
+                "6task": (api_tasks.api_task_get,)
             },
         )
         root_logger.warning("Timing debug loaded")

@@ -1,0 +1,34 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <title>Redirecting...</title>
+</head>
+<body>
+<script>
+        function get(name) {
+        if (name = (new RegExp('[?&]' + encodeURIComponent(name) + '=([^&]*)')).exec(location.search))
+            return decodeURIComponent(name[1]);
+    }
+
+    let task = get('task');
+    let token = document.cookies;
+    if (task === undefined) {
+        alert('Empty task name')
+    } else {
+        fetch('/api/users/me', {
+        headers: {
+    'Cookies': token
+    }}).then(x =>
+            {   if (x.status != 200){
+                    alert("Smth went wrong");
+                    return;
+                    }
+
+                x.json().then(t => window.location.replace('http://localhost:8000/ctfdockyard/loading/' + task + '?user_id=' + t.user_id))
+            }
+            ).catch(ex => alert(ex));
+    }
+</script>
+</body>
+</html>

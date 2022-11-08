@@ -140,7 +140,7 @@ class EBaseModel(BaseModel):
 
 from .user import User  # noqa
 from .scoring import DynamicKKSScoring, Scoring, StaticScoring  # noqa
-from .flags import DynamicKKSFlag, Flag, StaticFlag  # noqa
+from .flags import DynamicKKSFlag, Flag, StaticFlag, RegexFlag  # noqa
 from .task import Task, TaskForm  # noqa
 from .auth import AuthBase, CTFTimeOAuth, OAuth, SimpleAuth, TelegramAuth  # noqa
 

@@ -4,18 +4,188 @@
 {% block head %}
     {% set head_data.page_name = "Scoreboard" %}
     {{ super() }}
+    <script src="https://cdnjs.cloudflare.com/ajax/libs/jquery/3.6.0/jquery.min.js"
+            integrity="sha512-894YE6QWD5I59HgZOGReFYm4dnWc1Qt5NtvYSaNcOP+u1T9qYdvdihz0PPSiiqn/+/3e7Jo4EaG7TubfWGUrMQ=="
+            crossorigin="anonymous" referrerpolicy="no-referrer"></script>
+    <script src="https://cdnjs.cloudflare.com/ajax/libs/Chart.js/3.9.1/chart.min.js" integrity="sha512-ElRFoEQdI5Ht6kZvyzXhYG9NqjtkmlkfYk0wr6wHxU9JEHakS7UJZNeml5ALk+8IKlU6jDgMabC3vkumRokgJA==" crossorigin="anonymous" referrerpolicy="no-referrer"></script>
+    <style>
+    .stable {
+        width: 100%;
+    }
+    .inner-container {
+        display: flex;
+        position: static;
+        flex-flow: column nowrap;
+        justify-content: center;
+        width: 100%;
+        top: 50%;
+        left: 0;
+        height: 100%;
+    }
+
+    .table-wrapper{
+    box-shadow: 0px 35px 50px rgba( 0, 0, 0, 0.2 );
+}
+
+.fl-table {
+    border-radius: 5px;
+    font-size: 12px;
+    font-weight: normal;
+    border: none;
+    border-collapse: collapse;
+    width: 100%;
+    max-width: 100%;
+    white-space: nowrap;
+    background-color: white;
+}
+
+.fl-table td, .fl-table th {
+    text-align: center;
+    padding: 8px;
+}
+
+.fl-table td {
+    border-right: 1px solid #f8f8f8;
+    font-size: 12px;
+}
+
+.fl-table thead th {
+    color: #ffffff;
+    background: #4FC3A1;
+}
+
+
+.fl-table thead th:nth-child(odd) {
+    color: #ffffff;
+    background: #324960;
+}
+
+.fl-table tr:nth-child(even) {
+    background: #F8F8F8;
+}
+
+/* Responsive */
+
+@media (max-width: 767px) {
+    .fl-table {
+        display: block;
+        width: 100%;
+    }
+    .table-wrapper:before{
+        content: "Scroll horizontally >";
+        display: block;
+        text-align: right;
+        font-size: 11px;
+        color: white;
+        padding: 0 0 10px;
+    }
+    .fl-table thead, .fl-table tbody, .fl-table thead th {
+        display: block;
+    }
+    .fl-table thead th:last-child{
+        border-bottom: none;
+    }
+    .fl-table thead {
+        float: left;
+    }
+    .fl-table tbody {
+        width: auto;
+        position: relative;
+        overflow-x: auto;
+    }
+    .fl-table td, .fl-table th {
+        padding: 20px .625em .625em .625em;
+        height: 60px;
+        vertical-align: middle;
+        box-sizing: border-box;
+        overflow-x: hidden;
+        overflow-y: auto;
+        width: 120px;
+        font-size: 13px;
+        text-overflow: ellipsis;
+    }
+    .fl-table thead th {
+        text-align: left;
+        border-bottom: 1px solid #f7f7f9;
+    }
+    .fl-table tbody tr {
+        display: table-cell;
+    }
+    .fl-table tbody tr:nth-child(odd) {
+        background: none;
+    }
+    .fl-table tr:nth-child(even) {
+        background: transparent;
+    }
+    .fl-table tr td:nth-child(odd) {
+        background: #F8F8F8;
+        border-right: 1px solid #E6E4E4;
+    }
+    .fl-table tr td:nth-child(even) {
+        border-right: 1px solid #E6E4E4;
+    }
+    .fl-table tbody td {
+        display: block;
+        text-align: center;
+    }
+}
+
+    .chart-container {
+            width: 50%;
+    display: flex;
+    margin: 0 auto;
+            }
+    </style>
 {% endblock %}
 
 {% block content %}
-    <div class="container">
-        <table class="table mt-1 bg-light border">
+    <div>
+    <div class="chart-container">
+    <canvas id="chart"></canvas>
+
+    <script>
+    const DATA_COUNT = {{len(scoreboard)}};
+    const NUMBER_CFG = {count: DATA_COUNT, min: {{n_cfg_min}}, max: {{n_cfg_max}} };
+    const labels = {{ scoreboard_names | safe}};
+
+
+    const data = {
+    labels: labels,
+    datasets: {{solved_history | safe}}
+
+};
+
+        Chart.defaults.color = "#fff";
+        var ctx = document.getElementById("chart").getContext("2d");
+        const chart = new Chart(ctx, {
+  type: 'line',
+  data: data,
+  options: {
+    responsive: true,
+    plugins: {
+      legend: {
+        position: 'top'
+      },
+      title: {
+        display: false,
+        text: ''
+      }
+    }
+  },
+});
+
+
+    </script>
+    </div>
+    <div class="inner-container table-wrapper">
+        <table class="fl-table stable">
             <thead>
                 <tr>
                     <th scope="col">#</th>
-                    <th scope="col">username</th>
-                    <th scope="col">score</th>
-                    <th scope="col">latest</th>
-                    <th scope="col">timestamp</th>
+                    <th scope="col">Team</th>
+                    <th scope="col">Score</th>
+                    <th scope="col">Latest</th>
+                    <th scope="col">Timestamp</th>
                 </tr>
             </thead>
             <tbody>
@@ -45,6 +215,7 @@
             </tbody>
         </table>
     </div>
+   </div>
 {% endblock %}
 
 {% block footer %}

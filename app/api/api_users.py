@@ -26,6 +26,13 @@ async def api_scoreboard_get_internal() -> List[schema.User]:
         users = users.values()
     users = sorted(users, key=lambda i: i.get_last_solve_time()[1])
     users = sorted(users, key=lambda i: i.score, reverse=True)
+    for i, x in enumerate(users):
+        x.solves_history = [(await db.get_task_uuid(y)).scoring.points for y in x.solved_tasks] or [0]
+        if x.solves_history != [0]:
+            x.solves_history.insert(0, 0)
+            for z in range(len(x.solves_history) - 1):
+                x.solves_history[z + 1] = x.solves_history[z] + x.solves_history[z + 1]
+
     return users
 
 

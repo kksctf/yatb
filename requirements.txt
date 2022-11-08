@@ -3,7 +3,7 @@ aiohttp==3.8.1
 python_jose==3.1.0
 pydantic==1.9.1
 fastapi==0.78.0
-Jinja2==2.10.1
+Jinja2==3.1.2
 requests==2.23.0
 markdown==3.2.2
 uvicorn==0.17.6

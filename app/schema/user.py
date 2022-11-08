@@ -23,6 +23,7 @@ class User(EBaseModel):
         "affilation",
         "country",
         "profile_pic",
+        "solves_history"
     }
     __admin_only_fields__ = {
         "is_admin",
@@ -41,6 +42,7 @@ class User(EBaseModel):
 
     affilation: str = ""
     country: str = ""
+    solves_history = []
 
     profile_pic: Optional[str] = None
 

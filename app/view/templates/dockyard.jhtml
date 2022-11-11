@@ -21,7 +21,7 @@
     'Cookies': token
     }}).then(x =>
             {   if (x.status != 200){
-                    alert("Smth went wrong");
+                    alert("Auth first");
                     return;
                     }
 

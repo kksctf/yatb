@@ -92,19 +92,24 @@ async def index(req: Request, resp: Response, user: schema.User = Depends(auth.g
     return await tasks_get_all(req, resp, user)
 
 
+@router.get("/dockyard")
+async def dockyard(req: Request, resp: Response, user: schema.User = Depends(auth.get_current_user)):
+    if not user:
+        return 'Auth first', 401
+
+    if not req.query_params.get('task'):
+        return 'Task name empty', 400
+
+    return response_generator(
+        req,
+        "dockyard.jhtml",
+        headers={'Set-Cookie': f'token={req.cookies.get("access_token")}'}
+    )
+
+
 @router.get("/tasks")
 async def tasks_get_all(req: Request, resp: Response, user: schema.User = Depends(auth.get_current_user_safe)):
     tasks_list = await api_tasks.api_tasks_get(user)
-    if req.query_params.get('generate'):
-        if not req.query_params.get('task'):
-            return False
-
-        return response_generator(
-            req,
-            "dockyard.jhtml",
-            headers={'Set-Cookie': f'token={req.cookies.get("access_token")}'}
-        )
-
     return response_generator(
         req,
         "tasks.jhtml",
@@ -114,6 +119,7 @@ async def tasks_get_all(req: Request, resp: Response, user: schema.User = Depend
             "tasks": tasks_list,
         },
     )
+
 
 @router.get("/scoreboard")
 async def scoreboard_get(req: Request, resp: Response, user: schema.User = Depends(auth.get_current_user_safe)):

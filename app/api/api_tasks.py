@@ -82,7 +82,10 @@ async def api_task_submit_flag(flag: schema.FlagForm, user: schema.User = Depend
     ret = await db.solve_task(task, user)
 
     if len(task.pwned_by) == 1:
-        pass  # tg.display_fb_msg(task, user)
+        try:
+            tg.display_fb_msg(task, user)
+        except Exception as ex:  # noqa: W0703, PIE786
+            logger.error(f"tg_exception exception='{ex}'")
 
     return ret
 

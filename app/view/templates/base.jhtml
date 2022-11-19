@@ -9,6 +9,7 @@
         {% set head_data.pages = {
             ("Challenges", "All tasks"): url_for('tasks_get_all'),
             ("Scoreboard",): url_for('scoreboard_get'),
+            ("About",): url_for('about_get'),
         } %}
 
         {% block head %}
@@ -66,7 +67,7 @@
                                 {{ curr_user.username }}
                             </a>
                             <ul class="dropdown-menu dropdown-menu-end" aria-labelledby="userActions">
-                                <a class="dropdown-item btn btn-secondary" role="button" href="profile.html">Profile</a>
+<!--                                <a class="dropdown-item btn btn-secondary" role="button" href="profile.html">Profile</a>-->
                                 {% if curr_user.is_admin %}
                                     <li><a class="dropdown-item" href="{{ url_for('admin_index') }}">Admin panel</a></li>
                                 {% endif %}

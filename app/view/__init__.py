@@ -107,6 +107,18 @@ async def dockyard(req: Request, resp: Response, user: schema.User = Depends(aut
     )
 
 
+@router.get("/about")
+async def about_get(req: Request, resp: Response, user: schema.User = Depends(auth.get_current_user_safe)):
+    return response_generator(
+        req,
+        "about.jhtml",
+        {
+            "request": req,
+            "curr_user": user
+        },
+    )
+
+
 @router.get("/tasks")
 async def tasks_get_all(req: Request, resp: Response, user: schema.User = Depends(auth.get_current_user_safe)):
     tasks_list = await api_tasks.api_tasks_get(user)

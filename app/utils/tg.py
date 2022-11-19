@@ -1,3 +1,4 @@
+from typing import cast
 import requests
 import logging
 
@@ -37,5 +38,13 @@ def send_message(text):
 
 
 def display_fb_msg(what: schema.Task, by: schema.User):
-    message = f"""First blood on {encoder(what.task_name)} by [{encoder(by.username)}](https://ctftime.org/team/{by.oauth_id}), yay\\!"""
+    if by.auth_source.classtype == "CTFTimeOAuth":
+        au = cast(schema.auth.CTFTimeOAuth.AuthModel, by.auth_source)
+        message = (
+            f"First blood on {encoder(what.task_name)} by "
+            f"[{encoder(by.username)}](https://ctftime.org/team/{au.team.id}), yay\\!"
+        )
+    else:
+        message = f"First blood on {encoder(what.task_name)} by {encoder(by.username)}, yay\\!"
+
     return send_message(message)

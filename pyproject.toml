@@ -1,6 +1,5 @@
 [project]
 name = "YATB"
-version = "a0.2.15"
 description = "Yet another fast and furious jeopardy-CTF taskboard"
 authors = [
   "Rubikoid <rubikoid@kksctf.ru>",
@@ -14,7 +13,7 @@ repository = "https://github.com/kksctf/yatb"
 documentation = "https://github.com/kksctf/yatb"
 readme = "README.md"
 
-python = "^3.8"
+python = "^3.9"
 
 keywords = ["ctf", "jeopardy", "ctf-platform", "fastapi"]
 
@@ -25,7 +24,7 @@ classifiers = [
 # black config enabled.
 [tool.black]
 line-length = 150
-target_version = ['py38']
+target_version = ['py39']
 include = '\.pyi?$'
 exclude = '''
 

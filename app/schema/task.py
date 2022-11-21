@@ -1,15 +1,16 @@
 import datetime
-import humanize
 import time
-from typing import List, Dict, Optional, Union, Type
-from pydantic import validator, Extra
-
 import uuid
+from typing import Dict, List, Optional, Type, Union
 
-from . import EBaseModel, logger, config, User
-from .scoring import Scoring, DynamicKKSScoring, StaticScoring
-from .flags import Flag, StaticFlag, DynamicKKSFlag
+import humanize
+from pydantic import Extra, Field, validator
+
+from ..config import settings
 from ..utils import md
+from . import EBaseModel, User, config, logger
+from .flags import DynamicKKSFlag, Flag, StaticFlag
+from .scoring import DynamicKKSScoring, Scoring, StaticScoring
 
 
 def template_format_time(date: datetime.datetime) -> str:  # from alb1or1x_shit.py
@@ -37,7 +38,7 @@ class Task(EBaseModel):
         "hidden": ...,
     }
 
-    task_id: uuid.UUID = None  # type: ignore # yes i know, but factory in pydantic needed this shit.
+    task_id: uuid.UUID = Field(default_factory=lambda: uuid.uuid4())
 
     task_name: str
     category: str
@@ -70,17 +71,20 @@ class Task(EBaseModel):
         return "other"
 
     def visible_for_user(self, user: Optional[User] = None) -> bool:
-        if self.hidden:
-            if user and user.is_admin:
-                return True
-            else:
-                return False
-        else:
+        # if admin: always display task.
+        if user and user.is_admin:
             return True
 
-    @validator("task_id", pre=True, always=True)
-    def set_id(cls, v):
-        return v or uuid.uuid4()
+        # if event not started yet
+        if datetime.datetime.utcnow() <= settings.EVENT_START_TIME:
+            return False
+
+        # if task is hidden and no user/not admin:
+        # always hide
+        if self.hidden:
+            return False
+
+        return True
 
     # @validator('description_html', pre=True, always=True)
     # def set_html(cls, v):
@@ -164,7 +168,7 @@ class Task(EBaseModel):
         return first_pwn[0], result_time
 
     def short_desc(self):
-        return f"id={self.task_id};name={self.task_name}"
+        return f"task_id={self.task_id} task_name={self.task_name} hidden={self.hidden} points={self.scoring.points}"
 
 
 class TaskForm(EBaseModel):

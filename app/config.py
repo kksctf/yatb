@@ -1,9 +1,8 @@
-import os
-import hashlib
-import subprocess
-import distutils.util
 import datetime
+import os
+import subprocess
 from typing import List, Optional
+
 from pydantic import BaseSettings
 
 
@@ -52,7 +51,7 @@ class Settings(BaseSettings):
             self.VERSION += subprocess.check_output(["git", "rev-parse", "HEAD"]).decode()[:8]
             self.VERSION += "-Modified" if len(subprocess.check_output(["git", "status", "--porcelain"])) > 0 else ""
         else:
-            self.VERSION += "a0.5.0"
+            self.VERSION += "a0.5.2"
             if self.COMMIT:
                 self.VERSION += f"-{self.COMMIT[:8]}"
 

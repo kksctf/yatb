@@ -149,5 +149,5 @@ class FlagForm(EBaseModel):
     flag: str
 
 
-for i in [Task, User]:
-    logger.debug(f"Schema of {i} is {pprint.pformat(i.schema())}")
+# for i in [Task, User]:
+#     logger.debug(f"Schema of {i} is {pprint.pformat(i.schema())}")

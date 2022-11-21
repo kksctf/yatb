@@ -7,7 +7,9 @@ from .user import User
 
 
 class Flag(EBaseModel):
+    __public_fields__ = {"classtype"}
     __admin_only_fields__ = {"flag_base"}
+
     classtype: Literal["Flag"] = "Flag"
     flag_base: str = settings.FLAG_BASE
 
@@ -32,6 +34,7 @@ class Flag(EBaseModel):
 
 class StaticFlag(Flag):
     __admin_only_fields__ = {"flag_base", "flag"}
+
     classtype: Literal["StaticFlag"] = "StaticFlag"
     flag: str
 
@@ -41,6 +44,7 @@ class StaticFlag(Flag):
 
 class DynamicKKSFlag(Flag):
     __admin_only_fields__ = {"flag_base", "dynamic_flag_base"}
+
     classtype: Literal["DynamicKKSFlag"] = "DynamicKKSFlag"
     dynamic_flag_base: str
 

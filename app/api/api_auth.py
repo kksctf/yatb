@@ -17,6 +17,19 @@ router = APIRouter(
 )
 
 
+async def check_for_existing_model(
+    model: schema.auth.AuthBase.AuthModel,
+    check_for_class: Type[schema.auth.AuthBase.AuthModel],
+):
+    username = model.generate_username()
+    user_by_username = await db.get_user(username)
+    if user_by_username and not isinstance(user_by_username.auth_source, check_for_class):
+        raise HTTPException(
+            status_code=status.HTTP_403_FORBIDDEN,
+            detail="Team already exists. If you want to migrate between password <-> ctftime auth, contact orgs",
+        )
+
+
 def generic_handler_generator(cls: Type[schema.auth.AuthBase]) -> Callable:
     """
     This is a little crazy "generic generator" for handling universal auth way.
@@ -31,6 +44,9 @@ def generic_handler_generator(cls: Type[schema.auth.AuthBase]) -> Callable:
 
         # create model from form.
         model = await form.populate(req, resp)
+
+        # check for team with same name, but from other reg source.
+        await check_for_existing_model(model, cls.AuthModel)
 
         # extract primary (unique) field from model, and check
         # is user with that field exists
@@ -71,8 +87,7 @@ async def api_auth_simple_login(req: Request, resp: Response, form: schema.Simpl
         )
 
     auth_source = cast(schema.SimpleAuth.AuthModel, user.auth_source)
-    real_hash = form.get_hashed_password(auth_source.password_hash[0])
-    if auth_source.password_hash != real_hash:
+    if not form.check_password(auth_source):
         raise HTTPException(
             status_code=status.HTTP_401_UNAUTHORIZED,
             detail="Incorrect username or password",
@@ -89,11 +104,15 @@ async def api_auth_simple_login(req: Request, resp: Response, form: schema.Simpl
 async def api_auth_simple_register(req: Request, resp: Response, form: schema.SimpleAuth.Form = Depends()):
     # almost the same generic, but for login/password form, due to additional login.
     model = await form.populate(req, resp)
+
+    # check for team with same name, but from other reg source.
+    await check_for_existing_model(model, schema.SimpleAuth.AuthModel)
+
     user = await db.get_user_uniq_field(schema.SimpleAuth.AuthModel, model.get_uniq_field())
     if user:
         raise HTTPException(
             status_code=status.HTTP_403_FORBIDDEN,
-            detail="Username exists",
+            detail="Team exists",
         )
 
     user = await db.insert_user(model)

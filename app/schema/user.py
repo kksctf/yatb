@@ -7,7 +7,7 @@ import uuid
 from typing import Dict, List, Optional, Type, Union
 
 from fastapi import HTTPException, Query, status
-from pydantic import BaseModel, Extra, validator
+from pydantic import BaseModel, Extra, Field, validator
 
 from ..config import settings
 from . import EBaseModel, logger
@@ -30,7 +30,7 @@ class User(EBaseModel):
     }
     __private_fields__ = {}
 
-    user_id: uuid.UUID = None  # type: ignore # yes i know, but factory in pydantic needed this shit.
+    user_id: uuid.UUID = Field(default_factory=lambda: uuid.uuid4())
 
     username: str = "unknown"
 
@@ -56,10 +56,6 @@ class User(EBaseModel):
     def admin_checker(self):
         return self.auth_source.is_admin()
 
-    @validator("user_id", pre=True, always=True)
-    def set_id(cls, v):
-        return v or uuid.uuid4()
-
     def get_last_solve_time(self):
         if len(self.solved_tasks) > 0:
             return max(self.solved_tasks.items(), key=lambda x: x[1])
@@ -67,4 +63,4 @@ class User(EBaseModel):
             return ("", datetime.datetime.fromtimestamp(0))
 
     def short_desc(self):
-        return f"id={self.user_id}; name={self.username}; src={self.auth_source.classtype}"
+        return f"user_id={self.user_id} username={self.username} authsrc={self.auth_source.classtype}"

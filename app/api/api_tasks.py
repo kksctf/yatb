@@ -38,9 +38,9 @@ async def api_task_submit_flag(flag: schema.FlagForm, user: schema.User = Depend
 
     task = await db.find_task_by_flag(flag.flag, user)
     if task:
-        logger.info(f"[{user.short_desc()}] Found task with flag {flag.flag}, task={task.short_desc()}.")
+        logger.info(f"{user.short_desc()} state=found task with flag flag={flag.flag}, task={task.short_desc()}.")
     else:
-        logger.info(f"[{user.short_desc()}] Tried to find task with flag {flag.flag}, but no.")
+        logger.info(f"{user.short_desc()} state=not_found task with flag={flag.flag}")
         metrics.bad_solves_per_user.labels(user_id=user.user_id, username=user.username).inc()
 
     if not task or not task.visible_for_user(user):
@@ -82,7 +82,10 @@ async def api_task_submit_flag(flag: schema.FlagForm, user: schema.User = Depend
     ret = await db.solve_task(task, user)
 
     if len(task.pwned_by) == 1:
-        pass  # tg.display_fb_msg(task, user)
+        try:
+            tg.display_fb_msg(task, user)
+        except Exception as ex:  # noqa: W0703, PIE786
+            logger.error(f"tg_exception exception='{ex}'")
 
     return ret
 

@@ -139,14 +139,15 @@
 {% endblock %}
 
 {% block content %}
+{% if len(solved_history) > 0 %}
     <div>
     <div class="chart-container">
     <canvas id="chart"></canvas>
 
     <script>
     const DATA_COUNT = {{len(scoreboard)}};
-    const NUMBER_CFG = {count: DATA_COUNT, min: {{n_cfg_min}}, max: {{n_cfg_max}} };
-    const labels = {{ scoreboard_names | safe}};
+    const NUMBER_CFG = {count: DATA_COUNT};
+    const labels = {{ x_axis | safe}};
 
 
     const data = {
@@ -216,6 +217,9 @@
         </table>
     </div>
    </div>
+{% else %}
+<center><h1 style="color: white;">Here be dragons...</h1></center>
+{% endif %}
 {% endblock %}
 
 {% block footer %}

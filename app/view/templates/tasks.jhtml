@@ -54,6 +54,7 @@
 {% endblock %}
 
 {% block content %}
+    {% if tasks %}
     <div class="container-fluid px-0">
         <div class="card-columns" style="column-gap: 4px;">
             {% for task in tasks|sort(attribute='scoring.points') %}
@@ -61,6 +62,10 @@
             {% endfor %}
         </div>
     </div>
+    {% else %}
+    <center><h1 style="color: white;">Here be dragons...</h1></center>
+    {% endif %}
+
 {% endblock %}
 
 {% block footer %}

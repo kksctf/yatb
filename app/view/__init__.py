@@ -5,6 +5,7 @@ from datetime import datetime, timedelta
 from typing import Any, Dict, List, Optional
 import json
 from random import randint
+from itertools import groupby
 
 from fastapi import Cookie, Depends, FastAPI, HTTPException, Request, Response, status
 from fastapi.routing import APIRoute, APIRouter
@@ -137,19 +138,55 @@ async def tasks_get_all(req: Request, resp: Response, user: schema.User = Depend
 async def scoreboard_get(req: Request, resp: Response, user: schema.User = Depends(auth.get_current_user_safe)):
     scoreboard = await api_users.api_scoreboard_get_internal()
     r = lambda: randint(0, 255)
-    solves_history = sorted([{"label": x.username,
-                              "data": x.solves_history,
-                              "borderColor": '#%02X%02X%02X' % (r(), r(), r()),
-                              "backgroundColor": (r(), r(), r(), 1)} for x in
-                             scoreboard[:10] if x.solves_history != [0]], key=lambda i: max(i['data']))
-    # names = json.dumps(sorted([y.strftime('%Y-%m-%d | %H:%M') for x in scoreboard for y in x.solved_tasks.values() if x.solves_history != [0]]))
-    names = [x for x in range(max([len(x.solved_tasks) for x in scoreboard]) + 1)]
-    solves_history = json.dumps(solves_history)
-    n_cfg_min = min([y for x in scoreboard for y in x.solves_history]) or 0
-    n_cfg_max = max([y for x in scoreboard for y in x.solves_history]) or 0
 
-    if n_cfg_max == n_cfg_min:
-        n_cfg_min = 0
+    # names = json.dumps(sorted([y.strftime('%Y-%m-%d | %H:%M') for x in scoreboard for y in x.solved_tasks.values() if x.solves_history != [0]]))
+    if scoreboard:
+        # names = [x for x in range(max([len(x.solved_tasks) for x in scoreboard]) + 1)]
+        # solves_history = json.dumps(solves_history)
+        dates = []  # X AXIS
+        min_date = settings.EVENT_START_TIME
+        max_date = settings.EVENT_END_TIME
+
+        for i in range(((max_date - min_date).days * 24) + 1):
+            dates.append(min_date + timedelta(hours=i + 3))  # Well, welcome to GMT + 3
+
+        for i, x in enumerate(dates):
+            dates[i] = x.strftime('%d-%m-%Y %H:%M')
+
+        '''
+             Calculated values special for Nimda LateAutumn 2022
+             * yep, I like multiline comments hehe 
+        '''
+        scores = [0, 1000, 2000, 3000, 4000, 5200]  # Y AXIS
+
+        tsh = []
+
+        for user in scoreboard[:10]:
+            user_border_color = '#%02X%02X%02X' % (r(), r(), r())
+            user_background_color = (r(), r(), r(), 1)
+            grouped = groupby([{
+                'score': x['score'],
+                'solved_at': x['solved_at'].strftime('%d-%m-%Y %H'),
+                'uuid': x['uuid']
+            } for x in user.solves_history], lambda z: z['solved_at'])
+
+            groups = []
+
+            for key, group in grouped:
+                groups.append(sum([x['score'] for x in list(group)]))
+
+            tsh.append({"label": user.username,
+                        "data": groups,
+                        "borderColor": user_border_color,
+                        "backgroundColor": user_background_color})
+
+        solves_history = tsh
+    else:
+        solves_history = [],
+        dates = []
+        scores = []
+
+    solves_history = json.dumps(solves_history)
 
     return response_generator(
         req,
@@ -159,11 +196,10 @@ async def scoreboard_get(req: Request, resp: Response, user: schema.User = Depen
             "curr_user": user,
             "scoreboard": scoreboard,
             "solved_history": solves_history,
-            "scoreboard_names": names,
+            "x_axis": dates,
+            "y_axis": scores,
             "enumerate": enumerate,
-            "len": len,
-            "n_cfg_max": n_cfg_max,
-            "n_cfg_min": n_cfg_min
+            "len": len
         },
     )
 

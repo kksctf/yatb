@@ -16,8 +16,11 @@ class Settings(BaseSettings):
     CHAT_ID: int = 0
 
     # event time
-    EVENT_START_TIME: datetime.datetime = datetime.datetime(1077, 12, 12, 9, 0)
-    EVENT_END_TIME: datetime.datetime = datetime.datetime(2077, 12, 13, 9, 0)
+    # EVENT_START_TIME: datetime.datetime = datetime.datetime(2022, 11, 26, 9, 0)
+    # EVENT_END_TIME: datetime.datetime = datetime.datetime(2022, 11, 27, 9, 0)
+
+    EVENT_START_TIME: datetime.datetime = datetime.datetime(2022, 11, 21, 15, 0)
+    EVENT_END_TIME: datetime.datetime = datetime.datetime(2022, 11, 22, 15, 0)
 
     # database name
     DB_NAME: str = os.path.join(".", "file_db") + ".db"

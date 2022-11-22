@@ -95,9 +95,6 @@ async def index(req: Request, resp: Response, user: schema.User = Depends(auth.g
 
 @router.get("/dockyard")
 async def dockyard(req: Request, resp: Response, user: schema.User = Depends(auth.get_current_user)):
-    if not user:
-        return 'Auth first', 401
-
     if not req.query_params.get('task'):
         return 'Task name empty', 400
 
@@ -135,7 +132,7 @@ async def tasks_get_all(req: Request, resp: Response, user: schema.User = Depend
 
 
 @router.get("/scoreboard")
-async def scoreboard_get(req: Request, resp: Response, user: schema.User = Depends(auth.get_current_user_safe)):
+async def scoreboard_get(req: Request, resp: Response, r_user: schema.User = Depends(auth.get_current_user_safe)):
     scoreboard = await api_users.api_scoreboard_get_internal()
     r = lambda: randint(0, 255)
 
@@ -151,13 +148,7 @@ async def scoreboard_get(req: Request, resp: Response, user: schema.User = Depen
             dates.append(min_date + timedelta(hours=i + 3))  # Well, welcome to GMT + 3
 
         for i, x in enumerate(dates):
-            dates[i] = x.strftime('%d-%m-%Y %H:%M')
-
-        '''
-             Calculated values special for Nimda LateAutumn 2022
-             * yep, I like multiline comments hehe 
-        '''
-        scores = [0, 1000, 2000, 3000, 4000, 5200]  # Y AXIS
+            dates[i] = dates[i].strftime('%d-%m-%Y %H')
 
         tsh = []
 
@@ -166,17 +157,41 @@ async def scoreboard_get(req: Request, resp: Response, user: schema.User = Depen
             user_background_color = (r(), r(), r(), 1)
             grouped = groupby([{
                 'score': x['score'],
-                'solved_at': x['solved_at'].strftime('%d-%m-%Y %H'),
+                'solved_at': (x['solved_at'] + timedelta(hours=3)).strftime('%d-%m-%Y %H'),
                 'uuid': x['uuid']
             } for x in user.solves_history], lambda z: z['solved_at'])
+            grouped = [{'date': x, 'data': list(z)} for x, z in grouped]
 
-            groups = []
+            for i, x in enumerate(dates):
+                if not [z for z in grouped if z['date'] == x]:
+                    grouped.append({'date': x, 'data': [{
+                        'score': 0
+                    }]})
 
-            for key, group in grouped:
-                groups.append(sum([x['score'] for x in list(group)]))
+            grouped = sorted(grouped, key=lambda x: x['date'])
+
+            result = [{'solved_at': x, 'score': 0} for x in dates]
+            for group in grouped:
+                r_i = [result.index(x) for x in result if x['solved_at'] == group['date']][0]
+                if r_i != 0:
+                    result[r_i]['score'] = result[r_i - 1]['score'] + sum([x['score'] for x in group['data']])
+                else:
+                    result[r_i]['score'] = sum([x['score'] for x in group['data']])
+
+            # for i in range(1, len(result) - 1):
+            #     result[i - 1]['score'] = r2[]
+
+            c_d = datetime.utcnow() + timedelta(hours=3)
+
+            rem = [x for x in result if datetime.strptime(x['solved_at'], '%d-%m-%Y %H') > c_d]
+            [result.remove(x) for x in rem]
+
+            result = [x['score'] for x in sorted(result, key=lambda x: x['solved_at'])]
+            if sum(result) == 0:
+                result = [0]
 
             tsh.append({"label": user.username,
-                        "data": groups,
+                        "data": result,
                         "borderColor": user_border_color,
                         "backgroundColor": user_background_color})
 
@@ -184,7 +199,6 @@ async def scoreboard_get(req: Request, resp: Response, user: schema.User = Depen
     else:
         solves_history = [],
         dates = []
-        scores = []
 
     solves_history = json.dumps(solves_history)
 
@@ -193,11 +207,10 @@ async def scoreboard_get(req: Request, resp: Response, user: schema.User = Depen
         "scoreboard.jhtml",
         {
             "request": req,
-            "curr_user": user,
+            "curr_user": r_user,
             "scoreboard": scoreboard,
             "solved_history": solves_history,
             "x_axis": dates,
-            "y_axis": scores,
             "enumerate": enumerate,
             "len": len
         },

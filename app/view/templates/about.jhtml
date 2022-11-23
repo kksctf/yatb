@@ -20,7 +20,6 @@
 {% block content %}
 <div class="container-fluid">
     <article>
-        <center><h1>Nimda</h1></center>
         <h2>Что такое Capture The Flag</h2>
         <p>
             CTF — это соревнования по спортивному хакингу: как олимпиадное программирование, но в информационной

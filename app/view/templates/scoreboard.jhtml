@@ -155,7 +155,7 @@
 {% endblock %}
 
 {% block content %}
-{% if len(solved_history) > 0 %}
+{% if len(solved_history) > 0 and len(scoreboard) > 0%}
 <div>
     <div class="chart-container">
         <canvas id="chart"></canvas>

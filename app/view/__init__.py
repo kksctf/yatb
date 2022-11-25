@@ -129,6 +129,7 @@ async def tasks_get_all(req: Request, resp: Response, user: schema.User = Depend
         task = copy(task)
         task.description = task.description.replace('$USER_ID', str(user_id))
         task.description_html = task.description_html.replace('$USER_ID', str(user_id))
+        tasks_list[i] = task
 
     return response_generator(
         req,

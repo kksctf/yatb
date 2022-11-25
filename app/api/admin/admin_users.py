@@ -88,3 +88,29 @@ async def api_admin_user_edit_password(
         )
     au.password_hash = schema.auth.simple.hash_password(new_password.new_password)
     return user
+
+
+@router.delete(
+    "/user/{user_id}",
+    response_model=str,
+    response_model_include=schema.User.get_include_fieds(True),
+    response_model_exclude=schema.User.get_exclude_fields(),
+)
+async def api_admin_user_delete(
+    user_id: uuid.UUID,
+    user: schema.User = Depends(api_admin_user_get_internal),
+    admin: schema.User = Depends(admin_checker),
+):
+    if not user:
+        raise HTTPException(
+            status_code=status.HTTP_404_NOT_FOUND,
+            detail="user not exist",
+        )
+
+    if len(user.solved_tasks) > 0:
+        raise HTTPException(
+            status_code=status.HTTP_403_FORBIDDEN,
+            detail="user have solved tasks",
+        )
+    await db.delete_user(user)
+    return "deleted"

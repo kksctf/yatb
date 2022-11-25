@@ -119,3 +119,10 @@ async def update_user_admin(user_id: uuid.UUID, new_user: schema.User):
     # user.parse_obj(new_user)
     logger.debug(f"Resulting user={user}")
     return user
+
+
+async def delete_user(user: schema.User):
+    from . import _db
+
+    del _db._db["users"][user.user_id]
+    del _db._index["users"][user.user_id]

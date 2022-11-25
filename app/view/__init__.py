@@ -6,6 +6,7 @@ from typing import Any, Dict, List, Optional
 import json
 from random import randint
 from itertools import groupby
+from copy import deepcopy as copy
 
 from fastapi import Cookie, Depends, FastAPI, HTTPException, Request, Response, status
 from fastapi.routing import APIRoute, APIRouter
@@ -120,6 +121,15 @@ async def about_get(req: Request, resp: Response, user: schema.User = Depends(au
 @router.get("/tasks")
 async def tasks_get_all(req: Request, resp: Response, user: schema.User = Depends(auth.get_current_user_safe)):
     tasks_list = await api_tasks.api_tasks_get(user)
+    user_id = ''
+    if user:
+        user_id = user.user_id
+
+    for i, task in enumerate(tasks_list):
+        task = copy(task)
+        task.description = task.description.replace('$USER_ID', str(user_id))
+        task.description_html = task.description_html.replace('$USER_ID', str(user_id))
+
     return response_generator(
         req,
         "tasks.jhtml",
@@ -238,6 +248,14 @@ async def tasks_get_task(
         user: schema.User = Depends(auth.get_current_user_safe),
 ):
     task = await api_tasks.api_task_get(task_id, user)
+
+    user_id = ''
+
+    if user:
+        user_id = user.user_id
+    task = copy(task)
+    task.description = task.description.replace('$USER_ID', str(user_id))
+    task.description_html = task.description_html.replace('$USER_ID', str(user_id))
 
     return response_generator(
         req,

@@ -25,7 +25,7 @@
                     return;
                     }
 
-                x.json().then(t => window.location.replace('http://localhost:8000/ctfdockyard/loading/' + task + '?user_id=' + t.user_id))
+                x.json().then(t => window.location.replace('/ctfdockyard/loading/' + task + '?user_id=' + t.user_id))
             }
             ).catch(ex => alert(ex));
     }

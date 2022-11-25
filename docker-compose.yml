@@ -18,5 +18,5 @@ services:
       - ./app/view/static/:/usr/static/
       - ./nginx/yatb.conf:/etc/nginx/conf.d/default.conf
     ports:
-      - "8080:80"
+      - "8400:80"
     

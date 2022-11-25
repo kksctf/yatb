@@ -16,20 +16,17 @@ class Settings(BaseSettings):
     CHAT_ID: int = 0
 
     # event time
-    # EVENT_START_TIME: datetime.datetime = datetime.datetime(2022, 11, 26, 9, 0)
-    # EVENT_END_TIME: datetime.datetime = datetime.datetime(2022, 11, 27, 9, 0)
-
-    EVENT_START_TIME: datetime.datetime = datetime.datetime(2022, 11, 21, 15, 0)
-    EVENT_END_TIME: datetime.datetime = datetime.datetime(2022, 11, 22, 15, 0)
+    EVENT_START_TIME: datetime.datetime = datetime.datetime(2022, 11, 26, 9, 0)
+    EVENT_END_TIME: datetime.datetime = datetime.datetime(2022, 11, 27, 9, 0)
 
     # database name
     DB_NAME: str = os.path.join(".", "file_db") + ".db"
 
     # JWT settings
-    JWT_SECRET_KEY: str = "CHANGE_ME_OR_DIE13434523465"
+    JWT_SECRET_KEY: str = "testtesttest"
     JWT_ALGORITHM: str = "HS256"
     JWT_ACCESS_TOKEN_EXPIRE_MINUTES: int = 60 * 24 * 2  # two days
-    FLAG_SIGN_KEY: str = "YOU_ALSO_NEED_TO_CHANGE_ME"
+    FLAG_SIGN_KEY: str = "testtesttests"
 
     # rename docs. Why? Idk, but you maybe want this
     FASTAPI_DOCS_URL: str = "/kek_docs"
@@ -44,7 +41,7 @@ class Settings(BaseSettings):
     COMMIT: Optional[str] = None
 
     FLAG_BASE: str = "nimda"
-    CTF_NAME: str = "Nimda"
+    CTF_NAME: str = "Nimda Late Autumn 2022"
 
     def __init__(self, *args, **kwargs) -> None:
         super().__init__(*args, **kwargs)
@@ -84,4 +81,4 @@ MD_ATTRS_TASKS = {
         # "class": "btn btn-outline-primary btn-sm col-auto m-1 flex-fill"
     }
 }
-# ==== CLASSES FOR MD RENDERER ====
+# ==== CLASSES FOR MD RENDERER ====ы

@@ -55,7 +55,21 @@ class SimpleAuth(AuthBase):
         def check_password(self, model: "SimpleAuth.AuthModel") -> bool:
             return check_password(model.password_hash[0], model.password_hash[1], self.internal.password)
 
+        def check_valid(self) -> bool:
+            if settings.DEBUG:
+                return True
+            if len(self.internal.username) < 2 or len(self.internal.username) > 32:
+                return False
+            if len(self.internal.password) < 8:
+                return False
+            return True
+
         async def populate(self, req: Request, resp: Response) -> "SimpleAuth.AuthModel":
+            if not self.check_valid():
+                raise HTTPException(
+                    status_code=status.HTTP_400_BAD_REQUEST,
+                    detail="Invalid data",
+                )
             password_hash = hash_password(self.internal.password)
             return SimpleAuth.AuthModel(username=self.internal.username, password_hash=password_hash)
 
@@ -68,18 +82,24 @@ class SimpleAuth(AuthBase):
 
     @classmethod
     def generate_html(cls: Type["SimpleAuth"], url_for: Callable) -> str:
-        return """
+        if not settings.DEBUG:
+            login_resrictions = "minlength='2' maxlength='32'"
+            passw_resrictions = "minlength='8'"
+        else:
+            login_resrictions = ""
+            passw_resrictions = ""
+        return f"""
         Login:<br>
         <form class="login_form">
-            <input type="text" name="username" value="" placeholder="username">
-            <input type="password" name="password" value="" placeholder="password">
+            <input type="text" name="username" value="" placeholder="username" {login_resrictions}>
+            <input type="password" name="password" value="" placeholder="password" {passw_resrictions}>
             <button class="w-100 btn btn-warning mt-1" type="submit">Login</button>
         </form>
 
         Register:<br>
         <form class="register_form">
-            <input type="text" name="username" value="" placeholder="username">
-            <input type="password" name="password" value="" placeholder="password">
+            <input type="text" name="username" value="" placeholder="username" {login_resrictions}>
+            <input type="password" name="password" value="" placeholder="password" {passw_resrictions}>
             <button class="w-100 btn btn-warning mt-1" type="submit">Register</button>
         </form>
         """

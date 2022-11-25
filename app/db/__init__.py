@@ -65,6 +65,13 @@ class FileDB(object):
             old = user.solved_tasks
             user.solved_tasks = {i: migration_datetime for i in old}
 
+        # FIXME: говнокод & быстрофикс.
+        if isinstance(user.auth_source, dict):
+            original_au = user.auth_source
+            cls: schema.auth.AuthBase.AuthModel = getattr(schema.auth, user.auth_source["classtype"]).AuthModel
+            user.auth_source = cls.parse_obj(user.auth_source)
+            real_logger.warning(f"Found & fixed broken auth source: {original_au} -> {user.auth_source}")
+
         # admin promote
         if user.admin_checker() and not user.is_admin:
             real_logger.warning(f"INIT: Promoting {user} to admin")

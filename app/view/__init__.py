@@ -171,7 +171,7 @@ async def scoreboard_get(req: Request, resp: Response, r_user: schema.User = Dep
                 'solved_at': (x['solved_at'] + timedelta(hours=3)).strftime('%d-%m-%Y %H'),
                 'uuid': x['uuid']
             } for x in user.solves_history], lambda z: z['solved_at'])
-            grouped = [{'date': x, 'data': list(z)} for x, z in grouped]
+            grouped = [{'date': (datetime.strptime(x, '%d-%m-%Y %H') + timedelta(hours=3)).strftime('%d-%m-%Y %H'), 'data': list(z)} for x, z in grouped]
 
             for i, x in enumerate(dates):
                 if not [z for z in grouped if z['date'] == x]:
@@ -183,10 +183,10 @@ async def scoreboard_get(req: Request, resp: Response, r_user: schema.User = Dep
 
             result = [{'solved_at': x, 'score': 0} for x in dates]
             # ShitCode  / Fastfix
-            if grouped[0]['date'] == '26-11-2022 09':
-                grouped[0]['date'] = (datetime.strptime(grouped[0]['date'], '%d-%m-%Y %H') + timedelta(hours=3)).strftime(
-                    '%d-%m-%Y %H')
-                del grouped[1]
+            # if grouped[0]['date'] == '26-11-2022 09':
+            #     grouped[0]['date'] = (datetime.strptime(grouped[0]['date'], '%d-%m-%Y %H') + timedelta(hours=3)).strftime(
+            #         '%d-%m-%Y %H')
+            #   del grouped[1]
             for i, group in enumerate(grouped):
                 r_i = [result.index(x) for x in result if x['solved_at'] == group['date']][0]
                 if r_i != 0:

@@ -183,6 +183,9 @@ async def scoreboard_get(req: Request, resp: Response, r_user: schema.User = Dep
 
             result = [{'solved_at': x, 'score': 0} for x in dates]
             for group in grouped:
+                # ShitCode  / Fastfix
+                if group['date'] == '26-11-2022 09':
+                    group['date'] = (datetime.strptime(group['date'], '%d-%m-%Y %H') + timedelta(hours=3)).strftime('%d-%m-%Y %H')
                 r_i = [result.index(x) for x in result if x['solved_at'] == group['date']][0]
                 if r_i != 0:
                     result[r_i]['score'] = result[r_i - 1]['score'] + sum([x['score'] for x in group['data']])

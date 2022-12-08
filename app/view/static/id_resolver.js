@@ -13,7 +13,7 @@ const resolver_settings = [
         path_key: "task_id",
         result_key: "task_name",
         cache: {},
-        cache_key: "user_id_cache"
+        cache_key: "task_id_cache"
     },
 ]
 

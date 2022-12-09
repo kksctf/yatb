@@ -17,9 +17,7 @@ router = APIRouter(
 
 @router.get(
     "/",
-    response_model=List[schema.Task],
-    response_model_include=schema.Task.get_include_fieds(False),
-    response_model_exclude=schema.Task.get_exclude_fields(),
+    response_model=List[schema.Task.public_model()],
 )
 async def api_tasks_get(user: schema.User = Depends(auth.get_current_user_safe)):
     tasks = await db.get_all_tasks()
@@ -28,7 +26,10 @@ async def api_tasks_get(user: schema.User = Depends(auth.get_current_user_safe))
     return list(tasks)
 
 
-@router.post("/submit_flag")
+@router.post(
+    "/submit_flag",
+    response_model=uuid.UUID,
+)
 async def api_task_submit_flag(flag: schema.FlagForm, user: schema.User = Depends(auth.get_current_user)):
     if datetime.utcnow() < settings.EVENT_START_TIME:
         raise HTTPException(
@@ -92,9 +93,7 @@ async def api_task_submit_flag(flag: schema.FlagForm, user: schema.User = Depend
 
 @router.get(
     "/{task_id}",
-    response_model=schema.Task,
-    response_model_include=schema.Task.get_include_fieds(False),
-    response_model_exclude=schema.Task.get_exclude_fields(),
+    response_model=schema.Task.public_model(),
 )
 async def api_task_get(task_id: uuid.UUID, user: schema.User = Depends(auth.get_current_user)):
     task = await db.get_task_uuid(task_id)

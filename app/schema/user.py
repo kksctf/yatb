@@ -25,12 +25,12 @@ class User(EBaseModel):
         "profile_pic",
     }
     __admin_only_fields__ = {
-        "is_admin",
-        "oauth_id",
+        "is_admin": ...,
+        "auth_source": TYPING_AUTH,
     }
     __private_fields__ = {}
 
-    user_id: uuid.UUID = Field(default_factory=lambda: uuid.uuid4())
+    user_id: uuid.UUID = Field(default_factory=uuid.uuid4)
 
     username: str = "unknown"
 

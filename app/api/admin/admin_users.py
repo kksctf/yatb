@@ -28,9 +28,7 @@ class PasswordChangeForm(BaseModel):
 
 @router.get(
     "/user/{user_id}",
-    response_model=schema.User,
-    response_model_include=schema.User.get_include_fieds(True),
-    response_model_exclude=schema.User.get_exclude_fields(),
+    response_model=schema.User.admin_model(),
 )
 async def api_admin_user(user_id: uuid.UUID, user: schema.User = Depends(admin_checker)):
     ret_user = await api_admin_user_get_internal(user_id)
@@ -39,9 +37,7 @@ async def api_admin_user(user_id: uuid.UUID, user: schema.User = Depends(admin_c
 
 @router.post(
     "/user/{user_id}",
-    response_model=schema.User,
-    response_model_include=schema.User.get_include_fieds(True),
-    response_model_exclude=schema.User.get_exclude_fields(),
+    response_model=schema.User.admin_model(),
 )
 async def api_admin_user_edit(new_user: schema.User, user_id: uuid.UUID, user: schema.User = Depends(admin_checker)):
     new_user = await db.update_user_admin(user_id, new_user)
@@ -50,9 +46,7 @@ async def api_admin_user_edit(new_user: schema.User, user_id: uuid.UUID, user: s
 
 @router.get(
     "/users/me",
-    response_model=schema.User,
-    response_model_include=schema.User.get_include_fieds(True),
-    response_model_exclude=schema.User.get_exclude_fields(),
+    response_model=schema.User.admin_model(),
 )
 async def api_admin_users_me(user: schema.User = Depends(admin_checker)):
     return user
@@ -60,9 +54,7 @@ async def api_admin_users_me(user: schema.User = Depends(admin_checker)):
 
 @router.get(
     "/users",
-    response_model=Dict[uuid.UUID, schema.User],
-    response_model_include=schema.User.get_include_fieds(True),
-    response_model_exclude=schema.User.get_exclude_fields(),
+    response_model=Dict[uuid.UUID, schema.User.admin_model()],
 )
 async def api_admin_users(user: schema.User = Depends(admin_checker)):
     all_users = await api_admin_users_internal()
@@ -71,9 +63,7 @@ async def api_admin_users(user: schema.User = Depends(admin_checker)):
 
 @router.post(
     "/user/{user_id}/password",
-    response_model=schema.User,
-    response_model_include=schema.User.get_include_fieds(True),
-    response_model_exclude=schema.User.get_exclude_fields(),
+    response_model=schema.User.admin_model(),
 )
 async def api_admin_user_edit_password(
     new_password: PasswordChangeForm,
@@ -93,8 +83,6 @@ async def api_admin_user_edit_password(
 @router.delete(
     "/user/{user_id}",
     response_model=str,
-    response_model_include=schema.User.get_include_fieds(True),
-    response_model_exclude=schema.User.get_exclude_fields(),
 )
 async def api_admin_user_delete(
     user_id: uuid.UUID,

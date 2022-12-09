@@ -1,5 +1,6 @@
 import uuid
 import logging
+from pydantic import BaseModel
 from typing import List, Dict
 
 from fastapi import FastAPI, Cookie, Request, Response, HTTPException, status, Depends
@@ -20,9 +21,7 @@ async def get_task(task_id: uuid.UUID) -> schema.Task:
 
 @router.get(
     "/tasks",
-    response_model=Dict[uuid.UUID, schema.Task],
-    response_model_include=schema.Task.get_include_fieds(True),
-    response_model_exclude=schema.Task.get_exclude_fields(),
+    response_model=Dict[uuid.UUID, schema.Task.admin_model()],
 )
 async def api_admin_tasks(user: schema.User = Depends(admin_checker)):
     all_tasks = await db.get_all_tasks()
@@ -52,9 +51,7 @@ async def api_admin_unsolve_tasks(user: schema.User = Depends(admin_checker)):
 
 @router.get(
     "/unsolve_task/{task_id}",
-    response_model=schema.Task,
-    response_model_include=schema.Task.get_include_fieds(True),
-    response_model_exclude=schema.Task.get_exclude_fields(),
+    response_model=schema.Task.admin_model(),
 )
 async def api_admin_task_unsolve(task: schema.Task = Depends(get_task), user: schema.User = Depends(admin_checker)):
     logger.warning(f"Unsolving task: {task.short_desc()} by {user.short_desc()}")
@@ -63,9 +60,7 @@ async def api_admin_task_unsolve(task: schema.Task = Depends(get_task), user: sc
 
 @router.post(
     "/task",
-    response_model=schema.Task,
-    response_model_include=schema.Task.get_include_fieds(True),
-    response_model_exclude=schema.Task.get_exclude_fields(),
+    response_model=schema.Task.admin_model(),
 )
 async def api_admin_task_create(new_task: schema.TaskForm, user: schema.User = Depends(admin_checker)):
     task = await db.insert_task(new_task, user)
@@ -95,9 +90,7 @@ async def api_admin_task_delete(task: schema.Task = Depends(get_task), user: sch
 
 @router.get(
     "/task/{task_id}",
-    response_model=schema.Task,
-    response_model_include=schema.Task.get_include_fieds(True),
-    response_model_exclude=schema.Task.get_exclude_fields(),
+    response_model=schema.Task.admin_model(),
 )
 async def api_admin_task_get(task: schema.Task = Depends(get_task), user: schema.User = Depends(admin_checker)):
     return task
@@ -105,11 +98,11 @@ async def api_admin_task_get(task: schema.Task = Depends(get_task), user: schema
 
 @router.post(
     "/task/{task_id}",
-    response_model=schema.Task,
-    response_model_include=schema.Task.get_include_fieds(True),
-    response_model_exclude=schema.Task.get_exclude_fields(),
+    response_model=schema.Task.admin_model(),
 )
-async def api_admin_task_edit(new_task: schema.Task, task: schema.Task = Depends(get_task), user: schema.User = Depends(admin_checker)):
+async def api_admin_task_edit(
+    new_task: schema.Task, task: schema.Task = Depends(get_task), user: schema.User = Depends(admin_checker)
+):
     task = await db.update_task(task, new_task)  # TODO: remove bullshit.
     return task
 
@@ -117,34 +110,37 @@ async def api_admin_task_edit(new_task: schema.Task, task: schema.Task = Depends
 # TODO: А можно ли это сделать нормально?
 
 
-class InternalObjTasksList(schema.EBaseModel):
-    tasks: List[uuid.UUID]
+# class InternalObjTasksList(schema.EBaseModel):
+#     tasks: List[uuid.UUID]
 
 
-@router.post("/tasks/bulk_unhide")
-async def api_admin_tasks_bulk_unhide(tasks: InternalObjTasksList, user: schema.User = Depends(admin_checker)):
-    ret = {}
-    for task_id in tasks.tasks:
-        task = await db.get_task_uuid(task_id)
-        if task:
-            task.hidden = not task.hidden
-            ret[task.task_id] = task.hidden
-    return ret
+# @router.post("/tasks/bulk_unhide")
+# async def api_admin_tasks_bulk_unhide(tasks: InternalObjTasksList, user: schema.User = Depends(admin_checker)):
+#     ret = {}
+#     for task_id in tasks.tasks:
+#         task = await db.get_task_uuid(task_id)
+#         if task:
+#             task.hidden = not task.hidden
+#             ret[task.task_id] = task.hidden
+#     return ret
 
 
-class InternalObjTasksListDecay(InternalObjTasksList):
-    tasks: List[uuid.UUID]
-    decay: int
+# class InternalObjTasksListDecay(InternalObjTasksList):
+#     tasks: List[uuid.UUID]
+#     decay: int
 
 
 # not work.
-@router.post("/tasks/bulk_edit_decay")
-async def api_admin_tasks_bulk_edit_decay(tasks: InternalObjTasksListDecay, user: schema.User = Depends(admin_checker)):
-    ret = {}
-    for task_id in tasks.tasks:
-        task = await db.get_task_uuid(task_id)
-        if task:
-            if task.scoring.classtype == schema.scoring.DynamicKKSScoring:
-                task.scoring.decay = tasks.decay
-                ret[task.task_id] = task.scoring.decay
-    return ret
+# @router.post("/tasks/bulk_edit_decay")
+# async def api_admin_tasks_bulk_edit_decay(
+#     tasks: InternalObjTasksListDecay,
+#     user: schema.User = Depends(admin_checker),
+# ):
+#     ret = {}
+#     for task_id in tasks.tasks:
+#         task = await db.get_task_uuid(task_id)
+#         if task:
+#             if task.scoring.classtype == schema.scoring.DynamicKKSScoring:
+#                 task.scoring.decay = tasks.decay
+#                 ret[task.task_id] = task.scoring.decay
+#     return ret

@@ -31,9 +31,7 @@ async def api_scoreboard_get_internal() -> List[schema.User]:
 
 @router.get(
     "/scoreboard",
-    response_model=List[schema.User],
-    response_model_include=schema.User.get_include_fieds(False),
-    response_model_exclude=schema.User.get_exclude_fields(),
+    response_model=List[schema.User.public_model()],
 )
 async def api_scoreboard_get():
     users = await api_scoreboard_get_internal()
@@ -79,9 +77,7 @@ async def api_task_get_ctftime_scoreboard(fullScoreboard: bool = False):
 
 @router.get(
     "/me",
-    response_model=schema.User,
-    response_model_include=schema.User.get_include_fieds(False),
-    response_model_exclude=schema.User.get_exclude_fields(),
+    response_model=schema.User.public_model(),
 )
 async def api_users_me(user: schema.User = Depends(auth.get_current_user)):
     return user
@@ -97,9 +93,7 @@ async def api_users_logout(req: Request, resp: Response, user: schema.User = Dep
 
 @router.get(
     "/{user_id}",
-    response_model=schema.User,
-    response_model_include=schema.User.get_include_fieds(False),
-    response_model_exclude=schema.User.get_exclude_fields(),
+    response_model=schema.User.public_model(),
 )
 async def api_users_get(user_id: uuid.UUID, user: schema.User = Depends(auth.get_current_user)):
     req_user = await db.get_user_uuid(user_id)

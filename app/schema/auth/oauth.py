@@ -79,6 +79,12 @@ class OAuth(AuthBase):
 
 
 class CTFTimeOAuth_Team(EBaseModel):
+    __admin_only_fields__ = {
+        "id",
+        "name",
+        "country",
+        "logo",
+    }
     id: int
     name: str
     country: Optional[str]

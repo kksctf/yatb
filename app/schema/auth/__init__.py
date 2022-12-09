@@ -12,6 +12,8 @@ logger = logging.getLogger("yatb.schema.auth")
 
 class AuthBase(object):
     class AuthModel(EBaseModel):
+        __public_fields__ = {"classtype"}
+
         classtype: Literal["AuthBase"] = "AuthBase"
 
         def is_admin(self) -> bool:

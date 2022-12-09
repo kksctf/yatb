@@ -31,6 +31,7 @@ class Task(EBaseModel):
         "scoring": Scoring,
         "description_html": ...,
         "author": ...,
+        "pwned_by": ...,
     }
     __admin_only_fields__ = {
         "description": ...,
@@ -38,7 +39,7 @@ class Task(EBaseModel):
         "hidden": ...,
     }
 
-    task_id: uuid.UUID = Field(default_factory=lambda: uuid.uuid4())
+    task_id: uuid.UUID = Field(default_factory=uuid.uuid4)
 
     task_name: str
     category: str
@@ -57,11 +58,8 @@ class Task(EBaseModel):
 
     author: str
 
-    def __init__(self, *args, **kwargs):
-        super().__init__(*args, **kwargs)
-
     @property
-    def color_category(self):
+    def color_category(self) -> str:
         if self.category.lower() == "crypto":
             return "crypto"
         elif self.category.lower() == "web":
@@ -91,13 +89,13 @@ class Task(EBaseModel):
     #     return v or markdown2.markdown(cls.description)
 
     @staticmethod
-    def regenerate_md(content):
+    def regenerate_md(content: str) -> str:
         return md.markdownCSS(content, config.MD_CLASSES_TASKS, config.MD_ATTRS_TASKS)
 
     # it's time for crazy solution.
     # Taken from https://github.com/samuelcolvin/pydantic/issues/619#issuecomment-635784061
     @validator("scoring", pre=True)
-    def validate_scoring(cls, value):
+    def validate_scoring(cls, value):  # noqa: E0213, N805
         if isinstance(value, EBaseModel):
             return value
         if not isinstance(value, dict):

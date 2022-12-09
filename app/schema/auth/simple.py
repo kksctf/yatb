@@ -4,7 +4,7 @@ import hmac
 import os
 from typing import Callable, Hashable, List, Optional, Tuple, Type
 
-import aiohttp
+from base64 import b64encode
 from fastapi import Body, HTTPException, Query, Request, Response, status
 from pydantic import BaseSettings, Extra, validator
 
@@ -27,6 +27,8 @@ class SimpleAuth(AuthBase):
     class AuthModel(AuthBase.AuthModel):
         __admin_only_fields__ = {
             "username",
+        }
+        __private_fields__ = {
             "password_hash",
         }
         classtype: Literal["SimpleAuth"] = "SimpleAuth"

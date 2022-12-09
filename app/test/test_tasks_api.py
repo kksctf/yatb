@@ -8,31 +8,37 @@ client = client_cl
 
 def test_task_create(client: TestClient):
     test_auth.test_admin(client)
+
     resp1 = client.post(
         app.url_path_for("api_admin_task_create"),
-        data=schema.TaskForm(
+        json=schema.TaskForm(
             task_name="TestTast1",
             category="web",
             scoring=schema.StaticScoring(static_points=1337),
             description="test_task_decription",
             flag=schema.StaticFlag(flag_base="kks", flag="test_task"),
-        ).json(),
-        headers={"Content-Type": "application/json"},
+        ).dict(),
     )
     assert resp1.status_code == 200, resp1.text
 
     resp2 = client.post(
         app.url_path_for("api_admin_task_create"),
-        data=schema.TaskForm(
+        json=schema.TaskForm(
             task_name="TestTast2",
             category="pwn",
             scoring=schema.StaticScoring(static_points=1338),
             description="second_test_task_description",
             flag=schema.StaticFlag(flag_base="kks", flag="other_test_task"),
-        ).json(),
-        headers={"Content-Type": "application/json"},
+        ).dict(),
     )
     assert resp2.status_code == 200, resp2.text
+
+    resp1_1 = client.get(app.url_path_for("api_admin_task_get", task_id=resp1.json()["task_id"]))
+    assert resp1_1.status_code == 200, resp1_1.text
+    assert resp1_1.json()["task_id"] == resp1.json()["task_id"], resp1.json()
+    assert resp1_1.json()["task_name"] == "TestTast1", resp1.json()
+    assert resp1_1.json()["category"] == "web", resp1.json()
+    assert resp1_1.json()["description"] == "test_task_decription", resp1.json()
 
     resp3 = client.get(app.url_path_for("api_admin_tasks"))
     assert resp3.status_code == 200, resp3.text
@@ -47,14 +53,17 @@ def test_task_create(client: TestClient):
         task_obj = schema.Task(**task)
         task_obj.hidden = False
         resp_show = client.post(
-            app.url_path_for("api_admin_task_edit", task_id=str(task_obj.task_id)), data=task_obj.json(), headers={"Content-Type": "application/json"}
+            app.url_path_for("api_admin_task_edit", task_id=task_obj.task_id),
+            data=task_obj.json(),  # type: ignore
+            headers={"Content-Type": "application/json"},
         )
         assert resp_show.status_code == 200, f"{task['task_name']} {resp_show.text}"
 
     resp5 = client.get(app.url_path_for("api_tasks_get"))
-    assert resp5.status_code == 200, resp4.text
+    assert resp5.status_code == 200, resp5.text
     assert "flag" not in resp5.json()[0]
     assert "flag" not in resp5.json()[1]
+    assert "flag" not in resp5.text
 
     assert resp5.json()[0]["task_id"] in [resp1.json()["task_id"], resp2.json()["task_id"]], resp4.json()
     assert resp5.json()[1]["task_id"] in [resp1.json()["task_id"], resp2.json()["task_id"]], resp4.json()

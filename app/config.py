@@ -1,5 +1,5 @@
 import datetime
-import os
+from pathlib import Path
 import subprocess
 from typing import List, Optional
 
@@ -14,12 +14,12 @@ class Settings(BaseSettings):
     BOT_TOKEN: Optional[str] = None
     CHAT_ID: int = 0
 
-    # event time
+    # event time. should be in UTC
     EVENT_START_TIME: datetime.datetime = datetime.datetime(1077, 12, 12, 9, 0)
     EVENT_END_TIME: datetime.datetime = datetime.datetime(2077, 12, 13, 9, 0)
 
     # database name
-    DB_NAME: str = os.path.join(".", "file_db") + ".db"
+    DB_NAME: Path = Path(".") / "file_db.db"
 
     # JWT settings
     JWT_SECRET_KEY: str = "CHANGE_ME_OR_DIE13434523465"
@@ -28,12 +28,12 @@ class Settings(BaseSettings):
     FLAG_SIGN_KEY: str = "YOU_ALSO_NEED_TO_CHANGE_ME"
 
     # rename docs. Why? Idk, but you maybe want this
-    FASTAPI_DOCS_URL: str = "/kek_docs"
-    FASTAPI_REDOC_URL: str = "/kek_redoc"
-    FASTAPI_OPENAPI_URL: str = "/kek_openapi.json"
+    FASTAPI_DOCS_URL: str = "/docs"
+    FASTAPI_REDOC_URL: str = "/redoc"
+    FASTAPI_OPENAPI_URL: str = "/openapi.json"
 
     # if you enable metrics - you must change that URL, metrics can expose some sensitive info
-    MONITORING_URL: str = "/kek_metrics"
+    MONITORING_URL: str = "/metrics"
 
     # version magic
     VERSION: str = ""
@@ -47,7 +47,7 @@ class Settings(BaseSettings):
         self.version_solver()
 
     def version_solver(self):
-        if ".git" in os.listdir("."):
+        if (Path(".") / ".git").exists():
             self.VERSION += subprocess.check_output(["git", "rev-parse", "HEAD"]).decode()[:8]
             self.VERSION += "-Modified" if len(subprocess.check_output(["git", "status", "--porcelain"])) > 0 else ""
         else:

@@ -13,7 +13,7 @@ repository = "https://github.com/kksctf/yatb"
 documentation = "https://github.com/kksctf/yatb"
 readme = "README.md"
 
-python = "^3.9"
+python = "^3.10"
 
 keywords = ["ctf", "jeopardy", "ctf-platform", "fastapi"]
 
@@ -23,8 +23,8 @@ classifiers = [
 
 # black config enabled.
 [tool.black]
-line-length = 150
-target_version = ['py39']
+line-length = 120
+target_version = ['py310']
 include = '\.pyi?$'
 exclude = '''
 
@@ -48,7 +48,7 @@ exclude = '''
 # diff = true
 aggressive = 3
 in-place = true
-line-length = 150
+line-length = 120
 recursive = true
 
 [tool.pytest.ini_options]

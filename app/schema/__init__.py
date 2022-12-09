@@ -94,12 +94,16 @@ class EBaseModel(BaseModel):
         for attr_name, attr_value in cls.__dict__.items():
             if not isinstance(attr_value, property):
                 continue
-
-            logger.info(f"Found property in {cls}: {attr_name}")
-            target_fields[attr_name] = (
-                attr_value.fget.__annotations__["return"],
-                FieldInfo(),
-            )
+            if attr_name in exclude:
+                continue
+            elif attr_name in include:
+                logger.info(f"Found property in {cls}: {attr_name}")
+                target_fields[attr_name] = (
+                    attr_value.fget.__annotations__["return"],
+                    FieldInfo(),
+                )
+            else:
+                logger.info(f"Unlisted property at {cls.__qualname__}: {attr_name}")
 
         return create_model(
             f"{cls.__qualname__}_{name}",
@@ -147,73 +151,6 @@ class EBaseModel(BaseModel):
         else:
             ret = f1 | f2
         return ret
-
-    # def do_args(self, args, kwargs):
-    #     if len(self.__public_fields__) == 0 and len(self.__admin_only_fields__) == 0:
-    #         return
-    #     _admin_mode = False
-
-    #     print(self.__private_fields__, self.__public_fields__, self.__admin_only_fields__)
-    #     print(self)
-    #     print(args, kwargs)
-
-    #     if "include" not in kwargs:
-    #         kwargs["include"] = set()
-    #     if "exclude" not in kwargs:
-    #         kwargs["exclude"] = set()
-    #     if "admin_mode" in kwargs:
-    #         _admin_mode = kwargs["admin_mode"]
-    #     kwargs["exclude"].update(self.get_exclude_fields())
-    #     kwargs["include"].update(self.get_include_fieds(_admin_mode))
-
-    #     print(self)
-    #     print(_admin_mode, args, kwargs)
-
-    # # TODO: this is a VEEERY strange solution with in and out fields... but i have no fucking idea about anything else
-    # @staticmethod
-    # def recursive_load(in_fields: dict, out_fields: dict, *args, **kwargs):
-    #     for key, val in in_fields.items():  # iterate over fields list
-    #         if val != ... and issubclass(val, EBaseModel):  # if we found subclass
-    #             ev: FilterFieldsType = dict()  # set()  # prepare extendig set/dict
-    #             for subclass in [val] + val.__subclasses__():  # build in/ex fields for subclasses...
-    #                 tmp = subclass.get_include_fieds(*args, **kwargs)
-    #                 if isinstance(tmp, dict):  # append them to resulting dict
-    #                     ev.update(tmp)
-    #                 elif isinstance(tmp, set):  # append them to resulting dict (with convertion)
-    #                     ev |= {i: ... for i in tmp}
-    #             out_fields[key] = ev
-    #         else:
-    #             out_fields[key] = val
-
-    # @classmethod
-    # # @functools.lru_cache(maxsize=1024, typed=True)
-    # def get_include_fieds(cls, admin=False):
-    #     # resolve fields, that we need to include
-    #     if isinstance(cls.__public_fields__, dict) and isinstance(cls.__admin_only_fields__, dict):
-    #         # in case of public and admin fields are dicts - we need to do some complex shit.
-    #         ret_dict = {}
-    #         EBaseModel.recursive_load(cls.__public_fields__, ret_dict, admin=admin)
-    #         if admin:
-    #             EBaseModel.recursive_load(cls.__admin_only_fields__, ret_dict, admin=admin)
-    #         logger.debug(f"Include Fields Dict for {cls} and {admin}={ret_dict}")
-    #         return ret_dict
-    #     elif isinstance(cls.__public_fields__, set) and isinstance(cls.__admin_only_fields__, set):
-    #         # in case of public and admin fields are set - just join them.
-    #         ret = cls.__public_fields__ | (cls.__admin_only_fields__ if admin else set())
-    #         return ret
-    #     else:
-    #         print(
-    #             cls,
-    #             cls.__public_fields__,
-    #             cls.__admin_only_fields__,
-    #             type(cls.__public_fields__),
-    #             type(cls.__admin_only_fields__),
-    #         )
-    #         raise Exception("WTF why public fields and admin only fields have different types?!")
-
-    # @classmethod
-    # def get_exclude_fields(cls):
-    #     return cls.__private_fields__
 
     # Workaround for serializing properties with pydantic until
     # https://github.com/samuelcolvin/pydantic/issues/935#issuecomment-641175527 is solved

@@ -118,6 +118,7 @@ async def shutdown_event():
     global _db
     if settings.DB_NAME is None:
         return
+    save_path = settings.DB_NAME / "ressurect_db.db" if settings.DB_NAME.is_dir() else settings.DB_NAME
     with open(settings.DB_NAME, "wb") as f:
         pickle.dump(_db._db, f)
     real_logger.warning("FileDB saved")

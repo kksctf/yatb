@@ -133,14 +133,14 @@ for auth_way in schema.auth.ENABLED_AUTH_WAYS:
             **auth_way.router_params,
         )
     else:
-        router.add_api_route(
+        router.add_api_route(  # noqa: E1132 # this is intended way
             endpoint=api_auth_simple_login,
             path="/simple_login",
             name="api_auth_simple_login",
             methods=["POST"],
             **auth_way.router_params,
         )
-        router.add_api_route(
+        router.add_api_route(  # noqa: E1132 # this is intended way
             endpoint=api_auth_simple_register,
             path="/simple_register",
             name="api_auth_simple_register",

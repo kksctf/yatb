@@ -1,9 +1,16 @@
 import datetime
-from pathlib import Path
 import subprocess
-from typing import List, Optional
+from pathlib import Path
+from typing import Any, List, Optional, Type
 
-from pydantic import BaseSettings
+from pydantic import BaseSettings, validator
+from pydantic.fields import ModelField
+
+_DEFAULT_TOKEN = "default_token_CHANGE_ME"
+
+
+class DefaultTokenError(ValueError):
+    pass
 
 
 class Settings(BaseSettings):
@@ -22,10 +29,10 @@ class Settings(BaseSettings):
     DB_NAME: Path = Path(".") / "file_db.db"
 
     # JWT settings
-    JWT_SECRET_KEY: str = "CHANGE_ME_OR_DIE13434523465"
+    JWT_SECRET_KEY: str = _DEFAULT_TOKEN
     JWT_ALGORITHM: str = "HS256"
     JWT_ACCESS_TOKEN_EXPIRE_MINUTES: int = 60 * 24 * 2  # two days
-    FLAG_SIGN_KEY: str = "YOU_ALSO_NEED_TO_CHANGE_ME"
+    FLAG_SIGN_KEY: str = _DEFAULT_TOKEN
 
     # rename docs. Why? Idk, but you maybe want this
     FASTAPI_DOCS_URL: str = "/docs"
@@ -42,16 +49,27 @@ class Settings(BaseSettings):
     FLAG_BASE: str = "kks"
     CTF_NAME: str = "YATB-dev"
 
+    API_TOKEN: str = _DEFAULT_TOKEN
+    WS_API_TOKEN: str = _DEFAULT_TOKEN
+
     def __init__(self, *args, **kwargs) -> None:
         super().__init__(*args, **kwargs)
         self.version_solver()
+
+    @validator("JWT_SECRET_KEY", "FLAG_SIGN_KEY", "API_TOKEN", "WS_API_TOKEN", always=True)
+    def check_non_default_tokens(cls, v: str, field: ModelField, values: dict) -> str:  # noqa: E0213, N805
+        if values["DEBUG"]:
+            return v
+        if v == _DEFAULT_TOKEN:
+            raise DefaultTokenError(f"Field '{field.name}' have default token value")
+        return v
 
     def version_solver(self):
         if (Path(".") / ".git").exists():
             self.VERSION += subprocess.check_output(["git", "rev-parse", "HEAD"]).decode()[:8]
             self.VERSION += "-Modified" if len(subprocess.check_output(["git", "status", "--porcelain"])) > 0 else ""
         else:
-            self.VERSION += "a0.5.2"
+            self.VERSION += "a0.6.0"
             if self.COMMIT:
                 self.VERSION += f"-{self.COMMIT[:8]}"
 

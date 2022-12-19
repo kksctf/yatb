@@ -52,7 +52,7 @@ async def api_task_submit_flag(flag: schema.FlagForm, user: schema.User = Depend
             logger.warning(f"Кто-то {user} попытался решить хидден таск {task}")
             raise HTTPException(
                 status_code=status.HTTP_404_NOT_FOUND,
-                detail="Ты как колпак снял, зачем таск решаешь?!",
+                detail="Bad flag",
             )
         raise HTTPException(
             status_code=status.HTTP_404_NOT_FOUND,

@@ -30,8 +30,8 @@ logging.getLogger("yatb").propagate = False  # disable logging anything upper
 loggers = [logging.getLogger()]  # get the root logger
 loggers = loggers + [logging.getLogger(name) for name in logging.root.manager.loggerDict]
 
-for i in loggers:
-    print(f"LOGGER: {i}")
+# for i in loggers:
+#     print(f"LOGGER: {i}")
 
 from . import main  # noqa
 from . import api  # noqa

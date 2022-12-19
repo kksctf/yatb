@@ -1,17 +1,28 @@
-import uuid
 import logging
+import uuid
 
-from fastapi import FastAPI, Cookie, Request, Response, HTTPException, status, Depends
+from fastapi import (
+    Cookie,
+    Depends,
+    FastAPI,
+    HTTPException,
+    Query,
+    Request,
+    Response,
+    WebSocket,
+    WebSocketDisconnect,
+    WebSocketException,
+    status,
+)
 from fastapi.routing import APIRouter
 
 from ... import auth, config, schema
-
 from ...api import api_tasks as api_tasks
 from ...api import api_users as api_users
-
+from ...api.admin import admin_checker
 from ...api.admin import admin_tasks as api_admin_tasks
 from ...api.admin import admin_users as api_admin_users
-from ...api.admin import admin_checker
+from ...ws import ws_manager
 
 logger = logging.getLogger("yatb.view")
 
@@ -106,3 +117,28 @@ async def admin_user_get(req: Request, resp: Response, user_id: uuid.UUID, user:
         },
         ignore_admin=False,
     )
+
+
+async def get_token(
+    websocket: WebSocket,
+    token: str | None = Query(default=None),
+):
+    if token and token == config.settings.WS_API_TOKEN:
+        return token
+
+    raise WebSocketException(code=status.WS_1008_POLICY_VIOLATION)
+
+
+@router.websocket("/ws")
+async def websocker_ep(
+    websocket: WebSocket,
+    token: str = Depends(get_token),
+):
+    logger.info(f"{token= } connected to WS")
+    await ws_manager.connect(websocket)
+    try:
+        await websocket.send_json({"ping": "ping"})
+        while True:
+            await websocket.receive_text()
+    except WebSocketDisconnect:
+        ws_manager.disconnect(websocket)

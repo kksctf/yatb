@@ -20,6 +20,9 @@ def generate_loggers(
     if not os.path.exists(base_folder):
         os.mkdir(base_folder)
 
+    # setup root_logger with level - debug
+    # to file - debug
+    # to console - info
     root_logger = logging.getLogger(base_name)
     root_logger.setLevel(logging.DEBUG)
     formatter = logging.Formatter(root_format)

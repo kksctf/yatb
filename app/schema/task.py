@@ -100,6 +100,7 @@ class Task(EBaseModel):
             return value
         if not isinstance(value, dict):
             raise ValueError("value must be dict")
+
         classtype = value.get("classtype")
         if classtype == "Scoring":
             return Scoring(**value)
@@ -111,11 +112,12 @@ class Task(EBaseModel):
             raise ValueError(f"Unkonwn classtype {classtype}")
 
     @validator("flag", pre=True)
-    def validate_flag(cls, value):
     def validate_flag(cls, value):  # noqa: E0213, N805
+        if isinstance(value, EBaseModel):
             return value
         if not isinstance(value, dict):
             raise ValueError("value must be dict")
+
         classtype = value.get("classtype")
         if classtype == "Flag":
             return Flag(**value)

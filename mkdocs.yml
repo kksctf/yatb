@@ -1,8 +1,21 @@
 site_name: YATB
 site_description: YATB - yet another fast and furious jeopardy-CTF taskboard
 site_url: https://kksctf.github.io/yatb
+
 repo_name: kksctf/yatb
 repo_url: https://github.com/kksctf/yatb
+edit_uri: ""
+
+plugins:
+  - search
+
+nav:
+  - YATB: index.md
+  - config.md
+  - Hacking:
+    - hacking/index.md
+  - release-notes.md
+
 theme:
   name: material
   palette:
@@ -17,5 +30,3 @@ theme:
       toggle:
         icon: material/brightness-7
         name: Switch to dark mode
-plugins:
-  - search

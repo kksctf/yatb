@@ -55,7 +55,7 @@ class TelegramAuth(AuthBase):
         hash: str = Query(...)
 
         @validator("auth_date")
-        def check_date(cls, date, values, **kwargs):
+        def check_date(cls, date, values, **kwargs):  # noqa: E0213, N805
             rdate = datetime.datetime.fromtimestamp(date)
             if (datetime.datetime.now() - rdate).total_seconds() > 60 * 2:
                 raise HTTPException(
@@ -65,7 +65,7 @@ class TelegramAuth(AuthBase):
             return date
 
         @validator("hash")
-        def check_hash(cls, hash, values, **kwargs):
+        def check_hash(cls, hash, values, **kwargs):  # noqa: E0213, N805
             bot_sha = hashlib.sha256(TelegramAuth.auth_settings.BOT_TOKEN.encode()).digest()
 
             hash_check_string = "\n".join(f"{i}={values[i]}" for i in sorted(values.keys()) if values[i] is not None)

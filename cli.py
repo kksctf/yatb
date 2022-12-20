@@ -165,7 +165,7 @@ class YATB:
         new_task = (
             await self.s.post(
                 app.url_path_for("api_admin_task_edit", task_id=task.task_id),
-                data=task.json(), # httpx shit ;(, sry
+                data=task.json(),  # httpx shit ;(, sry
             )
         ).json()
         return schema.Task.parse_obj(new_task)

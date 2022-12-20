@@ -29,6 +29,13 @@ async def api_tasks_get(user: schema.User = Depends(auth.get_current_user_safe))
     return list(tasks)
 
 
+class BRMessage(schema.EBaseModel):
+    task_name: str
+    user_name: str
+    points: int
+    is_fb: bool
+
+
 @router.post(
     "/submit_flag",
     response_model=uuid.UUID,
@@ -84,6 +91,15 @@ async def api_task_submit_flag(flag: schema.FlagForm, user: schema.User = Depend
         metrics.solves_per_user.labels(user_id=user.user_id, username=user.username).inc()
 
     ret = await db.solve_task(task, user)
+
+    msg = BRMessage(
+        task_name=task.task_name,
+        user_name=user.username,
+        points=task.scoring.points,
+        is_fb=len(task.pwned_by) == 1,
+    )
+
+    await ws_manager.broadcast(msg.json())
 
     if len(task.pwned_by) == 1:
         try:

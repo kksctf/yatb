@@ -59,7 +59,7 @@ class EBaseModel(BaseModel):
                 continue
             elif field_name in include:
                 if origin_is_union(get_origin(field_value.annotation)):
-                    logger.info(f"Found union field at {cls.__qualname__}: {field_name}")
+                    logger.debug(f"Found union field at {cls.__qualname__}: {field_name}")
                     new_union_base: list[Any] = []
                     for union_member in get_args(field_value.annotation):
                         if issubclass(union_member, EBaseModel):
@@ -75,7 +75,7 @@ class EBaseModel(BaseModel):
                         field_value.field_info,
                     )
                 elif isinstance(field_value.annotation, type) and issubclass(field_value.annotation, EBaseModel):
-                    logger.info(f"Found EBaseModel field at {cls.__qualname__}: {field_name}")
+                    logger.debug(f"Found EBaseModel field at {cls.__qualname__}: {field_name}")
                     new_field_cls = (
                         field_value.annotation.public_model() if public else field_value.annotation.admin_model()
                     )
@@ -97,7 +97,7 @@ class EBaseModel(BaseModel):
             if attr_name in exclude:
                 continue
             elif attr_name in include:
-                logger.info(f"Found property in {cls}: {attr_name}")
+                logger.debug(f"Found property in {cls}: {attr_name}")
                 target_fields[attr_name] = (
                     attr_value.fget.__annotations__["return"],
                     FieldInfo(),

@@ -112,7 +112,7 @@ class Task(EBaseModel):
 
     @validator("flag", pre=True)
     def validate_flag(cls, value):
-        if isinstance(value, EBaseModel):
+    def validate_flag(cls, value):  # noqa: E0213, N805
             return value
         if not isinstance(value, dict):
             raise ValueError("value must be dict")

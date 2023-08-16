@@ -1,25 +1,23 @@
-import logging
-import os
 import uuid
-from datetime import datetime, timedelta
-from typing import Any, Dict, List, Optional
+from collections.abc import Mapping
+from pathlib import Path
 
-from fastapi import Cookie, Depends, FastAPI, HTTPException, Request, Response, status
-from fastapi.routing import APIRoute, APIRouter
-from fastapi.staticfiles import StaticFiles
+from fastapi import BackgroundTasks, Depends, Request, Response
+from fastapi.routing import APIRoute as _APIRoute
+from fastapi.routing import APIRouter
 from fastapi.templating import Jinja2Templates
-from pydantic import parse_obj_as
 from starlette.routing import Router
+from starlette.templating import _TemplateResponse
 
-from .. import auth, db, schema
+from .. import auth, schema
 from ..api import api_tasks, api_users
 from ..config import settings
 from ..utils.log_helper import get_logger
 
 logger = get_logger("view")
 
-_base_path = os.path.dirname(os.path.abspath(__file__))
-templ = Jinja2Templates(directory=os.path.join(_base_path, "templates"))
+_base_path = Path(__file__).resolve().parent
+templ = Jinja2Templates(directory=_base_path / "templates")
 
 router = APIRouter(
     prefix="",
@@ -27,29 +25,33 @@ router = APIRouter(
 )
 
 
-def route_generator(req: Request, base_path="/api", ignore_admin=True) -> Dict[str, str]:
+def route_generator(req: Request, base_path: str = "/api", *, ignore_admin: bool = True) -> dict[str, str]:
     router: Router = req.scope["router"]
     ret = {}
-    for r in router.routes:  # type: ignore # i'm 100% sure, that there should be only APIRoute objects
-        r: APIRoute
-        if r.path.startswith(base_path):
-            if ignore_admin and r.path.startswith(f"{base_path}/admin"):
-                continue
-            dummy_params = {i: f"NONE_{i}" for i in set(r.param_convertors.keys())}
-            ret[r.name] = req.url_for(name=r.name, **dummy_params)
+    for r in router.routes:
+        if not isinstance(r, _APIRoute):
+            continue
+        if not r.path.startswith(base_path):
+            continue
+        if ignore_admin and r.path.startswith(f"{base_path}/admin"):
+            continue
+
+        dummy_params = {i: f"NONE_{i}" for i in set(r.param_convertors.keys())}
+        ret[r.name] = req.url_for(r.name, **dummy_params)
     return ret
 
 
-def response_generator(
+def response_generator(  # noqa: PLR0913 # impossible to fix
     req: Request,
     filename: str,
-    context: dict = {},
+    context: dict = {},  # noqa: B006 # iknew.
     status_code: int = 200,
-    headers: dict = None,
-    media_type: str = None,
-    background=None,
-    ignore_admin=True,
-) -> Response:
+    headers: Mapping[str, str] | None = None,
+    media_type: str | None = None,
+    background: BackgroundTasks | None = None,
+    *,
+    ignore_admin: bool = True,
+) -> _TemplateResponse:
     context_base = {
         "request": req,
         "api_list": route_generator(req, ignore_admin=ignore_admin),
@@ -65,7 +67,7 @@ def response_generator(
     )
 
 
-def version_string():
+def version_string() -> str:
     return f"kks-tb-{settings.VERSION}"
 
 

@@ -1,11 +1,8 @@
-from datetime import datetime
 import os
 import pickle
-import uuid
-import logging
+from datetime import datetime
 
 from pydantic import BaseModel
-from typing import List
 
 from .. import app, db, schema
 from ..config import settings
@@ -14,7 +11,7 @@ from ..utils.log_helper import get_logger
 logger = get_logger("db")
 
 
-class FileDB(object):
+class FileDB:
     _db = None
     _index = None
 
@@ -71,11 +68,11 @@ class FileDB(object):
             original_au = user.auth_source
             cls: schema.auth.AuthBase.AuthModel = getattr(schema.auth, user.auth_source["classtype"]).AuthModel
             user.auth_source = cls.parse_obj(user.auth_source)
-            real_logger.warning(f"Found & fixed broken auth source: {original_au} -> {user.auth_source}")
+            logger.warning(f"Found & fixed broken auth source: {original_au} -> {user.auth_source}")
 
         # admin promote
         if user.admin_checker() and not user.is_admin:
-            real_logger.warning(f"INIT: Promoting {user} to admin")
+            logger.warning(f"INIT: Promoting {user} to admin")
             user.is_admin = True
 
         return user
@@ -89,7 +86,7 @@ async def startup_event():
     global _db
     if settings.DB_NAME is None:
         _db.reset_db()
-        real_logger.warning("TESTING_FileDB loaded")
+        logger.warning("TESTING_FileDB loaded")
         return
 
     if not os.path.exists(settings.DB_NAME):
@@ -106,10 +103,10 @@ async def startup_event():
                 "tasks": {},
                 "users": {},
             }
-            real_logger.error(f"Loading db exception, fallback to empty, {ex}")
+            logger.error(f"Loading db exception, fallback to empty, {ex}")
 
     _db.generate_index()
-    real_logger.warning("FileDB loaded")
+    logger.warning("FileDB loaded")
     # logger.debug(f"FileDB: {_db._db}")
     # logger.debug(f"FileDBIndex: {_db._index}")
 
@@ -122,7 +119,7 @@ async def shutdown_event():
     save_path = settings.DB_NAME / "ressurect_db.db" if settings.DB_NAME.is_dir() else settings.DB_NAME
     with open(settings.DB_NAME, "wb") as f:
         pickle.dump(_db._db, f)
-    real_logger.warning("FileDB saved")
+    logger.warning("FileDB saved")
 
 
 def update_entry(obj: BaseModel, data: dict):
@@ -131,5 +128,5 @@ def update_entry(obj: BaseModel, data: dict):
             setattr(obj, i, data[i])
 
 
-from .db_users import *  # noqa
 from .db_tasks import *  # noqa
+from .db_users import *  # noqa

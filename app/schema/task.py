@@ -6,9 +6,10 @@ from typing import Dict, List, Optional, Type, Union
 import humanize
 from pydantic import Extra, Field, validator
 
+from .. import config
 from ..config import settings
 from ..utils import md
-from . import EBaseModel, User, config, logger
+from . import EBaseModel, User, logger
 from .flags import DynamicKKSFlag, Flag, StaticFlag
 from .scoring import DynamicKKSScoring, Scoring, StaticScoring
 
@@ -68,13 +69,13 @@ class Task(EBaseModel):
             return "binary"
         return "other"
 
-    def visible_for_user(self, user: Optional[User] = None) -> bool:
+    def visible_for_user(self, user: User | None = None) -> bool:
         # if admin: always display task.
         if user and user.is_admin:
             return True
 
         # if event not started yet
-        if datetime.datetime.utcnow() <= settings.EVENT_START_TIME:
+        if datetime.datetime.now(tz=datetime.UTC) <= settings.EVENT_START_TIME:
             return False
 
         # if task is hidden and no user/not admin:
@@ -174,7 +175,7 @@ class Task(EBaseModel):
 class TaskForm(EBaseModel):
     task_name: str
     category: str
-    scoring: Union[Scoring, StaticScoring, DynamicKKSScoring]
+    scoring: Scoring | StaticScoring | DynamicKKSScoring
     description: str
-    flag: Union[Flag, StaticFlag, DynamicKKSFlag]
+    flag: Flag | StaticFlag | DynamicKKSFlag
     author: str = ""

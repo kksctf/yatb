@@ -1,20 +1,6 @@
-from typing import List, Dict, Optional
-from datetime import timedelta
-
-import asyncio
-import aiohttp
-import uuid
-import os
-import sys
-import pickle
-
-from fastapi import FastAPI, Cookie, Request, Response, HTTPException, status, Depends
-
-from fastapi.security import OAuth2PasswordBearer, OAuth2PasswordRequestForm, OAuth2
-
-from . import app, auth, db, schema, root_logger
-from .config import settings
+from . import app, root_logger
 from .api import api_tasks
+from .config import settings
 
 """
 @app.middleware("http")
@@ -30,9 +16,9 @@ if settings.DEBUG:
     try:
         root_logger.warning("Timing debug loadeding")
 
-        from asgi_server_timing import ServerTimingMiddleware  # noqa
         import fastapi  # noqa
         import pydantic  # noqa
+        from asgi_server_timing import ServerTimingMiddleware  # noqa
 
         app.add_middleware(
             ServerTimingMiddleware,
@@ -47,11 +33,11 @@ if settings.DEBUG:
                     fastapi.responses.HTMLResponse.render,
                     fastapi.responses.PlainTextResponse.render,
                 ),
-                "6tasks": (api_tasks.api_tasks_get,),
-                "6task": (api_tasks.api_task_get,),
+                # "6tasks": (api_tasks.api_tasks_get,),
+                # "6task": (api_tasks.api_task_get,),
             },
         )
         root_logger.warning("Timing debug loaded")
 
-    except Exception:
-        pass
+    except ImportError:
+        root_logger.warning("No timing extensions found")

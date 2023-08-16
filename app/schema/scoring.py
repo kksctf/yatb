@@ -1,6 +1,8 @@
 import math
 
-from . import EBaseModel, Literal, logger
+from typing import Literal
+
+from . import EBaseModel, logger
 
 
 class Scoring(EBaseModel):

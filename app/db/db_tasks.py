@@ -104,14 +104,14 @@ async def solve_task(task: schema.Task, solver: schema.User):
     if solver.is_admin and not settings.DEBUG:  # if you admin, you can't solve task.
         return task.task_id
 
-    if datetime.utcnow() > settings.EVENT_END_TIME:
+    if datetime.datetime.now(tz=datetime.UTC) > settings.EVENT_END_TIME:
         return task.task_id
 
     #  WTF: UNTEDTED: i belive this will work as a monkey patch for rAcE c0nDiTioN
     global db_lock
     async with db_lock:
         # add references
-        solv_time = datetime.now()
+        solv_time = datetime.datetime.now(tz=datetime.UTC)
         solver.solved_tasks[task.task_id] = solv_time
         task.pwned_by[solver.user_id] = solv_time
 
@@ -128,7 +128,9 @@ async def solve_task(task: schema.Task, solver: schema.User):
             for solver_id in task.pwned_by:
                 solver_recalc = await db_users.get_user_uuid(solver_id)
                 solver_recalc.score -= diff
-                metrics.score_per_user.labels(user_id=solver_recalc.user_id, username=solver_recalc.username).set(solver_recalc.score)
+                metrics.score_per_user.labels(user_id=solver_recalc.user_id, username=solver_recalc.username).set(
+                    solver_recalc.score
+                )
 
     return task.task_id
 

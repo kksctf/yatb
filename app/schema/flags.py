@@ -1,8 +1,9 @@
 import binascii
 import hmac
+from typing import Literal
 
 from ..config import settings
-from . import EBaseModel, Literal, logger
+from . import EBaseModel, logger
 from .user import User
 
 

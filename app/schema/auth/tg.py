@@ -1,14 +1,14 @@
 import datetime
 import hashlib
 import hmac
-from typing import Callable, List, Optional, Type
+from typing import Callable, List, Optional, Type, Literal
 import aiohttp
 
 from fastapi import HTTPException, Query, status, Request, Response
 from pydantic import BaseSettings, Extra, validator
 
 from ...config import settings
-from .. import EBaseModel, Literal
+from .. import EBaseModel
 from . import AuthBase, logger
 
 

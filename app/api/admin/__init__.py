@@ -1,7 +1,9 @@
 import logging
 
-from fastapi import FastAPI, Cookie, Request, Response, HTTPException, status, Depends, APIRouter, Header, Query
-from ... import auth, config, schema, db
+from fastapi import APIRouter, Cookie, Depends, FastAPI, Header, HTTPException, Query, Request, Response, status
+
+from ... import auth, config, db, schema
+from ...utils.log_helper import get_logger
 
 _fake_admin_user = schema.User(
     username="token_bot",
@@ -14,7 +16,7 @@ async def admin_checker(
     user: schema.User | None = Depends(auth.get_current_user_safe),
     token_header: str | None = Header(None, alias="X-Token"),
     token_query: str | None = Query(None, alias="token"),
-):
+) -> schema.User:
     if user and user.is_admin:
         return user
     if token_header and token_header == config.settings.API_TOKEN:
@@ -28,7 +30,7 @@ async def admin_checker(
     )
 
 
-logger = logging.getLogger("yatb.api.admin")
+logger = get_logger("api.admin")
 router = APIRouter(
     prefix="/admin",
     tags=["admin"],
@@ -58,5 +60,5 @@ async def api_detele_everything_but_tasks(admin: schema.User = Depends(admin_che
         task.pwned_by.clear()
 
 
-from . import admin_users  # noqa
 from . import admin_tasks  # noqa
+from . import admin_users  # noqa

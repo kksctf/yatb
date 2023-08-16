@@ -1,6 +1,6 @@
 import datetime
 import hmac
-from typing import Callable, Dict, Hashable, List, Optional, Type
+from typing import Callable, Dict, Hashable, List, Optional, Type, Literal
 import aiohttp
 
 from fastapi import HTTPException, Query, status, Request, Response
@@ -8,7 +8,7 @@ from fastapi.security import oauth2
 from pydantic import BaseSettings, Extra, validator
 
 from ...config import settings
-from .. import EBaseModel, Literal
+from .. import EBaseModel
 from . import AuthBase, logger
 
 

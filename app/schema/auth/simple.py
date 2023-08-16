@@ -2,14 +2,14 @@ import datetime
 import hashlib
 import hmac
 import os
-from typing import Callable, Hashable, List, Optional, Tuple, Type
+from typing import Callable, Hashable, List, Optional, Tuple, Type, Literal
 
 from base64 import b64encode
 from fastapi import Body, HTTPException, Query, Request, Response, status
 from pydantic import BaseSettings, Extra, validator
 
 from ...config import settings
-from .. import EBaseModel, Literal
+from .. import EBaseModel
 from . import AuthBase, logger
 
 

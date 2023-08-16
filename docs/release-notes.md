@@ -3,7 +3,9 @@
 ## Latest version
 
 - Changed:
+  - Migrated to newest pydantic/fastapi verison (pydantic v2, yes)
   - Refactor many things, mainly for typing or making ruff happy.
+  - Refactor logging system
 
 ## 0.6.1
 

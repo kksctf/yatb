@@ -1,10 +1,10 @@
 import datetime
 import subprocess
 from pathlib import Path
-from typing import Any, List, Optional, Type
+from typing import Self
 
-from pydantic import BaseSettings, validator
-from pydantic.fields import ModelField
+from pydantic import FieldValidationInfo, model_validator
+from pydantic_settings import BaseSettings
 
 _DEFAULT_TOKEN = "default_token_CHANGE_ME"  # noqa: S105 # intended
 
@@ -56,16 +56,20 @@ class Settings(BaseSettings):
         super().__init__(*args, **kwargs)
         self.__version_solver__()
 
-    @validator("JWT_SECRET_KEY", "FLAG_SIGN_KEY", "API_TOKEN", "WS_API_TOKEN", always=True)
-    def check_non_default_tokens(cls, v: str, field: ModelField, values: dict) -> str:  # noqa: E0213, N805
-        if values["DEBUG"]:
-            return v
-        if v == _DEFAULT_TOKEN:
-            raise DefaultTokenError(f"Field '{field.name}' have default token value")
-        return v
+    @model_validator(mode="after")
+    def check_non_default_tokens(self) -> Self:
+        if self.DEBUG:
+            return self
+
+        token_check_list = ["JWT_SECRET_KEY", "FLAG_SIGN_KEY", "API_TOKEN", "WS_API_TOKEN"]
+        for token_name in token_check_list:
+            if getattr(self, token_name) == _DEFAULT_TOKEN:
+                raise DefaultTokenError(f"Field '{token_name}' have default token value")
+
+        return self
 
     def __version_solver__(self) -> None:
-        if (Path(".") / ".git").exists():
+        if (Path() / ".git").exists():
             self.VERSION += subprocess.check_output(["git", "rev-parse", "HEAD"]).decode()[:8]  # noqa: S607, S603
             self.VERSION += (
                 "-Modified"

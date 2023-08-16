@@ -1,8 +1,6 @@
 import uuid
 from datetime import datetime
-from typing import List, Union
 
-import httpx
 from fastapi import APIRouter, Depends, HTTPException, status
 from pydantic import Field
 
@@ -20,7 +18,7 @@ router = APIRouter(
 
 @router.get(
     "/",
-    response_model=List[schema.Task.public_model()],
+    response_model=list[schema.Task.public_model()],
 )
 async def api_tasks_get(user: schema.User = Depends(auth.get_current_user_safe)):
     tasks = await db.get_all_tasks()

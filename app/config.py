@@ -52,9 +52,13 @@ class Settings(BaseSettings):
     API_TOKEN: str = _DEFAULT_TOKEN
     WS_API_TOKEN: str = _DEFAULT_TOKEN
 
-    def __init__(self, *args, **kwargs) -> None:
-        super().__init__(*args, **kwargs)
-        self.__version_solver__()
+    ENABLED_AUTH_WAYS: list[str] = [  # noqa: RUF012
+        "SimpleAuth",
+        "TelegramAuth",
+        "CTFTimeOAuth",
+        "GithubOAuth",
+        "DiscordOAuth",
+    ]
 
     @model_validator(mode="after")
     def check_non_default_tokens(self) -> Self:
@@ -68,7 +72,8 @@ class Settings(BaseSettings):
 
         return self
 
-    def __version_solver__(self) -> None:
+    @model_validator(mode="after")
+    def __version_solver__(self) -> Self:
         if (Path() / ".git").exists():
             self.VERSION += subprocess.check_output(["git", "rev-parse", "HEAD"]).decode()[:8]  # noqa: S607, S603
             self.VERSION += (
@@ -86,10 +91,13 @@ class Settings(BaseSettings):
         else:
             self.VERSION += "-prod"
 
+        return self
+
     model_config = SettingsConfigDict(
         # env_prefix="YATB_",
         env_file="yatb.env",
         env_file_encoding="utf-8",
+        extra="allow",
     )
 
 

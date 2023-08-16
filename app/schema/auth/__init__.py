@@ -1,4 +1,4 @@
-from typing import Annotated, Union, TypeAlias
+from typing import Annotated, TypeAlias, Union
 
 from pydantic import Field
 

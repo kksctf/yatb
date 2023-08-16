@@ -1,19 +1,12 @@
-import logging
-
 from ..utils.log_helper import get_logger
+from .auth import AuthBase, CTFTimeOAuth, OAuth, SimpleAuth, TelegramAuth
+from .ebasemodel import EBaseModel
+from .flags import DynamicKKSFlag, Flag, StaticFlag
+from .scoring import DynamicKKSScoring, Scoring, StaticScoring
+from .task import Task, TaskForm
+from .user import User
 
 logger = get_logger("schema")
-
-# isort: off
-from .ebasemodel import EBaseModel  # noqa
-
-from .auth import AuthBase, CTFTimeOAuth, OAuth, SimpleAuth, TelegramAuth  # noqa
-from .flags import DynamicKKSFlag, Flag, StaticFlag  # noqa
-from .scoring import DynamicKKSScoring, Scoring, StaticScoring  # noqa
-from .user import User  # noqa
-from .task import Task, TaskForm  # noqa
-
-# isort: on
 
 
 class FlagForm(EBaseModel):

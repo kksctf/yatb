@@ -7,9 +7,13 @@ from pydantic import Extra, Field, computed_field, validator
 from .. import config
 from ..config import settings
 from ..utils import md
-from . import EBaseModel, User, logger
+from ..utils.log_helper import get_logger
+from .ebasemodel import EBaseModel
 from .flags import DynamicKKSFlag, Flag, StaticFlag
 from .scoring import DynamicKKSScoring, Scoring, StaticScoring
+from .user import User
+
+logger = get_logger("schema.task")
 
 
 def template_format_time(date: datetime.datetime) -> str:  # from alb1or1x_shit.py

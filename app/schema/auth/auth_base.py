@@ -4,7 +4,7 @@ from typing import ClassVar, Literal, Self, TypeAlias
 from fastapi import Request, Response
 from pydantic_settings import BaseSettings, SettingsConfigDict
 
-from .. import EBaseModel
+from ..ebasemodel import EBaseModel
 
 RouterParams: TypeAlias = dict[str, str | object]
 

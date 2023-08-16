@@ -4,9 +4,12 @@ from typing import ClassVar, Literal, Self
 
 from pydantic import Field, model_validator
 
-from . import EBaseModel, logger
+from ..utils.log_helper import get_logger
 from .auth import ANNOTATED_TYPING_AUTH
 from .auth.auth_base import AuthBase
+from .ebasemodel import EBaseModel
+
+logger = get_logger("schema.user")
 
 
 class User(EBaseModel):

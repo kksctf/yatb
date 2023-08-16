@@ -6,7 +6,7 @@ from fastapi import HTTPException, Query, Request, Response, status
 from pydantic_settings import SettingsConfigDict
 
 from ...utils.log_helper import get_logger
-from .. import EBaseModel
+from ..ebasemodel import EBaseModel
 from .auth_base import AuthBase, RouterParams
 
 logger = get_logger("schema.auth")

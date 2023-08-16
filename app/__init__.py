@@ -1,14 +1,12 @@
 import logging
-import os
+from pathlib import Path
 
 from fastapi import FastAPI
 from fastapi.staticfiles import StaticFiles
 from fastapi.templating import Jinja2Templates
 
+from . import utils
 from .config import settings
-from . import schema
-
-from . import utils  # utils, and no circullar imports!!
 
 app = FastAPI(
     docs_url=settings.FASTAPI_DOCS_URL,
@@ -16,8 +14,8 @@ app = FastAPI(
     openapi_url=settings.FASTAPI_OPENAPI_URL,
 )
 
-_base_path = os.path.dirname(os.path.abspath(__file__))
-app.mount("/static", StaticFiles(directory=os.path.join(_base_path, "view", "static")), name="static")
+_base_path = Path(__file__).resolve().parent
+app.mount("/static", StaticFiles(directory=_base_path / "view" / "static"), name="static")
 
 root_logger = utils.log_helper.root_logger
 
@@ -27,8 +25,8 @@ loggers = loggers + [logging.getLogger(name) for name in logging.root.manager.lo
 # for i in loggers:
 #     print(f"LOGGER: {i}")
 
-from . import main  # noqa
 from . import api  # noqa
+from . import main  # noqa
 from . import view  # noqa
 
 app.include_router(api.router)

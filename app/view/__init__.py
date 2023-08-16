@@ -37,7 +37,7 @@ def route_generator(req: Request, base_path: str = "/api", *, ignore_admin: bool
             continue
 
         dummy_params = {i: f"NONE_{i}" for i in set(r.param_convertors.keys())}
-        ret[r.name] = req.url_for(r.name, **dummy_params)
+        ret[r.name] = str(req.url_for(r.name, **dummy_params))
     return ret
 
 

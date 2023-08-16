@@ -2,7 +2,7 @@ import datetime
 import uuid
 from typing import Annotated, ClassVar
 
-from pydantic import Extra, Field, computed_field, validator
+from pydantic import Field
 
 from .. import config
 from ..config import settings

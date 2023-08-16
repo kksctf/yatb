@@ -30,44 +30,24 @@ class FileDB:
         }
 
     def generate_index(self):
-        migration_datetime = datetime.now()
-
         for i, v in self._db["tasks"].items():
-            self._index["tasks"][v.task_id] = self.migrate_task(v, migration_datetime)
+            self._index["tasks"][v.task_id] = self.update_task(v)
 
         for i, v in self._db["users"].items():
-            self._index["users"][v.user_id] = self.migrate_user(v, migration_datetime)
+            self._index["users"][v.user_id] = self.update_user(v)
 
-    def migrate_task(self, task: schema.Task, migration_datetime: datetime):
+    def update_task(self, task: schema.Task):
         # regenerate markdown
         task.description_html = schema.Task.regenerate_md(task.description)
 
-        # 25.09.2020 migration
-        if "hidden" not in task.__fields__:
-            task.hidden = False
-
-        # 25.11.2020 migration, for task authors
-        if "author" not in task.__fields__:
-            task.author = "@kksctf"  # uuid.UUID(int=0)  # zero guid
-
-        # 11.11.2020 migration from list to dict in pwned_by/solved_tasks
-        if isinstance(task.pwned_by, list):
-            old = task.pwned_by
-            task.pwned_by = {i: migration_datetime for i in old}
-
         return task
 
-    def migrate_user(self, user: schema.User, migration_datetime: datetime):
-        # 11.11.2020 migration from list to dict in pwned_by/solved_tasks
-        if isinstance(user.solved_tasks, list):
-            old = user.solved_tasks
-            user.solved_tasks = {i: migration_datetime for i in old}
-
+    def update_user(self, user: schema.User):
         # FIXME: говнокод & быстрофикс.
         if isinstance(user.auth_source, dict):
             original_au = user.auth_source
             cls: schema.auth.AuthBase.AuthModel = getattr(schema.auth, user.auth_source["classtype"]).AuthModel
-            user.auth_source = cls.parse_obj(user.auth_source)
+            user.auth_source = cls.model_validate(user.auth_source)
             logger.warning(f"Found & fixed broken auth source: {original_au} -> {user.auth_source}")
 
         # admin promote

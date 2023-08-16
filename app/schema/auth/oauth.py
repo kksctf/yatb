@@ -77,7 +77,7 @@ class OAuth(AuthBase):
         return (
             f"""<a href='{cls.auth_settings.OAUTH_ENDPOINT}?response_type=code&scope={cls.scope}&state=TEST_STATE&"""
             f"""client_id={cls.auth_settings.OAUTH_CLIENT_ID}&"""
-            f"""redirect_uri={url_for(name=cls.router_params["name"])}'>Login using {cls.__name__}</a>"""
+            f"""redirect_uri={url_for(cls.router_params["name"])}'>Login using {cls.__name__}</a>"""
         )
 
 

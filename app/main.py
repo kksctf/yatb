@@ -14,19 +14,19 @@ async def session_middleware(request: Request, call_next):
 
 if settings.DEBUG:
     try:
-        root_logger.warning("Timing debug loadeding")
+        root_logger.warning("Timing debug loading")
 
         import fastapi  # noqa
         import pydantic  # noqa
-        from asgi_server_timing import ServerTimingMiddleware  # noqa
+        from asgi_server_timing import ServerTimingMiddleware  # noqa # type: ignore
 
         app.add_middleware(
             ServerTimingMiddleware,
             calls_to_track={
-                "1deps": (fastapi.routing.solve_dependencies,),
+                "1deps": (fastapi.routing.solve_dependencies,),  # type: ignore
                 "2main": (fastapi.routing.run_endpoint_function,),
                 # "3valid": (pydantic.fields.ModelField.validate,),
-                "4encode": (fastapi.encoders.jsonable_encoder,),
+                "4encode": (fastapi.encoders.jsonable_encoder,),  # type: ignore
                 "5render": (
                     fastapi.responses.JSONResponse.render,
                     fastapi.responses.ORJSONResponse.render,
@@ -39,5 +39,5 @@ if settings.DEBUG:
         )
         root_logger.warning("Timing debug loaded")
 
-    except ImportError:
+    except ModuleNotFoundError:
         root_logger.warning("No timing extensions found")

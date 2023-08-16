@@ -1,14 +1,8 @@
-import os
-import sys
-import logging
 import pytest
-
 from fastapi.testclient import TestClient
 
-# logger.setLevel(logging.INFO)
-
-from ..config import settings  # noqa
-from .. import app  # noqa
+from .. import app
+from ..config import settings
 
 # this disables real connection to db/creating db-in-file, and forces to use only in-memory db
 settings.DB_NAME = None  # type: ignore

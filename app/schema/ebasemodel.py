@@ -5,9 +5,11 @@ from typing import TYPE_CHECKING, Any, ClassVar, Self, TypeAlias, Union, get_arg
 
 from pydantic import BaseModel, create_model
 from pydantic.fields import FieldInfo
-from pydantic.main import IncEx
 
 from ..utils.log_helper import get_logger
+
+if TYPE_CHECKING:
+    from pydantic.main import IncEx
 
 logger = get_logger("schema")
 

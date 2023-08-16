@@ -4,7 +4,7 @@ from pathlib import Path
 from typing import Self
 
 from pydantic import FieldValidationInfo, model_validator
-from pydantic_settings import BaseSettings
+from pydantic_settings import BaseSettings, SettingsConfigDict
 
 _DEFAULT_TOKEN = "default_token_CHANGE_ME"  # noqa: S105 # intended
 
@@ -86,10 +86,11 @@ class Settings(BaseSettings):
         else:
             self.VERSION += "-prod"
 
-    class Config:
-        env_prefix = "YATB_"
-        env_file = "yatb.env"
-        env_file_encoding = "utf-8"
+    model_config = SettingsConfigDict(
+        # env_prefix="YATB_",
+        env_file="yatb.env",
+        env_file_encoding="utf-8",
+    )
 
 
 settings = Settings()

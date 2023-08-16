@@ -9,7 +9,7 @@ services:
     # command: "--log-level=warning --host 0.0.0.0 --port 80"
     restart: always
     volumes:
-      - ./yatb_production.env:/usr/src/yatb.env:ro
+      - ./yatb.env:/usr/src/yatb.env:ro
       - ./file_db.db:/usr/src/file_db.db
       - ./logs:/usr/src/logs
 

@@ -146,3 +146,6 @@ cython_debug/
 *.db.local
 
 logs/
+
+# env
+yatb.env

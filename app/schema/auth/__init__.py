@@ -1,13 +1,14 @@
 import logging
-from typing import Callable, Hashable, List, Optional, Type, Union
+from typing import Callable, Hashable, List, Literal, Optional, Type, Union
 
 from fastapi import APIRouter, HTTPException, Query, Request, Response, status
 from pydantic import BaseSettings, Extra, validator
 
 from ...config import settings
-from .. import EBaseModel, Literal
+from ...utils.log_helper import get_logger
+from .. import EBaseModel
 
-logger = logging.getLogger("yatb.schema.auth")
+logger = get_logger("schema.auth")
 
 
 class AuthBase(object):

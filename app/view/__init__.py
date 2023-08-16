@@ -12,11 +12,11 @@ from pydantic import parse_obj_as
 from starlette.routing import Router
 
 from .. import auth, db, schema
-from ..api import api_tasks as api_tasks
-from ..api import api_users as api_users
+from ..api import api_tasks, api_users
 from ..config import settings
+from ..utils.log_helper import get_logger
 
-logger = logging.getLogger("yatb.view")
+logger = get_logger("view")
 
 _base_path = os.path.dirname(os.path.abspath(__file__))
 templ = Jinja2Templates(directory=os.path.join(_base_path, "templates"))

@@ -1,8 +1,11 @@
 import logging
-from fastapi import APIRouter
-from .. import config, schema
 
-logger = logging.getLogger("yatb.api")
+from fastapi import APIRouter
+
+from .. import config, schema
+from ..utils.log_helper import get_logger
+
+logger = get_logger("api")
 router = APIRouter(
     prefix="/api",
     tags=["api"],

@@ -7,10 +7,11 @@ import logging
 from pydantic import BaseModel
 from typing import List
 
-from .. import app, schema, db
+from .. import app, db, schema
 from ..config import settings
+from ..utils.log_helper import get_logger
 
-real_logger = logging.getLogger("yatb.db")
+logger = get_logger("db")
 
 
 class FileDB(object):

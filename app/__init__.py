@@ -19,13 +19,7 @@ app = FastAPI(
 _base_path = os.path.dirname(os.path.abspath(__file__))
 app.mount("/static", StaticFiles(directory=os.path.join(_base_path, "view", "static")), name="static")
 
-root_logger = utils.log_helper.generate_loggers(
-    base_name="yatb",
-    modules=["schema", "schema.auth", "api", "api.admin", "db", "db.tasks", "db.users", "view"],
-)
-
-# logging.getLogger("yatb.schema").propagate = False  # disable logging schema debug shit to everything upper
-logging.getLogger("yatb").propagate = False  # disable logging anything upper
+root_logger = utils.log_helper.root_logger
 
 loggers = [logging.getLogger()]  # get the root logger
 loggers = loggers + [logging.getLogger(name) for name in logging.root.manager.loggerDict]

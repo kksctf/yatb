@@ -22,9 +22,10 @@ from ...api import api_users as api_users
 from ...api.admin import admin_checker
 from ...api.admin import admin_tasks as api_admin_tasks
 from ...api.admin import admin_users as api_admin_users
+from ...utils.log_helper import get_logger
 from ...ws import ws_manager
 
-logger = logging.getLogger("yatb.view")
+logger = get_logger("view")
 
 from .. import response_generator  # noqa
 

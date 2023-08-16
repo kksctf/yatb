@@ -4,8 +4,9 @@ import logging
 from typing import Hashable, List, Dict, Optional, Type
 
 from .. import schema
+from ..utils.log_helper import get_logger
 
-logger = logging.getLogger("yatb.db.users")
+logger = get_logger("db.users")
 
 # logger.debug(f"GlobalUsers, FileDB: {_db}")
 

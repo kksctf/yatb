@@ -62,6 +62,7 @@ task-tags = ["TODO", "FIXME", "WTF", "XXX"]
 select = ["ALL"]
 ignore = [
     "ANN101", #   | ruff?                 | Missing type annotation for `self` in method                            # non sense
+    "B008",   #   | ruff?                 | Do not perform function call `...` in argument defaults                 # fastapi DI...
     "D100",   #   | pydocstyle            | Missing docstring in public module                                      # meh
     "D101",   #   | pydocstyle            | Missing docstring in public class                                       # meh
     "D102",   #   | pydocstyle            | Missing docstring in public method                                      # meh
@@ -75,9 +76,11 @@ ignore = [
     "D203",   #   | pydocstyle            | 1 blank line required before class docstring                            # don't like it
     "D205",   #   | pydocstyle            | 1 blank line required between summary line and description              # don't like it
     "EM102",  #   | ruff?                 | Exception must not use an f-string literal, assign to variable first    # i care, but not this proj
+    "ERA001", #   | ruff?                 | commented out code                                                      # i know. and what?
     "F401",   #   | pyflakes              | %r imported but unused                                                  # pylance cover it
     "TID252", #   | flake8-tidy-imports   | Relative imports are banned                                             # no.
     "TRY003", #   | ruff?                 | Avoid specifying long messages outside the exception class              # i care, but not this proj
+    "G004",   #   | ruff?                 | Logging statement uses f-string                                         # i care, but not this proj
 ]
 
 

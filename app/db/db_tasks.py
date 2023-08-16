@@ -1,21 +1,19 @@
-from app.schema.user import User
-import uuid
+import datetime
 import logging
-from datetime import datetime
+import uuid
 from asyncio import Lock
+from typing import Dict, Union
+
+from .. import schema
+from ..config import settings
+from ..utils import metrics
+from ..utils.log_helper import get_logger
+from . import db_users, update_entry
 
 # import markdown2
 
-from typing import List, Dict, Union, Optional
 
-from .. import schema
-from ..schema.flags import StaticFlag, DynamicKKSFlag, Flag
-from ..config import settings
-from ..utils import md, metrics
-
-from . import update_entry, db_users
-
-logger = logging.getLogger("yatb.db.tasks")
+logger = get_logger("db.tasks")
 db_lock = Lock()
 
 

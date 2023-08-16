@@ -1,12 +1,12 @@
 from typing import cast
-import requests
-import logging
 
+import requests
 
 from .. import schema
 from ..config import settings
+from ..utils.log_helper import get_logger
 
-logger = logging.getLogger("yatb.api")
+logger = get_logger("api")
 
 
 def to_tg(data: dict, path: str) -> requests.Response:

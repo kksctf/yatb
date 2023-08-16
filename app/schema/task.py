@@ -1,10 +1,8 @@
 import datetime
-import time
 import uuid
-from typing import Dict, List, Optional, Type, Union
+from typing import Annotated, ClassVar
 
-import humanize
-from pydantic import Extra, Field, validator
+from pydantic import Extra, Field, computed_field, validator
 
 from .. import config
 from ..config import settings
@@ -17,27 +15,29 @@ from .scoring import DynamicKKSScoring, Scoring, StaticScoring
 def template_format_time(date: datetime.datetime) -> str:  # from alb1or1x_shit.py
     if Task.is_date_after_migration(date):
         # return date.strftime("%H:%M:%S.%f %d.%m.%Y")  # str(round(date.timestamp(), 2))
-        t = datetime.datetime.now() - date
-        ret = f"{Task.humanize_time(t)} ago / {date.strftime('%H:%M:%S')}"
-        return ret
-    else:
-        return "unknown"
+        t = datetime.datetime.now(tz=datetime.UTC) - date
+        return f"{Task.humanize_time(t)} ago / {date.strftime('%H:%M:%S')}"
+    return "unknown"
+
+
+ScoringUnion = Annotated[Scoring | StaticScoring | DynamicKKSScoring, Field(discriminator="classtype")]
+FlagUnion = Annotated[Flag | StaticFlag | DynamicKKSFlag, Field(discriminator="classtype")]
 
 
 class Task(EBaseModel):
-    __public_fields__ = {
-        "task_id": ...,
-        "task_name": ...,
-        "category": ...,
-        "scoring": Scoring,
-        "description_html": ...,
-        "author": ...,
-        "pwned_by": ...,
+    __public_fields__: ClassVar = {
+        "task_id",
+        "task_name",
+        "category",
+        "scoring",
+        "description_html",
+        "author",
+        "pwned_by",
     }
-    __admin_only_fields__ = {
-        "description": ...,
-        "flag": Flag,
-        "hidden": ...,
+    __admin_only_fields__: ClassVar = {
+        "description",
+        "flag",
+        "hidden",
     }
 
     task_id: uuid.UUID = Field(default_factory=uuid.uuid4)
@@ -45,20 +45,20 @@ class Task(EBaseModel):
     task_name: str
     category: str
 
-    # due to https://github.com/tiangolo/fastapi/issues/86#issuecomment-478275969, order of items in union matters!
-    scoring: Union[Scoring, StaticScoring, DynamicKKSScoring]  # = Scoring()
+    scoring: ScoringUnion
 
     description: str
     description_html: str
 
-    flag: Union[Flag, StaticFlag, DynamicKKSFlag]
+    flag: FlagUnion
 
-    pwned_by: Dict[uuid.UUID, datetime.datetime] = {}
+    pwned_by: dict[uuid.UUID, datetime.datetime] = {}
 
     hidden: bool = True
 
     author: str
 
+    # @computed_field
     @property
     def color_category(self) -> str:
         if self.category.lower() == "crypto":
@@ -85,53 +85,13 @@ class Task(EBaseModel):
 
         return True
 
-    # @validator('description_html', pre=True, always=True)
-    # def set_html(cls, v):
-    #     return v or markdown2.markdown(cls.description)
-
     @staticmethod
     def regenerate_md(content: str) -> str:
         return md.markdownCSS(content, config.MD_CLASSES_TASKS, config.MD_ATTRS_TASKS)
 
-    # it's time for crazy solution.
-    # Taken from https://github.com/samuelcolvin/pydantic/issues/619#issuecomment-635784061
-    @validator("scoring", pre=True)
-    def validate_scoring(cls, value):  # noqa: E0213, N805
-        if isinstance(value, EBaseModel):
-            return value
-        if not isinstance(value, dict):
-            raise ValueError("value must be dict")
-
-        classtype = value.get("classtype")
-        if classtype == "Scoring":
-            return Scoring(**value)
-        elif classtype == "StaticScoring":
-            return StaticScoring(**value)
-        elif classtype == "DynamicKKSScoring":
-            return DynamicKKSScoring(**value)
-        else:
-            raise ValueError(f"Unkonwn classtype {classtype}")
-
-    @validator("flag", pre=True)
-    def validate_flag(cls, value):  # noqa: E0213, N805
-        if isinstance(value, EBaseModel):
-            return value
-        if not isinstance(value, dict):
-            raise ValueError("value must be dict")
-
-        classtype = value.get("classtype")
-        if classtype == "Flag":
-            return Flag(**value)
-        elif classtype == "StaticFlag":
-            return StaticFlag(**value)
-        elif classtype == "DynamicKKSFlag":
-            return DynamicKKSFlag(**value)
-        else:
-            raise ValueError(f"Unkonwn classtype {classtype}")
-
     @staticmethod
     def is_date_after_migration(dt: datetime.datetime) -> bool:
-        migration_time = datetime.datetime.fromtimestamp(1605065347)
+        migration_time = datetime.datetime.fromtimestamp(1605065347, tz=datetime.UTC)
         if dt > migration_time:
             return True
         return False
@@ -154,28 +114,28 @@ class Task(EBaseModel):
             return f"{dt.second} second{'' if dt.second == 1 else 's'}"
         return ""
 
-    def last_pwned_str(self):
+    def last_pwned_str(self) -> tuple[uuid.UUID, str]:
         last_pwn = max(self.pwned_by.items(), key=lambda x: x[1])
 
-        last_time = datetime.datetime.now() - last_pwn[1]
+        last_time = datetime.datetime.now(tz=datetime.UTC) - last_pwn[1]
         result_time = Task.humanize_time(last_time) if Task.is_date_after_migration(last_pwn[1]) else "unknown"
 
         return last_pwn[0], result_time
 
-    def first_pwned_str(self):
+    def first_pwned_str(self) -> tuple[uuid.UUID, str]:
         first_pwn = min(self.pwned_by.items(), key=lambda x: x[1])
         result_time = template_format_time(first_pwn[1])
 
         return first_pwn[0], result_time
 
-    def short_desc(self):
+    def short_desc(self) -> str:
         return f"task_id={self.task_id} task_name={self.task_name} hidden={self.hidden} points={self.scoring.points}"
 
 
 class TaskForm(EBaseModel):
     task_name: str
     category: str
-    scoring: Scoring | StaticScoring | DynamicKKSScoring
+    scoring: ScoringUnion
     description: str
-    flag: Flag | StaticFlag | DynamicKKSFlag
+    flag: FlagUnion
     author: str = ""

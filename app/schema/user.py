@@ -1,21 +1,16 @@
-import binascii
 import datetime
-import hashlib
-import hmac
-import os
 import uuid
-from typing import Dict, List, Optional, Type, Union
+from typing import ClassVar, Literal, Self
 
-from fastapi import HTTPException, Query, status
-from pydantic import BaseModel, Extra, Field, validator
+from pydantic import Field, model_validator
 
-from ..config import settings
 from . import EBaseModel, logger
-from .auth import TYPING_AUTH
+from .auth import ANNOTATED_TYPING_AUTH
+from .auth.auth_base import AuthBase
 
 
 class User(EBaseModel):
-    __public_fields__ = {
+    __public_fields__: ClassVar = {
         "user_id",
         "username",
         "score",
@@ -24,11 +19,11 @@ class User(EBaseModel):
         "country",
         "profile_pic",
     }
-    __admin_only_fields__ = {
-        "is_admin": ...,
-        "auth_source": TYPING_AUTH,
+    __admin_only_fields__: ClassVar = {
+        "is_admin",
+        "auth_source",
     }
-    __private_fields__ = {}
+    __private_fields__: ClassVar = set()
 
     user_id: uuid.UUID = Field(default_factory=uuid.uuid4)
 
@@ -36,31 +31,37 @@ class User(EBaseModel):
 
     score: int = 0
 
-    solved_tasks: Dict[uuid.UUID, datetime.datetime] = {}  # uuid or task :hm
+    solved_tasks: dict[uuid.UUID, datetime.datetime] = {}  # uuid or task :hm
     is_admin: bool = False
 
     affilation: str = ""
     country: str = ""
 
-    profile_pic: Optional[str] = None
+    profile_pic: str | None = None
 
-    auth_source: TYPING_AUTH
+    auth_source: ANNOTATED_TYPING_AUTH  # type: ignore
 
-    def __init__(self, *args, **kwargs):
-        super().__init__(*args, **kwargs)
-        self.username = self.auth_source.generate_username()
+    @property
+    def au_s(self) -> AuthBase.AuthModel:  # WTF: dirty hack... ;(
+        return self.auth_source
+
+    @model_validator(mode="after")
+    def setup_fields(self) -> Self:
+        self.username = self.au_s.generate_username()
         if self.admin_checker():
             logger.warning(f"Promoting {self} to admin")
             self.is_admin = True
 
-    def admin_checker(self):
-        return self.auth_source.is_admin()
+        return self
 
-    def get_last_solve_time(self):
+    def admin_checker(self) -> bool:
+        return self.au_s.is_admin()
+
+    def get_last_solve_time(self) -> tuple[uuid.UUID, datetime.datetime] | tuple[Literal[""], datetime.datetime]:
         if len(self.solved_tasks) > 0:
             return max(self.solved_tasks.items(), key=lambda x: x[1])
-        else:
-            return ("", datetime.datetime.fromtimestamp(0))
 
-    def short_desc(self):
-        return f"user_id={self.user_id} username={self.username} authsrc={self.auth_source.classtype}"
+        return ("", datetime.datetime.fromtimestamp(0, tz=datetime.UTC))
+
+    def short_desc(self) -> str:
+        return f"user_id={self.user_id} username={self.username} authsrc={self.au_s.classtype}"

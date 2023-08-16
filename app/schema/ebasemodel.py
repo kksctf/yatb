@@ -3,7 +3,7 @@ import types
 import typing
 from typing import TYPE_CHECKING, Any, ClassVar, Self, TypeAlias, Union, get_args, get_origin
 
-from pydantic import BaseModel, create_model
+from pydantic import BaseModel, computed_field, create_model
 from pydantic.fields import FieldInfo
 
 from ..utils.log_helper import get_logger
@@ -13,7 +13,7 @@ if TYPE_CHECKING:
 
 logger = get_logger("schema")
 
-FilterFieldsType: TypeAlias = set[str] | dict[str, object]
+FilterFieldsType: TypeAlias = set[str]  #  | dict[str, object]
 
 
 def origin_is_union(tp: type[Any] | None) -> bool:
@@ -87,7 +87,7 @@ class EBaseModel(BaseModel):
             if attr_name in exclude:
                 continue
             if attr_name not in include:
-                logger.info(f"Unlisted property at {cls.__qualname__}: {attr_name}")
+                logger.error(f"Unlisted property at {cls.__qualname__}: {attr_name}")
                 continue
 
             logger.debug(f"Found property in {cls}: {attr_name}")
@@ -96,13 +96,16 @@ class EBaseModel(BaseModel):
                 FieldInfo(),
             )
 
-        return create_model(
+        ret = create_model(
             f"{cls.__qualname__}_{name}",
             __config__=cls.model_config,
             __module__=f"{cls.__module__}.dynamic",
-            # __validators__=cls.__validators__,  # type: ignore # WTF: why commented
+            # __validators__=cls.__pydantic_decorators__,  # type: ignore # WTF: why commented
             **target_fields,  # type: ignore
         )
+        ret.__pydantic_decorators__ = cls.__pydantic_decorators__
+
+        return ret
 
     @classmethod
     @functools.lru_cache(typed=True)
@@ -127,18 +130,19 @@ class EBaseModel(BaseModel):
     @staticmethod
     def join_fields(f1: FilterFieldsType, f2: FilterFieldsType) -> FilterFieldsType:
         ret = set()
-        if isinstance(f1, dict) or isinstance(f2, dict):
-            ret = {}
-            # ret |= ({i: ... for i in f1}  else f1)
-            if isinstance(f1, set):
-                ret |= {i: ... for i in f1}
-            else:
-                ret |= f1
+        # if isinstance(f1, dict) or isinstance(f2, dict):
+        #     ret = {}
+        #     # ret |= ({i: ... for i in f1}  else f1)
+        #     if isinstance(f1, set):
+        #         ret |= {i: ... for i in f1}
+        #     else:
+        #         ret |= f1
 
-            if isinstance(f2, set):
-                ret |= {i: ... for i in f2}
-            else:
-                ret |= f2
-        else:
-            ret = f1 | f2
+        #     if isinstance(f2, set):
+        #         ret |= {i: ... for i in f2}
+        #     else:
+        #         ret |= f2
+        # else:
+        ret = f1 | f2
+
         return ret

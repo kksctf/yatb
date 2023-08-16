@@ -1,20 +1,20 @@
 import binascii
 import hmac
-from typing import Literal
+from typing import ClassVar, Literal
 
 from ..config import settings
-from . import EBaseModel, logger
+from .ebasemodel import EBaseModel
 from .user import User
 
 
 class Flag(EBaseModel):
-    __public_fields__ = {"classtype"}
-    __admin_only_fields__ = {"flag_base"}
+    __public_fields__: ClassVar = {"classtype"}
+    __admin_only_fields__: ClassVar = {"flag_base"}
 
     classtype: Literal["Flag"] = "Flag"
     flag_base: str = settings.FLAG_BASE
 
-    def sanitization(self, user_flag: str):
+    def sanitization(self, user_flag: str) -> str:
         if self.flag_base + "{" in user_flag:
             user_flag = user_flag.replace(self.flag_base + "{", "", 1)
         if user_flag[-1] == "}":
@@ -34,7 +34,7 @@ class Flag(EBaseModel):
 
 
 class StaticFlag(Flag):
-    __admin_only_fields__ = {"flag_base", "flag"}
+    __admin_only_fields__: ClassVar = {"flag_base", "flag"}
 
     classtype: Literal["StaticFlag"] = "StaticFlag"
     flag: str
@@ -44,7 +44,7 @@ class StaticFlag(Flag):
 
 
 class DynamicKKSFlag(Flag):
-    __admin_only_fields__ = {"flag_base", "dynamic_flag_base"}
+    __admin_only_fields__: ClassVar = {"flag_base", "dynamic_flag_base"}
 
     classtype: Literal["DynamicKKSFlag"] = "DynamicKKSFlag"
     dynamic_flag_base: str
@@ -53,9 +53,3 @@ class DynamicKKSFlag(Flag):
         flag_part = "{" + self.dynamic_flag_base + "}" + f"{user.user_id}"
         hash = hmac.digest(settings.FLAG_SIGN_KEY.encode(), flag_part.encode(), "sha256")
         return self.flag_base + "{" + self.dynamic_flag_base + "_" + binascii.hexlify(hash).decode()[0:14] + "}"
-
-    def flag_checker(self, user_flag: str, user: User):
-        if self.flag_value(user) == self.sanitization(user_flag):
-            return True
-        else:
-            return False

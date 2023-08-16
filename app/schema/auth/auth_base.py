@@ -35,6 +35,7 @@ class AuthBase:
         model_config = SettingsConfigDict(
             env_file="yatb.env",
             env_file_encoding="utf-8",
+            extra="allow",
         )
 
     auth_settings: ClassVar[AuthSettings] = AuthSettings()

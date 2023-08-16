@@ -2,12 +2,17 @@
 
 ## Latest version
 
+Nothing
+
+## 0.6.1
+
 - Added:
   - Docs.
   - Notifications about task solves in websockets (only for admin right now)
   - Admin `cleanup_db` endpoint
   - Simple predef CLI interface for API.
 - Changed:
+  - Version enumeration: removed litera `a` before version.
   - pyproject.toml refactor
   - Add more ways to pass [`admin_checker`](/app/api/admin/__init__.py#L13) dep: user in cookies, token in header, token in query
   - Some strings sanitization

@@ -1,20 +1,22 @@
 import datetime
 import hashlib
 import hmac
-from typing import Callable, List, Optional, Type, Literal
-import aiohttp
+from collections.abc import Callable
+from typing import ClassVar, Literal, Self
 
-from fastapi import HTTPException, Query, status, Request, Response
-from pydantic import BaseSettings, Extra, validator
+from fastapi import HTTPException, Query, Request, Response, status
+from pydantic import field_validator, model_validator
+from pydantic_settings import SettingsConfigDict
 
-from ...config import settings
-from .. import EBaseModel
-from . import AuthBase, logger
+from ...utils.log_helper import get_logger
+from .auth_base import AuthBase
+
+logger = get_logger("schema.auth")
 
 
 class TelegramAuth(AuthBase):
     class AuthModel(AuthBase.AuthModel):
-        __admin_only_fields__ = {
+        __admin_only_fields__: ClassVar = {
             "tg_id",
             "tg_username",
             "tg_first_name",
@@ -23,9 +25,9 @@ class TelegramAuth(AuthBase):
         classtype: Literal["TelegramAuth"] = "TelegramAuth"
 
         tg_id: int
-        tg_username: Optional[str] = None
+        tg_username: str | None = None
         tg_first_name: str
-        tg_last_name: Optional[str] = None
+        tg_last_name: str | None = None
 
         def is_admin(self) -> bool:
             is_admin: bool = False
@@ -46,37 +48,54 @@ class TelegramAuth(AuthBase):
 
         first_name: str = Query(...)
 
-        last_name: Optional[str] = Query(None)
-        username: Optional[str] = Query(None)
-        photo_url: Optional[str] = Query(None)
+        last_name: str | None = Query(None)
+        username: str | None = Query(None)
+        photo_url: str | None = Query(None)
 
         auth_date: int = Query(...)
 
         hash: str = Query(...)
 
-        @validator("auth_date")
-        def check_date(cls, date, values, **kwargs):  # noqa: E0213, N805
-            rdate = datetime.datetime.fromtimestamp(date)
-            if (datetime.datetime.now() - rdate).total_seconds() > 60 * 2:
+        @field_validator("auth_date", mode="after")
+        @classmethod
+        def check_date(cls: type[Self], date: int) -> int:
+            rdate = datetime.datetime.fromtimestamp(date, tz=datetime.UTC)
+
+            if (datetime.datetime.now(tz=datetime.UTC) - rdate).total_seconds() > 60 * 2:
                 raise HTTPException(
                     status_code=status.HTTP_400_BAD_REQUEST,
                     detail="Bad date",
                 )
+
             return date
 
-        @validator("hash")
-        def check_hash(cls, hash, values, **kwargs):  # noqa: E0213, N805
+        @model_validator(mode="after")
+        def check_hash(self) -> Self:  # noqa: E0213, N805
             bot_sha = hashlib.sha256(TelegramAuth.auth_settings.BOT_TOKEN.encode()).digest()
 
-            hash_check_string = "\n".join(f"{i}={values[i]}" for i in sorted(values.keys()) if values[i] is not None)
+            hash_check_string = "\n".join(
+                f"{i}={attr_value}"
+                for i in sorted(
+                    [
+                        "id",
+                        "first_name",
+                        "last_name",
+                        "username",
+                        "photo_url",
+                        "auth_date",
+                    ],
+                )
+                if (attr_value := getattr(self, i)) is not None
+            )
             hash_check = hmac.new(bot_sha, hash_check_string.encode(), digestmod="sha256")
             if hash_check.hexdigest() != hash:
-                logger.warning(f"hash check failed for {hash_check.hexdigest()} != {hash}, {values}")
+                logger.warning(f"hash check failed for {hash_check.hexdigest()} != {hash}, {self}")
                 raise HTTPException(
                     status_code=status.HTTP_400_BAD_REQUEST,
                     detail="Bad hash",
                 )
-            return hash
+
+            return self
 
         async def populate(self, req: Request, resp: Response) -> "TelegramAuth.AuthModel":
             return TelegramAuth.AuthModel(
@@ -86,25 +105,24 @@ class TelegramAuth(AuthBase):
                 tg_username=self.username,
             )
 
-    class AuthSettings(BaseSettings):
+    class AuthSettings(AuthBase.AuthSettings):
         BOT_TOKEN: str = ""
         BOT_USERNAME: str = ""
 
-        ADMIN_USERNAMES: List[str] = []
-        ADMIN_UIDS: List[int] = []
+        ADMIN_USERNAMES: list[str] = []
+        ADMIN_UIDS: list[int] = []
 
-        class Config(AuthBase.AuthSettings.BaseConfig):
-            env_prefix = "AUTH_TG_"
+        model_config = SettingsConfigDict(AuthBase.AuthSettings.model_config, env_prefix="AUTH_TG_")
 
-    auth_settings = AuthSettings()
-    router_params = {
+    auth_settings: ClassVar[AuthSettings] = AuthSettings()
+    router_params: ClassVar = {
         "path": "/tg_callback",
         "name": "api_auth_tg_callback",
         "methods": ["GET"],
     }
 
     @classmethod
-    def generate_html(cls: Type["TelegramAuth"], url_for: Callable) -> str:
+    def generate_html(cls: type[Self], url_for: Callable) -> str:
         return f"""
         <script async src="https://telegram.org/js/telegram-widget.js?15"
         data-telegram-login="{ cls.auth_settings.BOT_USERNAME }"
@@ -113,5 +131,5 @@ class TelegramAuth(AuthBase):
         """
 
     @classmethod
-    def generate_script(cls: Type["TelegramAuth"], url_for: Callable) -> str:
+    def generate_script(cls: type[Self], url_for: Callable) -> str:
         return """"""

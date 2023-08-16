@@ -1,19 +1,21 @@
-import datetime
 import hashlib
 import hmac
 import os
-from typing import Callable, Hashable, List, Optional, Tuple, Type, Literal
+from collections.abc import Callable
+from typing import ClassVar, Literal, Self
 
-from base64 import b64encode
-from fastapi import Body, HTTPException, Query, Request, Response, status
-from pydantic import BaseSettings, Extra, validator
+from fastapi import HTTPException, Request, Response, status
+from pydantic_settings import SettingsConfigDict
 
 from ...config import settings
+from ...utils.log_helper import get_logger
 from .. import EBaseModel
-from . import AuthBase, logger
+from .auth_base import AuthBase
+
+logger = get_logger("schema.auth")
 
 
-def hash_password(password: str, salt: Optional[bytes] = None) -> Tuple[bytes, bytes]:
+def hash_password(password: str, salt: bytes | None = None) -> tuple[bytes, bytes]:
     salt = salt or os.urandom(32)
     pw_hash = hashlib.pbkdf2_hmac("sha256", password.encode(), salt, 100000)
     return salt, pw_hash
@@ -25,19 +27,19 @@ def check_password(salt: bytes, pw_hash: bytes, password: str) -> bool:
 
 class SimpleAuth(AuthBase):
     class AuthModel(AuthBase.AuthModel):
-        __admin_only_fields__ = {
+        __admin_only_fields__: ClassVar = {
             "username",
         }
-        __private_fields__ = {
+        __private_fields__: ClassVar = {
             "password_hash",
         }
         classtype: Literal["SimpleAuth"] = "SimpleAuth"
 
         username: str
-        password_hash: Tuple[bytes, bytes]
+        password_hash: tuple[bytes, bytes]
 
         def is_admin(self) -> bool:
-            if settings.DEBUG and self.username == "Rubikoid":
+            if settings.DEBUG and self.username == SimpleAuth.auth_settings.DEBUG_USERNAME:
                 return True
             return False
 
@@ -60,9 +62,12 @@ class SimpleAuth(AuthBase):
         def check_valid(self) -> bool:
             if settings.DEBUG:
                 return True
-            if len(self.internal.username) < 2 or len(self.internal.username) > 32:
+            if (
+                len(self.internal.username) < SimpleAuth.auth_settings.MIN_USERNAME_LEN
+                or len(self.internal.username) > SimpleAuth.auth_settings.MAX_USERNAME_LEN
+            ):
                 return False
-            if len(self.internal.password) < 8:
+            if len(self.internal.password) < SimpleAuth.auth_settings.MIN_PASSWORD_LEN:
                 return False
             return True
 
@@ -75,15 +80,20 @@ class SimpleAuth(AuthBase):
             password_hash = hash_password(self.internal.password)
             return SimpleAuth.AuthModel(username=self.internal.username, password_hash=password_hash)
 
-    class AuthSettings(BaseSettings):
-        class Config(AuthBase.AuthSettings.BaseConfig):
-            env_prefix = "AUTH_SIMPLE_"
+    class AuthSettings(AuthBase.AuthSettings):
+        DEBUG_USERNAME: str = "Rubikoid"
 
-    auth_settings = AuthSettings()
-    router_params = {}
+        MIN_PASSWORD_LEN: int = 8
+        MIN_USERNAME_LEN: int = 2
+        MAX_USERNAME_LEN: int = 32
+
+        model_config = SettingsConfigDict(AuthBase.AuthSettings.model_config, env_prefix="AUTH_SIMPLE_")
+
+    auth_settings: ClassVar[AuthSettings] = AuthSettings()
+    router_params: ClassVar = {}
 
     @classmethod
-    def generate_html(cls: Type["SimpleAuth"], url_for: Callable) -> str:
+    def generate_html(cls: type[Self], url_for: Callable) -> str:
         if not settings.DEBUG:
             login_resrictions = "minlength='2' maxlength='32'"
             passw_resrictions = "minlength='8'"
@@ -107,7 +117,7 @@ class SimpleAuth(AuthBase):
         """
 
     @classmethod
-    def generate_script(cls: Type["SimpleAuth"], url_for: Callable) -> str:
+    def generate_script(cls: type[Self], url_for: Callable) -> str:
         return """
         $(".login_form").submit(function(event) {
             event.preventDefault();

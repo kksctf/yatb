@@ -2,7 +2,8 @@
 
 ## Latest version
 
-Nothing
+- Changed:
+  - Refactor many things, mainly for typing or making ruff happy.
 
 ## 0.6.1
 

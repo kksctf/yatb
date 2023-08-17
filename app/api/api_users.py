@@ -87,7 +87,7 @@ async def api_users_me(user: schema.User = Depends(auth.get_current_user)):
 async def api_users_logout(req: Request, resp: Response, user: schema.User = Depends(auth.get_current_user)):
     resp.delete_cookie(key="access_token")
     resp.status_code = status.HTTP_307_TEMPORARY_REDIRECT
-    resp.headers["Location"] = req.url_for("index")
+    resp.headers["Location"] = str(req.url_for("index"))
     return "ok"
 
 

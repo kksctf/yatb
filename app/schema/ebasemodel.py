@@ -91,9 +91,11 @@ class EBaseModel(BaseModel):
                 continue
 
             logger.debug(f"Found property in {cls}: {attr_name}")
+
+            annotation = attr_value.fget.__annotations__["return"]
             target_fields[attr_name] = (
-                attr_value.fget.__annotations__["return"],
-                FieldInfo(),
+                annotation,
+                FieldInfo.from_annotation(annotation),
             )
 
         ret = create_model(

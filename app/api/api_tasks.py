@@ -1,5 +1,5 @@
 import uuid
-from datetime import datetime
+from datetime import UTC, datetime
 
 from fastapi import APIRouter, Depends, HTTPException, status
 from pydantic import Field
@@ -39,7 +39,7 @@ class BRMessage(schema.EBaseModel):
     response_model=uuid.UUID,
 )
 async def api_task_submit_flag(flag: schema.FlagForm, user: schema.User = Depends(auth.get_current_user)):
-    if datetime.utcnow() < settings.EVENT_START_TIME:
+    if datetime.now(tz=UTC) < settings.EVENT_START_TIME:
         raise HTTPException(
             status_code=status.HTTP_425_TOO_EARLY,
             detail="CTF has not started yet",

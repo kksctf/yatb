@@ -9,6 +9,9 @@ from jose import JWTError, jwt
 
 from . import db, schema
 from .config import settings
+from .utils.log_helper import get_logger
+
+logger = get_logger("auth")
 
 
 class OAuth2PasswordBearerWithCookie(OAuth2):
@@ -26,16 +29,17 @@ class OAuth2PasswordBearerWithCookie(OAuth2):
         super().__init__(flows=flows, scheme_name=scheme_name, description=description, auto_error=auto_error)
 
     async def __call__(self, request: Request) -> str:
-        authorization = request.cookies.get("access_token")
+        authorization_cookie = request.cookies.get("access_token", None)
+        authorization_header = request.headers.get("X-Auth-Token", None)
 
-        if not authorization:
+        if not authorization_cookie and not authorization_header:
             raise HTTPException(
                 status_code=status.HTTP_401_UNAUTHORIZED,
-                detail="No cookie",
+                detail="No cookie or header",
                 headers={"WWW-Authenticate": "Bearer"},
             )
 
-        scheme, param = get_authorization_scheme_param(authorization)
+        scheme, param = get_authorization_scheme_param(authorization_header or authorization_cookie)
         if scheme.lower() != "bearer":
             raise HTTPException(
                 status_code=status.HTTP_401_UNAUTHORIZED,

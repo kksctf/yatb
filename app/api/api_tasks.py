@@ -2,10 +2,10 @@ import uuid
 from datetime import UTC, datetime
 
 from fastapi import APIRouter, Depends, HTTPException, status
-from pydantic import Field
 
-from .. import auth, db, schema, utils
+from .. import auth, schema
 from ..config import settings
+from ..db.beanie import TaskDB
 from ..utils import metrics, tg
 from ..ws import ws_manager
 from . import logger
@@ -16,12 +16,11 @@ router = APIRouter(
 )
 
 
-@router.get(
-    "/",
-    response_model=list[schema.Task.public_model()],
-)
-async def api_tasks_get(user: schema.User | None = Depends(auth.get_current_user_safe)):
-    tasks = await db.get_all_tasks()
+@router.get("/")
+async def api_tasks_get(
+    user: schema.User | None = Depends(auth.get_current_user_safe),
+) -> list[schema.Task.public_model]:
+    tasks = await TaskDB.get_all()
     tasks = tasks.values()
     tasks = filter(lambda x: x.visible_for_user(user), tasks)
     return list(tasks)
@@ -34,11 +33,8 @@ class BRMessage(schema.EBaseModel):
     is_fb: bool
 
 
-@router.post(
-    "/submit_flag",
-    response_model=uuid.UUID,
-)
-async def api_task_submit_flag(flag: schema.FlagForm, user: schema.User = Depends(auth.get_current_user)):
+@router.post("/submit_flag")
+async def api_task_submit_flag(flag: schema.FlagForm, user: schema.User = Depends(auth.get_current_user)) -> uuid.UUID:
     if datetime.now(tz=UTC) < settings.EVENT_START_TIME:
         raise HTTPException(
             status_code=status.HTTP_425_TOO_EARLY,
@@ -108,12 +104,12 @@ async def api_task_submit_flag(flag: schema.FlagForm, user: schema.User = Depend
     return ret
 
 
-@router.get(
-    "/{task_id}",
-    response_model=schema.Task.public_model(),
-)
-async def api_task_get(task_id: uuid.UUID, user: schema.User = Depends(auth.get_current_user)):
-    task = await db.get_task_uuid(task_id)
+@router.get("/{task_id}")
+async def api_task_get(
+    task_id: uuid.UUID,
+    user: schema.User = Depends(auth.get_current_user),
+) -> schema.Task.public_model:
+    task = await TaskDB.find_by_task_uuid(task_id)
     if not task or not task.visible_for_user(user):
         raise HTTPException(
             status_code=status.HTTP_404_NOT_FOUND,

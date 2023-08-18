@@ -1,12 +1,11 @@
 import uuid
-import logging
-from pydantic import BaseModel
-from typing import List, Dict
+from typing import Dict
 
-from fastapi import FastAPI, Cookie, Request, Response, HTTPException, status, Depends
-from . import admin_checker, router, logger
-from ... import schema, auth, db
+from fastapi import Depends, HTTPException, status
+
+from ... import db, schema
 from ...config import settings
+from . import admin_checker, logger, router
 
 
 async def get_task(task_id: uuid.UUID) -> schema.Task:
@@ -37,8 +36,8 @@ async def api_admin_recalc_scoreboard(user: schema.User = Depends(admin_checker)
 @router.get("/unsolve_tasks")
 async def api_admin_unsolve_tasks(user: schema.User = Depends(admin_checker)):
     if not settings.DEBUG:
-        logger.critical(f"Какой-то еблан {user.short_desc()} ПЫТАЛСЯ сбросить таски на проде, ахтунг!")
-        return "Ты ебанулся, на проде эту хуйню запускать?!"
+        logger.critical(f"Какой-то гений {user.short_desc()} ПЫТАЛСЯ сбросить таски на проде!")
+        return "Нет."
 
     for _, task in (await db.get_all_tasks()).items():
         task.pwned_by.clear()
@@ -71,8 +70,8 @@ async def api_admin_task_create(new_task: schema.TaskForm, user: schema.User = D
 @router.get("/task/delete_all")
 async def api_admin_task_delete_all(user: schema.User = Depends(admin_checker)):
     if not settings.DEBUG:  # danger function!
-        logger.critical(f"Какой-то еблан {user.short_desc()} ПЫТАЛСЯ УДАЛИТЬ таски на проде, ахтунг!")
-        return "пащоль в жёпу (c) химичка Димона"
+        logger.critical(f"Какой-то гений {user.short_desc()} ПЫТАЛСЯ УДАЛИТЬ таски на проде!")
+        return "нет."
 
     logger.critical(f"[{user.short_desc()}] removing EVERYTHING")
     tasks = await db.get_all_tasks()

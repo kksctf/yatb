@@ -3,7 +3,7 @@ from .auth import AuthBase, CTFTimeOAuth, OAuth, SimpleAuth, TelegramAuth
 from .ebasemodel import EBaseModel
 from .flags import DynamicKKSFlag, Flag, StaticFlag
 from .scoring import DynamicKKSScoring, Scoring, StaticScoring
-from .task import Task, TaskForm
+from .task import Task, TaskForm, ScoringUnion, FlagUnion
 from .user import User
 
 logger = get_logger("schema")

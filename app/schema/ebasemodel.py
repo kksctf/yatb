@@ -33,7 +33,7 @@ class EBaseModel(BaseModel):
         name: str = "sub",
         *,
         public: bool = True,
-    ) -> type[BaseModel]:
+    ) -> type[Self]:
         target_fields: dict[str, tuple[type, FieldInfo]] = {}
 
         for field_name, field_value in cls.model_fields.items():
@@ -111,7 +111,7 @@ class EBaseModel(BaseModel):
 
     @classmethod
     @functools.lru_cache(typed=True)
-    def public_model(cls: type[Self]) -> type[BaseModel]:
+    def public_model(cls: type[Self]) -> type[Self]:
         return cls.build_model(
             cls.__public_fields__,
             cls.join_fields(cls.__private_fields__, cls.__admin_only_fields__),
@@ -121,7 +121,7 @@ class EBaseModel(BaseModel):
 
     @classmethod
     @functools.lru_cache(typed=True)
-    def admin_model(cls: type[Self]) -> type[BaseModel]:
+    def admin_model(cls: type[Self]) -> type[Self]:
         return cls.build_model(
             cls.join_fields(cls.__public_fields__, cls.__admin_only_fields__),
             cls.__private_fields__,

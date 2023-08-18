@@ -56,7 +56,7 @@ async def api_task_get_ctftime_scoreboard(fullScoreboard: bool = False):
             "team": user.username,
             "score": user.score,
         }
-        if fullScoreboard:
+        if fullScoreboard and full_tasks_list:
             obj["taskStats"] = {}
             for solved_task in user.solved_tasks:
                 obj["taskStats"][full_tasks_list[solved_task].task_name] = {
@@ -106,8 +106,8 @@ async def api_users_get(user_id: uuid.UUID, user: schema.User = Depends(auth.get
     return req_user
 
 
-@router.get("/{user_id}/username", response_model=str)
-async def api_users_get_username(user_id: uuid.UUID):
+@router.get("/{user_id}/username")
+async def api_users_get_username(user_id: uuid.UUID) -> str:
     req_user = await db.get_user_uuid(user_id)
     if not req_user:
         raise HTTPException(

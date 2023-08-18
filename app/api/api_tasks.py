@@ -20,7 +20,7 @@ router = APIRouter(
     "/",
     response_model=list[schema.Task.public_model()],
 )
-async def api_tasks_get(user: schema.User = Depends(auth.get_current_user_safe)):
+async def api_tasks_get(user: schema.User | None = Depends(auth.get_current_user_safe)):
     tasks = await db.get_all_tasks()
     tasks = tasks.values()
     tasks = filter(lambda x: x.visible_for_user(user), tasks)

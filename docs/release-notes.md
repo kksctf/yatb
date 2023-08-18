@@ -4,11 +4,13 @@
 
 - Added:
   - Ability to auth using X-Auth-Token instead of cookie
+  - Flag submission tests
 - Changed:
   - Migrated to newest pydantic/fastapi verison (pydantic v2, yes)
   - Refactor many things, mainly for typing or making ruff happy.
   - Refactor logging system
   - Some strings text sanitization
+  - Refactor some tests
 
 ## 0.6.1
 

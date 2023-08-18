@@ -1,5 +1,4 @@
 import asyncio
-from datetime import datetime
 import pickle
 import random
 import shutil
@@ -8,11 +7,13 @@ import subprocess
 import typing
 import uuid
 from dataclasses import dataclass
+from datetime import datetime
 from pathlib import Path
 from types import TracebackType
 
 import httpx
 import typer
+from pydantic import BaseModel
 from rich.console import Console
 
 from app import app, config, schema
@@ -35,8 +36,8 @@ class RawUser:
     username: str
     password: str = "0"
 
-    def generate_password(self):
-        self.password = "".join(random.choices(string.ascii_letters, k=16))
+    def generate_password(self) -> None:
+        self.password = "".join(random.choices(string.ascii_letters, k=16))  # noqa: S311 # i. knew.
 
 
 @dataclass
@@ -50,7 +51,7 @@ class RawTask:
     author: str = ""
 
 
-class FileTask(schema.BaseModel):
+class FileTask(BaseModel):
     task_name: str
     flag: str
     is_gulag: bool = False

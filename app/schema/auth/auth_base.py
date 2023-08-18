@@ -20,7 +20,11 @@ class AuthBase:
             return False
 
         def get_uniq_field(self) -> Hashable:
-            return None
+            return getattr(self, self.get_uniq_field_name())
+
+        @classmethod
+        def get_uniq_field_name(cls: type[Self]) -> str:
+            return "unknown"
 
         def generate_username(self) -> str:
             # raise NotImplementedError("AuthBase.generate_username not implemented")

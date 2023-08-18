@@ -89,19 +89,19 @@ class ClientEx(ClientExRaw):
         )
         resp.raise_for_status()
 
-        return schema.Task.admin_model().model_validate(resp.json())
+        return schema.Task.admin_model.model_validate(resp.json())
 
     def modify_task(self, task: schema.Task) -> schema.Task:
         resp = self.modify_task_raw(task=task)
         resp.raise_for_status()
 
-        return schema.Task.admin_model().model_validate(resp.json())
+        return schema.Task.admin_model.model_validate(resp.json())
 
     def get_me(self) -> schema.User:
         resp = self.get_me_raw()
         resp.raise_for_status()
 
-        return schema.User.public_model().model_validate(resp.json())
+        return schema.User.public_model.model_validate(resp.json())
 
 
 @pytest.fixture()

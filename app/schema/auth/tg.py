@@ -37,8 +37,9 @@ class TelegramAuth(AuthBase):
                 is_admin = True
             return is_admin
 
-        def get_uniq_field(self) -> int:
-            return self.tg_id
+        @classmethod
+        def get_uniq_field_name(cls: type[Self]) -> str:
+            return "tg_id"
 
         def generate_username(self) -> str:
             return self.tg_first_name + (" " + self.tg_last_name if self.tg_last_name else "")

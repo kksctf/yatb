@@ -108,6 +108,10 @@ class CTFTimeOAuth(OAuth):
         def get_uniq_field(self) -> int:
             return self.team.id
 
+        @classmethod
+        def get_uniq_field_name(cls: type[Self]) -> str:
+            return "team.id"
+
         def generate_username(self) -> str:
             return self.team.name
 
@@ -164,8 +168,9 @@ class GithubOAuth(OAuth):
         def is_admin(self) -> bool:
             return self.id in GithubOAuth.auth_settings.OAUTH_ADMIN_IDS
 
-        def get_uniq_field(self) -> int:
-            return self.id
+        @classmethod
+        def get_uniq_field_name(cls: type[Self]) -> str:
+            return "id"
 
         def generate_username(self) -> str:
             return self.name or self.login
@@ -217,8 +222,9 @@ class DiscordOAuth(OAuth):
         def is_admin(self) -> bool:
             return self.id in DiscordOAuth.auth_settings.OAUTH_ADMIN_IDS
 
-        def get_uniq_field(self) -> int:
-            return self.id
+        @classmethod
+        def get_uniq_field_name(cls: type[Self]) -> str:
+            return "id"
 
         def generate_username(self) -> str:
             return self.username

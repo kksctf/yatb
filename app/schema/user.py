@@ -51,7 +51,7 @@ class User(EBaseModel):
     @model_validator(mode="after")
     def setup_fields(self) -> Self:
         self.username = self.au_s.generate_username()
-        if self.admin_checker():
+        if self.admin_checker() and not self.is_admin:
             logger.warning(f"Promoting {self} to admin")
             self.is_admin = True
 

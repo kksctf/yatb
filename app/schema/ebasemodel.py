@@ -54,7 +54,7 @@ class EBaseModel(BaseModel):
                 for union_member in get_args(field_value.annotation):
                     if issubclass(union_member, EBaseModel):
                         new_member = (  # WTF: make it more robust
-                            union_member.public_model() if public else union_member.admin_model()
+                            union_member._public_model() if public else union_member._admin_model()
                         )
                         new_union_base.append(new_member)
                     else:
@@ -69,7 +69,7 @@ class EBaseModel(BaseModel):
             elif isinstance(field_value.annotation, type) and issubclass(field_value.annotation, EBaseModel):
                 logger.debug(f"Found EBaseModel field at {cls.__qualname__}: {field_name}")
                 new_field_cls = (
-                    field_value.annotation.public_model() if public else field_value.annotation.admin_model()
+                    field_value.annotation._public_model() if public else field_value.annotation._admin_model()
                 )
                 target_fields[field_name] = (
                     new_field_cls,
@@ -111,7 +111,7 @@ class EBaseModel(BaseModel):
 
     @classmethod
     @functools.lru_cache(typed=True)
-    def public_model(cls: type[Self]) -> type[Self]:
+    def _public_model(cls: type[Self]) -> type[Self]:
         return cls.build_model(
             cls.__public_fields__,
             cls.join_fields(cls.__private_fields__, cls.__admin_only_fields__),
@@ -121,7 +121,7 @@ class EBaseModel(BaseModel):
 
     @classmethod
     @functools.lru_cache(typed=True)
-    def admin_model(cls: type[Self]) -> type[Self]:
+    def _admin_model(cls: type[Self]) -> type[Self]:
         return cls.build_model(
             cls.join_fields(cls.__public_fields__, cls.__admin_only_fields__),
             cls.__private_fields__,
@@ -148,3 +148,13 @@ class EBaseModel(BaseModel):
         ret = f1 | f2
 
         return ret
+
+    @classmethod
+    @property
+    def public_model(cls: type[Self]) -> type[Self]:
+        return cls._public_model()
+
+    @classmethod
+    @property
+    def admin_model(cls: type[Self]) -> type[Self]:
+        return cls._admin_model()

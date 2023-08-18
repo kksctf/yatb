@@ -32,11 +32,11 @@
                 {{ inner_value | safe }}
             </div>
         </div>
-    {% elif type == "class" and 'anyOf' in prop %} {# anyof check due to narrow list of usages #}
+    {% elif type == "class" and 'oneOf' in prop %} {# oneOf check due to narrow list of usages #}
         <select class="form-control form_class_selector" id="class-selector-{{ prop_name }}" data-propname="{{ prop_name }}"> {# {{ ' '.join(attribs) }} #}
-            {% for ref in prop['anyOf'] %}
+            {% for ref in prop['oneOf'] %}
                 {% set ref = ref['$ref'].split('/')[-1] %}
-                {% if ref not in schema['definitions'] %}
+                {% if ref not in schema['$defs'] %}
                     <option> WTF WTF: {{ ref }} </option>
                 {% else %}
                     <option value="{{ ref }}" {{ 'selected' if inner_value['classtype'] == ref else '' }}>{{ ref }}</option>
@@ -44,11 +44,11 @@
             {% endfor %}
         </select>
         <div class="form_class_selector_list">
-            {% for ref in prop['anyOf'] %}
+            {% for ref in prop['oneOf'] %}
                 {% set ref = ref['$ref'].split('/')[-1] %}
-                {% if ref in schema['definitions'] %}
+                {% if ref in schema['$defs'] %}
                     <div class="form_class_selector_class" id="class-selector-forms-{{ prop_name }}" data-propname="{{ prop_name }}" data-ref="{{ ref }}">
-                    {% set defin = schema['definitions'][ref] %}
+                    {% set defin = schema['$defs'][ref] %}
                     {% if not isinstance(attribs, {}.__class__) %}
                         WTF WITH ATTRIBS : {{ attribs }}
                         {% set attribs = {} %}
@@ -72,6 +72,8 @@
                 {% endif %}
             {% endfor %}
         </div>
+    {% elif type == "classtype" %}
+        <input class="form-control" type="text" name="{{ prop_name }}" placeholder="{{ prop['title'] }}" value="{{ inner_value }}" readonly {{ ' '.join(attribs) }}>
     {% else %}
         _NOT_KNOWN_TYPE_{{ type }}_
     {% endif %}

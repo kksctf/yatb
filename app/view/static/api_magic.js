@@ -23,7 +23,7 @@ function getFormData(f) {
         obj_j = $(obj);
         obj_name = obj.name;
         obj_type = obj.type;
-        if (obj_name !== undefined && obj_name != "" && !obj_j.hasClass("form_class_disabled")) {
+        if (obj_name !== undefined && obj_name != "" && !obj_j.hasClass("form_class_disabled") && !obj_j.hasClass("form_class_selector")) {
             if (obj_type !== undefined && obj_name != "") {
                 if (obj_type == "checkbox") {
                     if (obj_j.val() != "on") {
@@ -44,7 +44,6 @@ function getFormData(f) {
     return ret;
 }
 
-
 function init_form_class() {
     $("select.form_class_selector").change(function () {
         var selected = this.value;
@@ -57,6 +56,15 @@ function init_form_class() {
         other_div.hide();
     });
     $("select.form_class_selector").change();
+
+    $('.form-select').select2({
+        theme: "bootstrap-5",
+        closeOnSelect: true,
+    });
+    $('.form-select-multiple').select2({
+        theme: "bootstrap-5",
+        closeOnSelect: false,
+    });
 }
 
 function ok_toast_generator(toast_name) {

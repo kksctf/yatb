@@ -6,6 +6,10 @@ from fastapi import BackgroundTasks, Depends, Request, Response
 from fastapi.routing import APIRoute as _APIRoute
 from fastapi.routing import APIRouter
 from fastapi.templating import Jinja2Templates
+from formgen.gen2 import Context as FormContext
+from formgen.gen2 import Contexts as FormContexts
+from formgen.gen2 import FieldType as FormFieldType
+from formgen.gen2 import generate_form
 from starlette.routing import Router
 from starlette.templating import _TemplateResponse
 
@@ -80,6 +84,11 @@ templ.env.globals["isinstance"] = isinstance
 templ.env.globals["DEBUG"] = settings.DEBUG
 templ.env.globals["FLAG_BASE"] = settings.FLAG_BASE
 templ.env.globals["CTF_NAME"] = settings.CTF_NAME
+
+templ.env.globals["generate_form"] = generate_form
+templ.env.globals["FormFieldType"] = FormFieldType
+templ.env.globals["FormContext"] = FormContext
+templ.env.globals["FormContexts"] = FormContexts
 
 from . import admin  # noqa
 

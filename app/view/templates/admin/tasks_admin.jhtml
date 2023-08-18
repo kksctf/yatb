@@ -10,8 +10,42 @@
 {% block content %}
     <div class="container">
         <div class="mb-3">
-            {% if not selected_task %}
-                {{ a_macro.generate_form(
+            {{
+                generate_form(
+                    model_type= (task_form_class if not selected_task else task_class),
+                    model = selected_task,
+                    form_id = ("task_create_form" if not selected_task else "task_edit_form"),
+                    contexts = FormContexts(
+                        contexts = {
+                            "task_id": FormContext(
+                                attributes = {"readonly": True}
+                            ),
+                            "description": FormContext(
+                                override = FormFieldType.TEXTAREA
+                            ),
+                            "description_html": FormContext(
+                                override = FormFieldType.HTML
+                            ),
+                            "scoring": FormContexts(
+                                contexts = {
+                                    "classtype": FormContext(
+                                        attributes = {"readonly": True}
+                                    )
+                                }
+                            ),
+                            "flag": FormContexts(
+                                contexts = {
+                                    "classtype": FormContext(
+                                        attributes = {"readonly": True}
+                                    )
+                                }
+                            )
+                        }
+                    ),
+                ) | safe
+            }}
+            {# {% if not selected_task %} #}
+                {# {{ a_macro.generate_form(
                     task_form_class.schema(),
                     form_id="task_create_form",
                     overrides = {
@@ -27,29 +61,58 @@
 			                "classtype": ["readonly"]
 			            }	                   
 		            })
-                }}
-            {% else %}
-                {{ a_macro.generate_form(
-                    task_class.schema(),
-                    form_id="task_edit_form",
-                    values=selected_task.dict(),
-                    overrides = {
-                        "description": "textarea",
-                        "scoring": "class",
-                        'description_html': 'html',
-                        "flag": "class",
+                }} #}
+                {# {{
+                    generate_form(
+                        model_type=task_form_class,
+                        model = None,
+                        form_id = "task_create_form",
+                        contexts = FormContexts(
+                            contexts = {
+                                "description": FormContext(
+                                    override = FormFieldType.TEXTAREA
+                                ),
+                                "scoring": FormContexts(
+                                    contexts = {
+                                        "classtype": FormContext(
+                                            attributes = {"readonly": True}
+                                        )
+                                    }
+                                ),
+                                "flag": FormContexts(
+                                    contexts = {
+                                        "classtype": FormContext(
+                                            attributes = {"readonly": True}
+                                        )
+                                    }
+                                )
+                            }
+                        ),
+                    ) | safe
+                }} #}
+            {# {% else %}
+
+            {% endif %} #}
+            {# {{ a_macro.generate_form(
+                task_class.schema(),
+                form_id="task_edit_form",
+                values=selected_task.dict(),
+                overrides = {
+                    "description": "textarea",
+                    "scoring": "class",
+                    'description_html': 'html',
+                    "flag": "class",
+                },
+                attribs={
+                    'task_id':  ['readonly'],
+                    "scoring": {
+                        "classtype": ["readonly"]
                     },
-                    attribs={
-                        'task_id':  ['readonly'],
-                        "scoring": {
-                            "classtype": ["readonly"]
-                        },
-			            "flag":{
-			                "classtype": ["readonly"]
-			            }	
-                    })
-                }}
-            {% endif %}
+                    "flag":{
+                        "classtype": ["readonly"]
+                    }	
+                })
+            }} #}
         </div>
         <hr>
         <button class="btn btn-danger mx-1 inverse_hidden_button">Inverse hidden</button>

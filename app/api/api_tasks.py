@@ -17,9 +17,7 @@ router = APIRouter(
 
 
 @router.get("/")
-async def api_tasks_get(
-    user: schema.User | None = Depends(auth.get_current_user_safe),
-) -> list[schema.Task.public_model]:
+async def api_tasks_get(user: auth.CURR_USER_SAFE) -> list[schema.Task.public_model]:
     tasks = await TaskDB.get_all()
     tasks = tasks.values()
     tasks = filter(lambda x: x.visible_for_user(user), tasks)
@@ -34,7 +32,7 @@ class BRMessage(schema.EBaseModel):
 
 
 @router.post("/submit_flag")
-async def api_task_submit_flag(flag: schema.FlagForm, user: schema.User = Depends(auth.get_current_user)) -> uuid.UUID:
+async def api_task_submit_flag(flag: schema.FlagForm, user: auth.CURR_USER) -> uuid.UUID:
     if datetime.now(tz=UTC) < settings.EVENT_START_TIME:
         raise HTTPException(
             status_code=status.HTTP_425_TOO_EARLY,
@@ -105,10 +103,7 @@ async def api_task_submit_flag(flag: schema.FlagForm, user: schema.User = Depend
 
 
 @router.get("/{task_id}")
-async def api_task_get(
-    task_id: uuid.UUID,
-    user: schema.User = Depends(auth.get_current_user),
-) -> schema.Task.public_model:
+async def api_task_get(task_id: uuid.UUID, user: auth.CURR_USER) -> schema.Task.public_model:
     task = await TaskDB.find_by_task_uuid(task_id)
     if not task or not task.visible_for_user(user):
         raise HTTPException(

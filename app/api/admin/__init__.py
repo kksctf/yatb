@@ -1,6 +1,6 @@
-import logging
+from typing import Annotated
 
-from fastapi import APIRouter, Cookie, Depends, FastAPI, Header, HTTPException, Query, Request, Response, status
+from fastapi import APIRouter, Depends, Header, HTTPException, Query, status
 
 from ... import auth, config, db, schema
 from ...utils.log_helper import get_logger
@@ -13,7 +13,7 @@ _fake_admin_user = schema.User(
 
 
 async def admin_checker(
-    user: schema.User | None = Depends(auth.get_current_user_safe),
+    user: auth.CURR_USER_SAFE,
     token_header: str | None = Header(None, alias="X-Token"),
     token_query: str | None = Query(None, alias="token"),
 ) -> schema.User:
@@ -30,6 +30,8 @@ async def admin_checker(
     )
 
 
+CURR_ADMIN = Annotated[schema.User, Depends(admin_checker)]
+
 logger = get_logger("api.admin")
 router = APIRouter(
     prefix="/admin",
@@ -38,13 +40,13 @@ router = APIRouter(
 
 
 @router.get("/save_db")
-async def save_db(user: schema.User = Depends(admin_checker)):
+async def save_db(user: CURR_ADMIN):
     await db.shutdown_event()
     logger.warning(f"DB saved by {user.short_desc()}")
 
 
 @router.delete("/cleanup_db")
-async def api_detele_everything_but_tasks(admin: schema.User = Depends(admin_checker)):
+async def api_detele_everything_but_tasks(admin: CURR_ADMIN):
     if not config.settings.DEBUG:
         logger.error(f"{admin} чистить юзеров на проде")
         raise HTTPException(

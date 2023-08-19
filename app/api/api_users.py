@@ -69,12 +69,12 @@ async def api_task_get_ctftime_scoreboard(fullScoreboard: bool = False):
 
 
 @router.get("/me")
-async def api_users_me(user: schema.User = Depends(auth.get_current_user)) -> schema.User.public_model:
+async def api_users_me(user: auth.CURR_USER) -> schema.User.public_model:
     return user
 
 
 @router.get("/logout")
-async def api_users_logout(req: Request, resp: Response, user: schema.User = Depends(auth.get_current_user)):
+async def api_users_logout(req: Request, resp: Response, user: auth.CURR_USER) -> str:
     resp.delete_cookie(key="access_token")
     resp.status_code = status.HTTP_307_TEMPORARY_REDIRECT
     resp.headers["Location"] = str(req.url_for("index"))
@@ -82,10 +82,7 @@ async def api_users_logout(req: Request, resp: Response, user: schema.User = Dep
 
 
 @router.get("/{user_id}")
-async def api_users_get(
-    user_id: uuid.UUID,
-    user: schema.User = Depends(auth.get_current_user),
-) -> schema.User.public_model:
+async def api_users_get(user_id: uuid.UUID, user: auth.CURR_USER) -> schema.User.public_model:
     req_user = await UserDB.find_by_user_uuid(user_id)
     if not req_user:
         raise HTTPException(

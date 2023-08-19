@@ -26,6 +26,11 @@ class AuthBase:
         def get_uniq_field_name(cls: type[Self]) -> str:
             return "unknown"
 
+        @classmethod
+        def get_classtype(cls: type[Self]) -> str:
+            # intended solution https://github.com/pydantic/pydantic/issues/7179
+            return cls.model_fields["classtype"].default
+
         def generate_username(self) -> str:
             # raise NotImplementedError("AuthBase.generate_username not implemented")
             return "undefined"

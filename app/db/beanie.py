@@ -91,18 +91,27 @@ class UserDB(DocumentEx[User], User):
 
 
 class DBClient:
-    client: AsyncIOMotorClient  # type: ignore
+    client: AsyncIOMotorClient  # type: ignore # bad library ;(
+    db: AsyncIOMotorDatabase  # type: ignore # bad library ;(
 
     def __init__(self) -> None:
         pass
 
     async def init(self) -> None:
-        self.client = AsyncIOMotorClient("mongodb://root:root@127.0.0.1:27017")
-        await init_beanie(database=self.client.yatb, document_models=[TaskDB, UserDB])  # type: ignore
+        self.client = AsyncIOMotorClient(str(settings.MONGO))
+        self.db = self.client[settings.DB_NAME]
+        await init_beanie(database=self.db, document_models=[TaskDB, UserDB])  # type: ignore # bad library ;(
         logger.info("Beanie init ok")
 
     async def close(self) -> None:
         logger.info("DB close ok")
+
+    async def reset_db(self) -> None:
+        if not settings.DEBUG:
+            logger.warning("DB Reset without debug")
+            return
+
+        await self.client.drop_database(settings.DB_NAME)
 
 
 @app.on_event("startup")

@@ -3,7 +3,7 @@ import subprocess
 from pathlib import Path
 from typing import Self
 
-from pydantic import FieldValidationInfo, model_validator
+from pydantic import MongoDsn, model_validator
 from pydantic_settings import BaseSettings, SettingsConfigDict
 
 _DEFAULT_TOKEN = "default_token_CHANGE_ME"  # noqa: S105 # intended
@@ -26,7 +26,8 @@ class Settings(BaseSettings):
     EVENT_END_TIME: datetime.datetime = datetime.datetime(2077, 12, 13, 9, 0, tzinfo=datetime.UTC)
 
     # database name
-    DB_NAME: Path = Path() / "file_db.db"
+    DB_NAME: str = "yatb"
+    MONGO: MongoDsn = MongoDsn("mongodb://root:root@127.0.0.1:27017")
 
     # JWT settings
     JWT_SECRET_KEY: str = _DEFAULT_TOKEN

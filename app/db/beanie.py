@@ -276,7 +276,7 @@ class DBClient:
         pass
 
     async def init(self) -> None:
-        self.client = AsyncIOMotorClient(str(settings.MONGO))
+        self.client = AsyncIOMotorClient(str(settings.MONGO), tz_aware=True)
         self.db = self.client[settings.DB_NAME]
         await init_beanie(database=self.db, document_models=[TaskDB, UserDB])  # type: ignore # bad library ;(
         logger.info("Beanie init ok")

@@ -39,7 +39,7 @@ async def api_task_submit_flag(flag: schema.FlagForm, user: auth.CURR_USER) -> u
             detail="CTF has not started yet",
         )
 
-    task = await db.find_task_by_flag(flag.flag, user)
+    task = await TaskDB.find_by_flag(flag.flag, user)
     if task:
         logger.info(f"{user.short_desc()} state=found task with flag flag={flag.flag}, task={task.short_desc()}.")
     else:
@@ -69,7 +69,8 @@ async def api_task_submit_flag(flag: schema.FlagForm, user: auth.CURR_USER) -> u
             if _user_yes_task_not:
                 # task.pwned_by.remove(user.solved_tasks)
                 pass
-            await db.recalc_user_score(user)
+
+            await user.recalc_score_one()
             raise HTTPException(
                 status_code=status.HTTP_500_INTERNAL_SERVER_ERROR,
                 detail="пятисотОЧКА!!1<br>Попробуйте решить таск ещё раз.",
@@ -82,7 +83,7 @@ async def api_task_submit_flag(flag: schema.FlagForm, user: auth.CURR_USER) -> u
         metrics.solves_per_task.labels(task_id=task.task_id, task_name=task.task_name).inc()
         metrics.solves_per_user.labels(user_id=user.user_id, username=user.username).inc()
 
-    ret = await db.solve_task(task, user)
+    ret = await user.solve_task_bw(task)
 
     msg = BRMessage(
         task_name=task.task_name,
@@ -91,7 +92,7 @@ async def api_task_submit_flag(flag: schema.FlagForm, user: auth.CURR_USER) -> u
         is_fb=len(task.pwned_by) == 1,
     )
 
-    await ws_manager.broadcast(msg.json())
+    await ws_manager.broadcast(msg.model_dump_json())
 
     if len(task.pwned_by) == 1:
         try:

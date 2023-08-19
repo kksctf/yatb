@@ -49,8 +49,7 @@ def generic_handler_generator(cls: type[schema.auth.AuthBase]) -> Callable:
         user = await UserDB.get_user_uniq_field(cls, model.get_uniq_field())
         if user is None:
             # if not: create new user
-            user_db = UserDB(auth_source=model)
-            user = await user_db.insert()  # type: ignore # WTF: library shit ;(
+            user = await UserDB.populate(model)
             metrics.users.inc()
         elif user.admin_checker() and not user.is_admin:
             # if users exists: check and promote to admin. conceptual shit.
@@ -111,8 +110,7 @@ async def api_auth_simple_register(req: Request, resp: Response, form: schema.Si
             detail="Team exists",
         )
 
-    user_db = UserDB(auth_source=model)
-    user = await user_db.insert()  # type: ignore # WTF: library shit ;(
+    user = await UserDB.populate(model)
     metrics.users.inc()
 
     access_token = auth.create_user_token(user)

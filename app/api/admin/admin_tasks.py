@@ -1,108 +1,112 @@
 import uuid
-from typing import Dict
+from typing import Annotated, Mapping
 
+from beanie import BulkWriter
+from beanie.operators import Set
 from fastapi import Depends, HTTPException, status
 
-from ... import db, schema
+from ... import schema
 from ...config import settings
-from . import admin_checker, logger, router
+from ...db.beanie import TaskDB, UserDB
+from . import CURR_ADMIN, logger, router
 
 
-async def get_task(task_id: uuid.UUID) -> schema.Task:
-    task = await db.get_task_uuid(task_id)
+async def get_task(task_id: uuid.UUID) -> TaskDB:
+    task = await TaskDB.find_by_task_uuid(task_id)
     if not task:
         raise HTTPException(
             status_code=status.HTTP_404_NOT_FOUND,
             detail="Task not found",
         )
+
     return task
 
 
-@router.get(
-    "/tasks",
-    response_model=Dict[uuid.UUID, schema.Task.admin_model()],
-)
-async def api_admin_tasks(user: schema.User = Depends(admin_checker)):
-    all_tasks = await db.get_all_tasks()
+CURR_TASK = Annotated[TaskDB, Depends(get_task)]
+
+
+@router.get("/tasks")
+async def api_admin_tasks(user: CURR_ADMIN) -> Mapping[uuid.UUID, schema.Task.admin_model]:
+    all_tasks = await TaskDB.get_all()
     return all_tasks
 
 
 @router.get("/recalc_scoreboard")
-async def api_admin_recalc_scoreboard(user: schema.User = Depends(admin_checker)):
-    await db.recalc_scoreboard()
+async def api_admin_recalc_scoreboard(user: CURR_ADMIN):
+    await UserDB.recalc_scoreboard()
     return None
 
 
 @router.get("/unsolve_tasks")
-async def api_admin_unsolve_tasks(user: schema.User = Depends(admin_checker)):
+async def api_admin_unsolve_tasks(user: CURR_ADMIN) -> str:
     if not settings.DEBUG:
         logger.critical(f"Какой-то гений {user.short_desc()} ПЫТАЛСЯ сбросить таски на проде!")
         return "Нет."
 
-    for _, task in (await db.get_all_tasks()).items():
-        task.pwned_by.clear()
+    async with BulkWriter() as bw:
+        for task in (await TaskDB.get_all()).values():
+            task.pwned_by.clear()
+            await task.update(Set({str(TaskDB.pwned_by): task.pwned_by}), bulk_writer=bw)
 
-    for _, ur in (await db.get_all_users()).items():
-        ur.solved_tasks.clear()
-    await db.recalc_scoreboard()
+        logger.info(f"{bw.operations = }")
+
+    async with BulkWriter() as bw:
+        for user in (await UserDB.get_all()).values():
+            user.solved_tasks.clear()
+            await user.update(Set({str(UserDB.solved_tasks): user.solved_tasks}), bulk_writer=bw)
+
+        logger.info(f"{bw.operations = }")
+
+    await UserDB.recalc_scoreboard()
     return "ok"
 
 
-@router.get(
-    "/unsolve_task/{task_id}",
-    response_model=schema.Task.admin_model(),
-)
-async def api_admin_task_unsolve(task: schema.Task = Depends(get_task), user: schema.User = Depends(admin_checker)):
+@router.get("/unsolve_task/{task_id}")
+async def api_admin_task_unsolve(task: CURR_TASK, user: CURR_ADMIN) -> schema.Task.admin_model:
     logger.warning(f"Unsolving task: {task.short_desc()} by {user.short_desc()}")
-    return await db.unsolve_task(task)
+    # return await db.unsolve_task(task)
+    raise NotImplementedError
 
 
-@router.post(
-    "/task",
-    response_model=schema.Task.admin_model(),
-)
-async def api_admin_task_create(new_task: schema.TaskForm, user: schema.User = Depends(admin_checker)):
-    task = await db.insert_task(new_task, user)
+@router.post("/task")
+async def api_admin_task_create(new_task: schema.TaskForm, user: CURR_ADMIN) -> schema.Task.admin_model:
+    task = await TaskDB.populate(new_task, user)
     logger.debug(f"New task: {new_task}, result={task}")
     return task
 
 
 @router.get("/task/delete_all")
-async def api_admin_task_delete_all(user: schema.User = Depends(admin_checker)):
-    if not settings.DEBUG:  # danger function!
-        logger.critical(f"Какой-то гений {user.short_desc()} ПЫТАЛСЯ УДАЛИТЬ таски на проде!")
-        return "нет."
+async def api_admin_task_delete_all(user: CURR_ADMIN):
+    raise NotImplementedError
 
-    logger.critical(f"[{user.short_desc()}] removing EVERYTHING")
-    tasks = await db.get_all_tasks()
-    for task in list(tasks.values()):
-        await db.remove_task(task)
-    return "ok, you dead."
+    # if not settings.DEBUG:  # danger function!
+    #     logger.critical(f"Какой-то гений {user.short_desc()} ПЫТАЛСЯ УДАЛИТЬ таски на проде!")
+    #     return "нет."
+
+    # logger.critical(f"[{user.short_desc()}] removing EVERYTHING")
+    # tasks = await db.get_all_tasks()
+    # for task in list(tasks.values()):
+    #     await db.remove_task(task)
+    # return "ok, you dead."
 
 
 @router.get("/task/delete/{task_id}")
-async def api_admin_task_delete(task: schema.Task = Depends(get_task), user: schema.User = Depends(admin_checker)):
-    await db.remove_task(task)
-    logger.warning(f"[{user.short_desc()}] removing task {task}")
-    return "ok"
+async def api_admin_task_delete(task: CURR_TASK, user: CURR_ADMIN):
+    raise NotImplementedError
+
+    # await db.remove_task(task)
+    # logger.warning(f"[{user.short_desc()}] removing task {task}")
+    # return "ok"
 
 
-@router.get(
-    "/task/{task_id}",
-    response_model=schema.Task.admin_model(),
-)
-async def api_admin_task_get(task: schema.Task = Depends(get_task), user: schema.User = Depends(admin_checker)):
+@router.get("/task/{task_id}")
+async def api_admin_task_get(task: CURR_TASK, user: CURR_ADMIN) -> schema.Task.admin_model:
     return task
 
 
-@router.post(
-    "/task/{task_id}",
-    response_model=schema.Task.admin_model(),
-)
-async def api_admin_task_edit(
-    new_task: schema.Task, task: schema.Task = Depends(get_task), user: schema.User = Depends(admin_checker)
-):
-    task = await db.update_task(task, new_task)  # TODO: remove bullshit.
+@router.post("/task/{task_id}")
+async def api_admin_task_edit(new_task: schema.Task, task: CURR_TASK, user: CURR_ADMIN) -> schema.Task.admin_model:
+    task = await task.update_entry(new_task)  # TODO: remove bullshit.
     return task
 
 
@@ -114,7 +118,7 @@ async def api_admin_task_edit(
 
 
 # @router.post("/tasks/bulk_unhide")
-# async def api_admin_tasks_bulk_unhide(tasks: InternalObjTasksList, user: schema.User = Depends(admin_checker)):
+# async def api_admin_tasks_bulk_unhide(tasks: InternalObjTasksList, user: CURR_ADMIN):
 #     ret = {}
 #     for task_id in tasks.tasks:
 #         task = await db.get_task_uuid(task_id)
@@ -133,7 +137,7 @@ async def api_admin_task_edit(
 # @router.post("/tasks/bulk_edit_decay")
 # async def api_admin_tasks_bulk_edit_decay(
 #     tasks: InternalObjTasksListDecay,
-#     user: schema.User = Depends(admin_checker),
+#     user: CURR_ADMIN,
 # ):
 #     ret = {}
 #     for task_id in tasks.tasks:

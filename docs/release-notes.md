@@ -5,12 +5,14 @@
 - Added:
   - Ability to auth using X-Auth-Token instead of cookie
   - Flag submission tests
+  - Beanie ODM to mongodb instead of cringe file(pickle)db
 - Changed:
   - Migrated to newest pydantic/fastapi verison (pydantic v2, yes)
   - Refactor many things, mainly for typing or making ruff happy.
   - Refactor logging system
   - Some strings text sanitization
   - Refactor some tests
+  - Use typing.Annotation for fastapi dependencies
 
 ## 0.6.1
 

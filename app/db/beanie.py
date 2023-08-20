@@ -1,7 +1,7 @@
 import datetime
 import uuid
 from collections.abc import Hashable, Mapping
-from typing import Any, ClassVar, Generic, Self, TypeVar, final
+from typing import Any, ClassVar, Generic, Literal, Self, TypeVar, final
 
 import pymongo
 from beanie import BulkWriter, Document, init_beanie
@@ -18,6 +18,7 @@ from ..utils.log_helper import get_logger
 logger = get_logger("db.beanie")
 
 _T = TypeVar("_T", bound=EBaseModel)
+_TT = TypeVar("_TT", bound=EBaseModel)
 
 
 class DocumentEx(Document, EBaseModel, Generic[_T]):
@@ -114,6 +115,19 @@ class TaskDB(DocumentEx[Task], Task):
 
 
 class UserDB(DocumentEx[User], User):
+    class ScoreboardProjection(EBaseModel):
+        user_id: uuid.UUID
+        username: str
+        score: int
+        solved_tasks: dict[uuid.UUID, datetime.datetime]
+        is_admin: bool
+
+        def get_last_solve_time(self) -> tuple[uuid.UUID, datetime.datetime] | tuple[Literal[""], datetime.datetime]:
+            if len(self.solved_tasks) > 0:
+                return max(self.solved_tasks.items(), key=lambda x: x[1])
+
+            return ("", datetime.datetime.fromtimestamp(0, tz=datetime.UTC))
+
     async def recalc_score_one(self) -> None:
         # WTF: db_lock?
         task_cache = await TaskDB.get_all()
@@ -245,6 +259,10 @@ class UserDB(DocumentEx[User], User):
     @classmethod
     async def get_all(cls: type[Self]) -> dict[uuid.UUID, Self]:
         return {i.user_id: i for i in await cls.find_all().to_list()}
+
+    @classmethod
+    async def get_all_projected(cls: type[Self], projection: type[_TT]) -> dict[uuid.UUID, _TT]:
+        return {i.user_id: i for i in await cls.find_all().project(projection).to_list()}  # type: ignore # FIXME: fix.
 
     @classmethod
     async def get_user_uniq_field(

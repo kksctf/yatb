@@ -16,6 +16,7 @@
   - Use typing.Annotation for fastapi dependencies
 - Fixes:
   - Some optimization in jinja formatting
+  - Optimize scoreboard generation
 
 ## 0.6.1
 

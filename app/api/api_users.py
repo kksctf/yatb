@@ -25,6 +25,17 @@ async def api_scoreboard_get_internal() -> Sequence[schema.User]:
     return users  # noqa: RET504
 
 
+async def api_scoreboard_get_internal_shrinked() -> Sequence[UserDB.ScoreboardProjection]:
+    users = await UserDB.get_all_projected(UserDB.ScoreboardProjection)
+    if not settings.DEBUG:  # noqa: SIM108
+        users = filter(lambda x: not x.is_admin, users.values())
+    else:
+        users = users.values()
+    users = sorted(users, key=lambda i: i.get_last_solve_time()[1])
+    users = sorted(users, key=lambda i: i.score, reverse=True)
+    return users  # noqa: RET504
+
+
 @router.get("/scoreboard")
 async def api_scoreboard_get() -> Sequence[schema.User.public_model]:
     users = await api_scoreboard_get_internal()

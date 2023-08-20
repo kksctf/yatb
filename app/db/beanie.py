@@ -181,6 +181,8 @@ class UserDB(DocumentEx[User], User):
         solve_time = datetime.datetime.now(tz=datetime.UTC)
         self.solved_tasks[task.task_id] = solve_time
         task.pwned_by[self.user_id] = solve_time
+        await self.update(Set({f"solved_tasks.{task.task_id}": solve_time}))
+        await task.update(Set({f"pwned_by.{self.user_id}": solve_time}))
 
         # get previous score and sum it to solver score
         prev_score = task.scoring.points
@@ -188,6 +190,12 @@ class UserDB(DocumentEx[User], User):
 
         # if do_recalc, recalc all the scoreboard... only users, who solved task
         do_recalc = task.scoring.solve_task()
+        await task.update(
+            Set(
+                {str(TaskDB.scoring): task.scoring},
+            ),
+            # bulk_writer=bw,
+        )
 
         if do_recalc:
             new_score = task.scoring.points
@@ -207,26 +215,12 @@ class UserDB(DocumentEx[User], User):
                 solver.score -= diff
                 await solver.update(
                     Set({UserDB.score: self.score}),
-                    # bulk_writer=bw,
+                    bulk_writer=bw,
                 )
 
-        await task.update(
-            Set(
-                {
-                    str(TaskDB.scoring): task.scoring,
-                    str(TaskDB.pwned_by): task.sanitize_dict(task.pwned_by),
-                },
-            ),
-            # bulk_writer=bw,
-        )
         await self.update(
-            Set(
-                {
-                    UserDB.score: self.score,
-                    str(UserDB.solved_tasks): self.sanitize_dict(self.solved_tasks),
-                }
-            ),
-            # bulk_writer=bw,
+            Set({UserDB.score: self.score}),
+            bulk_writer=bw,
         )
 
         return task.task_id

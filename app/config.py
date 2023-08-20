@@ -21,7 +21,7 @@ class Settings(BaseSettings):
 
     # bot token for notifications
     BOT_TOKEN: str | None = None
-    CHAT_ID: int = 0
+    CHAT_ID: int | None = None
 
     # event time. should be in UTC
     EVENT_START_TIME: datetime.datetime = datetime.datetime(1077, 12, 12, 9, 0, tzinfo=datetime.UTC)
@@ -85,7 +85,7 @@ class Settings(BaseSettings):
                 else ""
             )
         else:
-            self.VERSION += "0.6.1a0"
+            self.VERSION += "0.6.2a0"
             if self.COMMIT:
                 self.VERSION += f"-{self.COMMIT[:8]}"
 

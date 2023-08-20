@@ -2,6 +2,8 @@
 
 ## Latest version
 
+## 0.6.2a0
+
 - Added:
   - Ability to auth using X-Auth-Token instead of cookie
   - Flag submission tests

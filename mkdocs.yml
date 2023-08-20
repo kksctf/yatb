@@ -13,7 +13,7 @@ nav:
   - YATB: index.md
   - config.md
   - Hacking:
-    - hacking/index.md
+      - hacking/index.md
   - release-notes.md
 
 theme:
@@ -30,3 +30,6 @@ theme:
       toggle:
         icon: material/brightness-7
         name: Switch to dark mode
+
+markdown_extensions:
+  - mdx_truly_sane_lists

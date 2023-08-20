@@ -1,3 +1,6 @@
 mkdocs==1.4.2
 mkdocs-material==8.5.11
 mkdocs-material-extensions==1.1.1
+# For fixing nested list
+# Ref: https://github.com/mkdocs/mkdocs/issues/545#issuecomment-522196661
+mdx_truly_sane_lists==1.3

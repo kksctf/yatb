@@ -18,6 +18,7 @@ services:
       - mongo
     expose:
       - 80
+
   mongo:
     image: mongo:7.0
     environment:

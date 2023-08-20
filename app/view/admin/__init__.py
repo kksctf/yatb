@@ -37,7 +37,7 @@ router = APIRouter(
 
 @router.get("/")
 async def admin_index(req: Request, resp: Response, user: schema.User = Depends(admin_checker)):
-    return response_generator(
+    return await response_generator(
         req,
         "admin/index.jhtml",
         {
@@ -51,7 +51,7 @@ async def admin_index(req: Request, resp: Response, user: schema.User = Depends(
 @router.get("/tasks")
 async def admin_tasks(req: Request, resp: Response, user: schema.User = Depends(admin_checker)):
     tasks_list = await api_tasks.api_tasks_get(user)
-    return response_generator(
+    return await response_generator(
         req,
         "admin/tasks_admin.jhtml",
         {
@@ -69,7 +69,7 @@ async def admin_tasks(req: Request, resp: Response, user: schema.User = Depends(
 async def admin_task_get(req: Request, resp: Response, task_id: uuid.UUID, user: schema.User = Depends(admin_checker)):
     tasks_list = await api_tasks.api_tasks_get(user)
     selected_task = await api_tasks.api_task_get(task_id, user)
-    return response_generator(
+    return await response_generator(
         req,
         "admin/tasks_admin.jhtml",
         {
@@ -87,7 +87,7 @@ async def admin_task_get(req: Request, resp: Response, task_id: uuid.UUID, user:
 @router.get("/users")
 async def admin_users(req: Request, resp: Response, user: schema.User = Depends(admin_checker)):
     users_dict = await api_admin_users.api_admin_users_internal()
-    return response_generator(
+    return await response_generator(
         req,
         "admin/users_admin.jhtml",
         {
@@ -105,7 +105,7 @@ async def admin_users(req: Request, resp: Response, user: schema.User = Depends(
 async def admin_user_get(req: Request, resp: Response, user_id: uuid.UUID, user: schema.User = Depends(admin_checker)):
     users_dict = await api_admin_users.api_admin_users_internal()
     selected_user = await api_admin_users.api_admin_user_get_internal(user_id)
-    return response_generator(
+    return await response_generator(
         req,
         "admin/users_admin.jhtml",
         {

@@ -14,6 +14,8 @@
   - Some strings text sanitization
   - Refactor some tests
   - Use typing.Annotation for fastapi dependencies
+- Fixes:
+  - Some optimization in jinja formatting
 
 ## 0.6.1
 

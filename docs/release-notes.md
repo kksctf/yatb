@@ -16,6 +16,7 @@
   - Refactor some tests
   - Use typing.Annotation for fastapi dependencies
   - Rename some OAUTH settings to make it better-looking
+  - More documentation fixes
 - Fixes:
   - Some optimization in jinja formatting
   - Optimize scoreboard generation

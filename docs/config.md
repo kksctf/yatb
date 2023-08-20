@@ -1,17 +1,26 @@
 # YATB Config
 
-Config setup stored in [app/config.py](https://github.com/kksctf/yatb/blob/master/app/config.py) file
+Setup config stored in [app/config.py](https://github.com/kksctf/yatb/blob/master/app/config.py) file
 
 ## .env
 
-Setting are populated from `yatb.env`, if you use local uvicorn startup (usually debug)
-
-And from `yatb_production.env`, if you use docker-compose setup (usually production)
+Always populated from `yatb.env`, or from enviroment.
 
 ## Main settings
 
+### Debug
+
 - `DEBUG`: enable/disable debug mode. Should be off on production
-- `EVENT_START_TIME` / `EVENT_END_TIME`: dates of event start and end. **MUST** be in UTC and offset-native. I prefer setting it directly in `config.py` rather than .env
+- `PROFILING`: enable/disable profiling. Enables `?profile=true` query param for viewing PyInstrument output
+
+### Event timing
+
+- `EVENT_START_TIME` / `EVENT_END_TIME`: dates of event start and end. **MUST** be in UTC and offset-aware.
+
+### DB Data
+
+- `DB_NAME`: name of database
+- `MONGO`: DSN for connecting to mongodb instance
 
 ## **Must** be changed
 
@@ -121,5 +130,4 @@ There are some params for hiding fastapi docs:
 
 ## Misc
 
-- `DB_NAME`: Path to DB file
 - `VERSION`: base string, used for versing string population

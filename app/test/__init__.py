@@ -1,19 +1,26 @@
 # ruff: noqa: S101, S106, ANN201, T201 # this is a __test file__
 
+import typing
+
 import pytest
 from fastapi.testclient import TestClient
 from httpx import Response
 
-from .. import app, config, schema
+from .. import app, schema
 from ..config import settings
+from ..db.beanie import db
 
-# this disables real connection to db/creating db-in-file, and forces to use only in-memory db
-settings.DB_NAME = None  # type: ignore
+settings.DB_NAME = "yatb_testing"
 
 LoginForm = schema.SimpleAuth.Form._Internal  # noqa: SLF001
 
 
 class ClientExRaw(TestClient):
+    def __enter__(self) -> typing.Self:
+        super().__enter__()
+        self.drop_db()
+        return self
+
     def simple_register_raw(self, username: str, password: str) -> Response:
         return self.post(
             app.url_path_for("api_auth_simple_register"),
@@ -60,6 +67,11 @@ class ClientExRaw(TestClient):
     def get_me_raw(self) -> Response:
         return self.get(app.url_path_for("api_users_me"))
 
+    def drop_db(self) -> None:
+        with self._portal_factory() as portal:
+            print("Drop DB")
+            portal.call(db.reset_db)
+
 
 class ClientEx(ClientExRaw):
     # def simple_register(self, username: str, password: str) -> schema.User:
@@ -89,19 +101,19 @@ class ClientEx(ClientExRaw):
         )
         resp.raise_for_status()
 
-        return schema.Task.admin_model().model_validate(resp.json())
+        return schema.Task.admin_model.model_validate(resp.json())
 
     def modify_task(self, task: schema.Task) -> schema.Task:
         resp = self.modify_task_raw(task=task)
         resp.raise_for_status()
 
-        return schema.Task.admin_model().model_validate(resp.json())
+        return schema.Task.admin_model.model_validate(resp.json())
 
     def get_me(self) -> schema.User:
         resp = self.get_me_raw()
         resp.raise_for_status()
 
-        return schema.User.public_model().model_validate(resp.json())
+        return schema.User.public_model.model_validate(resp.json())
 
 
 @pytest.fixture()

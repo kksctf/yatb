@@ -1,5 +1,6 @@
 import uuid
 from datetime import UTC, datetime, timedelta
+from typing import Annotated
 
 from fastapi import Depends, HTTPException, Request, status
 from fastapi.openapi.models import OAuthFlows as OAuthFlowsModel
@@ -7,8 +8,9 @@ from fastapi.security import OAuth2
 from fastapi.security.utils import get_authorization_scheme_param
 from jose import JWTError, jwt
 
-from . import db, schema
+from . import schema
 from .config import settings
+from .db.beanie import UserDB
 from .utils.log_helper import get_logger
 
 logger = get_logger("auth")
@@ -70,7 +72,7 @@ def create_user_token(user: schema.User) -> str:
     )
 
 
-async def get_current_user(token: str = Depends(oauth2_scheme)) -> schema.User:
+async def get_current_user(token: str = Depends(oauth2_scheme)) -> UserDB:
     credentials_exception = HTTPException(
         status_code=status.HTTP_401_UNAUTHORIZED,
         detail="Could not validate credentials",
@@ -86,14 +88,14 @@ async def get_current_user(token: str = Depends(oauth2_scheme)) -> schema.User:
     except JWTError as ex:
         raise credentials_exception from ex
 
-    user = await db.get_user_uuid(uuid=uuid.UUID(user_id))
+    user = await UserDB.find_by_user_uuid(uuid.UUID(user_id))
     if user is None:
         raise credentials_exception
 
     return user
 
 
-async def get_current_user_safe(request: Request) -> schema.User | None:
+async def get_current_user_safe(request: Request) -> UserDB | None:
     user = None
     try:
         user = await get_current_user(await oauth2_scheme(request))
@@ -101,3 +103,7 @@ async def get_current_user_safe(request: Request) -> schema.User | None:
         user = None
 
     return user
+
+
+CURR_USER = Annotated[UserDB, Depends(get_current_user)]
+CURR_USER_SAFE = Annotated[UserDB | None, Depends(get_current_user_safe)]

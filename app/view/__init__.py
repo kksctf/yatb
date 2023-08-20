@@ -1,3 +1,4 @@
+import asyncio
 import uuid
 from collections.abc import Mapping
 from pathlib import Path
@@ -45,7 +46,7 @@ def route_generator(req: Request, base_path: str = "/api", *, ignore_admin: bool
     return ret
 
 
-def response_generator(  # noqa: PLR0913 # impossible to fix
+async def response_generator(  # noqa: PLR0913 # impossible to fix
     req: Request,
     filename: str,
     context: dict = {},  # noqa: B006 # iknew.
@@ -61,13 +62,16 @@ def response_generator(  # noqa: PLR0913 # impossible to fix
         "api_list": route_generator(req, ignore_admin=ignore_admin),
     }
     context_base.update(context)
-    return templ.TemplateResponse(
-        name=filename,
-        context=context_base,
-        status_code=status_code,
-        headers=headers,
-        media_type=media_type,
-        background=background,
+    return await asyncio.get_running_loop().run_in_executor(
+        None,
+        lambda: templ.TemplateResponse(
+            name=filename,
+            context=context_base,
+            status_code=status_code,
+            headers=headers,
+            media_type=media_type,
+            background=background,
+        ),
     )
 
 
@@ -97,14 +101,14 @@ router.include_router(admin.router)
 
 @router.get("/")
 @router.get("/index")
-async def index(req: Request, resp: Response, user: schema.User = Depends(auth.get_current_user_safe)):
+async def index(req: Request, resp: Response, user: auth.CURR_USER_SAFE):
     return await tasks_get_all(req, resp, user)
 
 
 @router.get("/tasks")
-async def tasks_get_all(req: Request, resp: Response, user: schema.User = Depends(auth.get_current_user_safe)):
+async def tasks_get_all(req: Request, resp: Response, user: auth.CURR_USER_SAFE):
     tasks_list = await api_tasks.api_tasks_get(user)
-    return response_generator(
+    return await response_generator(
         req,
         "tasks.jhtml",
         {
@@ -116,9 +120,9 @@ async def tasks_get_all(req: Request, resp: Response, user: schema.User = Depend
 
 
 @router.get("/scoreboard")
-async def scoreboard_get(req: Request, resp: Response, user: schema.User = Depends(auth.get_current_user_safe)):
-    scoreboard = await api_users.api_scoreboard_get_internal()
-    return response_generator(
+async def scoreboard_get(req: Request, resp: Response, user: auth.CURR_USER_SAFE):
+    scoreboard = await api_users.api_scoreboard_get_internal_shrinked()
+    return await response_generator(
         req,
         "scoreboard.jhtml",
         {
@@ -131,8 +135,8 @@ async def scoreboard_get(req: Request, resp: Response, user: schema.User = Depen
 
 
 @router.get("/login")
-async def login_get(req: Request, resp: Response, user: schema.User = Depends(auth.get_current_user_safe)):
-    return response_generator(
+async def login_get(req: Request, resp: Response, user: auth.CURR_USER_SAFE):
+    return await response_generator(
         req,
         "login.jhtml",
         {
@@ -148,10 +152,10 @@ async def tasks_get_task(
     req: Request,
     resp: Response,
     task_id: uuid.UUID,
-    user: schema.User = Depends(auth.get_current_user_safe),
+    user: auth.CURR_USER_SAFE,
 ):
     task = await api_tasks.api_task_get(task_id, user)
-    return response_generator(
+    return await response_generator(
         req,
         "task.jhtml",
         {

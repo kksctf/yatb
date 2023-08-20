@@ -20,13 +20,15 @@
             </thead>
             <tbody>
                 {% for i, user in enumerate(scoreboard) %}
+                    {% if len(user.solved_tasks) > 0 %}
+                        {% set last_solve_info = user.get_last_solve_time() %}
+                    {% endif %}
                     <tr>
                         <th scope="row">{{ i + 1 }}</th>
                         <td>{{ user.username }}</td>
                         <td>{{ user.score }}</td>
                         <td>
                             {% if len(user.solved_tasks) > 0 %}
-                                {% set last_solve_info = user.get_last_solve_time() %}
                                 <span style='display: none;' class='task_id_resolve'>{{ last_solve_info[0] }}</span>
                             {% else %}
                                 ¯\_(ツ)_/¯
@@ -34,7 +36,6 @@
                         </td>
                         <td>
                             {% if len(user.solved_tasks) > 0 %}
-                                {% set last_solve_info = user.get_last_solve_time() %}
                                 {{ template_format_time(last_solve_info[1]) }}
                             {% else %}
                                 ¯\_(ツ)_/¯

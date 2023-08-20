@@ -1,13 +1,10 @@
-import uuid
-from datetime import timedelta
-from typing import Callable, List, Literal, Optional, Type, cast
+from collections.abc import Callable
+from typing import Literal, cast
 
-import aiohttp
 from fastapi import APIRouter, Depends, HTTPException, Request, Response, status
-from starlette.responses import RedirectResponse
 
 from .. import auth, db, schema
-from ..config import settings
+from ..db.beanie import UserDB
 from ..utils import metrics
 from . import logger
 
@@ -19,18 +16,18 @@ router = APIRouter(
 
 async def check_for_existing_model(
     model: schema.auth.AuthBase.AuthModel,
-    check_for_class: Type[schema.auth.AuthBase.AuthModel],
+    check_for_class: type[schema.auth.AuthBase.AuthModel],
 ):
     username = model.generate_username()
-    user_by_username = await db.get_user(username)
+    user_by_username = await UserDB.find_by_username(username)
     if user_by_username and not isinstance(user_by_username.auth_source, check_for_class):
         raise HTTPException(
             status_code=status.HTTP_403_FORBIDDEN,
-            detail="Team already exists. If you want to migrate between password <-> ctftime auth, contact orgs",
+            detail="User/Team already exists. If you want to migrate between password <-> ctftime auth, contact orgs",
         )
 
 
-def generic_handler_generator(cls: Type[schema.auth.AuthBase]) -> Callable:
+def generic_handler_generator(cls: type[schema.auth.AuthBase]) -> Callable:
     """
     This is a little crazy "generic generator" for handling universal auth way.
     Should work for most of possible authentification ways.
@@ -41,7 +38,6 @@ def generic_handler_generator(cls: Type[schema.auth.AuthBase]) -> Callable:
         resp: Response,
         form: "schema.auth.AuthBase.Form" = Depends(),
     ) -> Literal["ok"]:
-
         # create model from form.
         model = await form.populate(req, resp)
 
@@ -50,16 +46,15 @@ def generic_handler_generator(cls: Type[schema.auth.AuthBase]) -> Callable:
 
         # extract primary (unique) field from model, and check
         # is user with that field exists
-        user = await db.get_user_uniq_field(cls.AuthModel, model.get_uniq_field())
+        user = await UserDB.get_user_uniq_field(cls, model.get_uniq_field())
         if user is None:
             # if not: create new user
-            user = await db.insert_user(model)
+            user = await UserDB.populate(model)
             metrics.users.inc()
-        else:
-            # if exist: check for admin
-            if user.admin_checker() and not user.is_admin:
-                logger.warning(f"Promoting old {user} to admin")
-                user.is_admin = True
+        elif user.admin_checker() and not user.is_admin:
+            # if users exists: check and promote to admin. conceptual shit.
+            logger.warning(f"Promoting old {user} to admin")
+            user.is_admin = True
 
         metrics.logons_per_user.labels(user_id=user.user_id, username=user.username).inc()
 
@@ -68,7 +63,7 @@ def generic_handler_generator(cls: Type[schema.auth.AuthBase]) -> Callable:
         resp.set_cookie(key="access_token", value=f"Bearer {access_token}", httponly=True)
 
         resp.status_code = status.HTTP_303_SEE_OTHER
-        resp.headers["Location"] = req.url_for("index")
+        resp.headers["Location"] = str(req.url_for("index"))
 
         return "ok"
 
@@ -79,7 +74,7 @@ def generic_handler_generator(cls: Type[schema.auth.AuthBase]) -> Callable:
 async def api_auth_simple_login(req: Request, resp: Response, form: schema.SimpleAuth.Form = Depends()):
     # almost the same generic, but for login/password form, due to additional login.
     model = await form.populate(req, resp)
-    user = await db.get_user_uniq_field(schema.SimpleAuth.AuthModel, model.get_uniq_field())
+    user = await UserDB.get_user_uniq_field(schema.SimpleAuth, model.get_uniq_field())
     if not user:
         raise HTTPException(
             status_code=status.HTTP_401_UNAUTHORIZED,
@@ -108,14 +103,14 @@ async def api_auth_simple_register(req: Request, resp: Response, form: schema.Si
     # check for team with same name, but from other reg source.
     await check_for_existing_model(model, schema.SimpleAuth.AuthModel)
 
-    user = await db.get_user_uniq_field(schema.SimpleAuth.AuthModel, model.get_uniq_field())
+    user = await UserDB.get_user_uniq_field(schema.SimpleAuth, model.get_uniq_field())
     if user:
         raise HTTPException(
             status_code=status.HTTP_403_FORBIDDEN,
             detail="Team exists",
         )
 
-    user = await db.insert_user(model)
+    user = await UserDB.populate(model)
     metrics.users.inc()
 
     access_token = auth.create_user_token(user)
@@ -130,20 +125,20 @@ for auth_way in schema.auth.ENABLED_AUTH_WAYS:
     if auth_way != schema.auth.SimpleAuth:
         router.add_api_route(
             endpoint=generic_handler_generator(auth_way),
-            **auth_way.router_params,
+            **auth_way.router_params,  # type: ignore
         )
     else:
-        router.add_api_route(  # noqa: E1132 # this is intended way
+        router.add_api_route(
             endpoint=api_auth_simple_login,
             path="/simple_login",
             name="api_auth_simple_login",
             methods=["POST"],
-            **auth_way.router_params,
+            **auth_way.router_params,  # type: ignore
         )
-        router.add_api_route(  # noqa: E1132 # this is intended way
+        router.add_api_route(
             endpoint=api_auth_simple_register,
             path="/simple_register",
             name="api_auth_simple_register",
             methods=["POST"],
-            **auth_way.router_params,
+            **auth_way.router_params,  # type: ignore
         )

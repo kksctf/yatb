@@ -43,8 +43,9 @@ class SimpleAuth(AuthBase):
                 return True
             return False
 
-        def get_uniq_field(self) -> str:
-            return self.username
+        @classmethod
+        def get_uniq_field_name(cls: type[Self]) -> str:
+            return "username"
 
         def generate_username(self) -> str:
             return self.username

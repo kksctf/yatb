@@ -1,8 +1,5 @@
-import logging
-
 from fastapi import APIRouter
 
-from .. import config, schema
 from ..utils.log_helper import get_logger
 
 logger = get_logger("api")

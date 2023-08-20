@@ -91,7 +91,7 @@
                     </form>
                 </div>
             {% endif %}
-            <p class="text-muted mt-3">&copy; #kksctf 2020-2021</p>
+            <p class="text-muted mt-3">&copy; #kksctf 2020-2023</p>
         </div>
     </div>
 {% endblock %}

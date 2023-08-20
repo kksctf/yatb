@@ -7,6 +7,7 @@ from pydantic import BaseModel
 from .. import app, db, schema
 from ..config import settings
 from ..utils.log_helper import get_logger
+from .beanie import TaskDB, UserDB
 
 logger = get_logger("db")
 
@@ -63,6 +64,7 @@ _db = FileDB()
 
 @app.on_event("startup")
 async def startup_event():
+    return
     global _db
     if settings.DB_NAME is None:
         _db.reset_db()
@@ -93,6 +95,7 @@ async def startup_event():
 
 @app.on_event("shutdown")
 async def shutdown_event():
+    return
     global _db
     if settings.DB_NAME is None:
         return
@@ -108,5 +111,5 @@ def update_entry(obj: BaseModel, data: dict):
             setattr(obj, i, data[i])
 
 
-from .db_tasks import *  # noqa
-from .db_users import *  # noqa
+# from .db_tasks import *  # noqa
+# from .db_users import *  # noqa

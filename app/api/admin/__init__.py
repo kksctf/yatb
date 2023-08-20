@@ -1,8 +1,10 @@
-import logging
+from typing import Annotated
 
-from fastapi import APIRouter, Cookie, Depends, FastAPI, Header, HTTPException, Query, Request, Response, status
+from fastapi import APIRouter, Depends, Header, HTTPException, Query, status
 
-from ... import auth, config, db, schema
+from ... import auth, schema
+from ...config import settings
+from ...db.beanie import TaskDB, UserDB
 from ...utils.log_helper import get_logger
 
 _fake_admin_user = schema.User(
@@ -13,15 +15,16 @@ _fake_admin_user = schema.User(
 
 
 async def admin_checker(
-    user: schema.User | None = Depends(auth.get_current_user_safe),
+    user: auth.CURR_USER_SAFE,
     token_header: str | None = Header(None, alias="X-Token"),
     token_query: str | None = Query(None, alias="token"),
 ) -> schema.User:
     if user and user.is_admin:
         return user
-    if token_header and token_header == config.settings.API_TOKEN:
+
+    if token_header and token_header == settings.API_TOKEN:
         return _fake_admin_user
-    if token_query and token_query == config.settings.API_TOKEN:
+    if token_query and token_query == settings.API_TOKEN:
         return _fake_admin_user
 
     raise HTTPException(
@@ -30,6 +33,8 @@ async def admin_checker(
     )
 
 
+CURR_ADMIN = Annotated[schema.User, Depends(admin_checker)]
+
 logger = get_logger("api.admin")
 router = APIRouter(
     prefix="/admin",
@@ -37,27 +42,45 @@ router = APIRouter(
 )
 
 
-@router.get("/save_db")
-async def save_db(user: schema.User = Depends(admin_checker)):
-    await db.shutdown_event()
-    logger.warning(f"DB saved by {user.short_desc()}")
+# @router.get("/save_db")
+# async def save_db(user: CURR_ADMIN):
+#     await db.shutdown_event()
+#     logger.warning(f"DB saved by {user.short_desc()}")
 
 
-@router.delete("/cleanup_db")
-async def api_detele_everything_but_tasks(admin: schema.User = Depends(admin_checker)):
-    if not config.settings.DEBUG:
+@router.delete("/db_users")
+async def api_detele_everything_but_tasks(admin: CURR_ADMIN) -> None:
+    if not settings.DEBUG:
         logger.error(f"{admin} чистить юзеров на проде")
         raise HTTPException(
             status_code=status.HTTP_403_FORBIDDEN,
             detail="unacceptable",
         )
 
-    for user in list((await db.get_all_users()).values()):
+    for user in (await UserDB.get_all()).values():
         if not user.is_admin:
-            await db.delete_user(user)
+            await user.delete()  # type: ignore # WTF: great library
 
-    for task in (await db.get_all_tasks()).values():
+    for task in (await TaskDB.get_all()).values():
         task.pwned_by.clear()
+        await task.save()  # type: ignore # WTF: great library
+
+
+@router.delete("/db")
+async def api_detele_everything(admin: CURR_ADMIN) -> None:
+    if not settings.DEBUG:
+        logger.error(f"{admin} чистить бд")
+        raise HTTPException(
+            status_code=status.HTTP_403_FORBIDDEN,
+            detail="unacceptable",
+        )
+
+    for user in (await UserDB.get_all()).values():
+        if not user.is_admin:
+            await user.delete()  # type: ignore # WTF: great library
+
+    for task in (await TaskDB.get_all()).values():
+        await task.delete()  # type: ignore # WTF: great library
 
 
 from . import admin_tasks  # noqa

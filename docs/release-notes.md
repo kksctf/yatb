@@ -30,7 +30,7 @@
 - Changed:
   - Version enumeration: removed litera `a` before version.
   - pyproject.toml refactor
-  - Add more ways to pass [`admin_checker`](/app/api/admin/__init__.py#L13) dep: user in cookies, token in header, token in query
+  - Add more ways to pass [`admin_checker`](https://github.com/kksctf/yatb/blob/master/app/api/admin/__init__.py#L13) dep: user in cookies, token in header, token in query
   - Some strings sanitization
 
 ## a0.6.0

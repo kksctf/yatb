@@ -15,6 +15,8 @@ class DefaultTokenError(ValueError):
 
 class Settings(BaseSettings):
     DEBUG: bool = False
+    PROFILING: bool = False
+
     TOKEN_PATH: str = "/api/users/login"
 
     # bot token for notifications
@@ -27,7 +29,7 @@ class Settings(BaseSettings):
 
     # database name
     DB_NAME: str = "yatb"
-    MONGO: MongoDsn = MongoDsn("mongodb://root:root@127.0.0.1:27017")
+    MONGO: MongoDsn = "mongodb://root:root@127.0.0.1:27017"  # type: ignore
 
     # JWT settings
     JWT_SECRET_KEY: str = _DEFAULT_TOKEN

@@ -14,11 +14,11 @@ async def session_middleware(request: Request, call_next):
 
 if settings.DEBUG:
     try:
-        root_logger.warning("Timing debug loading")
-
         import fastapi  # noqa
         import pydantic  # noqa
         from asgi_server_timing import ServerTimingMiddleware  # noqa # type: ignore
+
+        root_logger.warning("Timing debug loading")
 
         app.add_middleware(
             ServerTimingMiddleware,
@@ -41,3 +41,28 @@ if settings.DEBUG:
 
     except ModuleNotFoundError:
         root_logger.warning("No timing extensions found")
+
+if settings.PROFILING:
+    try:
+        from fastapi import Request
+        from fastapi.responses import HTMLResponse
+        from pyinstrument import Profiler
+
+        root_logger.warning("pyinstrument loading")
+
+        @app.middleware("http")
+        async def profile_request(request: Request, call_next):
+            profiling = request.query_params.get("profile", False)
+            if profiling:
+                profiler = Profiler(async_mode="enabled")  # interval=settings.profiling_interval
+                profiler.start()
+                await call_next(request)
+                profiler.stop()
+                return HTMLResponse(profiler.output_html())
+            else:
+                return await call_next(request)
+
+        root_logger.warning("pyinstrument loaded")
+
+    except ModuleNotFoundError:
+        root_logger.warning("No pyinstrument found")

@@ -111,6 +111,5 @@ def update_entry(obj: BaseModel, data: dict):
             setattr(obj, i, data[i])
 
 
-
 # from .db_tasks import *  # noqa
 # from .db_users import *  # noqa

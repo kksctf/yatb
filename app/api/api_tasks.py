@@ -62,7 +62,9 @@ async def api_task_submit_flag(flag: schema.FlagForm, user: auth.CURR_USER) -> u
         _task_yes_user_not = task.task_id in user.solved_tasks and user.user_id not in task.pwned_by
         _user_yes_task_not = task.task_id not in user.solved_tasks and user.user_id in task.pwned_by
         if _task_yes_user_not or _user_yes_task_not:
-            logger.warning(f"Wtf, user and task misreferenced!!! {task} {user}")
+            logger.warning(
+                f"Wtf, user and task misreferenced!!! {task} {user} {_task_yes_user_not = } {_user_yes_task_not = }"
+            )
             if _task_yes_user_not:
                 # user.solved_tasks.remove(task.task_id)
                 pass
@@ -104,7 +106,7 @@ async def api_task_submit_flag(flag: schema.FlagForm, user: auth.CURR_USER) -> u
 
 
 @router.get("/{task_id}")
-async def api_task_get(task_id: uuid.UUID, user: auth.CURR_USER) -> schema.Task.public_model:
+async def api_task_get(task_id: uuid.UUID, user: auth.CURR_USER_SAFE) -> schema.Task.public_model:
     task = await TaskDB.find_by_task_uuid(task_id)
     if not task or not task.visible_for_user(user):
         raise HTTPException(

@@ -1,17 +1,32 @@
-version: '3'
+version: "3"
 
 services:
   yatb:
     build:
       dockerfile: Dockerfile.production
       context: .
-    command: "--log-level=warning --host 0.0.0.0 --port 80 --proxy-headers --forwarded-allow-ips *"
+    command: "--workers=2 --bind=0.0.0.0:80 --proxy-allow-from='*'"
+    #  --log-level=warning --host 0.0.0.0 --port 80 --proxy-headers --forwarded-allow-ips *"
     # command: "--log-level=warning --host 0.0.0.0 --port 80"
     restart: always
     volumes:
       - ./yatb.env:/usr/src/yatb.env:ro
-      - ./file_db.db:/usr/src/file_db.db
       - ./logs:/usr/src/logs
+    environment:
+      - "MONGO=mongodb://root:root@mongo:27017"
+    depends_on:
+      - mongo
+    expose:
+      - 80
+  mongo:
+    image: mongo:7.0
+    environment:
+      - "MONGO_INITDB_ROOT_USERNAME=root"
+      - "MONGO_INITDB_ROOT_PASSWORD=root"
+    volumes:
+      - "yatb_data:/data/db"
+    expose:
+      - 27017
 
   nginx:
     image: nginx
@@ -21,4 +36,6 @@ services:
       - ./nginx/yatb.conf:/etc/nginx/conf.d/default.conf
     ports:
       - "8080:80"
-    
+
+volumes:
+  yatb_data:

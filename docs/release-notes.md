@@ -7,6 +7,7 @@
   - Flag submission tests
   - Beanie ODM to mongodb instead of cringe file(pickle)db
   - MongoDB as DB in docker-compose.yml
+  - More documentation about auth ways
 - Changed:
   - Migrated to newest pydantic/fastapi verison (pydantic v2, yes)
   - Refactor many things, mainly for typing or making ruff happy.
@@ -14,6 +15,7 @@
   - Some strings text sanitization
   - Refactor some tests
   - Use typing.Annotation for fastapi dependencies
+  - Rename some OAUTH settings to make it better-looking
 - Fixes:
   - Some optimization in jinja formatting
   - Optimize scoreboard generation

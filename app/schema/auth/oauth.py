@@ -23,13 +23,13 @@ class OAuth(AuthBase):
         async def get_token(self, req: Request, cls: type["OAuth"], session: aiohttp.ClientSession) -> dict:
             oauth_token = await (
                 await session.post(
-                    cls.auth_settings.OAUTH_TOKEN_ENDPOINT,
+                    cls.auth_settings.TOKEN_ENDPOINT,
                     params={
                         "grant_type": "authorization_code",
                         "code": self.code,
                         "redirect_uri": req.url_for(cls.router_params["name"]),  # type: ignore
-                        "client_id": cls.auth_settings.OAUTH_CLIENT_ID,
-                        "client_secret": cls.auth_settings.OAUTH_CLIENT_SECRET,
+                        "client_id": cls.auth_settings.CLIENT_ID,
+                        "client_secret": cls.auth_settings.CLIENT_SECRET,
                     },
                     headers={"Accept": "application/json"},
                 )
@@ -50,12 +50,12 @@ class OAuth(AuthBase):
             return OAuth.AuthModel()
 
     class OAuthSettings(AuthBase.AuthSettings):
-        OAUTH_ADMIN_IDS: list[int] = []
-        OAUTH_CLIENT_ID: str = ""
-        OAUTH_CLIENT_SECRET: str = ""
-        OAUTH_ENDPOINT: str = ""
-        OAUTH_TOKEN_ENDPOINT: str = ""
-        OAUTH_API_ENDPOINT: str = ""
+        ADMIN_IDS: list[int] = []
+        CLIENT_ID: str = ""
+        CLIENT_SECRET: str = ""
+        ENDPOINT: str = ""
+        TOKEN_ENDPOINT: str = ""
+        API_ENDPOINT: str = ""
 
         model_config = SettingsConfigDict(AuthBase.AuthSettings.model_config, env_prefix="AUTH_OAUTH_")
 
@@ -75,8 +75,8 @@ class OAuth(AuthBase):
     @classmethod
     def generate_html(cls: type[Self], url_for: Callable) -> str:
         return (
-            f"""<a href='{cls.auth_settings.OAUTH_ENDPOINT}?response_type=code&scope={cls.scope}&state=TEST_STATE&"""
-            f"""client_id={cls.auth_settings.OAUTH_CLIENT_ID}&"""
+            f"""<a href='{cls.auth_settings.ENDPOINT}?response_type=code&scope={cls.scope}&state=TEST_STATE&"""
+            f"""client_id={cls.auth_settings.CLIENT_ID}&"""
             f"""redirect_uri={url_for(cls.router_params["name"])}'>Login using {cls.__name__}</a>"""
         )
 
@@ -103,7 +103,7 @@ class CTFTimeOAuth(OAuth):
         team: CTFTimeOAuth_Team
 
         def is_admin(self) -> bool:
-            return self.team.id in CTFTimeOAuth.auth_settings.OAUTH_ADMIN_IDS
+            return self.team.id in CTFTimeOAuth.auth_settings.ADMIN_IDS
 
         def get_uniq_field(self) -> int:
             return self.team.id
@@ -121,7 +121,7 @@ class CTFTimeOAuth(OAuth):
                 oauth_token = await self.get_token(req, CTFTimeOAuth, session)
                 user_data = await (
                     await session.get(
-                        CTFTimeOAuth.auth_settings.OAUTH_API_ENDPOINT,
+                        CTFTimeOAuth.auth_settings.API_ENDPOINT,
                         headers={"Authorization": f"Bearer {oauth_token['access_token']}"},
                     )
                 ).json()
@@ -129,10 +129,10 @@ class CTFTimeOAuth(OAuth):
                 return CTFTimeOAuth.AuthModel.model_validate(user_data)
 
     class AuthSettings(OAuth.OAuthSettings):
-        OAUTH_ADMIN_IDS: list[int] = [32621]  # id of org team at ctftime. Default is for kks, change it ;)
-        OAUTH_ENDPOINT: str = "https://oauth.ctftime.org/authorize"
-        OAUTH_TOKEN_ENDPOINT: str = "https://oauth.ctftime.org/token"
-        OAUTH_API_ENDPOINT: str = "https://oauth.ctftime.org/user"
+        ADMIN_IDS: list[int] = [32621]  # id of org team at ctftime. Default is for kks, change it ;)
+        ENDPOINT: str = "https://oauth.ctftime.org/authorize"
+        TOKEN_ENDPOINT: str = "https://oauth.ctftime.org/token"
+        API_ENDPOINT: str = "https://oauth.ctftime.org/user"
 
         model_config = SettingsConfigDict(OAuth.OAuthSettings.model_config, env_prefix="AUTH_CTFTIME_")
 
@@ -166,7 +166,7 @@ class GithubOAuth(OAuth):
         url: str
 
         def is_admin(self) -> bool:
-            return self.id in GithubOAuth.auth_settings.OAUTH_ADMIN_IDS
+            return self.id in GithubOAuth.auth_settings.ADMIN_IDS
 
         @classmethod
         def get_uniq_field_name(cls: type[Self]) -> str:
@@ -181,7 +181,7 @@ class GithubOAuth(OAuth):
                 oauth_token = await self.get_token(req, GithubOAuth, session)
                 user_data = await (
                     await session.get(
-                        GithubOAuth.auth_settings.OAUTH_API_ENDPOINT,
+                        GithubOAuth.auth_settings.API_ENDPOINT,
                         headers={"Authorization": f"Bearer {oauth_token['access_token']}"},
                     )
                 ).json()
@@ -189,10 +189,10 @@ class GithubOAuth(OAuth):
                 return GithubOAuth.AuthModel.model_validate(user_data)
 
     class AuthSettings(OAuth.OAuthSettings):
-        OAUTH_ADMIN_IDS: list[int] = []
-        OAUTH_ENDPOINT: str = "https://github.com/login/oauth/authorize"
-        OAUTH_TOKEN_ENDPOINT: str = "https://github.com/login/oauth/access_token"
-        OAUTH_API_ENDPOINT: str = "https://api.github.com/user"
+        ADMIN_IDS: list[int] = []
+        ENDPOINT: str = "https://github.com/login/oauth/authorize"
+        TOKEN_ENDPOINT: str = "https://github.com/login/oauth/access_token"
+        API_ENDPOINT: str = "https://api.github.com/user"
 
         model_config = SettingsConfigDict(OAuth.OAuthSettings.model_config, env_prefix="AUTH_GITHUB_")
 
@@ -220,7 +220,7 @@ class DiscordOAuth(OAuth):
         discriminator: str
 
         def is_admin(self) -> bool:
-            return self.id in DiscordOAuth.auth_settings.OAUTH_ADMIN_IDS
+            return self.id in DiscordOAuth.auth_settings.ADMIN_IDS
 
         @classmethod
         def get_uniq_field_name(cls: type[Self]) -> str:
@@ -233,13 +233,13 @@ class DiscordOAuth(OAuth):
         async def get_token(self, req: Request, cls: type["OAuth"], session: aiohttp.ClientSession):
             oauth_token = await (
                 await session.post(
-                    cls.auth_settings.OAUTH_TOKEN_ENDPOINT,
+                    cls.auth_settings.TOKEN_ENDPOINT,
                     data={
                         "grant_type": "authorization_code",
                         "code": self.code,
                         "redirect_uri": req.url_for(cls.router_params["name"]),  # type: ignore
-                        "client_id": cls.auth_settings.OAUTH_CLIENT_ID,
-                        "client_secret": cls.auth_settings.OAUTH_CLIENT_SECRET,
+                        "client_id": cls.auth_settings.CLIENT_ID,
+                        "client_secret": cls.auth_settings.CLIENT_SECRET,
                         "scope": DiscordOAuth.scope,
                     },
                     headers={"Accept": "application/json"},
@@ -258,7 +258,7 @@ class DiscordOAuth(OAuth):
                 oauth_token = await self.get_token(req, DiscordOAuth, session)
                 user_data = await (
                     await session.get(
-                        DiscordOAuth.auth_settings.OAUTH_API_ENDPOINT,
+                        DiscordOAuth.auth_settings.API_ENDPOINT,
                         headers={"Authorization": f"Bearer {oauth_token['access_token']}"},
                     )
                 ).json()
@@ -266,10 +266,10 @@ class DiscordOAuth(OAuth):
                 return DiscordOAuth.AuthModel.model_validate(user_data)
 
     class AuthSettings(OAuth.OAuthSettings):
-        OAUTH_ADMIN_IDS: list[int] = []
-        OAUTH_ENDPOINT: str = "https://discord.com/api/oauth2/authorize"
-        OAUTH_TOKEN_ENDPOINT: str = "https://discord.com/api/oauth2/token"
-        OAUTH_API_ENDPOINT: str = "https://discord.com/api/users/@me"
+        ADMIN_IDS: list[int] = []
+        ENDPOINT: str = "https://discord.com/api/oauth2/authorize"
+        TOKEN_ENDPOINT: str = "https://discord.com/api/oauth2/token"
+        API_ENDPOINT: str = "https://discord.com/api/users/@me"
 
         model_config = SettingsConfigDict(OAuth.OAuthSettings.model_config, env_prefix="AUTH_DISCORD_")
 

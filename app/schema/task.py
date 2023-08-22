@@ -24,8 +24,14 @@ def template_format_time(date: datetime.datetime) -> str:  # from alb1or1x_shit.
     return "unknown"
 
 
-ScoringUnion = Annotated[StaticScoring | DynamicKKSScoring, Field(discriminator="classtype")]
-FlagUnion = Annotated[StaticFlag | DynamicKKSFlag, Field(discriminator="classtype")]
+ScoringUnion = Annotated[
+    StaticScoring | DynamicKKSScoring,
+    Field(discriminator="classtype"),
+]
+FlagUnion = Annotated[
+    StaticFlag | DynamicKKSFlag,
+    Field(discriminator="classtype"),
+]
 
 
 class Task(EBaseModel):

@@ -51,14 +51,16 @@ $(function () {
             else {
                 path_params = {};
                 path_params[item.path_key] = id;
-
-                result = await preq(api_list[item.api_url], path_params, { method: "GET", }).then(get_json);
-                let result_data = (item.result_key != "" ? result.json[item.result_key] : result.json);
-                item.cache[id] = result_data;
-                jthis.text(result_data);
-                jthis.removeClass(item.class);
-                othis.style = "";
-
+                try {
+                    result = await preq(api_list[item.api_url], path_params, { method: "GET", }).then(get_json);
+                    let result_data = (item.result_key != "" ? result.json[item.result_key] : result.json);
+                    item.cache[id] = result_data;
+                    jthis.text(result_data);
+                    jthis.removeClass(item.class);
+                    othis.style = "";
+                } catch (err) {
+                    console.error(item, path_params, err);
+                }
             }
         }
         localStorage.setItem(item.cache_key, JSON.stringify(item.cache));

@@ -89,8 +89,8 @@ class TelegramAuth(AuthBase):
                 if (attr_value := getattr(self, i)) is not None
             )
             hash_check = hmac.new(bot_sha, hash_check_string.encode(), digestmod="sha256")
-            if hash_check.hexdigest() != hash:
-                logger.warning(f"hash check failed for {hash_check.hexdigest()} != {hash}, {self}")
+            if hash_check.hexdigest() != self.hash:
+                logger.warning(f"hash check failed for {hash_check.hexdigest()} != {self.hash}, {self}")
                 raise HTTPException(
                     status_code=status.HTTP_400_BAD_REQUEST,
                     detail="Bad hash",

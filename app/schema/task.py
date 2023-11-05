@@ -77,6 +77,8 @@ class Task(EBaseModel):
             return "web"
         elif self.category.lower() in ["binary", "reverse", "pwn"]:
             return "binary"
+        elif self.category.lower() == "forensic":
+            return "forensic"
         return "other"
 
     def visible_for_user(self, user: User | None = None) -> bool:

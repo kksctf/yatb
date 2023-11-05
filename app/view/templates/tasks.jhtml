@@ -28,6 +28,10 @@
                 <input class="form-check-input" type="checkbox" checked autocomplete="off" id="showWebTasks">
                 <span class="web-color">web {{ macro.task_ico("web") }}</span>
             </label>
+            <label class="dropdown-item form-inline" for="showForensicTasks">
+                <input class="form-check-input" type="checkbox" checked autocomplete="off" id="showForensicTasks">
+                <span class="forensic-color">forensic {{ macro.task_ico("forensic") }}</span>
+            </label>
             <label class="dropdown-item form-inline" for="showOtherTasks">
                 <input class="form-check-input" type="checkbox" checked autocomplete="off" id="showOtherTasks">
                 <span class="other-color">other {{ macro.task_ico("other") }}</span>
@@ -79,8 +83,9 @@
             categorySelector = {
                 "categories": {
                     "crypto": true,
-                    "web": true,
                     "binary": true,
+                    "web": true,
+                    "forensic": true,
                     "other": true,
                 },
                 "showSolved": true,
@@ -162,6 +167,12 @@
         $(function () {
             $("#showWebTasks").click(function () {
                 setCategory("web", $(this).is(":checked"));
+                redrawVisible();
+            });
+        });
+        $(function () {
+            $("#showForensicTasks").click(function () {
+                setCategory("forensic", $(this).is(":checked"));
                 redrawVisible();
             });
         });

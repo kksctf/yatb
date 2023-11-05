@@ -44,12 +44,14 @@ html {
 }
 
 body {
-    margin-top: 48px; /* Margin top by header height */
-    margin-bottom: 60px; /* Margin bottom by footer height */
+    margin-top: 48px;
+    /* Margin top by header height */
+    margin-bottom: 60px;
+    /* Margin bottom by footer height */
     background-color: #585858;
 }
 
-body > nav {
+body>nav {
     background-color: #404040;
 }
 
@@ -59,23 +61,22 @@ body > nav {
     width: 100%;
     /* Set the fixed height of the footer here */
     height: 60px;
-    line-height: 60px; /* Vertically center the text there */
+    line-height: 60px;
+    /* Vertically center the text there */
     color: #909090;
     background-color: #404040;
 }
 
-div.card > * a {
+div.card>* a {
     text-decoration: none;
 }
 
 div.card.solved:not(.secondary) {
-    background: repeating-linear-gradient(
-        135deg,
-        #404040,
-        #404040 20px,
-        #585858 20px,
-        #585858 40px
-    );
+    background: repeating-linear-gradient(135deg,
+            #404040,
+            #404040 20px,
+            #585858 20px,
+            #585858 40px);
     color: white;
 }
 
@@ -84,26 +85,35 @@ div.card.solved.secondary {
     color: white;
 }
 
-div.card.solved > div.card-header > * > * {
+div.card.solved>div.card-header>*>* {
     color: greenyellow;
 }
 
-div.card.solved > .card-body > .card-text > a {
+div.card.solved>.card-body>.card-text>a {
     color: #a2d5f2;
 }
 
-div.card.crypto:not(.solved) > * .task-category, .crypto-color {
-    color: rgb(0, 160, 0);
+div.card.crypto:not(.solved)>* .task-category,
+.crypto-color {
+    color: #3c6e71;
 }
 
-div.card.binary:not(.solved) > * .task-category, .binary-color {
-    color: red;
+div.card.binary:not(.solved)>* .task-category,
+.binary-color {
+    color: #D11149;
 }
 
-div.card.web:not(.solved) > * .task-category, .web-color {
-    color: blue;
+div.card.web:not(.solved)>* .task-category,
+.web-color {
+    color: #6610F2;
 }
 
-div.card.other:not(.solved) > * .task-category, .other-color {
-    color: rgb(151, 91, 0);
+div.card.forensic:not(.solved)>* .task-category,
+.forensic-color {
+    color: #E6C229;
+}
+
+div.card.other:not(.solved)>* .task-category,
+.other-color {
+    color: #f17105;
 }

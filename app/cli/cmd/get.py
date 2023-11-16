@@ -1,7 +1,6 @@
 import asyncio
 
-from app import config
-
+from ... import config
 from ..base import c, tapp
 from ..client import YATB
 

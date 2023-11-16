@@ -6,7 +6,7 @@ from datetime import datetime
 
 from pydantic import BaseModel, RootModel
 
-from app import schema
+from .. import schema
 
 
 class UserPublic(schema.EBaseModel):

@@ -3,8 +3,6 @@ import shutil
 import subprocess
 from pathlib import Path
 
-from app import config
-
 from ..base import c, files_domain, tapp
 from ..client import YATB
 from ..models import FileTask
@@ -20,7 +18,7 @@ def prepare_tasks(
 
     async def _a():
         async with YATB() as y:
-            y.set_admin_token(config.settings.API_TOKEN)
+            y.set_admin_token()
 
             for category_src in main_tasks_dir.iterdir():
                 if not category_src.is_dir():

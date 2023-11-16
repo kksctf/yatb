@@ -4,8 +4,7 @@ from types import TracebackType
 
 import httpx
 
-from app import app, auth, schema
-
+from .. import app, auth, config, schema
 from .base import FLAG_BASE, base_url
 from .models import AllTasks, AllUsers, RawTask, RawUser, UserPrivate, UserPublic
 
@@ -16,7 +15,7 @@ class YATB:
     def __init__(self) -> None:
         self.s = httpx.AsyncClient(base_url=base_url)
 
-    def set_admin_token(self, token: str) -> None:
+    def set_admin_token(self, token: str = config.settings.API_TOKEN) -> None:
         self.s.headers["X-Token"] = token
 
     def make_user_token(self, user: schema.User) -> str:

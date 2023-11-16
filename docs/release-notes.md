@@ -2,6 +2,11 @@
 
 ## Latest version
 
+## 0.6.2a1
+
+- Fixed:
+  - Few fixes
+
 ## 0.6.2a0
 
 - Added:

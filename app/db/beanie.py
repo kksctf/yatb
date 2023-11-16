@@ -1,13 +1,15 @@
 import datetime
 import uuid
 from collections.abc import Hashable, Mapping
-from typing import Any, ClassVar, Generic, Literal, Self, TypeVar, final
+from typing import Annotated, Any, ClassVar, Generic, Literal, Self, TypeVar, final
 
+import bson
 import pymongo
 from beanie import BulkWriter, Document, init_beanie
 from beanie.operators import And as _And
 from beanie.operators import Set
 from motor.motor_asyncio import AsyncIOMotorClient, AsyncIOMotorDatabase
+from pydantic import PlainSerializer
 
 from .. import app
 from ..config import settings
@@ -19,6 +21,9 @@ logger = get_logger("db.beanie")
 
 _T = TypeVar("_T", bound=EBaseModel)
 _TT = TypeVar("_TT", bound=EBaseModel)
+
+# SER_UUID = PlainSerializer(lambda x: bson.Binary.from_uuid(x), return_type=bson.Binary, when_used="json")
+# SER_UUID = PlainSerializer(lambda x: str, return_type=str, when_used="json")
 
 
 class DocumentEx(Document, EBaseModel, Generic[_T]):
@@ -49,6 +54,8 @@ class DocumentEx(Document, EBaseModel, Generic[_T]):
 
 
 class TaskDB(DocumentEx[Task], Task):
+    # pwned_by: dict[Annotated[uuid.UUID, SER_UUID], datetime.datetime] = {}
+
     async def update_entry(self, new_task: Task) -> Self:
         logger.debug(f"Update task {self} to {new_task}")
 
@@ -105,6 +112,19 @@ class TaskDB(DocumentEx[Task], Task):
 
         return None
 
+    @classmethod
+    async def recalc_score(cls: type[Self]) -> None:
+        async with BulkWriter() as bw:
+            for task in (await cls.get_all()).values():
+                task.scoring.set_solves(len(task.pwned_by))
+                await task.update(
+                    Set(
+                        {str(TaskDB.scoring): task.scoring},
+                    ),
+                    bulk_writer=bw,
+                )
+            logger.info(bw.operations)
+
     class Settings:
         name: ClassVar = "tasks"
         indexes: ClassVar = [
@@ -115,6 +135,8 @@ class TaskDB(DocumentEx[Task], Task):
 
 
 class UserDB(DocumentEx[User], User):
+    # solved_tasks: dict[Annotated[uuid.UUID, SER_UUID], datetime.datetime] = {}
+
     class ScoreboardProjection(EBaseModel):
         user_id: uuid.UUID
         username: str
@@ -261,15 +283,14 @@ class UserDB(DocumentEx[User], User):
     @classmethod
     async def get_user_uniq_field(
         cls: type[Self],
-        base: type[auth.AuthBase],
+        base: type[auth.AuthBase.AuthModel],
         field: Hashable,
     ) -> Self | None:
-        return await cls.find_one(
-            _And(
-                cls.auth_source.classtype == base.AuthModel.get_classtype(),
-                {base.AuthModel.get_uniq_field_name(): field},
-            ),
+        x = _And(
+            cls.auth_source.classtype == base.get_classtype(),
+            {f"auth_source.{base.get_uniq_field_name()}": field},
         )
+        return await cls.find_one(x)
 
     class Settings:
         name: ClassVar = "users"

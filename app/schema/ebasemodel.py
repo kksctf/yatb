@@ -49,7 +49,7 @@ class EBaseModel(BaseModel):
                 continue
 
             if origin_is_union(get_origin(field_value.annotation)):
-                logger.debug(f"Found union field at {cls.__qualname__}: {field_name}")
+                # logger.debug(f"Found union field at {cls.__qualname__}: {field_name}")
                 new_union_base: list[Any] = []
                 for union_member in get_args(field_value.annotation):
                     if issubclass(union_member, EBaseModel):
@@ -67,7 +67,7 @@ class EBaseModel(BaseModel):
                     field_value,
                 )
             elif isinstance(field_value.annotation, type) and issubclass(field_value.annotation, EBaseModel):
-                logger.debug(f"Found EBaseModel field at {cls.__qualname__}: {field_name}")
+                # logger.debug(f"Found EBaseModel field at {cls.__qualname__}: {field_name}")
                 new_field_cls = (
                     field_value.annotation._public_model() if public else field_value.annotation._admin_model()
                 )

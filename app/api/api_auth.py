@@ -46,7 +46,7 @@ def generic_handler_generator(cls: type[schema.auth.AuthBase]) -> Callable:
 
         # extract primary (unique) field from model, and check
         # is user with that field exists
-        user = await UserDB.get_user_uniq_field(cls, model.get_uniq_field())
+        user = await UserDB.get_user_uniq_field(cls.AuthModel, model.get_uniq_field())
         if user is None:
             # if not: create new user
             user = await UserDB.populate(model)
@@ -74,7 +74,7 @@ def generic_handler_generator(cls: type[schema.auth.AuthBase]) -> Callable:
 async def api_auth_simple_login(req: Request, resp: Response, form: schema.SimpleAuth.Form = Depends()):
     # almost the same generic, but for login/password form, due to additional login.
     model = await form.populate(req, resp)
-    user = await UserDB.get_user_uniq_field(schema.SimpleAuth, model.get_uniq_field())
+    user = await UserDB.get_user_uniq_field(schema.SimpleAuth.AuthModel, model.get_uniq_field())
     if not user:
         raise HTTPException(
             status_code=status.HTTP_401_UNAUTHORIZED,
@@ -103,7 +103,7 @@ async def api_auth_simple_register(req: Request, resp: Response, form: schema.Si
     # check for team with same name, but from other reg source.
     await check_for_existing_model(model, schema.SimpleAuth.AuthModel)
 
-    user = await UserDB.get_user_uniq_field(schema.SimpleAuth, model.get_uniq_field())
+    user = await UserDB.get_user_uniq_field(schema.SimpleAuth.AuthModel, model.get_uniq_field())
     if user:
         raise HTTPException(
             status_code=status.HTTP_403_FORBIDDEN,

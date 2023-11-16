@@ -37,6 +37,12 @@ async def api_admin_recalc_scoreboard(user: CURR_ADMIN):
     return None
 
 
+@router.get("/recalc_tasks")
+async def api_admin_recalc_tasks(user: CURR_ADMIN):
+    await TaskDB.recalc_score()
+    return None
+
+
 @router.get("/unsolve_tasks")
 async def api_admin_unsolve_tasks(user: CURR_ADMIN) -> str:
     if not settings.DEBUG:

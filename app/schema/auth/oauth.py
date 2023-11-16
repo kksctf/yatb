@@ -233,11 +233,11 @@ class DiscordOAuth(OAuth):
         async def get_token(self, req: Request, cls: type["OAuth"], session: aiohttp.ClientSession):
             oauth_token = await (
                 await session.post(
-                    cls.auth_settings.TOKEN_ENDPOINT,
+                    str(cls.auth_settings.TOKEN_ENDPOINT),
                     data={
                         "grant_type": "authorization_code",
                         "code": self.code,
-                        "redirect_uri": req.url_for(cls.router_params["name"]),  # type: ignore
+                        "redirect_uri": str(req.url_for(cls.router_params["name"])),  # type: ignore
                         "client_id": cls.auth_settings.CLIENT_ID,
                         "client_secret": cls.auth_settings.CLIENT_SECRET,
                         "scope": DiscordOAuth.scope,

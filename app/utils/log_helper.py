@@ -9,11 +9,16 @@ MODULES = [
     "init",
     "schema",
     "schema.auth",
+    "schema.scoring",
+    "schema.user",
+    "schema.task",
+    "auth",
     "api",
     "api.admin",
     "db",
     "db.tasks",
     "db.users",
+    "db.beanie",
     "view",
 ]
 

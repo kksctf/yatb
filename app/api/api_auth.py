@@ -47,6 +47,7 @@ def generic_handler_generator(cls: type[schema.auth.AuthBase]) -> Callable:
         # extract primary (unique) field from model, and check
         # is user with that field exists
         user = await UserDB.get_user_uniq_field(cls.AuthModel, model.get_uniq_field())
+
         if user is None:
             # if not: create new user
             user = await UserDB.populate(model)
@@ -55,6 +56,7 @@ def generic_handler_generator(cls: type[schema.auth.AuthBase]) -> Callable:
             # if users exists: check and promote to admin. conceptual shit.
             logger.warning(f"Promoting old {user} to admin")
             user.is_admin = True
+            await user.save()  # type: ignore # great library
 
         metrics.logons_per_user.labels(user_id=user.user_id, username=user.username).inc()
 
@@ -122,6 +124,9 @@ async def api_auth_simple_register(req: Request, resp: Response, form: schema.Si
 # Create routes for all enabled auth ways
 # also, handle login/password way especially...
 for auth_way in schema.auth.ENABLED_AUTH_WAYS:
+    if auth_way.FAKE:
+        continue
+
     if auth_way != schema.auth.SimpleAuth:
         router.add_api_route(
             endpoint=generic_handler_generator(auth_way),

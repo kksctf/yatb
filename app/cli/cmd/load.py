@@ -10,8 +10,8 @@ from ..models import FileTask
 
 @tapp.command()
 def prepare_tasks(
-    main_tasks_dir: Path = Path("./tasks"),
-    static_files_dir: Path = Path("./deploy/static_files"),
+    main_tasks_dir: Path,
+    static_files_dir: Path,
 ):
     main_tasks_dir = main_tasks_dir.expanduser().resolve()
     static_files_dir = static_files_dir.expanduser().resolve()
@@ -29,7 +29,9 @@ def prepare_tasks(
                         continue
 
                     category_name = task_src.name
-                    task_info = FileTask.parse_file(task_src / "task.json")
+
+                    # task_info = FileTask.model_validate_json((task_src / "task.json").read_text())
+
                     task_desc = (task_src / "desc.md").read_text(encoding="utf-8")
 
                     created_task = await y.create_task(task_info.get_raw(category_name, task_desc))

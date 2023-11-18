@@ -44,6 +44,13 @@ def display_fb_msg(what: schema.Task, by: schema.User):
             f"First blood on {encoder(what.task_name)} by "
             f"[{encoder(by.username)}](https://ctftime.org/team/{au.team.id}), yay\\!"
         )
+    elif by.auth_source.classtype == "TelegramAuth":
+        au = cast(schema.auth.TelegramAuth.AuthModel, by.auth_source)
+        if au.tg_username:
+            message = f"First blood on {encoder(what.task_name)} by @{encoder(au.tg_username)}, yay\\!"
+        else:
+            message = f"First blood on {encoder(what.task_name)} by {encoder(by.username)}, yay\\!"
+
     else:
         message = f"First blood on {encoder(what.task_name)} by {encoder(by.username)}, yay\\!"
 

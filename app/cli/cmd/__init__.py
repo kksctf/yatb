@@ -102,6 +102,8 @@ def recalc():
     async def _a():
         async with YATB() as y:
             y.set_admin_token()
+
+            await y.admin_recalc_tasks()
             await y.admin_recalc_scoreboard()
 
     asyncio.run(_a())

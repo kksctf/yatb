@@ -105,6 +105,10 @@ class YATB:
         resp = await self.s.get(app.url_path_for("api_admin_recalc_scoreboard"))
         resp.raise_for_status()
 
+    async def admin_recalc_tasks(self) -> None:
+        resp = await self.s.get(app.url_path_for("api_admin_recalc_tasks"))
+        resp.raise_for_status()
+
     async def update_task(self, task: schema.Task) -> schema.Task:
         new_task = (
             await self.s.post(

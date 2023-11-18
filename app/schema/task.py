@@ -1,6 +1,7 @@
 import datetime
 import uuid
 from typing import Annotated, ClassVar
+from zoneinfo import ZoneInfo
 
 from pydantic import Field
 
@@ -15,12 +16,15 @@ from .user import User
 
 logger = get_logger("schema.task")
 
+TARGET_TZ = ZoneInfo("Europe/Moscow")
+
 
 def template_format_time(date: datetime.datetime) -> str:  # from alb1or1x_shit.py
     if Task.is_date_after_migration(date):
+        localized_date = date.astimezone(tz=TARGET_TZ)
         # return date.strftime("%H:%M:%S.%f %d.%m.%Y")  # str(round(date.timestamp(), 2))
         t = datetime.datetime.now(tz=datetime.UTC) - date
-        return f"{Task.humanize_time(t)} ago / {date.strftime('%H:%M:%S')}"
+        return f"{Task.humanize_time(t)} ago / {localized_date.strftime('%H:%M:%S')}"
     return "unknown"
 
 

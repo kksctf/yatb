@@ -236,7 +236,7 @@ class UserDB(DocumentEx[User], User):
 
                 solver.score -= diff
                 await solver.update(
-                    Set({UserDB.score: self.score}),
+                    Set({UserDB.score: solver.score}),
                     bulk_writer=bw,
                 )
 

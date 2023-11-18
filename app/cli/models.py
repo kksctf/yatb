@@ -58,8 +58,13 @@ class FileTask(BaseModel):
     is_http: bool = True
     domain_prefix: str | None = None
 
+    @property
+    def full_name(self) -> str:
+        return self.name
+
     def get_raw(self) -> RawTask:
-        name = self.name
+        name = self.full_name
+
         description = self.description.strip().strip('"').strip("'")
 
         if self.server_port:

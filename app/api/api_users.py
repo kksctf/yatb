@@ -23,8 +23,14 @@ def filter_scoreboard(users: Iterable[_T]) -> Sequence[_T]:
     if not settings.DEBUG:
         ret = filter(lambda x: not x.is_admin, ret)
 
-    ret = sorted(ret, key=lambda i: i.get_last_solve_time()[1])
-    ret = sorted(ret, key=lambda i: i.score, reverse=True)
+    ret = sorted(
+        ret,
+        key=lambda i: (
+            i.get_last_solve_time()[1],
+            i.score * -1,
+        ),
+        reverse=False,
+    )
 
     return ret
 

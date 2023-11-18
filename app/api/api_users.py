@@ -26,8 +26,8 @@ def filter_scoreboard(users: Iterable[_T]) -> Sequence[_T]:
     ret = sorted(
         ret,
         key=lambda i: (
+            -i.score,
             i.get_last_solve_time()[1],
-            i.score * -1,
         ),
         reverse=False,
     )

@@ -16,7 +16,7 @@ async def api_admin_users_internal() -> Mapping[uuid.UUID, schema.User]:
     return all_users
 
 
-async def api_admin_user_get_internal(user_id: uuid.UUID) -> schema.User:
+async def api_admin_user_get_internal(user_id: uuid.UUID) -> UserDB:
     user = await UserDB.find_by_user_uuid(user_id)
     if not user:
         raise HTTPException(
@@ -67,6 +67,15 @@ async def api_admin_user_edit_password(
             detail="User is not login-passw sourced",
         )
     au.password_hash = schema.auth.simple.hash_password(new_password.new_password)
+    return user
+
+
+@router.get("/user/{user_id}/score")
+async def api_admin_user_recalc_score(
+    admin: CURR_ADMIN,
+    user: UserDB = Depends(api_admin_user_get_internal),
+) -> schema.User.admin_model:
+    await user.recalc_score_one()
     return user
 
 

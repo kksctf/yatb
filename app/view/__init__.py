@@ -121,7 +121,9 @@ async def tasks_get_all(req: Request, resp: Response, user: auth.CURR_USER_SAFE)
 
 @router.get("/scoreboard")
 async def scoreboard_get(req: Request, resp: Response, user: auth.CURR_USER_SAFE):
+    tasks_list = await api_tasks.api_tasks_get(user)
     scoreboard = await api_users.api_scoreboard_get_internal_shrinked()
+
     return await response_generator(
         req,
         "scoreboard.jhtml",
@@ -130,6 +132,7 @@ async def scoreboard_get(req: Request, resp: Response, user: auth.CURR_USER_SAFE
             "curr_user": user,
             "scoreboard": scoreboard,
             "enumerate": enumerate,
+            "all_tasks": tasks_list,
         },
     )
 

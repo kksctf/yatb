@@ -15,6 +15,7 @@
                     <th scope="col">username</th>
                     <th scope="col">score</th>
                     <th scope="col">latest</th>
+                    <th scope="col"></th>
                     <th scope="col">timestamp</th>
                 </tr>
             </thead>
@@ -33,6 +34,19 @@
                             {% else %}
                                 ¯\_(ツ)_/¯
                             {% endif %}
+                        </td>
+                        <td>
+                            <div class="d-flex justify-content-start">
+                            {% for task in all_tasks|sort(attribute='scoring.points')|sort(attribute='category') %}
+                                <div class="m-0 p-0" data-bs-toggle="tooltip" data-bs-placement="top" data-bs-title="{{ task.task_name }}  |  {{ task.category }}  |  {{ task.scoring.points }}">
+                                    {% if task.task_id in user.solved_tasks %}
+                                        <i class="bi bi-check" style="color: green;"></i>
+                                    {% else %}
+                                        <i class="bi bi-x" style="color: red;"></i>
+                                    {% endif %}
+                                </div>
+                            {% endfor %}
+                            </div>
                         </td>
                         <td>
                             {% if len(user.solved_tasks) > 0 %}

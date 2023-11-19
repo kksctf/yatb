@@ -7,8 +7,8 @@
 {% endblock %}
 
 {% block content %}
-    <div class="container">
-        <table class="table mt-1 bg-light border">
+    <div class="container-fluid px-0">
+        <table class="table table-striped mt-1 border">
             <thead>
                 <tr>
                     <th scope="col">#</th>
@@ -35,14 +35,14 @@
                                 ¯\_(ツ)_/¯
                             {% endif %}
                         </td>
-                        <td>
-                            <div class="d-flex justify-content-start">
+                        <td class="p-0">
+                            <div class="d-flex justify-content-start flex-wrap">
                             {% for task in all_tasks|sort(attribute='scoring.points')|sort(attribute='category') %}
                                 <div class="m-0 p-0" data-bs-toggle="tooltip" data-bs-placement="top" data-bs-title="{{ task.task_name }}  |  {{ task.category }}  |  {{ task.scoring.points }}">
                                     {% if task.task_id in user.solved_tasks %}
-                                        <i class="bi bi-check" style="color: green;"></i>
+                                        <i class="bi bi-check" style="background-color: greenyellow; font-size: 1.7em;"></i>
                                     {% else %}
-                                        <i class="bi bi-x" style="color: red;"></i>
+                                        <i class="bi bi-x" style="background-color: #D11149; color: white; font-size: 1.7em;"></i>
                                     {% endif %}
                                 </div>
                             {% endfor %}

@@ -117,3 +117,7 @@ div.card.other:not(.solved)>* .task-category,
 .other-color {
     color: #f17105;
 }
+
+.scoreboard-indicator-fontsize {
+    font-size: min(3vw, 1.7em);
+}

@@ -8,15 +8,13 @@
 
 {% block content %}
     <div class="container-fluid px-0">
-        <table class="table table-striped mt-1 border">
+        <table class="table mt-1 border">
             <thead>
                 <tr>
                     <th scope="col">#</th>
                     <th scope="col">username</th>
                     <th scope="col">score</th>
-                    <th scope="col">latest</th>
                     <th scope="col"></th>
-                    <th scope="col">timestamp</th>
                 </tr>
             </thead>
             <tbody>
@@ -26,34 +24,32 @@
                     {% endif %}
                     <tr>
                         <th scope="row">{{ i + 1 }}</th>
-                        <td>{{ user.username }}</td>
-                        <td>{{ user.score }}</td>
                         <td>
-                            {% if len(user.solved_tasks) > 0 %}
-                                <span style='display: none;' class='task_id_resolve'>{{ last_solve_info[0] }}</span>
-                            {% else %}
-                                ¯\_(ツ)_/¯
-                            {% endif %}
+                            <div class="d-flex flex-wrap">{{ user.username }}</div>
                         </td>
+                        <td>{{ user.score }}</td>
                         <td class="p-0">
-                            <div class="d-flex justify-content-start flex-wrap">
+                            <div class="d-flex justify-content-center flex-wrap">
                             {% for task in all_tasks|sort(attribute='scoring.points')|sort(attribute='category') %}
-                                <div class="m-0 p-0" data-bs-toggle="tooltip" data-bs-placement="top" data-bs-title="{{ task.task_name }}  |  {{ task.category }}  |  {{ task.scoring.points }}">
+                                {% set tooltip = str(task.scoring.points) + " | " + task.task_name + " | " + task.category %}
+                                {% if task.task_id in user.solved_tasks and task.task_id == last_solve_info[0]%}
+                                    {% set tooltip = tooltip + " | " + template_format_time(last_solve_info[1]) %}
+                                {% endif %}
+
+                                <div class="m-0 p-0 position-relative" data-bs-toggle="tooltip" data-bs-placement="top" data-bs-title="{{ tooltip }}">
                                     {% if task.task_id in user.solved_tasks %}
-                                        <i class="bi bi-check" style="background-color: greenyellow; font-size: 1.7em;"></i>
+                                        {% if task.task_id == last_solve_info[0] %}
+                                            <span class="position-absolute top-0 start-100 translate-middle p-1 bg-danger border border-dark rounded-circle" style="z-index: 99;"></span>
+                                            <div class="bi bi-check scoreboard-indicator-fontsize" style="background-color: #d9ed92;"></div>
+                                        {% else %}
+                                            <div class="bi bi-check scoreboard-indicator-fontsize" style="background-color: #99d98c;"></div>
+                                        {% endif %}
                                     {% else %}
-                                        <i class="bi bi-x" style="background-color: #D11149; color: white; font-size: 1.7em;"></i>
+                                        <div class="bi bi-x scoreboard-indicator-fontsize"></div>
                                     {% endif %}
                                 </div>
                             {% endfor %}
                             </div>
-                        </td>
-                        <td>
-                            {% if len(user.solved_tasks) > 0 %}
-                                {{ template_format_time(last_solve_info[1]) }}
-                            {% else %}
-                                ¯\_(ツ)_/¯
-                            {% endif %}
                         </td>
                     </tr>
                 {% endfor %}

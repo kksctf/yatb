@@ -133,6 +133,7 @@ async def scoreboard_get(req: Request, resp: Response, user: auth.CURR_USER_SAFE
             "scoreboard": scoreboard,
             "enumerate": enumerate,
             "all_tasks": tasks_list,
+            "str": str,
         },
     )
 

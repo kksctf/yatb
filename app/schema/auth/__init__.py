@@ -8,10 +8,13 @@ from .auth_base import AuthBase
 from .oauth import CTFTimeOAuth, DiscordOAuth, GithubOAuth, OAuth
 from .simple import SimpleAuth
 from .tg import TelegramAuth
+from .token_auth import TokenAuth
 
 logger = get_logger("schema.auth")
 
-ENABLED_AUTH_WAYS: list[type[AuthBase]] = []
+ENABLED_AUTH_WAYS: list[type[AuthBase]] = [
+    TokenAuth,  # type: ignore # types wtf
+]
 
 for auth_way in settings.ENABLED_AUTH_WAYS:
     try:

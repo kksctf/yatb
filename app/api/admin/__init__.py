@@ -10,7 +10,7 @@ from ...utils.log_helper import get_logger
 _fake_admin_user = schema.User(
     username="token_bot",
     is_admin=True,
-    auth_source=schema.auth.SimpleAuth.AuthModel(username="token_bot", password_hash=(b"\x00", b"\x00")),
+    auth_source=schema.auth.TokenAuth.AuthModel(username="hardcoded_token"),
 )
 
 

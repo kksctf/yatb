@@ -10,6 +10,8 @@ RouterParams: TypeAlias = dict[str, str | object]
 
 
 class AuthBase:
+    FAKE: bool = False
+
     class AuthModel(EBaseModel):
         __public_fields__ = {"classtype"}
 

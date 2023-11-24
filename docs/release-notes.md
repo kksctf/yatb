@@ -2,6 +2,30 @@
 
 ## Latest version
 
+- Added:
+  - Forensic category to front
+  - Fake `TokenAuth` auth way for usage of `_fake_admin_user` even if `SimpleAuth` is disabled. It is always active auth way
+  - `unhide` CLI command. `unhide` unhides all tasks
+  - Better handling `TelegramAuth` while generation firstblood message
+  - `rev` alias for `binary` category
+  - `api_admin_user_recalc_score` endpoint
+  - `api_admin_recalc_tasks` endpoint
+  - Solve statistics per task in scoreboard
+- Changed:
+  - Colorscheme a little
+  - Splitted and somewhere refactored CLI interface to many small modules, moved it inside package
+  - Migration to my (`https://github.com/Rubikoid/beanie.git@encoder-fix`) fork of beanie, because of broken upstream and unclear PR [beanie!785](https://github.com/roman-right/beanie/pull/785) status
+  - Refactored `api_scoreboard_get_internal*`, removed copypaste
+  - Migration from nginx to caddy for serving static files - nginx broken for no reason, so migration to caddy was the simplest fix
+  - Heavily improved `prepare_tasks` CLI cmd
+  - Improved sorting scoreboard, make it more stable
+  - `api_detele_everything` is a little safer now
+- Depricated:
+  - NGINX as static files proxy
+- Fixed:
+  - Added few missed modules to logger
+  - Timezone while formatting time before display it in scoreboard.
+
 ## 0.6.2a2
 
 - Fixed:

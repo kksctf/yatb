@@ -67,19 +67,26 @@ async def api_detele_everything_but_tasks(admin: CURR_ADMIN) -> None:
 
 
 @router.delete("/db")
-async def api_detele_everything(admin: CURR_ADMIN) -> None:
-    if not settings.DEBUG:
-        logger.error(f"{admin} чистить бд")
+async def api_detele_everything(admin: CURR_ADMIN, *, force: bool = False) -> None:
+    if not settings.DEBUG and admin.username != "hardcoded_token":
+        logger.error(f"{admin} чистит бд!")
         raise HTTPException(
             status_code=status.HTTP_403_FORBIDDEN,
             detail="unacceptable",
         )
 
     for user in (await UserDB.get_all()).values():
-        if not user.is_admin:
-            await user.delete()  # type: ignore # WTF: great library
+        if user.is_admin:
+            continue
+        if len(user.solved_tasks) and not force:
+            continue
+
+        await user.delete()  # type: ignore # WTF: great library
 
     for task in (await TaskDB.get_all()).values():
+        if len(task.pwned_by) and not force:
+            continue
+
         await task.delete()  # type: ignore # WTF: great library
 
 

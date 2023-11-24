@@ -1,6 +1,6 @@
 [project]
 name = "YATB"
-version = "0.6.2a2"
+version = "0.6.3a0"
 
 description = "Yet another fast and furious jeopardy-CTF taskboard"
 

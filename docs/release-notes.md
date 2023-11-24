@@ -2,6 +2,8 @@
 
 ## Latest version
 
+## 0.6.3a0
+
 - Added:
   - Forensic category to front
   - Fake `TokenAuth` auth way for usage of `_fake_admin_user` even if `SimpleAuth` is disabled. It is always active auth way

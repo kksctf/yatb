@@ -1,5 +1,6 @@
 import uuid
 from collections.abc import Sequence
+from typing import Iterable, TypeVar
 
 from fastapi import APIRouter, Depends, HTTPException, Request, Response, status
 
@@ -13,27 +14,31 @@ router = APIRouter(
     tags=["users"],
 )
 
+_T = TypeVar("_T", schema.User, UserDB.ScoreboardProjection)
+
+
+def filter_scoreboard(users: Iterable[_T]) -> Sequence[_T]:
+    ret = users
+
+    if not settings.DEBUG:
+        ret = filter(lambda x: not x.is_admin, ret)
+
+    ret = sorted(ret, key=lambda i: i.get_last_solve_time()[1])
+    ret = sorted(ret, key=lambda i: i.score, reverse=True)
+
+    return ret
+
 
 async def api_scoreboard_get_internal() -> Sequence[schema.User]:
     users = await UserDB.get_all()
-    if not settings.DEBUG:  # noqa: SIM108
-        users = filter(lambda x: not x.is_admin, users.values())
-    else:
-        users = users.values()
-    users = sorted(users, key=lambda i: i.get_last_solve_time()[1])
-    users = sorted(users, key=lambda i: i.score, reverse=True)
-    return users  # noqa: RET504
+
+    return filter_scoreboard(users.values())
 
 
 async def api_scoreboard_get_internal_shrinked() -> Sequence[UserDB.ScoreboardProjection]:
     users = await UserDB.get_all_projected(UserDB.ScoreboardProjection)
-    if not settings.DEBUG:  # noqa: SIM108
-        users = filter(lambda x: not x.is_admin, users.values())
-    else:
-        users = users.values()
-    users = sorted(users, key=lambda i: i.get_last_solve_time()[1])
-    users = sorted(users, key=lambda i: i.score, reverse=True)
-    return users  # noqa: RET504
+
+    return filter_scoreboard(users.values())
 
 
 @router.get("/scoreboard")
@@ -43,7 +48,7 @@ async def api_scoreboard_get() -> Sequence[schema.User.public_model]:
 
 
 @router.get("/ctftime_scoreboard")
-async def api_task_get_ctftime_scoreboard(fullScoreboard: bool = False):
+async def api_task_get_ctftime_scoreboard(*, fullScoreboard: bool = False):
     scoreboard = await api_scoreboard_get_internal()
     standings = []
     tasks = None

@@ -75,7 +75,7 @@ class Task(EBaseModel):
             return "crypto"
         elif self.category.lower() == "web":
             return "web"
-        elif self.category.lower() in ["binary", "reverse", "pwn"]:
+        elif self.category.lower() in ["binary", "reverse", "pwn", "rev"]:
             return "binary"
         elif self.category.lower() == "forensic":
             return "forensic"

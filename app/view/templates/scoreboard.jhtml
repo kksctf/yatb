@@ -32,8 +32,8 @@
                             <div class="d-flex justify-content-center flex-wrap">
                             {% for task in all_tasks|sort(attribute='scoring.points')|sort(attribute='category') %}
                                 {% set tooltip = str(task.scoring.points) + " | " + task.task_name + " | " + task.category %}
-                                {% if task.task_id in user.solved_tasks and task.task_id == last_solve_info[0]%}
-                                    {% set tooltip = tooltip + " | " + template_format_time(last_solve_info[1]) %}
+                                {% if task.task_id in user.solved_tasks %}
+                                    {% set tooltip = tooltip + " | " + template_format_time(user.solved_tasks[task.task_id]) %}
                                 {% endif %}
 
                                 <div class="m-0 p-0 position-relative" data-bs-toggle="tooltip" data-bs-placement="top" data-bs-title="{{ tooltip }}">

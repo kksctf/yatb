@@ -2,6 +2,8 @@
 
 ## Latest version
 
+## 0.6.2a2
+
 - Fixed:
   - Chaotic point changes in scoreboard on flag submit
 

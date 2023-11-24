@@ -5,7 +5,7 @@ from types import TracebackType
 import httpx
 
 from .. import app, auth, config, schema
-from .base import FLAG_BASE, base_url
+from .base import settings
 from .models import AllTasks, AllUsers, RawTask, RawUser, UserPrivate, UserPublic
 
 
@@ -13,7 +13,7 @@ class YATB:
     s: httpx.AsyncClient
 
     def __init__(self) -> None:
-        self.s = httpx.AsyncClient(base_url=base_url)
+        self.s = httpx.AsyncClient(base_url=settings.base_url)
 
     def set_admin_token(self, token: str = config.settings.API_TOKEN) -> None:
         self.s.headers["X-Token"] = token
@@ -93,7 +93,7 @@ class YATB:
                     task_name=task.task_name,
                     description=task.description,
                     category=task.category,
-                    flag=schema.flags.StaticFlag(flag=task.flag, flag_base=FLAG_BASE),
+                    flag=schema.flags.StaticFlag(flag=task.flag, flag_base=settings.flag_base),
                     scoring=schema.scoring.DynamicKKSScoring(),
                     author=task.author,
                 ).model_dump(mode="json"),
@@ -134,4 +134,4 @@ class YATB:
         exc_value: BaseException | None = None,
         traceback: TracebackType | None = None,
     ) -> None:
-        await self.s.__aexit__(exc_type=exc_type, exc_value=exc_value, traceback=traceback)
+        await self.s.__aexit__(exc_type=exc_type, exc_value=exc_value, traceback=traceback)  # type: ignore

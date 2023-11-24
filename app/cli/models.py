@@ -7,6 +7,7 @@ from datetime import datetime
 from pydantic import BaseModel, RootModel
 
 from .. import schema
+from .base import settings
 
 
 class UserPublic(schema.EBaseModel):
@@ -42,19 +43,57 @@ class RawTask:
 
 
 class FileTask(BaseModel):
-    task_name: str
+    name: str
+    description: str
+
+    author: str
+    category: str
+
     flag: str
     is_gulag: bool = False
 
-    author: str = "none"
-    category: str | None = None
+    warmup: bool = False
+    server_port: int | None = None
 
-    def get_raw(self, category_name: str, description: str) -> RawTask:
+    is_http: bool = True
+    domain_prefix: str | None = None
+
+    def get_raw(self) -> RawTask:
+        name = self.name
+        description = self.description.strip().strip('"').strip("'")
+
+        if self.server_port:
+            if self.is_http:
+                if self.domain_prefix:
+                    server_addr = f"https://{self.domain_prefix}.{settings.tasks_domain}/"
+                else:
+                    server_addr = f"http://{settings.tasks_ip}:{self.server_port}"
+
+                description += "\n\n---\n\n"
+                description += '<div class="card-text row d-flex justify-content-between">'
+                description += (
+                    f"<a class='col-auto m-1 flex-fill' "
+                    f"href='{server_addr}' rel='noopener noreferrer' "
+                    f"target='_blank'>{server_addr}</a>\n"
+                )
+                description += "</div>"
+            else:
+                description += (
+                    "\n\n---\n\n"
+                    f"`nc {settings.tasks_ip} {self.server_port}`"
+                    "\n"  #
+                )
+
+        flag = self.flag
+        if flag.startswith(settings.flag_base + "{") and flag.endswith("}"):
+            flag = flag.removeprefix(settings.flag_base + "{")
+            flag = flag.removesuffix("}")
+
         return RawTask(
-            task_name=self.task_name,
-            category=self.category or category_name,
+            task_name=name,
+            category=self.category,
             description=description,
-            flag=self.flag,
+            flag=flag,
             author=self.author,
         )
 

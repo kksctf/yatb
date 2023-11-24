@@ -107,6 +107,20 @@ def recalc():
     asyncio.run(_a())
 
 
+@tapp.command()
+def unhide():
+    async def _a():
+        async with YATB() as y:
+            y.set_admin_token()
+
+            async with asyncio.TaskGroup() as tg:
+                for task in (await y.get_all_tasks()).values():
+                    task.hidden = False
+                    tg.create_task(y.update_task(task))
+
+    asyncio.run(_a())
+
+
 # @tapp.command()
 # def cmd():  # noqa: CCR001,ANN201
 #     async def _a():

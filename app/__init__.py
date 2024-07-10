@@ -5,7 +5,7 @@ from fastapi import FastAPI
 from fastapi.staticfiles import StaticFiles
 from fastapi.templating import Jinja2Templates
 
-from . import utils
+from . import api, main, utils, view
 from .config import settings
 
 app = FastAPI(
@@ -25,10 +25,7 @@ loggers = loggers + [logging.getLogger(name) for name in logging.root.manager.lo
 # for i in loggers:
 #     print(f"LOGGER: {i}")
 
-from . import api  # noqa
-from . import main  # noqa
-from . import view  # noqa
-
+main.setup_utils(app)
 app.include_router(api.router)
 app.include_router(view.router)
 app.include_router(view.admin.api_rotuer)
@@ -44,15 +41,3 @@ instrumentator = Instrumentator(
     env_var_name="ENABLE_METRICS",
 )
 instrumentator.instrument(app).expose(app, endpoint=expose_url)
-# utils.metrics.bad_solves_per_user
-
-"""
-@app.on_event("startup")
-def startup_event():
-    metrics.load_all_metrics()
-
-
-@app.on_event("shutdown")
-def shutdown_event():
-    metrics.save_all_metrics()
-"""

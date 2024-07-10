@@ -18,14 +18,14 @@ async def admin_checker(
     user: auth.CURR_USER_SAFE,
     token_header: str | None = Header(None, alias="X-Token"),
     token_query: str | None = Query(None, alias="token"),
-) -> schema.User:
+) -> UserDB:
     if user and user.is_admin:
         return user
 
     if token_header and token_header == settings.API_TOKEN:
-        return _fake_admin_user
+        return _fake_admin_user  # type: ignore
     if token_query and token_query == settings.API_TOKEN:
-        return _fake_admin_user
+        return _fake_admin_user  # type: ignore
 
     raise HTTPException(
         status_code=status.HTTP_403_FORBIDDEN,
@@ -33,7 +33,7 @@ async def admin_checker(
     )
 
 
-CURR_ADMIN = Annotated[schema.User, Depends(admin_checker)]
+CURR_ADMIN = Annotated[UserDB, Depends(admin_checker)]
 
 logger = get_logger("api.admin")
 router = APIRouter(

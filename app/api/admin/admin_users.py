@@ -16,7 +16,7 @@ async def api_admin_users_internal() -> Mapping[uuid.UUID, schema.User]:
     return all_users
 
 
-async def api_admin_user_get_internal(user_id: uuid.UUID) -> UserDB:
+async def get_user(user_id: uuid.UUID) -> UserDB:
     user = await UserDB.find_by_user_uuid(user_id)
     if not user:
         raise HTTPException(
@@ -27,29 +27,33 @@ async def api_admin_user_get_internal(user_id: uuid.UUID) -> UserDB:
     return user
 
 
+CURR_USER = Annotated[UserDB, Depends(get_user)]
+
+
 class PasswordChangeForm(BaseModel):
     new_password: str
 
 
 @router.get("/user/{user_id}")
-async def api_admin_user(user_id: uuid.UUID, user: CURR_ADMIN) -> schema.User.admin_model:
-    ret_user = await api_admin_user_get_internal(user_id)
-    return ret_user
+async def api_admin_user(admin: CURR_ADMIN, user: CURR_USER) -> schema.User.admin_model:
+    return user
 
 
 @router.post("/user/{user_id}")
-async def api_admin_user_edit(new_user: schema.User, user_id: uuid.UUID, user: CURR_ADMIN) -> schema.User.admin_model:
-    new_user = await db.update_user_admin(user_id, new_user)
+async def api_admin_user_edit(new_user: schema.User, user_id: uuid.UUID, admin: CURR_ADMIN) -> schema.User.admin_model:
+    # new_user = await db.update_user_admin(user_id, new_user)
+    raise Exception
+
     return new_user
 
 
 @router.get("/users/me")
-async def api_admin_users_me(user: CURR_ADMIN) -> schema.User.admin_model:
-    return user
+async def api_admin_users_me(admin: CURR_ADMIN) -> schema.User.admin_model:
+    return admin
 
 
 @router.get("/users")
-async def api_admin_users(user: CURR_ADMIN) -> Mapping[uuid.UUID, schema.User.admin_model]:
+async def api_admin_users(admin: CURR_ADMIN) -> Mapping[uuid.UUID, schema.User.admin_model]:
     all_users = await api_admin_users_internal()
     return all_users
 
@@ -58,7 +62,7 @@ async def api_admin_users(user: CURR_ADMIN) -> Mapping[uuid.UUID, schema.User.ad
 async def api_admin_user_edit_password(
     new_password: PasswordChangeForm,
     admin: CURR_ADMIN,
-    user: schema.User = Depends(api_admin_user_get_internal),
+    user: CURR_USER,
 ) -> schema.User.admin_model:
     au = user.auth_source
     if not isinstance(au, schema.auth.SimpleAuth.AuthModel):
@@ -73,7 +77,7 @@ async def api_admin_user_edit_password(
 @router.get("/user/{user_id}/score")
 async def api_admin_user_recalc_score(
     admin: CURR_ADMIN,
-    user: UserDB = Depends(api_admin_user_get_internal),
+    user: CURR_USER,
 ) -> schema.User.admin_model:
     await user.recalc_score_one()
     return user
@@ -82,18 +86,14 @@ async def api_admin_user_recalc_score(
 @router.delete("/user/{user_id}")
 async def api_admin_user_delete(
     admin: CURR_ADMIN,
-    user: schema.User = Depends(api_admin_user_get_internal),
+    user: CURR_USER,
 ) -> str:
-    if not user:
-        raise HTTPException(
-            status_code=status.HTTP_404_NOT_FOUND,
-            detail="user not exist",
-        )
+    raise Exception
 
     if len(user.solved_tasks) > 0:
         raise HTTPException(
             status_code=status.HTTP_403_FORBIDDEN,
             detail="user have solved tasks",
         )
-    await db.delete_user(user)
+    # await db.delete_user(user)
     return "deleted"

@@ -1,5 +1,6 @@
 import uuid
-from typing import Annotated, Mapping
+from collections.abc import Mapping
+from typing import Annotated
 
 from beanie import BulkWriter
 from beanie.operators import Set

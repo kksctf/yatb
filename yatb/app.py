@@ -35,6 +35,7 @@ loggers = loggers + [logging.getLogger(name) for name in logging.root.manager.lo
 
 app.include_router(api.router)
 app.include_router(view.router)
+app.include_router(view.admin.api_rotuer)
 
 expose_url = settings.MONITORING_URL
 

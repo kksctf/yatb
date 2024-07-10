@@ -6,7 +6,7 @@ from fastapi import FastAPI
 from fastapi.staticfiles import StaticFiles
 from prometheus_fastapi_instrumentator import Instrumentator
 
-from . import api, utils, view
+from . import api, main, utils, view
 from .config import settings
 from .db import db
 
@@ -33,6 +33,7 @@ app.mount("/static", StaticFiles(directory=_base_path / "view" / "static"), name
 loggers = [logging.getLogger()]  # get the root logger
 loggers = loggers + [logging.getLogger(name) for name in logging.root.manager.loggerDict]
 
+main.setup_utils(app)
 app.include_router(api.router)
 app.include_router(view.router)
 app.include_router(view.admin.api_rotuer)

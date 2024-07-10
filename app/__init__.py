@@ -31,6 +31,7 @@ from . import view  # noqa
 
 app.include_router(api.router)
 app.include_router(view.router)
+app.include_router(view.admin.api_rotuer)
 
 # prometheus
 from prometheus_fastapi_instrumentator import Instrumentator  # noqa

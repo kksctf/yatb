@@ -1,6 +1,7 @@
 # ruff: noqa: S101, S106, ANN201, T201 # this is a __test file__
 
 import typing
+from contextlib import contextmanager
 
 import pytest
 from fastapi.testclient import TestClient
@@ -125,6 +126,15 @@ def client(request):
 
     print("Client shutdown")
     client.__exit__()
+
+
+@contextmanager
+def enable_debug() -> typing.Generator[None, typing.Any, None]:
+    settings.DEBUG = True
+    try:
+        yield
+    finally:
+        settings.DEBUG = False
 
 
 # from . import test_auth  # noqa

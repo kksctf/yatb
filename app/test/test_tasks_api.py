@@ -66,7 +66,7 @@ def test_task_create(client: ClientEx):
 
 
 def test_task_solve(client: ClientEx):
-    client.simple_register_raw(username="Rubikoid", password="123")
+    test_auth.test_admin(client)
 
     tasks: dict[int, schema.Task] = {}  # fake array ;)
     tasks[0] = client.create_task(
@@ -97,7 +97,7 @@ def test_task_solve(client: ClientEx):
         task = tasks[i]
         assert not task.hidden, f"{task = }"
 
-    client.simple_register_raw(username="Rubikoid_user", password="123")
+    client.simple_register_raw(username="Rubikoid_user", password="123456789")
 
     resp1 = client.solve_task_raw("test_task")
     assert resp1.status_code == status.HTTP_200_OK, resp1.text

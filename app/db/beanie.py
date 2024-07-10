@@ -311,10 +311,7 @@ class DBClient:
     async def init(self) -> None:
         self.client = AsyncIOMotorClient(str(settings.MONGO), tz_aware=True)
         self.db = self.client[settings.DB_NAME]
-        await init_beanie(
-            database=self.db,
-            document_models=[TaskDB, UserDB]
-        )
+        await init_beanie(database=self.db, document_models=[TaskDB, UserDB])
         logger.info("Beanie init ok")
 
     async def close(self) -> None:
@@ -329,12 +326,12 @@ class DBClient:
 
 
 @app.on_event("startup")
-async def startup_event():
+async def startup_event() -> None:
     await db.init()
 
 
 @app.on_event("shutdown")
-async def shutdown_event():
+async def shutdown_event() -> None:
     await db.close()
 
 

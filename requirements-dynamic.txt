@@ -1,0 +1,12 @@
+# kr8s==0.17.0
+lightkube==0.15.3
+
+miniopy-async==1.20.1
+
+pydantic-settings==2.3.4
+pydantic==2.8.2
+fastapi==0.101.1
+
+uvicorn==0.17.6
+
+loguru==0.7.2

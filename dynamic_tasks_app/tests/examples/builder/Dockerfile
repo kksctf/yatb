@@ -1,4 +1,4 @@
-FROM python:3.12-slim
+FROM rubikoid/yatb-k8s-builder-base:latest
 
 WORKDIR /app
 

@@ -10,3 +10,6 @@ fastapi==0.101.1
 uvicorn==0.17.6
 
 loguru==0.7.2
+
+ruamel.yaml==0.18.6
+cyclopts==2.9.3

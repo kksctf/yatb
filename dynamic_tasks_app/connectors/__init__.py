@@ -1,5 +1,7 @@
 from abc import ABC, abstractmethod
 from enum import Enum
+from types import TracebackType
+from typing import AsyncContextManager, Self
 from uuid import UUID
 
 from pydantic import BaseModel
@@ -18,6 +20,18 @@ class DynamicTaskInfo(BaseModel):
 
 
 class BaseConnector(ABC):
+    async def __aenter__(self) -> Self:
+        await self.init()
+        return self
+
+    async def __aexit__(
+        self,
+        exc_type: type[BaseException] | None,
+        exc_value: BaseException | None,
+        traceback: TracebackType | None,
+    ) -> None:
+        await self.close()
+
     @abstractmethod
     async def init(self) -> None:
         pass

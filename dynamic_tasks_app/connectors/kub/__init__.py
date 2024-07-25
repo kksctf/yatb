@@ -427,6 +427,7 @@ class KubeApi:
                         self.client.simple_service(
                             svc_name,
                             ns_name,
+                            31337,
                             port.containerPort,
                             [self._BASE_IP],
                         ),
@@ -446,6 +447,8 @@ class KubeApi:
             for service in services:
                 if not service.spec or not service.spec.externalIPs or not service.spec.ports:
                     raise ImpossibleError
+
+                logger.info(f"{service = }")
 
                 addr = f"http://{service.spec.externalIPs[0]}:{service.spec.ports[0].nodePort}"
 

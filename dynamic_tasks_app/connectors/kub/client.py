@@ -127,17 +127,21 @@ class AsyncClientEx(AsyncClient):
             ),
         )
 
-    def simple_service(self, name: str, namespace: str, target_port: int, extrenal_ips: list[str]) -> Service:
+    def simple_service(
+        self, name: str, namespace: str, external_port: int, target_port: int, external_ips: list[str]
+    ) -> Service:
         return Service(
             metadata=ObjectMeta(
                 name=name,
                 namespace=namespace,
             ),
             spec=ServiceSpec(
-                type="NodePort",
-                externalIPs=extrenal_ips,
+                # type="LoadBalancer",
+                # allocateLoadBalancerNodePorts=False,
+                # type="NodePort",
+                externalIPs=external_ips,
                 selector={"app.kubernetes.io/name": name},
-                ports=[ServicePort(port=target_port)],
+                ports=[ServicePort(port=external_port, targetPort=target_port)],
             ),
         )
 

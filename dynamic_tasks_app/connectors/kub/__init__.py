@@ -1,5 +1,6 @@
 import asyncio
 import base64
+import hashlib
 import io
 import json
 import random
@@ -10,6 +11,8 @@ from contextlib import AsyncExitStack, asynccontextmanager
 from pathlib import Path, PurePosixPath
 from typing import TypeGuard, TypeVar
 
+from aiohttp.client_exceptions import ClientResponseError
+from docker_registry_client_async import DockerRegistryClientAsync, FormattedSHA256, ImageName, Manifest
 from lightkube import operators as op
 from lightkube.config.kubeconfig import KubeConfig
 from lightkube.core.async_client import AsyncClient
@@ -61,13 +64,13 @@ class KubeApi:
     _BASE_IP: str = "192.168.1.44"
 
     BUILD_BUCKET_NAME: str = "dynamic-tasks-build-source"
-    # BUILD_NAMESPACE: str = "yatb-build-namespace"
     BUILD_NAMESPACE: str = "yatb-build"
 
-    RUN_NAMESPACE: str = "yatb-run"
+    RUN_NAMESPACE: str = "yatb-run"  # not used now... :hm"
 
     client: AsyncClientEx
     s3: Minio
+    drca: DockerRegistryClientAsync
 
     async def init(self) -> None:
         # setup kube
@@ -82,6 +85,9 @@ class KubeApi:
             secure=False,  # http for False, https for True
         )
 
+        DockerRegistryClientAsync.DEFAULT_PROTOCOL = "http"  # FIXME: tmp
+        self.drca = DockerRegistryClientAsync()
+
         # setup buckets
         await self.setup_s3()
 
@@ -90,6 +96,7 @@ class KubeApi:
 
     async def close(self) -> None:
         await self.client.close()
+        await self.drca.close()
 
     async def setup_namespaces(self) -> None:
         for ns in [self.BUILD_NAMESPACE]:
@@ -164,6 +171,7 @@ class KubeApi:
         destination_override: str | None = None,
         secrets: list[Secret] | None = None,
         dockerfile: Path | str = Path("Dockerfile"),
+        skip_build: bool = False,
     ) -> str:
         assert source.is_absolute()
         assert source.is_dir()
@@ -172,11 +180,36 @@ class KubeApi:
         build_name = name  # self.generate_name()
         raw_img_name = f"{build_name}.tar.gz"
 
+        # some customization
+        destination = destination_override or self.get_image_name(build_name)
+
+        if skip_build:
+            return destination
+
         with io.BytesIO() as buff:
             with tarfile.open(fileobj=buff, mode="w:gz") as tar:
                 for file in source.iterdir():
                     tar.add(file, arcname=file.relative_to(source))  # string absolute long path
             buff.seek(0)  # reset to 0. because... you knew.
+
+            # calc tar hash and check whenever it already builded
+            hash_digest = hashlib.sha256(buff.getbuffer()).hexdigest()
+
+            try:
+                tags_resp = await self.drca.get_tags(
+                    ImageName.parse(destination),
+                )
+
+                if hash_digest in tags_resp.tags["tags"]:
+                    logger.info(
+                        f"{hash_digest} found in {tags_resp.tags = } for {destination = }, not building this anymore",
+                    )
+                    return destination
+
+            except ClientResponseError as ex:
+                if ex.status != 404:
+                    raise
+                logger.info(f"No image for {destination = } exists so far")
 
             size = len(buff.getbuffer())
             await self.s3.put_object(
@@ -190,9 +223,7 @@ class KubeApi:
                 f"Uploaded archive from {source} ({size = }) as 's3://{self.BUILD_BUCKET_NAME}/{raw_img_name}'",
             )
 
-        # some customization
-        destination = destination_override or self.get_image_name(build_name)
-
+        # more customization
         volume_mounts: list[VolumeMount] = []
         volumes: list[Volume] = []
         for secret in secrets or []:
@@ -321,7 +352,15 @@ class KubeApi:
                 newlines=False,
             ):
                 logger.trace(f"Building {name!r}: {line}")
+
         logger.info(f"{name!r} builded as {destination!r}")
+
+        # upload special caching tag
+        img_name = ImageName.parse(destination)
+        manifest = await self.drca.get_manifest(img_name)
+        patched_img = img_name.clone().set_tag(hash_digest)
+        await self.drca.put_manifest(patched_img, manifest.manifest)
+
         return destination
 
     async def oneshot(self, name: str) -> None:

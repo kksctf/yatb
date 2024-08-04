@@ -13,3 +13,5 @@ loguru==0.7.2
 
 ruamel.yaml==0.18.6
 cyclopts==2.9.3
+
+docker-registry-client-async==0.2.11

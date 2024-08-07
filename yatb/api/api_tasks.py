@@ -1,5 +1,6 @@
 import uuid
 from datetime import UTC, datetime
+from typing import Annotated
 
 from fastapi import APIRouter, HTTPException, status
 from pydantic import BaseModel
@@ -18,6 +19,19 @@ router = APIRouter(
 )
 
 
+async def get_task(task_id: uuid.UUID, user: auth.CURR_USER_SAFE) -> TaskDB:
+    task = await TaskDB.find_by_task_uuid(task_id)
+    if not task or not task.visible_for_user(user):
+        raise HTTPException(
+            status_code=status.HTTP_404_NOT_FOUND,
+            detail="No task",
+        )
+    return task
+
+
+CURRENT_TASK = Annotated[TaskDB, Depends(get_task)]
+
+
 @router.get("/")
 async def api_tasks_get(user: auth.CURR_USER_SAFE) -> list[schema.Task.public_model]:
     tasks = await TaskDB.get_all()
@@ -31,6 +45,11 @@ class BRMessage(BaseModel):
     user_name: str
     points: int
     is_fb: bool
+
+
+@router.get("/{task_id}")
+async def api_task_get(task: CURRENT_TASK) -> schema.Task.public_model:
+    return task
 
 
 @router.post("/submit_flag")
@@ -105,14 +124,3 @@ async def api_task_submit_flag(flag: schema.FlagForm, user: auth.CURR_USER) -> u
             logger.error(f"tg_exception exception='{ex}'")
 
     return ret
-
-
-@router.get("/{task_id}")
-async def api_task_get(task_id: uuid.UUID, user: auth.CURR_USER_SAFE) -> schema.Task.public_model:
-    task = await TaskDB.find_by_task_uuid(task_id)
-    if not task or not task.visible_for_user(user):
-        raise HTTPException(
-            status_code=status.HTTP_404_NOT_FOUND,
-            detail="No task",
-        )
-    return task

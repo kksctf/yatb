@@ -1,4 +1,5 @@
 import asyncio
+from contextlib import AsyncExitStack
 from pathlib import Path
 
 from cyclopts import App
@@ -17,16 +18,24 @@ async def build(
     source: Path = Path(__file__).resolve().parent / "extra",
     name: str = "yatb-k8s-builder-base",
     tag: str = "latest",
+    registry: str = "docker.io/rubikoid",
 ) -> None:
-    async with (
-        KubeConnector() as x,
-        x.api.docker_config_json_secret(docker_login, docker_password) as docker_json_secret,
-    ):
+    source = source.resolve()
+
+    async with AsyncExitStack() as exit_stack:
+        x = await exit_stack.enter_async_context(KubeConnector())
+
+        secrets = []
+        if registry == "docker.io/rubikoid":
+            raw_docker_json_secret = x.api.docker_config_json_secret(docker_login, docker_password)
+            docker_json_secret = await exit_stack.enter_async_context(raw_docker_json_secret)
+            secrets.append(docker_json_secret)
+
         await x.api.build(
             name,
             source,
-            destination_override=f"rubikoid/yatb-k8s-builder-base:{tag}",
-            secrets=[docker_json_secret],
+            destination_override=f"{registry}/{name}:{tag}",
+            secrets=secrets,
         )
 
 
@@ -35,32 +44,54 @@ async def run_service(
     src: Path,
     name: str | None = None,
     flag: str | None = None,
+    *,
+    skip_build: bool = False,
 ) -> None:
     src = src.resolve()
     compose = load_compose(src)
 
     name = name or src.name
-    flag = flag or "crab{TEST}"
+    flag = flag or "flag{TEST}"
 
     async with KubeConnector() as x:
-        await x.api.service(name, compose, "flag{TEST}")
+        stack = await x.api.service(
+            name,
+            compose,
+            flag,
+            host=x.api._BASE_IP,
+            port=31337,
+            skip_build=skip_build,
+        )
+        input("...?>")
+        await stack.aclose()
+
+
+@app.command()
+async def test_service() -> None:
+    src = Path("dynamic_tasks_app") / "tests" / "examples" / "service"
+    src = src.resolve()
+
+    compose = load_compose(src)
+
+    name = "test-serivce"
+    flag = "flag{TEST}"
+
+    async with KubeConnector() as x:
+        stack = await x.api.service(
+            name,
+            compose,
+            flag,
+            host=x.api._BASE_IP,
+            port=31337,
+        )
+        input("...?>")
+        await stack.aclose()
 
 
 @app.command()
 async def test():
     async with KubeConnector() as x:
-        src = Path("dynamic_tasks_app") / "tests" / "examples" / "service"
-        src = src.resolve()
-        compose = load_compose(src)
-        await x.api.service("test-svc", compose, "flag{TEST}")
-
         await x.test()
-
-        # src = Path("dynamic_tasks_app") / "tests" / "examples" / "builder"
-        # src = src.resolve()
-        # name = "test-image"
-
-        # await x.api.build(name, src)
 
 
 if __name__ == "__main__":

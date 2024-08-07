@@ -1,0 +1,2 @@
+class GenericConnectorError(Exception):
+    pass

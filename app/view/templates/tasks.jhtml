@@ -73,6 +73,7 @@
 
 {% block scripts %}
     {{ super() }}
+    {{ macro.dynamic_task_script(curr_user) }}
     <script>
         function capitalizeFirstLetter(string) {
             return string.charAt(0).toUpperCase() + string.slice(1);

@@ -1,10 +1,14 @@
+import datetime
 from collections.abc import Callable
-from typing import Annotated, Literal, Self, cast
+from typing import Annotated, Literal, Self, TypeAlias, cast
 from uuid import UUID
 
+import httpx
+import humanize
 from fastapi import APIRouter, Depends, HTTPException, Request, Response, status
+from fastapi.responses import HTMLResponse
 from httpx import AsyncClient
-from pydantic import BaseModel
+from pydantic import BaseModel, TypeAdapter
 
 from .. import auth, db, schema
 from ..config import settings
@@ -31,26 +35,78 @@ class DynamicTaskInfo(BaseModel):
 
     @classmethod
     def build(cls, task: schema.Task, user: schema.User) -> Self:
-        if not task.dynamic_task_type:
+        if not task.dynamic_task_info:
             raise Exception("impossible")
 
         return cls(
             name=f"{task.task_id}",
             descriptor=task.task_id,
-            type=task.dynamic_task_type,
+            type=task.dynamic_task_info.dynamic_task_type,
             user_id=f"{user.user_id}",
         )
 
 
+class ExternalDynamicTaskInfo(BaseModel):
+    class HostPortPair(BaseModel):
+        host: str
+        port: int
+
+    id: UUID
+
+    task_descriptor: UUID
+
+    user_id: str
+
+    hp: HostPortPair
+
+    least_time: datetime.timedelta
+
+
+class ExternalDynamicTaskError(BaseModel):
+    class Detail(BaseModel):
+        error: str
+
+    detail: Detail
+
+
+_TT: TypeAlias = ExternalDynamicTaskInfo | ExternalDynamicTaskError
+ExternalDynamicTaskResp = TypeAdapter[_TT](_TT)
+
+
 class DynamicTasksClient(AsyncClient):
     def __init__(self) -> None:
-        if not settings.DYNAMIC_TASKS_CONTROLLER_TOKEN:
+        if not settings.DYNAMIC_TASKS_CONTROLLER_TOKEN or not settings.DYNAMIC_TASKS_CONTROLLER:
             return
 
-        self.headers["X-Token"] = settings.DYNAMIC_TASKS_CONTROLLER_TOKEN
+        super().__init__(
+            base_url=settings.DYNAMIC_TASKS_CONTROLLER,
+            headers={
+                "X-Token": settings.DYNAMIC_TASKS_CONTROLLER_TOKEN,
+            },
+            timeout=httpx.Timeout(connect=5.0, read=120.0, write=5.0, pool=5.0),
+        )
 
-    async def start(self, task_info: DynamicTaskInfo):
-        pass
+    def format_resp(self, resp: httpx.Response) -> str:
+        info = ExternalDynamicTaskResp.validate_json(resp.text)
+        return self.format_info(info)
+
+    def format_info(self, info: _TT) -> str:
+        if not isinstance(info, ExternalDynamicTaskInfo):
+            return f"Status: {info.detail}"
+
+        ret = ""
+        ret += "Status: Running <br>"
+
+        link = f"http://{info.hp.host}:{info.hp.port}/"
+        ret += f"<a href='{link}'>{link}</a> <br>"
+
+        ret += f"Will die after {humanize.precisedelta(info.least_time)}"
+
+        return ret
+
+    async def start(self, task_info: DynamicTaskInfo) -> str:
+        resp = await self.post("/api/start", json=task_info.model_dump(mode="json"))
+        return self.format_resp(resp)
 
     async def stop(self, task_info: DynamicTaskInfo):
         pass
@@ -58,8 +114,9 @@ class DynamicTasksClient(AsyncClient):
     async def restart(self, task_info: DynamicTaskInfo):
         pass
 
-    async def info(self, task_info: DynamicTaskInfo):
-        pass
+    async def info(self, task_info: DynamicTaskInfo) -> str:
+        resp = await self.post("/api/info", json=task_info.model_dump(mode="json"))
+        return self.format_resp(resp)
 
 
 __client: DynamicTasksClient = DynamicTasksClient()
@@ -75,7 +132,7 @@ async def __get_client() -> DynamicTasksClient:
 
 
 async def get_dynamic_task(task: CURRENT_TASK) -> TaskDB:
-    if not task.dynamic_task_handle:
+    if not task.dynamic_task_info:
         raise HTTPException(
             status_code=status.HTTP_400_BAD_REQUEST,
             detail="Bad task",
@@ -87,21 +144,25 @@ CLIENT = Annotated[DynamicTasksClient, Depends(__get_client)]
 CURRENT_DYNAMIC_TASK = Annotated[TaskDB, Depends(get_dynamic_task)]
 
 
-@router.post("/start/{task_id}")
-async def api_dynamic_task_start(user: auth.CURR_USER, task: CURRENT_DYNAMIC_TASK, client: CLIENT):
-    return await client.start(DynamicTaskInfo.build(task=task, user=user))
+@router.get("/start/{task_id}")
+async def api_dynamic_task_start(user: auth.CURR_USER, task: CURRENT_DYNAMIC_TASK, client: CLIENT) -> HTMLResponse:
+    info = await client.start(DynamicTaskInfo.build(task=task, user=user))
+    return HTMLResponse(info)
 
 
-@router.post("/stop/{task_id}")
-async def api_dynamic_task_stop(user: auth.CURR_USER, task: CURRENT_DYNAMIC_TASK, client: CLIENT):
-    return await client.stop(DynamicTaskInfo.build(task=task, user=user))
+@router.get("/stop/{task_id}")
+async def api_dynamic_task_stop(user: auth.CURR_USER, task: CURRENT_DYNAMIC_TASK, client: CLIENT) -> HTMLResponse:
+    info = await client.stop(DynamicTaskInfo.build(task=task, user=user))
+    return HTMLResponse(info)
 
 
-@router.post("/restart/{task_id}")
-async def api_dynamic_task_restart(user: auth.CURR_USER, task: CURRENT_DYNAMIC_TASK, client: CLIENT):
-    return await client.restart(DynamicTaskInfo.build(task=task, user=user))
+@router.get("/restart/{task_id}")
+async def api_dynamic_task_restart(user: auth.CURR_USER, task: CURRENT_DYNAMIC_TASK, client: CLIENT) -> HTMLResponse:
+    info = await client.restart(DynamicTaskInfo.build(task=task, user=user))
+    return HTMLResponse(info)
 
 
-@router.post("/info/{task_id}")
-async def api_dynamic_task_info(user: auth.CURR_USER, task: CURRENT_DYNAMIC_TASK, client: CLIENT):
-    return await client.info(DynamicTaskInfo.build(task=task, user=user))
+@router.get("/info/{task_id}")
+async def api_dynamic_task_info(user: auth.CURR_USER, task: CURRENT_DYNAMIC_TASK, client: CLIENT) -> HTMLResponse:
+    info = await client.info(DynamicTaskInfo.build(task=task, user=user))
+    return HTMLResponse(info)

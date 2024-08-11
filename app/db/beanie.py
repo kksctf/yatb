@@ -1,19 +1,16 @@
 import datetime
 import uuid
 from collections.abc import Hashable, Mapping
-from typing import Annotated, Any, ClassVar, Generic, Literal, Self, TypeVar, final
+from typing import Any, ClassVar, Generic, Literal, Self, TypeVar, final
 
-import bson
 import pymongo
 from beanie import BulkWriter, Document, init_beanie
 from beanie.operators import And as _And
 from beanie.operators import Set
 from motor.motor_asyncio import AsyncIOMotorClient, AsyncIOMotorDatabase
-from pydantic import PlainSerializer
 
-from .. import app
 from ..config import settings
-from ..schema import EBaseModel, Task, TaskForm, User, auth
+from ..schema import EBaseModel, FlagCheckResult, Task, TaskForm, User, auth
 from ..schema.ebasemodel import FilterFieldsType
 from ..utils.log_helper import get_logger
 
@@ -83,16 +80,8 @@ class TaskDB(DocumentEx[Task], Task):
         return self
 
     @classmethod
-    async def populate(cls: type[Self], new_task: TaskForm, author: User) -> Self:
-        task = cls(
-            task_name=new_task.task_name,
-            category=new_task.category,
-            scoring=new_task.scoring,
-            description=new_task.description,
-            description_html=Task.regenerate_md(new_task.description),
-            flag=new_task.flag,
-            author=(new_task.author if new_task.author != "" else f"@{author.username}"),
-        )
+    async def populate(cls, new_task: TaskForm, author: User) -> Self:
+        task = new_task.to_task(cls, author)
         await task.insert()  # type: ignore # WTF: bad library
         return task
 
@@ -107,8 +96,14 @@ class TaskDB(DocumentEx[Task], Task):
     @classmethod
     async def find_by_flag(cls: type[Self], flag: str, user: User) -> Self | None:
         for task in await cls.find_all().to_list():
-            if task.flag.flag_checker(flag, user):
+            result = task.flag.flag_checker(flag, user)
+            if result == FlagCheckResult.valid:
                 return task
+
+            if result == FlagCheckResult.invalid:
+                continue
+
+            logger.warning(f"user=[{user.short_desc()}], task=[{task.short_desc()}], {flag=}, {result.name=}")
 
         return None
 
@@ -323,22 +318,6 @@ class DBClient:
             return
 
         await self.client.drop_database(settings.DB_NAME)
-
-
-@app.on_event("startup")
-async def startup_event() -> None:
-    await db.init()
-
-
-@app.on_event("shutdown")
-async def shutdown_event() -> None:
-    await db.close()
-
-
-# async def init_db():
-#     await db.init()
-#     yield
-#     await db.close()
 
 
 db = DBClient()

@@ -1,6 +1,6 @@
 from typing import cast
 
-import requests
+import httpx
 
 from .. import schema
 from ..config import settings
@@ -9,11 +9,12 @@ from ..utils.log_helper import get_logger
 logger = get_logger("api")
 
 
-def to_tg(data: dict, path: str) -> requests.Response:
+def to_tg(data: dict, path: str) -> httpx.Response | None:
     if not settings.BOT_TOKEN:
-        return
+        return None
+
     url = f"https://api.telegram.org/bot{settings.BOT_TOKEN}/{path}"
-    ret = requests.post(url, data=data)
+    ret = httpx.post(url, data=data)
     logger.info(f"TG info={ret.text}")
     return ret
 

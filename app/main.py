@@ -2,8 +2,8 @@ import time
 
 from fastapi import FastAPI, Request
 
-from . import root_logger
 from .config import settings
+from .utils.log_helper import root_logger
 
 
 async def simple_timing_middleware(request: Request, call_next):

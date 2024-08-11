@@ -1,4 +1,5 @@
 import logging
+from contextlib import asynccontextmanager
 from pathlib import Path
 
 from fastapi import FastAPI
@@ -6,12 +7,26 @@ from fastapi.staticfiles import StaticFiles
 from fastapi.templating import Jinja2Templates
 
 from . import api, main, utils, view
+from .api.api_dynamic_tasks import __client
 from .config import settings
+from .db import beanie
+
+
+@asynccontextmanager
+async def lifespan(app: FastAPI):
+    await beanie.db.init()
+    async with __client:
+        try:
+            yield
+        finally:
+            await beanie.db.close()
+
 
 app = FastAPI(
     docs_url=settings.FASTAPI_DOCS_URL,
     redoc_url=settings.FASTAPI_REDOC_URL,
     openapi_url=settings.FASTAPI_OPENAPI_URL,
+    lifespan=lifespan,
 )
 
 _base_path = Path(__file__).resolve().parent

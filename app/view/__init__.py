@@ -155,10 +155,9 @@ async def login_get(req: Request, resp: Response, user: auth.CURR_USER_SAFE):
 async def tasks_get_task(
     req: Request,
     resp: Response,
-    task_id: uuid.UUID,
+    task: api_tasks.CURRENT_TASK,
     user: auth.CURR_USER_SAFE,
 ):
-    task = await api_tasks.api_task_get(task_id, user)
     return await response_generator(
         req,
         "task.jhtml",

@@ -1,9 +1,11 @@
 import datetime
 import uuid
+from enum import Enum
 from typing import Annotated, ClassVar
 from zoneinfo import ZoneInfo
 
 from pydantic import Field, computed_field
+from typing_extensions import TypeVar
 
 from .. import config
 from ..config import settings
@@ -38,6 +40,18 @@ FlagUnion = Annotated[
 ]
 
 
+class DynamicTaskType(Enum):
+    BUILDER = "builder"
+    SERVICE = "service"
+
+
+class DynamicTaskInfo(EBaseModel):
+    __admin_only_fields__: ClassVar = {
+        "dynamic_task_type",
+    }
+    dynamic_task_type: DynamicTaskType
+
+
 class Task(EBaseModel):
     __public_fields__: ClassVar = {
         "task_id",
@@ -54,6 +68,7 @@ class Task(EBaseModel):
         "hidden",
         "points",
         "solves",
+        "dynamic_task_info",
     }
 
     task_id: uuid.UUID = Field(default_factory=uuid.uuid4)
@@ -73,6 +88,8 @@ class Task(EBaseModel):
     hidden: bool = True
 
     author: str
+
+    dynamic_task_info: DynamicTaskInfo | None = None
 
     # @computed_field
     @property
@@ -160,6 +177,9 @@ class Task(EBaseModel):
         return len(self.pwned_by)
 
 
+_T = TypeVar("_T", bound=Task)
+
+
 class TaskForm(EBaseModel):
     task_name: str
     category: str
@@ -167,3 +187,18 @@ class TaskForm(EBaseModel):
     description: str
     flag: FlagUnion
     author: str = ""
+
+    dynamic_task_info: DynamicTaskInfo | None = None
+
+    def to_task(self, cls: type[_T], author: User) -> _T:
+        task = cls(
+            task_name=self.task_name,
+            category=self.category,
+            scoring=self.scoring,
+            description=self.description,
+            description_html=Task.regenerate_md(self.description),
+            flag=self.flag,
+            author=(self.author if self.author != "" else f"@{author.username}"),
+            dynamic_task_info=self.dynamic_task_info,
+        )
+        return task

@@ -3,6 +3,7 @@ import string
 import uuid
 from dataclasses import dataclass
 from datetime import datetime
+from pathlib import Path
 
 from pydantic import BaseModel, RootModel
 
@@ -41,6 +42,8 @@ class RawTask:
 
     author: str = ""
 
+    dynamic_task_type: schema.DynamicTaskInfo | None = None
+
 
 class FileTask(BaseModel):
     name: str
@@ -50,9 +53,7 @@ class FileTask(BaseModel):
     category: str
 
     flag: str
-    is_gulag: bool = False
 
-    warmup: bool = False
     server_port: int | None = None
 
     is_http: bool = True
@@ -62,45 +63,9 @@ class FileTask(BaseModel):
     def full_name(self) -> str:
         return self.name
 
-    def get_raw(self) -> RawTask:
-        name = self.full_name
 
-        description = self.description.strip().strip('"').strip("'")
-
-        if self.server_port:
-            if self.is_http:
-                if self.domain_prefix:
-                    server_addr = f"https://{self.domain_prefix}.{settings.tasks_domain}/"
-                else:
-                    server_addr = f"http://{settings.tasks_ip}:{self.server_port}"
-
-                description += "\n\n---\n\n"
-                description += '<div class="card-text row d-flex justify-content-between">'
-                description += (
-                    f"<a class='col-auto m-1 flex-fill' "
-                    f"href='{server_addr}' rel='noopener noreferrer' "
-                    f"target='_blank'>{server_addr}</a>\n"
-                )
-                description += "</div>"
-            else:
-                description += (
-                    "\n\n---\n\n"
-                    f"`nc {settings.tasks_ip} {self.server_port}`"
-                    "\n"  #
-                )
-
-        flag = self.flag
-        if flag.startswith(settings.flag_base + "{") and flag.endswith("}"):
-            flag = flag.removeprefix(settings.flag_base + "{")
-            flag = flag.removesuffix("}")
-
-        return RawTask(
-            task_name=name,
-            category=self.category,
-            description=description,
-            flag=flag,
-            author=self.author,
-        )
+class State(BaseModel):
+    task_to_uuid: dict[Path, uuid.UUID] = {}
 
 
 AllUsers = RootModel[dict[uuid.UUID, UserPrivate]]

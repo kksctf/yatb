@@ -96,7 +96,17 @@ class YATB:
                     flag=schema.flags.StaticFlag(flag=task.flag, flag_base=settings.flag_base),
                     scoring=schema.scoring.DynamicKKSScoring(),
                     author=task.author,
+                    dynamic_task_info=task.dynamic_task_type,
                 ).model_dump(mode="json"),
+            )
+        ).json()
+        return schema.Task.model_validate(new_task)
+
+    async def create_task_full_form(self, task: schema.TaskForm) -> schema.Task:
+        new_task = (
+            await self.s.post(
+                app.url_path_for("api_admin_task_create"),
+                json=task.model_dump(mode="json"),
             )
         ).json()
         return schema.Task.model_validate(new_task)

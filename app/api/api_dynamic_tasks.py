@@ -33,6 +33,8 @@ class DynamicTaskInfo(BaseModel):
 
     user_id: str
 
+    flag: str
+
     @classmethod
     def build(cls, task: schema.Task, user: schema.User) -> Self:
         if not task.dynamic_task_info:
@@ -43,6 +45,7 @@ class DynamicTaskInfo(BaseModel):
             descriptor=task.task_id,
             type=task.dynamic_task_info.dynamic_task_type,
             user_id=f"{user.user_id}",
+            flag=task.flag.flag_value(user),
         )
 
 

@@ -28,6 +28,8 @@ class DynamicTaskInfo(BaseModel):
 
     user_id: str
 
+    flag: str
+
 
 @dataclass
 class LocalTaskInfo:
@@ -35,6 +37,8 @@ class LocalTaskInfo:
 
     task_descriptor: UUID
     user_id: str
+
+    flag: str
 
     _info: DynamicTaskInfo
 
@@ -62,6 +66,7 @@ class LocalTaskInfo:
             id=uuid4(),
             task_descriptor=info.descriptor,
             user_id=info.user_id,
+            flag=info.flag,
             _info=info,
         )
 
@@ -79,7 +84,6 @@ class ExternalDynamicTaskInfo(BaseModel):
 
 
 class BaseConnector(ABC):
-    tasks: dict[UUID, LocalTaskInfo]
     tasks_index: dict[tuple[UUID, str], LocalTaskInfo]
 
     expiration_controller: ExpirationController
@@ -88,7 +92,6 @@ class BaseConnector(ABC):
     def __init__(self, expiration_controller: ExpirationController, ports_controller: PortsController) -> None:
         super().__init__()
 
-        self.tasks = {}
         self.tasks_index = {}
 
         self.expiration_controller = expiration_controller
@@ -177,7 +180,7 @@ class BaseConnector(ABC):
 
     async def stop(self, task_info: DynamicTaskInfo) -> None:
         ltask_info = self.get_ltask_info(task_info)
-        await self._restart(ltask_info)
+        await self._stop(ltask_info)
 
     async def restart(self, task_info: DynamicTaskInfo) -> None:
         ltask_info = self.get_ltask_info(task_info)
@@ -191,6 +194,6 @@ class BaseConnector(ABC):
         ltask_info = self.get_ltask_info(task_info)
         return await self._info(ltask_info)
 
-    async def info_id(self, dynamic_task_id: UUID) -> ExternalDynamicTaskInfo:
-        ltask_info = self.tasks[dynamic_task_id]
-        return await self._info(ltask_info)
+    # async def info_id(self, dynamic_task_id: UUID) -> ExternalDynamicTaskInfo:
+    #     ltask_info = self.tasks[dynamic_task_id]
+    #     return await self._info(ltask_info)

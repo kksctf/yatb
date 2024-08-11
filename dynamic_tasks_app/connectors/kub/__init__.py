@@ -44,7 +44,7 @@ class KubeConnector(BaseConnector):
         return await self.api.service(
             task_info._info.name,
             compose,
-            flag="crab{test}",
+            flag=task_info.flag,
             host=task_info.hp_ok.host,
             port=task_info.hp_ok.port,
             skip_build=False,

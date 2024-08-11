@@ -47,7 +47,7 @@ class KubeConnector(BaseConnector):
             flag="crab{test}",
             host=task_info.hp_ok.host,
             port=task_info.hp_ok.port,
-            skip_build=True,
+            skip_build=False,
         )
 
     async def _stop(self, task_info: LocalTaskInfo) -> None:

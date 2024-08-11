@@ -1,10 +1,14 @@
+import datetime
 from pathlib import Path
 from typing import Self
+from uuid import UUID
 
 from pydantic import model_validator
 from pydantic_settings import BaseSettings, SettingsConfigDict
 
 _DEFAULT_TOKEN = "default_token_CHANGE_ME"  # noqa: S105 # intended
+
+DEFAULT_TTL = datetime.timedelta(hours=1)
 
 
 class DefaultTokenError(ValueError):
@@ -25,6 +29,12 @@ class Settings(BaseSettings):
     S3_PORT: int = 80
     S3_ACCESS: str
     S3_SECRET: str
+
+    EXTERNAL_IPS: list[str]
+    PORT_START: int = 20000
+    PORT_END: int = 40000
+
+    UUID_TO_PATH_MAPPING: dict[UUID, Path] = {}
 
     @property
     def kube_config_path(self) -> str | None:

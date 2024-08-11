@@ -154,6 +154,11 @@ class BaseConnector(ABC):
 
         return self.tasks_index[k]
 
+    def free_ltask_info(self, task_info: DynamicTaskInfo) -> None:
+        k = (task_info.descriptor, task_info.user_id)
+
+        del self.tasks_index[k]
+
     async def start(self, task_info: DynamicTaskInfo) -> ExternalDynamicTaskInfo:
         ltask_info = self.init_ltask_info(task_info)
         ltask_info.hp = self.ports_controller.get_host_and_port()
@@ -162,6 +167,7 @@ class BaseConnector(ABC):
 
         stack = await self._start(ltask_info)
         stack.callback(lambda: self.ports_controller.free_port(ltask_info.hp_ok))
+        stack.callback(lambda: self.free_ltask_info(task_info))
 
         info = await self.expiration_controller.push_stack(stack)
         logger.info(f"Pushed {info = }")

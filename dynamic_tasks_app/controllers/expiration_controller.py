@@ -7,7 +7,7 @@ from uuid import UUID, uuid4
 
 from loguru import logger
 
-DEFAULT_TTL = datetime.timedelta(minutes=1)
+from ..config import DEFAULT_TTL
 
 
 @dataclass

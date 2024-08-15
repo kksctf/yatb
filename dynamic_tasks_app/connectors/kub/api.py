@@ -7,7 +7,9 @@ import string
 import tarfile
 from collections.abc import AsyncGenerator
 from contextlib import AsyncExitStack, asynccontextmanager
+from gzip import GzipFile
 from pathlib import Path, PurePosixPath
+from typing import IO, cast
 
 from aiohttp.client_exceptions import ClientResponseError
 from docker_registry_client_async import DockerRegistryClientAsync, ImageName
@@ -166,7 +168,15 @@ class KubeApi:
             return destination
 
         with io.BytesIO() as buff:
-            with tarfile.open(fileobj=buff, mode="w:gz") as tar:
+            with (
+                # have to separately create gzip, because we need to setup mtime=0
+                GzipFile(fileobj=buff, mode="wb", mtime=0) as gzip,
+                tarfile.open(
+                    # https://stackoverflow.com/a/58407810
+                    fileobj=cast(IO[bytes], gzip),  # IDK WHY, but for some reason gzip is not IO[bytes]...
+                    mode="w|",
+                ) as tar,
+            ):
                 for file in source.iterdir():
                     tar.add(file, arcname=file.relative_to(source))  # string absolute long path
             buff.seek(0)  # reset to 0. because... you knew.

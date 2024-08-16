@@ -19,9 +19,7 @@ class Settings(BaseSettings):
     DEBUG: bool = False
     TESTING: bool = False
 
-    FLAG_SIGN_KEY: str = _DEFAULT_TOKEN
-
-    DYNAMIC_TASKS_CONTROLLER_TOKEN: str | None = None
+    DYNAMIC_TASKS_CONTROLLER_TOKEN: str = _DEFAULT_TOKEN
 
     KUBE_CONFIG_PATH: Path | None = None
 
@@ -52,7 +50,7 @@ class Settings(BaseSettings):
         if self.DEBUG or self.TESTING:
             return self
 
-        token_check_list = ["FLAG_SIGN_KEY"]
+        token_check_list = ["DYNAMIC_TASKS_CONTROLLER_TOKEN"]
         for token_name in token_check_list:
             if getattr(self, token_name) == _DEFAULT_TOKEN:
                 raise DefaultTokenError(f"Field '{token_name}' have default token value")

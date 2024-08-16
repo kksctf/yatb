@@ -2,6 +2,13 @@
 
 ## Latest version
 
+- Added:
+  - FastUI PoC
+  - Dynamic Tasks microservice and it's integration into yatb
+- Changed:
+  - Migrated from my beanie fork back to upstream.
+- Fixed:
+  - Many tests. They now work on DEBUG=False build of code, because running tests in debug mode is something strange.
 ## 0.6.3a0
 
 - Added:

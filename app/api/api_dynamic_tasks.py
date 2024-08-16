@@ -112,7 +112,17 @@ class DynamicTasksClient(AsyncClient):
         return self.format_resp(resp)
 
     async def stop(self, task_info: DynamicTaskInfo):
-        pass
+        resp = await self.post("/api/stop", json=task_info.model_dump(mode="json"))
+
+        if resp.status_code == status.HTTP_200_OK:
+            return "ok"
+
+        try:
+            err = ExternalDynamicTaskError.model_validate_json(resp.text)
+        except Exception as ex:
+            return "error?"
+        else:
+            return f"Status: {err.detail}"
 
     async def restart(self, task_info: DynamicTaskInfo):
         pass

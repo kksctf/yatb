@@ -100,7 +100,18 @@ class DynamicTasksClient(AsyncClient):
         ret = ""
         ret += "Status: Running <br>"
 
-        link = f"http://{info.hp.host}:{info.hp.port}/"
+        try:
+            ip = ip_address(info.hp.host)
+
+            if ip.version == 4:
+                ip = f"{ip}"
+            elif ip.version == 6:
+                ip = f"[{ip}]"
+
+        except ValueError as ex:
+            ip = info.hp.host
+
+        link = f"http://{ip}:{info.hp.port}/"
         ret += f"<a href='{link}'>{link}</a> <br>"
 
         ret += f"Will die after {humanize.precisedelta(info.least_time)}"

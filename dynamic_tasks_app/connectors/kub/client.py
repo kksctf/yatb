@@ -142,6 +142,7 @@ class AsyncClientEx(AsyncClient):
                 externalIPs=external_ips,
                 selector={"app.kubernetes.io/name": name},
                 ports=[ServicePort(port=external_port, targetPort=target_port)],
+                ipFamilyPolicy="PreferDualStack",
             ),
         )
 

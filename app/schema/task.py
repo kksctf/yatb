@@ -191,6 +191,10 @@ class TaskForm(EBaseModel):
     dynamic_task_info: DynamicTaskInfo | None = None
 
     def to_task(self, cls: type[_T], author: User) -> _T:
+        str_author = self.author if self.author != "" else f"@{author.username}"
+        if not str_author.startswith("@"):
+            str_author = f"@{str_author}"
+
         task = cls(
             task_name=self.task_name,
             category=self.category,
@@ -198,7 +202,7 @@ class TaskForm(EBaseModel):
             description=self.description,
             description_html=Task.regenerate_md(self.description),
             flag=self.flag,
-            author=(self.author if self.author != "" else f"@{author.username}"),
+            author=str_author,
             dynamic_task_info=self.dynamic_task_info,
         )
         return task

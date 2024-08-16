@@ -50,8 +50,5 @@ class KubeConnector(BaseConnector):
             skip_build=False,
         )
 
-    async def _stop(self, task_info: LocalTaskInfo) -> None:
-        raise NotImplementedError
-
     async def _restart(self, task_info: LocalTaskInfo) -> None:
         raise NotImplementedError

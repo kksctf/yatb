@@ -1,3 +1,4 @@
+import asyncio
 import datetime
 from abc import ABC, abstractmethod
 from contextlib import AsyncExitStack
@@ -12,7 +13,7 @@ from pydantic import BaseModel
 
 from ..controllers import ExpirationController, PortsController
 from ..controllers.ports_controller import HostPortPair
-from .errors import GenericConnectorError
+from .errors import GenericConnectorError, InstanceNotFoundError
 
 
 class DynamicTaskType(Enum):
@@ -85,6 +86,7 @@ class ExternalDynamicTaskInfo(BaseModel):
 
 class BaseConnector(ABC):
     tasks_index: dict[tuple[UUID, str], LocalTaskInfo]
+    tasks_lock: asyncio.Lock
 
     expiration_controller: ExpirationController
     ports_controller: PortsController
@@ -93,6 +95,7 @@ class BaseConnector(ABC):
         super().__init__()
 
         self.tasks_index = {}
+        self.tasks_lock = asyncio.Lock()
 
         self.expiration_controller = expiration_controller
         self.ports_controller = ports_controller
@@ -118,19 +121,29 @@ class BaseConnector(ABC):
         await self.expiration_controller.close()
 
     @abstractmethod
-    async def _start(self, task_info: LocalTaskInfo) -> AsyncExitStack:
+    async def _start(self, ltask_info: LocalTaskInfo) -> AsyncExitStack:
         raise NotImplementedError
 
-    @abstractmethod
-    async def _stop(self, task_info: LocalTaskInfo) -> None:
-        raise NotImplementedError
+    async def _stop(self, ltask_info: LocalTaskInfo) -> None:
+        if not ltask_info.expiration_id:
+            raise GenericConnectorError("Task is not initialized yet")
+
+        expiration_stack_info = await self.expiration_controller.get(ltask_info.expiration_id)
+
+        if task := expiration_stack_info.death_task:
+            task.cancel()
+
+        await self.expiration_controller.kill(expiration_stack_info)
 
     @abstractmethod
-    async def _restart(self, task_info: LocalTaskInfo) -> None:
+    async def _restart(self, ltask_info: LocalTaskInfo) -> None:
         raise NotImplementedError
 
     async def _info(self, ltask_info: LocalTaskInfo) -> ExternalDynamicTaskInfo:
-        expiration_info = self.expiration_controller.get(ltask_info.expiration_id_ok)
+        if not ltask_info.expiration_id:
+            raise GenericConnectorError("Task is not initialized yet")
+
+        expiration_info = await self.expiration_controller.get(ltask_info.expiration_id)
 
         return ExternalDynamicTaskInfo(
             id=ltask_info.id,
@@ -140,30 +153,35 @@ class BaseConnector(ABC):
             least_time=expiration_info.time_left,
         )
 
-    def init_ltask_info(self, task_info: DynamicTaskInfo) -> LocalTaskInfo:
-        k = (task_info.descriptor, task_info.user_id)
+    async def init_ltask_info(self, task_info: DynamicTaskInfo) -> LocalTaskInfo:
+        async with self.tasks_lock:
+            k = (task_info.descriptor, task_info.user_id)
 
-        if k in self.tasks_index:
-            raise GenericConnectorError("This task for your team already exsits")
+            if k in self.tasks_index:
+                raise GenericConnectorError("This task for your team already exsits")
 
-        self.tasks_index[k] = LocalTaskInfo.build(task_info)
-        return self.tasks_index[k]
+            self.tasks_index[k] = LocalTaskInfo.build(task_info)
+            return self.tasks_index[k]
 
-    def get_ltask_info(self, task_info: DynamicTaskInfo) -> LocalTaskInfo:
-        k = (task_info.descriptor, task_info.user_id)
+    async def get_ltask_info(self, task_info: DynamicTaskInfo) -> LocalTaskInfo:
+        async with self.tasks_lock:
+            k = (task_info.descriptor, task_info.user_id)
 
-        if k not in self.tasks_index:
-            raise GenericConnectorError("No task found")
+            if k not in self.tasks_index:
+                raise InstanceNotFoundError("No task found")
 
-        return self.tasks_index[k]
+            return self.tasks_index[k]
 
     def free_ltask_info(self, task_info: DynamicTaskInfo) -> None:
+        # since this is sync method, we can do not lock
+        assert not self.tasks_lock.locked()
+
         k = (task_info.descriptor, task_info.user_id)
 
         del self.tasks_index[k]
 
     async def start(self, task_info: DynamicTaskInfo) -> ExternalDynamicTaskInfo:
-        ltask_info = self.init_ltask_info(task_info)
+        ltask_info = await self.init_ltask_info(task_info)
         ltask_info.hp = self.ports_controller.get_host_and_port()
 
         logger.info(f"Got port {ltask_info.hp = }")
@@ -179,19 +197,19 @@ class BaseConnector(ABC):
         return await self._info(ltask_info)
 
     async def stop(self, task_info: DynamicTaskInfo) -> None:
-        ltask_info = self.get_ltask_info(task_info)
+        ltask_info = await self.get_ltask_info(task_info)
         await self._stop(ltask_info)
 
     async def restart(self, task_info: DynamicTaskInfo) -> None:
-        ltask_info = self.get_ltask_info(task_info)
+        ltask_info = await self.get_ltask_info(task_info)
         await self._restart(ltask_info)
 
     async def extend(self, task_info: DynamicTaskInfo) -> None:
-        ltask_info = self.get_ltask_info(task_info)
-        self.expiration_controller.extend_life(ltask_info.expiration_id_ok, datetime.timedelta(minutes=1))
+        ltask_info = await self.get_ltask_info(task_info)
+        await self.expiration_controller.extend_life(ltask_info.expiration_id_ok, datetime.timedelta(minutes=1))
 
     async def info_task(self, task_info: DynamicTaskInfo) -> ExternalDynamicTaskInfo:
-        ltask_info = self.get_ltask_info(task_info)
+        ltask_info = await self.get_ltask_info(task_info)
         return await self._info(ltask_info)
 
     # async def info_id(self, dynamic_task_id: UUID) -> ExternalDynamicTaskInfo:

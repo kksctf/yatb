@@ -6,7 +6,8 @@ from fastapi import APIRouter, FastAPI, HTTPException, Request, status
 from dynamic_tasks_app.connectors import ExternalDynamicTaskInfo
 
 from .config import settings
-from .connectors import DynamicTaskInfo, GenericConnectorError
+from .connectors import DynamicTaskInfo
+from .connectors.errors import GenericConnectorError, InstanceNotFoundError
 from .connectors.kub import KubeConnector
 
 # WTF: tmp for dev
@@ -39,6 +40,13 @@ router = APIRouter(
 async def execption_handler():
     try:
         yield
+    except InstanceNotFoundError as ex:
+        raise HTTPException(
+            status_code=status.HTTP_404_NOT_FOUND,
+            detail={
+                "error": f"{ex!r}",
+            },
+        ) from ex
     except GenericConnectorError as ex:
         raise HTTPException(
             status_code=status.HTTP_500_INTERNAL_SERVER_ERROR,

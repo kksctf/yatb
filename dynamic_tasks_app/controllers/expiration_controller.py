@@ -56,18 +56,23 @@ class StackInfo:
 class ExpirationController:
     root_stack: AsyncExitStack
     stacks: dict[UUID, StackInfo]
+    stacks_lock: asyncio.Lock
 
     def __init__(self) -> None:
         self.root_stack = AsyncExitStack()
         self.stacks = {}
+        self.stacks_lock = asyncio.Lock()
 
-    def get(self, id: UUID) -> StackInfo:
-        return self.stacks[id]
+    async def get(self, id: UUID) -> StackInfo:
+        async with self.stacks_lock:
+            return self.stacks[id]
 
     async def push_stack(self, stack: AsyncExitStack) -> StackInfo:
         stack = await self.root_stack.enter_async_context(stack)
-        info = StackInfo.build(stack)
-        self.stacks[info.id] = info
+
+        async with self.stacks_lock:
+            info = StackInfo.build(stack)
+            self.stacks[info.id] = info
 
         await self._create_death_task(info)
 
@@ -75,8 +80,8 @@ class ExpirationController:
 
         return info
 
-    def extend_life(self, id: UUID, by: datetime.timedelta) -> StackInfo:
-        info = self.stacks[id]
+    async def extend_life(self, id: UUID, by: datetime.timedelta) -> StackInfo:
+        info = await self.get(id)
         info.extend_life(by)
 
         logger.info(f"Lifetime of {info = } extended")
@@ -85,22 +90,29 @@ class ExpirationController:
 
         return info
 
+    async def kill(self, info: StackInfo) -> None:
+        await info.die()
+
+        async with self.stacks_lock:
+            del self.stacks[info.id]
+
+        logger.info(f"{info = } is cleaned")
+
     async def _create_death_task(self, info: StackInfo) -> None:
         async def _task() -> None:
             try:
                 await asyncio.sleep(info.time_left.seconds + 1)
+
+                if not info.is_expired:
+                    logger.info(f"{info = } death task finished, but info is fresh, so restaring")
+                    info.death_task = asyncio.create_task(_task())
+                    return
             except asyncio.CancelledError:
                 logger.info(f"{info = } death task got cancelled")
-
-            if not info.is_expired:
-                logger.info(f"{info = } death task finished, but info is fresh, so restaring")
-                info.death_task = asyncio.create_task(_task())
                 return
 
             logger.info(f"{info = } is expired")
-            await info.die()
-            del self.stacks[info.id]
-            logger.info(f"{info = } is cleaned")
+            await self.kill(info)
 
         info.death_task = asyncio.create_task(_task())
 

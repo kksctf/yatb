@@ -155,6 +155,10 @@ class TaskForm(BaseModel):
     author: str = ""
 
     def to_task[T: Task](self, cls: type[T], author: User) -> T:
+        str_author = self.author if self.author != "" else f"@{author.username}"
+        if not str_author.startswith("@"):
+            str_author = f"@{str_author}"
+
         task = cls(
             task_name=self.task_name,
             category=self.category,
@@ -162,6 +166,6 @@ class TaskForm(BaseModel):
             description=self.description,
             description_html=cls.regenerate_md(self.description),
             flag=self.flag,
-            author=(self.author if self.author != "" else f"@{author.username}"),
+            author=str_author,
         )
         return task

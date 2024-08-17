@@ -4,17 +4,18 @@
 {% block head %}
     {% set head_data.page_name = "All tasks" %}
     {{ super() }}
+    <script src="https://cdn.jsdelivr.net/npm/macy@2"></script>
 {% endblock %}
 
 {% block right_header_buttons %}
     <li class="nav-item dropdown">
-        <a class="nav-link dropdown-toggle" href="#" id="navbarCategoryDropdown" role="button" data-bs-toggle="dropdown" aria-expanded="false">
+        <a class="nav-link marine-text dropdown-toggle" href="#" id="navbarCategoryDropdown" role="button" data-bs-toggle="dropdown" aria-expanded="false">
             Settings
         </a>
         <div class="dropdown-menu dropdown-menu-end mega-dropdown" aria-labelledby="navbarCategoryDropdown">
-            <p class="dropdown-header">Show options</p>
+            {# <p class="dropdown-header">Show options</p> #}
             
-            <a class="dropdown-item" id="showAllTasks" href="#">Show all tasks</a>
+            {# <a class="dropdown-item" id="showAllTasks" href="#">Show all tasks</a>
             
             <label class="dropdown-item form-inline" for="showCryptoTasks">
                 <input class="form-check-input" type="checkbox" checked autocomplete="off" id="showCryptoTasks">
@@ -35,7 +36,7 @@
             <label class="dropdown-item form-inline" for="showOtherTasks">
                 <input class="form-check-input" type="checkbox" checked autocomplete="off" id="showOtherTasks">
                 <span class="other-color">other {{ macro.task_ico("other") }}</span>
-            </label>
+            </label> #}
             
             <label class="dropdown-item form-inline" for="showSolvedTasks">
                 <input class="form-check-input" type="checkbox" checked autocomplete="off" id="showSolvedTasks">
@@ -44,13 +45,8 @@
                 </span>
             </label>
 
-            <div class="dropdown-divider"></div>
-            <p class="dropdown-header">Personalization</p>
-
-            <label class="dropdown-item form-inline" for="anotherSolvedTheme">
-                <input class="form-check-input" type="checkbox" checked autocomplete="off" id="anotherSolvedTheme">
-                <span>Another theme for solved tasks</span>
-            </label>
+            {# <div class="dropdown-divider"></div>
+            <p class="dropdown-header">Personalization</p> #}
         </div>
     </li>
     {{ super() }}
@@ -59,7 +55,7 @@
 
 {% block content %}
     <div class="container-fluid px-0">
-        <div class="card-columns" style="column-gap: 4px;">
+        <div id="macy-container">
             {% for task in tasks|sort(attribute='scoring.points') %}
                 {{ macro.task_show(task, curr_user) }}
             {% endfor %}
@@ -109,13 +105,16 @@
         function redrawVisible () {
             for (var k of Object.keys(categorySelector.categories)) {
                 if (categorySelector.categories[k] == true) {
-                    $("." + k).show()
+                    $("." + k).show();
                     if (categorySelector.showSolved == false) {
                         $(".solved").hide();
                     }
                 } else {
-                    $("." + k).hide()
+                    $("." + k).hide();
                 }
+            }
+            if (macy) {
+                macy.recalculate(true);
             }
         }
 
@@ -221,5 +220,20 @@
             }
             event.stopPropagation(); //Always stop propagation
         });
+
+        var macy = Macy({
+            container: '#macy-container',
+            trueOrder: false,
+            waitForImages: false,
+            margin: 4,
+            columns: 5,
+            breakAt: {
+                1400: 4,
+                1200: 3,
+                992: 2,
+                576: 1,
+            }
+        });
+
     </script>
 {% endblock %}

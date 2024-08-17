@@ -1,22 +1,18 @@
 {%- macro flag_box(user=None) -%}
 {% if user %}
-<form class="nav-item flag_submit_form">
+<form class="nav-item flag_submit_form ">
     <div class="input-group">
-        <div class="input-group-prepend mx-0 p-0">
-            <span class="input-group-text" style="border-radius: 4px 0 0 4px;">{{ FLAG_BASE }}{</span>
-        </div>
-        <input type="text" class="form-control rounded-0" name="flag" placeholder="sampl3_fl4g" required>
-        <div class="input-group-prepend mx-0 p-0">
-            <span class="input-group-text rounded-0">}</span>
-        </div>
-        <button class="btn btn-outline-light" style="border-radius: 0 4px 4px 0;" type="submit">Submit</button>
+        <span class="input-group-text">{{ FLAG_BASE }}{</span>
+        <input type="text" class="form-control" name="flag" placeholder="sampl3_fl4g" required>
+        <span class="input-group-text">}</span>
+        <button class="btn btn-primary" type="submit" style="--bs-btn-bg: rgb(13, 65, 210); border-color:rgb(13, 65, 210)">Submit</button>
     </div>
 </form>
 {% endif %}
 {%- endmacro -%}
 
 {%- macro task_classes(task, user=None, solved_status=True) -%}
-    {% set cl=["card", "w-100", "rounded-0", "border", "mb-1"] %}
+    {% set cl=["card", "rounded-0", "border", "mb-1"] %}
     {% if solved_status and user and user.user_id in task.pwned_by %}
         {% set _ = cl.append("solved") %}
     {% endif %}
@@ -47,11 +43,15 @@
         <div class="card-header">
             <div class="row justify-content-between">
                 <a class="col card-title m-0" href="{{ url_for('tasks_get_task', task_id=task.task_id) }}"><h4 class="m-0 p-0">{{ task.task_name }}</h4></a>
-                <h1 class="col-auto card-subtitle task-points">{{ task.scoring.points }}</h1>
+                <h1 class="col-auto card-subtitle task-points">
+                    {{ task.scoring.points }}
+                </h1>
                 <div class="w-100"></div>
-                <h5 class="col card-subtitle task-category">{{ task.category }} {{ task_ico(task.category) }}</h5>
+                <h5 class="col card-subtitle task-category">
+                    {# {{ task.category }} {{ task_ico(task.category) }} #}
+                </h5>
                 <h6 class="col-auto card-subtitle align-self-end">
-                    <abbr class="initialism" title="Solves" style="text-decoration: none;">
+                    <abbr class="initialism" title="Solutions" style="text-decoration: none;">
                     <svg width="16px" height="16px" viewBox="0 0 16 16" class="bi bi-check-all" fill="currentColor" xmlns="http://www.w3.org/2000/svg"><path fill-rule="evenodd" d="M8.97 4.97a.75.75 0 0 1 1.071 1.05l-3.992 4.99a.75.75 0 0 1-1.08.02L2.324 8.384a.75.75 0 1 1 1.06-1.06l2.094 2.093L8.95 4.992a.252.252 0 0 1 .02-.022zm-.92 5.14l.92.92a.75.75 0 0 0 1.079-.02l3.992-4.99a.75.75 0 1 0-1.091-1.028L9.477 9.417l-.485-.486-.943 1.179z"/></svg>
                     {{ len(task.pwned_by) }}
                     </abbr>
@@ -61,7 +61,7 @@
             <p class="card-subtitle mt-2"><a href="tg://resolve?domain={{ task.author.replace('@', '') }}">{{ task.author }}</a></p>
             {# {% endif %} #} {# full_description #}
         </div>
-        <div class="card-body {% if solved_status and user and user.user_id in task.pwned_by %} collapse {% endif %} }}"> {# TODO: macros for detection if task is solved #}
+        <div class="card-body {% if solved_status and user and user.user_id in task.pwned_by %} collapse {% endif %}"> {# TODO: macros for detection if task is solved #}
             {{ task.description_html | safe }}
             {# {% for desc in task.description.split("\n\n") %}
                 {% if 'http' in desc %}
@@ -96,14 +96,14 @@
                 {% set task_last_pwn = task.last_pwned_str() %}
                 {% set task_first_pwn = task.first_pwned_str() %}
                 <div class="d-flex flex-row">
-                    <abbr class="initialism" title="First pwn"><svg width="1em" height="1em" viewBox="0 0 16 16" class="col-auto align-self-center bi bi-flag" fill="currentColor" xmlns="http://www.w3.org/2000/svg"><path fill-rule="evenodd" d="M14.778.085A.5.5 0 0 1 15 .5V8a.5.5 0 0 1-.314.464L14.5 8l.186.464-.003.001-.006.003-.023.009a12.435 12.435 0 0 1-.397.15c-.264.095-.631.223-1.047.35-.816.252-1.879.523-2.71.523-.847 0-1.548-.28-2.158-.525l-.028-.01C7.68 8.71 7.14 8.5 6.5 8.5c-.7 0-1.638.23-2.437.477A19.626 19.626 0 0 0 3 9.342V15.5a.5.5 0 0 1-1 0V.5a.5.5 0 0 1 1 0v.282c.226-.079.496-.17.79-.26C4.606.272 5.67 0 6.5 0c.84 0 1.524.277 2.121.519l.043.018C9.286.788 9.828 1 10.5 1c.7 0 1.638-.23 2.437-.477a19.587 19.587 0 0 0 1.349-.476l.019-.007.004-.002h.001M14 1.221c-.22.078-.48.167-.766.255-.81.252-1.872.523-2.734.523-.886 0-1.592-.286-2.203-.534l-.008-.003C7.662 1.21 7.139 1 6.5 1c-.669 0-1.606.229-2.415.478A21.294 21.294 0 0 0 3 1.845v6.433c.22-.078.48-.167.766-.255C4.576 7.77 5.638 7.5 6.5 7.5c.847 0 1.548.28 2.158.525l.028.01C9.32 8.29 9.86 8.5 10.5 8.5c.668 0 1.606-.229 2.415-.478A21.317 21.317 0 0 0 14 7.655V1.222z"/></svg></abbr>
+                    <abbr class="initialism" title="First pwned by"><svg width="1em" height="1em" viewBox="0 0 16 16" class="col-auto align-self-center bi bi-flag" fill="currentColor" xmlns="http://www.w3.org/2000/svg"><path fill-rule="evenodd" d="M14.778.085A.5.5 0 0 1 15 .5V8a.5.5 0 0 1-.314.464L14.5 8l.186.464-.003.001-.006.003-.023.009a12.435 12.435 0 0 1-.397.15c-.264.095-.631.223-1.047.35-.816.252-1.879.523-2.71.523-.847 0-1.548-.28-2.158-.525l-.028-.01C7.68 8.71 7.14 8.5 6.5 8.5c-.7 0-1.638.23-2.437.477A19.626 19.626 0 0 0 3 9.342V15.5a.5.5 0 0 1-1 0V.5a.5.5 0 0 1 1 0v.282c.226-.079.496-.17.79-.26C4.606.272 5.67 0 6.5 0c.84 0 1.524.277 2.121.519l.043.018C9.286.788 9.828 1 10.5 1c.7 0 1.638-.23 2.437-.477a19.587 19.587 0 0 0 1.349-.476l.019-.007.004-.002h.001M14 1.221c-.22.078-.48.167-.766.255-.81.252-1.872.523-2.734.523-.886 0-1.592-.286-2.203-.534l-.008-.003C7.662 1.21 7.139 1 6.5 1c-.669 0-1.606.229-2.415.478A21.294 21.294 0 0 0 3 1.845v6.433c.22-.078.48-.167.766-.255C4.576 7.77 5.638 7.5 6.5 7.5c.847 0 1.548.28 2.158.525l.028.01C9.32 8.29 9.86 8.5 10.5 8.5c.668 0 1.606-.229 2.415-.478A21.317 21.317 0 0 0 14 7.655V1.222z"/></svg></abbr>
                     <small class="col-auto text-start text-truncate flex-fill px-1">
                         <span style="display: none;" class="user_id_resolve">{{ task_first_pwn[0] }}</span>
                     </small>
                     <small class="col-auto text-end text-truncate flex-fill px-1">
                         {{ task_last_pwn[1] }} ago by <span style="display: none;" class="user_id_resolve">{{ task_last_pwn[0] }}</span> 
                     </small>
-                    <abbr class="initialism" title="Latest pwn"><svg width="1em" height="1em" viewBox="0 0 16 16" class="col-auto align-self-center bi bi-arrow-clockwise" fill="currentColor" xmlns="http://www.w3.org/2000/svg"><path fill-rule="evenodd" d="M8 3a5 5 0 1 0 4.546 2.914.5.5 0 0 1 .908-.417A6 6 0 1 1 8 2v1z"/><path d="M8 4.466V.534a.25.25 0 0 1 .41-.192l2.36 1.966c.12.1.12.284 0 .384L8.41 4.658A.25.25 0 0 1 8 4.466z"/></svg></abbr>
+                    <abbr class="initialism" title="Latest pwned by"><svg width="1em" height="1em" viewBox="0 0 16 16" class="col-auto align-self-center bi bi-arrow-clockwise" fill="currentColor" xmlns="http://www.w3.org/2000/svg"><path fill-rule="evenodd" d="M8 3a5 5 0 1 0 4.546 2.914.5.5 0 0 1 .908-.417A6 6 0 1 1 8 2v1z"/><path d="M8 4.466V.534a.25.25 0 0 1 .41-.192l2.36 1.966c.12.1.12.284 0 .384L8.41 4.658A.25.25 0 0 1 8 4.466z"/></svg></abbr>
                 </div>
             {% else %}
                 <small> be first to pwn this! </small> {# TODO: other great text #}

@@ -38,6 +38,16 @@
     }
 }
 
+@font-face {
+    font-family: "Spoof Medium";
+    src: url(https://of.worldota.net/fonts/spoof/Spoof-Medium.woff2);
+}
+
+@font-face {
+    font-family: "PT Root UI";
+    src: url(https://of.worldota.net/fonts/ptrootui/pt-root-ui_vf.woff2);
+}
+
 html {
     position: relative;
     min-height: 100%;
@@ -48,11 +58,23 @@ body {
     /* Margin top by header height */
     margin-bottom: 60px;
     /* Margin bottom by footer height */
-    background-color: #585858;
+    /* background-color: #acef81; */
+    font-family: "PT Root UI";
+    background-color: #f2f1f0;
+}
+
+.marine-text {
+    color: rgb(13, 65, 210);
+    font-size: 16px;
+    font-weight: 500;
 }
 
 body>nav {
-    background-color: #404040;
+    background-color: white;
+}
+
+.navbar-brand {
+    font-family: "Spoof Medium";
 }
 
 .footer {
@@ -63,30 +85,19 @@ body>nav {
     height: 60px;
     line-height: 60px;
     /* Vertically center the text there */
-    color: #909090;
-    background-color: #404040;
+}
+
+.card {
+    background-color: #fff;
 }
 
 div.card>* a {
     text-decoration: none;
 }
 
-div.card.solved:not(.secondary) {
-    background: repeating-linear-gradient(135deg,
-            #404040,
-            #404040 20px,
-            #585858 20px,
-            #585858 40px);
-    color: white;
-}
-
-div.card.solved.secondary {
-    background: #404040;
-    color: white;
-}
-
-div.card.solved>div.card-header>*>* {
-    color: greenyellow;
+div.card.solved {
+    background: #acef81;
+    color: #000;
 }
 
 div.card.solved>.card-body>.card-text>a {

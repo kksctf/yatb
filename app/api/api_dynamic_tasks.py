@@ -1,5 +1,6 @@
 import datetime
 from collections.abc import Callable
+from ipaddress import ip_address
 from typing import Annotated, Literal, Self, TypeAlias, cast
 from uuid import UUID
 
@@ -15,7 +16,8 @@ from ..config import settings
 from ..db.beanie import TaskDB, UserDB
 from ..utils import metrics
 from ..utils.log_helper import get_logger
-from .api_tasks import CURRENT_TASK
+from .api_tasks import CURRENT_TASK, get_task
+import contextlib
 
 logger = get_logger("api.dynamic_tasks")
 
@@ -72,22 +74,33 @@ class ExternalDynamicTaskError(BaseModel):
     detail: Detail
 
 
+class MultipleInfoRequest(BaseModel):
+    tasks: list[UUID]
+
+
+class MultipleInfoResponse(BaseModel):
+    data: dict[UUID, str]
+
+
 _TT: TypeAlias = ExternalDynamicTaskInfo | ExternalDynamicTaskError
 ExternalDynamicTaskResp = TypeAdapter[_TT](_TT)
 
 
 class DynamicTasksClient(AsyncClient):
     def __init__(self) -> None:
-        if not settings.DYNAMIC_TASKS_CONTROLLER_TOKEN or not settings.DYNAMIC_TASKS_CONTROLLER:
-            return
+        logger.info("Trying to start dynamic tasks client")
+
+        base_url = settings.DYNAMIC_TASKS_CONTROLLER or ""
+        x_token = settings.DYNAMIC_TASKS_CONTROLLER_TOKEN or ""
 
         super().__init__(
-            base_url=settings.DYNAMIC_TASKS_CONTROLLER,
+            base_url=base_url,
             headers={
-                "X-Token": settings.DYNAMIC_TASKS_CONTROLLER_TOKEN,
+                "X-Token": x_token,
             },
             timeout=httpx.Timeout(connect=5.0, read=120.0, write=5.0, pool=5.0),
         )
+        logger.info(f"DTC startd with {base_url = } {x_token = }")
 
     def format_resp(self, resp: httpx.Response) -> str:
         info = ExternalDynamicTaskResp.validate_json(resp.text)
@@ -136,7 +149,8 @@ class DynamicTasksClient(AsyncClient):
             return f"Status: {err.detail}"
 
     async def restart(self, task_info: DynamicTaskInfo):
-        pass
+        resp = await self.post("/api/restart", json=task_info.model_dump(mode="json"))
+        return self.format_resp(resp)
 
     async def info(self, task_info: DynamicTaskInfo) -> str:
         resp = await self.post("/api/info", json=task_info.model_dump(mode="json"))
@@ -184,6 +198,25 @@ async def api_dynamic_task_stop(user: auth.CURR_USER, task: CURRENT_DYNAMIC_TASK
 async def api_dynamic_task_restart(user: auth.CURR_USER, task: CURRENT_DYNAMIC_TASK, client: CLIENT) -> HTMLResponse:
     info = await client.restart(DynamicTaskInfo.build(task=task, user=user))
     return HTMLResponse(info)
+
+
+@router.post("/infos")
+async def api_dynamic_task_infos(
+    user: auth.CURR_USER,
+    client: CLIENT,
+    req: MultipleInfoRequest,
+) -> MultipleInfoResponse:
+    resp = MultipleInfoResponse(data={})
+
+    for task_id in req.tasks:
+        try:
+            task = await get_dynamic_task(await get_task(task_id=task_id, user=user))
+        except HTTPException:
+            continue
+
+        resp.data[task_id] = await client.info(DynamicTaskInfo.build(task=task, user=user))
+
+    return resp
 
 
 @router.get("/info/{task_id}")

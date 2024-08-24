@@ -71,6 +71,12 @@
     {{ super() }}
     {{ macro.dynamic_task_script(curr_user) }}
     <script>
+        function updateMacy() {
+            if (macy) {
+                macy.recalculate(true);
+            }
+        }
+        
         function capitalizeFirstLetter(string) {
             return string.charAt(0).toUpperCase() + string.slice(1);
         }
@@ -113,9 +119,7 @@
                     $("." + k).hide();
                 }
             }
-            if (macy) {
-                macy.recalculate(true);
-            }
+            updateMacy();
         }
 
         function setCategory (target, status) {

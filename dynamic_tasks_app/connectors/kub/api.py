@@ -42,8 +42,6 @@ from .client import AsyncClientEx, ImpossibleError, check_meta
 
 
 class KubeApi:
-    _BASE_IP: str = "192.168.1.44"
-
     BUILD_BUCKET_NAME: str = "dynamic-tasks-build-source"
     BUILD_NAMESPACE: str = "yatb-build"
 
@@ -108,10 +106,10 @@ class KubeApi:
         return "".join(random.choices(alphabet, k=n))  # noqa: S311
 
     def get_image_name(self, name: str) -> str:
-        return f"{self._BASE_IP}:5000/prebuild-images/{name}:latest"
+        return f"{settings.DOCKER_REGISTRY_HOST}:5000/prebuild-images/{name}:latest"
 
     def fix_image_name(self, src: str) -> str:
-        return src.replace(f"{self._BASE_IP}:5000", "registry.local")
+        return src.replace(f"{settings.DOCKER_REGISTRY_HOST}:5000", "registry.local")
 
     @asynccontextmanager
     async def docker_config_json_secret(
@@ -267,7 +265,11 @@ class KubeApi:
                             "--cache=true",
                             "--cache-run-layers=true",
                             "--cache-copy-layers=true",
-                            f"--cache-repo={self._BASE_IP}:5000/cache",
+                            f"--cache-repo={settings.DOCKER_REGISTRY_HOST}:5000/cache",
+                            "--insecure",
+                            f"--insecure-registry={settings.DOCKER_REGISTRY_HOST}:5000",
+                            f"--insecure-registry={settings.DOCKER_REGISTRY_HOST}",
+                            # f"--registry-map",
                         ],
                         # args=[
                         #     "-c",
@@ -279,9 +281,13 @@ class KubeApi:
                         #     """.strip(),
                         # ],
                         env=[
+                            # EnvVar(
+                            #     "KANIKO_REGISTRY_MAP",
+                            #     "registry.local=http://{settings.DOCKER_REGISTRY_HOST}:5000",
+                            # ),
                             EnvVar(
                                 "S3_ENDPOINT",
-                                value=f"http://{self._BASE_IP}:{settings.S3_PORT}",
+                                value=f"http://{settings.S3_HOST}:{settings.S3_PORT}",
                             ),
                             # need to specify this to use path-stye minio,
                             # and don't try to resolve http://bucket.ip:port/file
@@ -423,12 +429,27 @@ class KubeApi:
 
             image = self.fix_image_name(image)
 
+            env = []
+            for env_key, env_value in svc.parsed_env.items():
+                # WTF: monkeypatch or production ready?????
+
+                if env_key == "FLAG":
+                    continue
+                env.append(
+                    EnvVar(
+                        name=env_key,
+                        value=env_value,
+                    ),
+                )
+
+            logger.trace(f"Creating container for {svc_name = } with {env = }")
+
             containers[svc_name] = Container(
                 name=svc_name,
                 image=image,
                 command=svc.prepared_command,
                 ports=[ContainerPort(port.internal_port) for port in svc.ports],
-                # env=[],
+                env=env,
             )
 
         def patch_container(container: Container, secret: Secret, key: str) -> Container:
@@ -437,6 +458,7 @@ class KubeApi:
 
             if container.env is None:
                 container.env = []
+
             container.env.append(
                 EnvVar(
                     name=key,
@@ -463,7 +485,7 @@ class KubeApi:
                     immutable=True,
                     stringData={"FLAG": flag},
                 ),
-            )
+            ),
         )
 
         # run stage

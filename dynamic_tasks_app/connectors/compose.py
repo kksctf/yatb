@@ -49,6 +49,8 @@ class Service(BaseModel):
 
     ports: list[Port] = []
 
+    environment: list[str] = []
+
     @property
     def prepared_command(self) -> list[str] | None:
         if not self.command:
@@ -58,6 +60,16 @@ class Service(BaseModel):
             return self.command.split(" ")
 
         return self.command
+
+    @property
+    def parsed_env(self) -> dict[str, str]:
+        ret = {}
+
+        for raw_env in self.environment:
+            spl = raw_env.split("=", maxsplit=1)
+            ret[spl[0]] = spl[1]
+
+        return ret
 
 
 class Compose(BaseModel):

@@ -28,6 +28,9 @@ class Settings(BaseSettings):
     S3_ACCESS: str
     S3_SECRET: str
 
+    DOCKER_REGISTRY_HOST: str
+
+    EXTERNAL_TO_INTERNAL_IPS_MAPPING: dict[str, str]
     EXTERNAL_IPS: list[str]
     PORT_START: int = 20000
     PORT_END: int = 40000

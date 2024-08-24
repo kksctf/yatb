@@ -72,7 +72,11 @@ def prepare_tasks(
                     if not (task_src / "task.yaml").exists():
                         continue
 
-                    task_info = parse_yaml_raw_as(FileTask, (task_src / "task.yaml").read_text())
+                    try:
+                        task_info = parse_yaml_raw_as(FileTask, (task_src / "task.yaml").read_text())
+                    except Exception as ex:
+                        c.print(f"ERROR!!! {task_src = } has bad yaml: {ex!r}")
+                        continue
 
                     if task_src not in state.task_to_uuid:
                         created_task = await y.create_task_full_form(task_to_raw(task_info))

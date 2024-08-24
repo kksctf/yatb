@@ -54,6 +54,13 @@ async def execption_handler():
                 "error": f"{ex!r}",
             },
         ) from ex
+    except NotImplementedError as ex:
+        raise HTTPException(
+            status_code=status.HTTP_501_NOT_IMPLEMENTED,
+            detail={
+                "error": f"{ex!r}",
+            },
+        ) from ex
 
 
 @router.post("/start")

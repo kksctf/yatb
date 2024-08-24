@@ -81,7 +81,12 @@
                         <button type="button" class="btn btn-outline-dark dynamic_task_start" data-id="{{ task.task_id }}">Start</button>
                         <button type="button" class="btn btn-outline-dark dynamic_task_restart" data-id="{{ task.task_id }}">Restart</button>
                         <button type="button" class="btn btn-outline-dark dynamic_task_stop" data-id="{{ task.task_id }}">Stop</button>
-                        <button type="button" class="btn btn-outline-dark dynamic_task_info" data-id="{{ task.task_id }}">Info</button>
+                        <button type="button" class="btn btn-outline-dark dynamic_task_info" data-id="{{ task.task_id }}">
+                            <svg xmlns="http://www.w3.org/2000/svg" width="16" height="16" fill="currentColor" class="bi bi-arrow-clockwise" viewBox="0 0 16 16">
+                            <path fill-rule="evenodd" d="M8 3a5 5 0 1 0 4.546 2.914.5.5 0 0 1 .908-.417A6 6 0 1 1 8 2z"/>
+                            <path d="M8 4.466V.534a.25.25 0 0 1 .41-.192l2.36 1.966c.12.1.12.284 0 .384L8.41 4.658A.25.25 0 0 1 8 4.466"/>
+                            </svg>
+                        </button>
                         {% if user and user.admin_checker() %}
                             <button type="button" class="btn btn-outline-dark dynamic_task_token" data-id="{{ task.task_id }}">Token</button>
                             <button type="button" class="btn btn-outline-dark dynamic_task_build" data-id="{{ task.task_id }}">Build</button>
@@ -130,52 +135,22 @@
 {% endmacro %}
 
 {% macro dynamic_task_script(user=None) %}
-    <script>
-        $(function () {
-            $(".dynamic_task_info").click(function (event) {
-                event.preventDefault();
-                let task_id = this.dataset.id;
-                preq(api_list["api_dynamic_task_info"], {"task_id": task_id}, { method: 'GET' })
-                    .then(get_text)
-                    .then((data) => {return data; }, nok_toast_generator("Get dynamic task info"))
-                    .then((data) => {
-                        $("#data-" + task_id).html(data.text);
-                    });
-            });
-            $(".dynamic_task_start").click(function (event) {
-                event.preventDefault();
-                let task_id = this.dataset.id;
-                preq(api_list["api_dynamic_task_start"], {"task_id": task_id}, { method: 'GET' })
-                    .then(get_text)
-                    .then(ok_toast_generator("Start dynamic task"), nok_toast_generator("Start dynamic task"))
-                    .then((data) => {
-                        $("#data-" + task_id).html(data.text);
-                    });
-            });
-            $(".dynamic_task_stop").click(function (event) {
-                event.preventDefault();
-                let task_id = this.dataset.id;
-                preq(api_list["api_dynamic_task_stop"], {"task_id": task_id}, { method: 'GET' })
-                    .then(get_text)
-                    .then(ok_toast_generator("Stop dynamic task"), nok_toast_generator("Stop dynamic task"))
-                    .then((data) => {
-                        $("#data-" + task_id).html(data.text);
-                    });
-            });
-            $(".dynamic_task_restart").click(function (event) {
-                event.preventDefault();
-                let task_id = this.dataset.id;
-                preq(api_list["api_dynamic_task_restart"], {"task_id": task_id}, { method: 'GET' })
-                    .then(get_text)
-                    .then(ok_toast_generator("Restart dynamic task"), nok_toast_generator("Restart dynamic task"))
-                    .then((data) => {
-                        $("#data-" + task_id).html(data.text);
-                    });
-            });
-            {% if user and user.admin_checker() %}
+    <script src="{{ url_for('static', path='dynamic_tasks.js') }}"></script>
+    {% if user %}
+        <script>
+            $(function() {
+                load_all_dynamic_info();
+            })
+        </script>
+    {% endif %}
+
+    {% if user and user.admin_checker() %}
+        <script>
+            $(function () {
                 $(".dynamic_task_build").click(function (event) {
                     event.preventDefault();
                     let task_id = this.dataset.id;
+
                     preq(api_list["api_dynamic_task_start_build"], {"task_id": task_id}, { method: 'GET' })
                         .then(get_text)
                         .then(ok_toast_generator("Build dynamic task"), nok_toast_generator("Build dynamic task"))
@@ -186,35 +161,26 @@
                 $(".dynamic_task_kill").click(function (event) {
                     event.preventDefault();
                     let task_id = this.dataset.id;
-                    display_grecap(task_id, (resp) => {
-                        $.toast({
-                            type: 'success',
-                            title: "Kill dynamic task",
-                            subtitle: 'now',
-                            content: 'Sending req to server....',
-                            delay: 5000,
+                    
+                    preq(api_list["api_dynamic_task_stop_fully_stop"], {"task_id": task_id}, { get_data: {"gcap_resp": resp}, method: 'GET' })
+                        .then(get_text)
+                        .then(ok_toast_generator("Kill dynamic task"), nok_toast_generator("Kill dynamic task"))
+                        .then((data) => {
+                            $("#data-" + task_id).text(data.json);
                         });
-                        preq(api_list["api_dynamic_task_stop_fully_stop"], {"task_id": task_id}, { get_data: {"gcap_resp": resp}, method: 'GET' })
-                            .then(get_text)
-                            .then(ok_toast_generator("Kill dynamic task"), nok_toast_generator("Kill dynamic task"))
-                            .then((data) => {
-                                $("#data-" + task_id).text(data.json);
-                            });
-                    });
                 });
                 $(".dynamic_task_token").click(function (event) {
                     event.preventDefault();
                     let task_id = this.dataset.id;
-                    display_grecap(task_id, (resp) => {
-                        preq(api_list["api_dynamic_task_token"], {"task_id": task_id}, { get_data: {"gcap_resp": resp}, method: 'GET' })
-                            .then(get_text)
-                            .then(ok_toast_generator("Get dynamic task token"), nok_toast_generator("Get dynamic task token"))
-                            .then((data) => {
-                                $("#data-" + task_id).text(data.json);
-                            });
-                    });
+
+                    preq(api_list["api_dynamic_task_token"], {"task_id": task_id}, { get_data: {"gcap_resp": resp}, method: 'GET' })
+                        .then(get_text)
+                        .then(ok_toast_generator("Get dynamic task token"), nok_toast_generator("Get dynamic task token"))
+                        .then((data) => {
+                            $("#data-" + task_id).text(data.json);
+                        });
                 });
-            {% endif %}
-        });
-    </script>
+            });
+        </script>
+    {% endif %}
 {% endmacro %}

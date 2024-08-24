@@ -41,11 +41,13 @@ class KubeConnector(BaseConnector):
 
         logger.info(f"Loaded {compose = }")
 
+        internal_host = settings.EXTERNAL_TO_INTERNAL_IPS_MAPPING[task_info.hp_ok.host]
+
         return await self.api.service(
             task_info._info.name,
             compose,
             flag=task_info.flag,
-            host=task_info.hp_ok.host,
+            host=internal_host,  # task_info.hp_ok.host,
             port=task_info.hp_ok.port,
             skip_build=False,
         )

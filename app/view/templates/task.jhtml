@@ -19,5 +19,9 @@
 
 {% block footer %}
     {{ super() }}
+{% endblock %}
+
+{% block scripts %}
+    {{ super() }}
     {{ macro.dynamic_task_script(curr_user) }}
 {% endblock %}

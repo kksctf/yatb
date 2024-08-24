@@ -17,7 +17,6 @@ from ..db.beanie import TaskDB, UserDB
 from ..utils import metrics
 from ..utils.log_helper import get_logger
 from .api_tasks import CURRENT_TASK, get_task
-import contextlib
 
 logger = get_logger("api.dynamic_tasks")
 

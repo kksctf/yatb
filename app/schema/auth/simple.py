@@ -69,8 +69,10 @@ class SimpleAuth(AuthBase):
                 or len(self.internal.username) > SimpleAuth.auth_settings.MAX_USERNAME_LEN
             ):
                 return False
+
             if len(self.internal.password) < SimpleAuth.auth_settings.MIN_PASSWORD_LEN:  # noqa: SIM103
                 return False
+
             return True
 
         async def populate(self, req: Request, resp: Response) -> "SimpleAuth.AuthModel":
@@ -87,7 +89,7 @@ class SimpleAuth(AuthBase):
 
         MIN_PASSWORD_LEN: int = 8
         MIN_USERNAME_LEN: int = 2
-        MAX_USERNAME_LEN: int = 32
+        MAX_USERNAME_LEN: int = 64
 
         model_config = SettingsConfigDict(AuthBase.AuthSettings.model_config, env_prefix="AUTH_SIMPLE_")
 
@@ -97,8 +99,12 @@ class SimpleAuth(AuthBase):
     @classmethod
     def generate_html(cls: type[Self], url_for: Callable) -> str:
         if not settings.DEBUG:
-            login_resrictions = "minlength='2' maxlength='32'"
-            passw_resrictions = "minlength='8'"
+            login_resrictions = (
+                f"minlength='{cls.auth_settings.MIN_USERNAME_LEN}' "
+                f"maxlength='{cls.auth_settings.MAX_USERNAME_LEN}' "
+                "required"
+            )
+            passw_resrictions = f"required minlength='{cls.auth_settings.MIN_PASSWORD_LEN}'"
         else:
             login_resrictions = ""
             passw_resrictions = ""

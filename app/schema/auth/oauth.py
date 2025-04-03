@@ -17,8 +17,8 @@ class OAuth(AuthBase):
         classtype: Literal["OAuth"] = "OAuth"
 
     class Form(AuthBase.Form):
-        code: str = Query(...)
-        state: str = Query(...)
+        code: str = Query()
+        state: str = Query()
 
         async def get_token(self, req: Request, cls: type["OAuth"], session: aiohttp.ClientSession) -> dict:
             oauth_token = await (
@@ -27,7 +27,7 @@ class OAuth(AuthBase):
                     params={
                         "grant_type": "authorization_code",
                         "code": self.code,
-                        "redirect_uri": req.url_for(cls.router_params["name"]),  # type: ignore
+                        "redirect_uri": str(req.url_for(cls.router_params["name"])),  # type: ignore
                         "client_id": cls.auth_settings.CLIENT_ID,
                         "client_secret": cls.auth_settings.CLIENT_SECRET,
                     },

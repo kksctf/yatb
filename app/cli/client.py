@@ -13,7 +13,7 @@ class YATB:
     s: httpx.AsyncClient
 
     def __init__(self) -> None:
-        self.s = httpx.AsyncClient(base_url=settings.base_url)
+        self.s = httpx.AsyncClient(base_url=settings.BASE_URL)
 
     def set_admin_token(self, token: str = config.settings.API_TOKEN) -> None:
         self.s.headers["X-Token"] = token
@@ -93,7 +93,7 @@ class YATB:
                     task_name=task.task_name,
                     description=task.description,
                     category=task.category,
-                    flag=schema.flags.StaticFlag(flag=task.flag, flag_base=settings.flag_base),
+                    flag=schema.flags.StaticFlag(flag=task.flag, flag_base=settings.FLAG_BASE),
                     scoring=schema.scoring.DynamicKKSScoring(),
                     author=task.author,
                     dynamic_task_info=task.dynamic_task_type,

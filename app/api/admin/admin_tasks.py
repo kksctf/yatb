@@ -98,8 +98,13 @@ async def api_admin_task_delete_all(user: CURR_ADMIN):
 
 
 @router.get("/task/delete/{task_id}")
-async def api_admin_task_delete(task: CURR_TASK, user: CURR_ADMIN):
-    raise NotImplementedError
+async def api_admin_task_delete(task: CURR_TASK, user: CURR_ADMIN) -> schema.Task.admin_model:
+    if len(task.pwned_by):
+        raise HTTPException(status_code=500)
+
+    await task.delete()  # type: ignore # WTF: great library
+
+    return task
 
     # await db.remove_task(task)
     # logger.warning(f"[{user.short_desc()}] removing task {task}")
@@ -116,6 +121,18 @@ async def api_admin_task_edit(new_task: schema.Task, task: CURR_TASK, user: CURR
     task = await task.update_entry(new_task)  # TODO: remove bullshit.
     return task
 
+
+@router.get("/flag/find")
+async def api_admin_find_flag_owner(flag: str, user: CURR_ADMIN):
+    task_user = await TaskDB.find_by_flag_for_all(flag)
+    if not task_user:
+        raise HTTPException(
+            status_code=status.HTTP_404_NOT_FOUND,
+            detail=f"unk...",
+        )
+
+    task, target_user = task_user
+    return {"task": task, "target_user": target_user}
 
 # TODO: А можно ли это сделать нормально?
 

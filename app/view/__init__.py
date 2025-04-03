@@ -2,6 +2,7 @@ import asyncio
 import uuid
 from collections.abc import Mapping
 from pathlib import Path
+from typing import TYPE_CHECKING
 
 from fastapi import BackgroundTasks, Depends, Request, Response
 from fastapi.routing import APIRoute as _APIRoute
@@ -11,13 +12,15 @@ from formgen.gen2 import Context as FormContext
 from formgen.gen2 import Contexts as FormContexts
 from formgen.gen2 import FieldType as FormFieldType
 from formgen.gen2 import generate_form
-from starlette.routing import Router
 from starlette.templating import _TemplateResponse
 
 from .. import auth, schema
 from ..api import api_tasks, api_users
 from ..config import settings
 from ..utils.log_helper import get_logger
+
+if TYPE_CHECKING:
+    from starlette.routing import Router
 
 logger = get_logger("view")
 
@@ -84,6 +87,8 @@ templ.env.globals["len"] = len
 templ.env.globals["template_format_time"] = schema.task.template_format_time
 templ.env.globals["set"] = set
 templ.env.globals["isinstance"] = isinstance
+templ.env.globals["str"] = str
+templ.env.globals["enumerate"] = enumerate
 
 templ.env.globals["DEBUG"] = settings.DEBUG
 templ.env.globals["FLAG_BASE"] = settings.FLAG_BASE

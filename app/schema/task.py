@@ -69,6 +69,7 @@ class Task(EBaseModel):
         "points",
         "solves",
         "dynamic_task_info",
+        "req_tasks",
     }
 
     task_id: uuid.UUID = Field(default_factory=uuid.uuid4)
@@ -90,6 +91,8 @@ class Task(EBaseModel):
     author: str
 
     dynamic_task_info: DynamicTaskInfo | None = None
+
+    req_tasks: list[uuid.UUID] = Field(default_factory=list)
 
     # @computed_field
     @property
@@ -117,6 +120,14 @@ class Task(EBaseModel):
         # always hide
         if self.hidden:
             return False
+
+        if self.req_tasks:
+            if not user:
+                return False
+
+            # every element of self.req_tasks is in user.solved_tasks
+            # i.e. user solved all of tasks in req.tasks
+            return set(self.req_tasks) <= set(user.solved_tasks)
 
         return True
 
@@ -190,6 +201,8 @@ class TaskForm(EBaseModel):
 
     dynamic_task_info: DynamicTaskInfo | None = None
 
+    req_tasks: list[uuid.UUID] = []
+
     def to_task(self, cls: type[_T], author: User) -> _T:
         str_author = self.author if self.author != "" else f"@{author.username}"
         if not str_author.startswith("@"):
@@ -204,5 +217,6 @@ class TaskForm(EBaseModel):
             flag=self.flag,
             author=str_author,
             dynamic_task_info=self.dynamic_task_info,
+            req_tasks=self.req_tasks,
         )
         return task

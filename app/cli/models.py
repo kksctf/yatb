@@ -59,6 +59,10 @@ class FileTask(BaseModel):
     is_http: bool = True
     domain_prefix: str | None = None
 
+    is_dynamic: bool = True
+
+    is_service_builder: bool = False
+
     @property
     def full_name(self) -> str:
         return self.name
@@ -66,6 +70,10 @@ class FileTask(BaseModel):
 
 class State(BaseModel):
     task_to_uuid: dict[Path, uuid.UUID] = {}
+
+    @property
+    def uuid_to_task(self) -> dict[uuid.UUID, Path]:
+        return {v: i for i, v in self.task_to_uuid.items()}
 
 
 AllUsers = RootModel[dict[uuid.UUID, UserPrivate]]

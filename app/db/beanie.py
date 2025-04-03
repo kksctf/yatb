@@ -108,6 +108,16 @@ class TaskDB(DocumentEx[Task], Task):
         return None
 
     @classmethod
+    async def find_by_flag_for_all(cls: type[Self], flag: str) -> tuple[Self, User] | None:
+        for user in await UserDB.find_all().to_list():
+            for task in await cls.find_all().to_list():
+                result = task.flag.flag_checker(flag, user)
+                if result == FlagCheckResult.valid:
+                    return task, user
+
+        return None
+
+    @classmethod
     async def recalc_score(cls: type[Self]) -> None:
         async with BulkWriter() as bw:
             for task in (await cls.get_all()).values():

@@ -19,6 +19,7 @@ from .errors import GenericConnectorError, InstanceNotFoundError
 class DynamicTaskType(Enum):
     BUILDER = "builder"
     SERVICE = "service"
+    BUILDER_AND_SERVICE = "builder_and_service"
 
 
 class DynamicTaskInfo(BaseModel):

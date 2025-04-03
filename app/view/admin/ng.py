@@ -101,6 +101,7 @@ async def admin_ng_tasks(req: Request, admin: CURR_ADMIN) -> list[AnyComponent]:
                 DisplayLookup(field="category", title="Category"),
                 DisplayLookup(field="points", title="Points"),
                 DisplayLookup(field="solves", title="Solve Count"),
+                DisplayLookup(field="hidden", title="Hidden?"),
             ],
         ),
         title="Tasks",

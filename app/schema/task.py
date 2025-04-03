@@ -192,6 +192,8 @@ _T = TypeVar("_T", bound=Task)
 
 
 class TaskForm(EBaseModel):
+    task_id: uuid.UUID | None = None
+
     task_name: str
     category: str
     scoring: ScoringUnion
@@ -219,4 +221,9 @@ class TaskForm(EBaseModel):
             dynamic_task_info=self.dynamic_task_info,
             req_tasks=self.req_tasks,
         )
+
+        # WTF: shitcode
+        if self.task_id:
+            task.task_id = self.task_id
+
         return task

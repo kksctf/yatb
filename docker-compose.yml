@@ -3,7 +3,7 @@ version: "3"
 services:
   yatb:
     build:
-      dockerfile: Dockerfile.production
+      dockerfile: ./contrib/docker/Dockerfile.production
       context: .
     command: "--workers=4 --bind=0.0.0.0:80 --forwarded-allow-ips='*'"
     #  --log-level=warning --host 0.0.0.0 --port 80 --proxy-headers --forwarded-allow-ips *"
@@ -34,7 +34,7 @@ services:
     restart: always
     volumes:
       - "./app/view/static/:/usr/caddy/static/:ro"
-      - "./nginx/Caddyfile:/etc/caddy/Caddyfile:ro"
+      - "./contrib/docker/Caddyfile:/etc/caddy/Caddyfile:ro"
       - "caddy_data:/data"
     ports:
       - "127.0.0.1:8080:80"

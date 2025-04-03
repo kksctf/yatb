@@ -28,6 +28,7 @@ class DynamicTaskInfo(BaseModel):
     type: DynamicTaskType
 
     user_id: str
+    user_admin: bool = False
 
     flag: str
 

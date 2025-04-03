@@ -33,6 +33,7 @@ class DynamicTaskInfo(BaseModel):
     type: schema.task.DynamicTaskType
 
     user_id: str
+    user_admin: bool = False
 
     flag: str
 
@@ -46,6 +47,7 @@ class DynamicTaskInfo(BaseModel):
             descriptor=task.task_id,
             type=task.dynamic_task_info.dynamic_task_type,
             user_id=f"{user.user_id}",
+            user_admin=user.is_admin,
             flag=task.flag.flag_value(user),
         )
 

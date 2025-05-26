@@ -1,4 +1,4 @@
-from app.db import update_entry
+from yatb.db import update_entry
 import uuid
 import logging
 from typing import Hashable, List, Dict, Optional, Type

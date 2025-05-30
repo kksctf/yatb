@@ -1,0 +1,25 @@
+/* Masonry-ish grid without JS */
+.task-grid {
+    display: grid;
+    grid-template-columns: repeat(auto-fill, minmax(260px, 1fr));
+    gap: 1rem;
+    /* space between cards */
+}
+
+/* override Bulma’s .column padding/margins inside the grid */
+.task-grid>.column {
+    margin: 0 !important;
+    padding: 0 !important;
+}
+
+.task-grid .card {
+    height: 100%;
+    /* all cards same column height */
+    display: flex;
+    /* stretch footer to bottom      */
+    flex-direction: column;
+}
+
+.task-grid .card-content {
+    flex-grow: 1;
+}

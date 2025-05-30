@@ -9,15 +9,14 @@
   <style>
     /* indicator box 20×20, centred glyph */
     .sb-indicator {
-      width: 1.25rem; height: 1.25rem;
+      width: 2.5rem; height: 2.5rem;
       display:flex; align-items:center; justify-content:center;
-      margin:1px 2px; font-size:0.75rem;
+      font-size:0.75rem;
       line-height:1;                       /* tighter vertical align   */
-      border-radius: 2px;                  /* slight rounding          */
     }
-    .sb-solved        { background:#99d98c; }  /* normal solve  */
-    .sb-solved-last   { background:#d9ed92; }  /* user’s last   */
-    .sb-solved-first  { background:#92d8ed; }  /* first blood   */
+    .sb-solved        { background:var(--bulma-success); color: #222;}  /* normal solve  */
+    .sb-solved-last   { background:var(--bulma-primary); color: #222;}  /* user’s last   */
+    .sb-solved-first  { background:var(--bulma-info); color: #222;}  /* first blood   */
     .sb-unsolved      { color:#555; }          /* simple “x”    */
 
     /* tiny red dot for “just solved” */
@@ -25,6 +24,13 @@
       position:absolute; top:-2px; right:-2px;
       width:.5rem; height:.5rem; border-radius:50%;
       background:#dc2626; border:1px solid #222;
+      z-index: 99999;
+    }
+
+    .sb-star {
+      position:absolute; top:-4px; right:-6px;
+      font-size:.55rem; color:#ffc107;
+      z-index: 99999;
     }
   </style>
 {% endblock %}
@@ -32,18 +38,22 @@
 {% block content %}
 <h1 class="title is-3">Scoreboard</h1>
 
-<table class="table is-fullwidth is-bordered">
+<table class="table is-fullwidth">
   <thead>
     <tr>
-      <th>#</th>
-      <th>username</th>
-      <th>score</th>
+      <th></th>
+      <th>who</th>
+      <th>how much</th>
       <th></th>
     </tr>
   </thead>
 
-  {# initial tbody and the HTMX auto-refresh container #}
-  {% include "partials/scoreboard_table.jhtml" %}
-
+  <tbody id="scoreboard-body"
+         hx-get="/scoreboard"
+         hx-trigger="load, every 30s"
+         hx-target="#scoreboard-body"
+         hx-swap="innerHTML">
+    {% include "partials/scoreboard_table.jhtml" %}
+  </tbody>
 </table>
 {% endblock %}

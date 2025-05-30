@@ -1,14 +1,6 @@
-{#  reload every 30 s – same pattern as before #}
-<tbody id="scoreboard-body"
-       hx-get="/scoreboard"
-       hx-trigger="load, every 30s"
-       hx-target="#scoreboard-body"
-       hx-swap="outerHTML">
-
 {% for pos, user in enumerate(scoreboard, start=1) %}
   {# build lookup helpers once per user #}
   {% set last_task_id, last_time = user.get_last_solve_time() if user.solved_tasks else (None, None) %}
-
   <tr>
     <th>{{ pos }}</th>
     <td>{{ user.username }}</td>
@@ -42,9 +34,7 @@
               <i class="fa-solid fa-check"></i>
 
               {% if user.user_id == task.first_pwned_str()[0] %}
-                <i class="fa-solid fa-star"
-                   style="position:absolute; top:-4px; right:-6px;
-                          font-size:.55rem; color:#ffc107;"></i>
+                <i class="fa-solid fa-star sb-star"></i>
               {% elif task.task_id == last_task_id %}
                 <span class="sb-last-dot"></span>
               {% endif %}
@@ -53,9 +43,7 @@
             {% endif %}
           </div>
         {% endfor %}
-
       </div>
     </td>
   </tr>
 {% endfor %}
-</tbody>

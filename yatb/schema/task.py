@@ -133,7 +133,10 @@ class Task(EBaseModel):
             return f"{dt.second} second{'' if dt.second == 1 else 's'}"
         return ""
 
-    def last_pwned_str(self) -> tuple[uuid.UUID, str]:
+    def last_pwned_str(self) -> tuple[uuid.UUID, str] | None:
+        if not self.pwned_by:
+            return None
+
         last_pwn = max(self.pwned_by.items(), key=lambda x: x[1])
 
         last_time = datetime.datetime.now(tz=datetime.UTC) - last_pwn[1]
@@ -141,7 +144,10 @@ class Task(EBaseModel):
 
         return last_pwn[0], result_time
 
-    def first_pwned_str(self) -> tuple[uuid.UUID, str]:
+    def first_pwned_str(self) -> tuple[uuid.UUID, str] | None:
+        if not self.pwned_by:
+            return None
+
         first_pwn = min(self.pwned_by.items(), key=lambda x: x[1])
         result_time = template_format_time(first_pwn[1])
 

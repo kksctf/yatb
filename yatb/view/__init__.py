@@ -118,6 +118,13 @@ async def tasks_get(
 ):
     tasks = await api_tasks.api_tasks_get(user)
 
+    # collect every user UUID appearing in first/last pwn lists
+    uid_set: set[uuid.UUID] = set()
+    for t in tasks:
+        uid_set.update(t.pwned_by.keys())
+
+    uid2name = {uid: (await api_users.api_users_get(uid, user)).username for uid in uid_set}
+
     # Detect if this is an HTMX call (partial refresh) or a full-page load
     partial_refresh = request.headers.get("hx-request") == "true"
 
@@ -129,6 +136,7 @@ async def tasks_get(
             {
                 "curr_user": user,
                 "tasks": tasks,
+                "uid2name": uid2name,
             },
         )
 
@@ -144,6 +152,7 @@ async def tasks_get(
         {
             "curr_user": user,
             "tasks": tasks,
+            "uid2name": uid2name,
         },
     )
 

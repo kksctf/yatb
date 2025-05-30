@@ -1,4 +1,4 @@
-<div id="tasks-container" class="columns is-multiline is-variable is-2">
+<div id="tasks-container" class="task-grid">
     {% for task in tasks | sort(attribute='scoring.points') %}
     {% include "partials/task_card.jhtml" %}
     {% else %}

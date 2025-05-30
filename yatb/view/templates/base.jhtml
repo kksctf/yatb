@@ -5,7 +5,7 @@
     <meta charset="utf-8">
     <title>{% block title %}HTMX YATB{% endblock %}</title>
 
-    <link rel="stylesheet" href="{{ url_for('static', path='style.css') }}">
+    <link rel="stylesheet" href="{{ url_for('static', path='layout.css') }}">
     
     <!-- Bulma & HTMX from CDNs -->
     <link rel="stylesheet" href="https://cdn.jsdelivr.net/npm/bulma@1.0.1/css/bulma.min.css">
@@ -29,9 +29,14 @@
             <div class="navbar-start">
                 <a class="navbar-item" href="/tasks">Challenges</a>
                 <a class="navbar-item" href="/scoreboard">Scoreboard</a>
-
+            </div>
+            <div class="navbar-end">
                 {% if curr_user %}
+                    <!-- response placeholder -->
+                    <div id="flag-submit-result" class="navbar-item"></div>
                     <form class="navbar-item"
+                        method="post"
+                        action="/api/tasks/submit_flag"
                         hx-post="/api/tasks/submit_flag"
                         hx-target="#flag-submit-result"
                         hx-swap="innerHTML">
@@ -52,18 +57,11 @@
                         </p>
 
                         <p class="control">
-                        <button class="button is-primary">Submit</button>
+                        <button class="button is-info">Submit</button>
                         </p>
                     </div>
                     </form>
-
-                    <!-- response placeholder -->
-                    <div id="flag-submit-result" class="navbar-item"></div>
-                {% endif %}
-            </div>
-            <div class="navbar-end">
-                {% if curr_user %}
-                    <a class="navbar-item" href="/profile">Profile</a>
+                    <a class="navbar-item" href="/profile">{{ curr_user.username }}</a>
                     <a class="navbar-item" href="{{ url_for('api_users_logout') }}">Logout</a>
                 {% else %}
                     <a class="navbar-item" href="/login">Login</a>

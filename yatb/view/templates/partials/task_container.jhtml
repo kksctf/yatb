@@ -1,0 +1,7 @@
+<div id="tasks-container" class="columns is-multiline is-variable is-2">
+    {% for task in tasks | sort(attribute='scoring.points') %}
+    {% include "partials/task_card.jhtml" %}
+    {% else %}
+    <p>No tasks match your filters.</p>
+    {% endfor %}
+</div>

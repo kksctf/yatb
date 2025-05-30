@@ -24,7 +24,7 @@ class YATB:
     async def register_user(self, user: RawUser) -> UserPrivate:
         resp = await self.s.post(
             app.url_path_for("api_auth_simple_register"),
-            json=schema.SimpleAuth.Form._Internal(
+            json=schema.SimpleAuth.Form(
                 username=user.username,
                 password=user.password,
             ).model_dump(mode="json"),

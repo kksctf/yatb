@@ -1,0 +1,61 @@
+{#  reload every 30 s – same pattern as before #}
+<tbody id="scoreboard-body"
+       hx-get="/scoreboard"
+       hx-trigger="load, every 30s"
+       hx-target="#scoreboard-body"
+       hx-swap="outerHTML">
+
+{% for pos, user in enumerate(scoreboard, start=1) %}
+  {# build lookup helpers once per user #}
+  {% set last_task_id, last_time = user.get_last_solve_time() if user.solved_tasks else (None, None) %}
+
+  <tr>
+    <th>{{ pos }}</th>
+    <td>{{ user.username }}</td>
+    <td>{{ user.score }}</td>
+
+    <td class="p-0">
+      <div class="is-flex is-flex-wrap-wrap is-justify-content-center">
+
+        {% for task in all_tasks | sort(attribute='category') | sort(attribute='scoring.points') %}
+          {% set tooltip = task.scoring.points ~ ' | ' ~ task.task_name %}
+          {% if task.task_id in user.solved_tasks %}
+            {% set tooltip = tooltip ~ ' | ' ~ template_format_time(user.solved_tasks[task.task_id]) %}
+          {% endif %}
+
+          <div class="sb-indicator
+                      {% if task.task_id in user.solved_tasks %}
+                         {% if user.user_id == task.first_pwned_str()[0] %}
+                            sb-solved-first
+                         {% elif task.task_id == last_task_id %}
+                            sb-solved-last
+                         {% else %}
+                            sb-solved
+                         {% endif %}
+                      {% else %}
+                         sb-unsolved
+                      {% endif %}"
+               title="{{ tooltip }}"
+               style="position:relative;">
+
+            {% if task.task_id in user.solved_tasks %}
+              <i class="fa-solid fa-check"></i>
+
+              {% if user.user_id == task.first_pwned_str()[0] %}
+                <i class="fa-solid fa-star"
+                   style="position:absolute; top:-4px; right:-6px;
+                          font-size:.55rem; color:#ffc107;"></i>
+              {% elif task.task_id == last_task_id %}
+                <span class="sb-last-dot"></span>
+              {% endif %}
+            {% else %}
+              <i class="fa-solid fa-xmark"></i>
+            {% endif %}
+          </div>
+        {% endfor %}
+
+      </div>
+    </td>
+  </tr>
+{% endfor %}
+</tbody>

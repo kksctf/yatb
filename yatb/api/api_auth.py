@@ -1,7 +1,7 @@
 from collections.abc import Callable
-from typing import Literal, cast
+from typing import Literal, cast, Annotated
 
-from fastapi import APIRouter, Depends, HTTPException, Request, Response, status
+from fastapi import APIRouter, Depends, HTTPException, Request, Response, status, Form
 
 from .. import auth, db, schema
 from ..db.beanie import UserDB
@@ -73,7 +73,7 @@ def generic_handler_generator(cls: type[schema.auth.AuthBase]) -> Callable:
     return generic_handler
 
 
-async def api_auth_simple_login(req: Request, resp: Response, form: schema.SimpleAuth.Form = Depends()):
+async def api_auth_simple_login(req: Request, resp: Response, form: Annotated[schema.SimpleAuth.Form, Form()]):
     # almost the same generic, but for login/password form, due to additional login.
     model = await form.populate(req, resp)
     user = await UserDB.get_user_uniq_field(schema.SimpleAuth.AuthModel, model.get_uniq_field())
@@ -95,10 +95,16 @@ async def api_auth_simple_login(req: Request, resp: Response, form: schema.Simpl
     access_token = auth.create_user_token(user)
     resp.set_cookie(key="access_token", value=f"Bearer {access_token}", httponly=True)
 
+    if req.headers.get("HX-Request") == "true":
+        resp.headers["HX-Redirect"] = "/tasks"  # or "/"
+        return "ok"
+
+    resp.status_code = status.HTTP_303_SEE_OTHER
+    resp.headers["Location"] = str(req.url_for("index"))
     return "ok"
 
 
-async def api_auth_simple_register(req: Request, resp: Response, form: schema.SimpleAuth.Form = Depends()):
+async def api_auth_simple_register(req: Request, resp: Response, form: Annotated[schema.SimpleAuth.Form, Form()]):
     # almost the same generic, but for login/password form, due to additional login.
     model = await form.populate(req, resp)
 
@@ -118,6 +124,12 @@ async def api_auth_simple_register(req: Request, resp: Response, form: schema.Si
     access_token = auth.create_user_token(user)
     resp.set_cookie(key="access_token", value=f"Bearer {access_token}", httponly=True)
 
+    if req.headers.get("HX-Request") == "true":
+        resp.headers["HX-Redirect"] = "/tasks"  # or "/"
+        return "ok"
+
+    resp.status_code = status.HTTP_303_SEE_OTHER
+    resp.headers["Location"] = str(req.url_for("index"))
     return "ok"
 
 

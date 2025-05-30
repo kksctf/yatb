@@ -21,42 +21,31 @@ stress_cmds = stress_cmds
 load_cmds = load_cmds
 
 tasks_to_create: list[RawTask] = [
+    RawTask(flag="task1", task_name="Warm-up crypto", category="crypto", description="XOR basics"),
+    RawTask(flag="task2", task_name="Heap fun", category="binary", description="UAF exploitation"),
+    RawTask(flag="task3", task_name="SQLi 101", category="web", description="Classic injection"),
+    RawTask(flag="task4", task_name="Forensic trace", category="forensic", description="PCAP puzzle"),
+    RawTask(flag="task5", task_name="Obscure stego", category="other", description="Audio LSB"),
+    RawTask(flag="task6", task_name="RSA baby", category="crypto", description="e=3 low exponent"),
+    RawTask(flag="task7", task_name="Fmt-str 101", category="binary", description="Leak & write"),
+    RawTask(flag="task8", task_name="XSS everywhere", category="web", description="DOM clobbering"),
+    RawTask(flag="task9", task_name="Memory dump", category="forensic", description="WinDbg basics"),
     RawTask(
-        task_name="test_task_1",
-        category="web",
-        description="flag - A\n",
-        flag="A",
+        flag="task10",
+        task_name="Regex confusion",
+        category="other",
+        description="Catastrophic backtracking",
     ),
-    RawTask(
-        task_name="test_task_2",
-        category="web",
-        description="flag - B\n",
-        flag="B",
-    ),
-    RawTask(
-        task_name="test_task_3",
-        category="web",
-        description="flag - C\n",
-        flag="C",
-    ),
-    RawTask(
-        task_name="test_task_1_separate",
-        category="web",
-        description="flag - As\n",
-        flag="As",
-    ),
-    RawTask(
-        task_name="test_task_2_separate",
-        category="web",
-        description="flag - Bs\n",
-        flag="Bs",
-    ),
-    RawTask(
-        task_name="test_task_3_separate",
-        category="web",
-        description="flag - Cs\n",
-        flag="Cs",
-    ),
+    RawTask(flag="task11", task_name="CBC bit-flip", category="crypto", description="Padding oracle"),
+    RawTask(flag="task12", task_name="ROP chain", category="binary", description="ret2libc → system"),
+    RawTask(flag="task13", task_name="Race condition", category="web", description="Flask session fix"),
+    RawTask(flag="task14", task_name="ELF timeline", category="forensic", description="Shell history"),
+    RawTask(flag="task15", task_name="Brainf**k encode", category="other", description="Esoteric encoding"),
+    RawTask(flag="task16", task_name="Elliptic twist", category="crypto", description="Curve math"),
+    RawTask(flag="task17", task_name="Sigreturn-oriented", category="binary", description="SROP primer"),
+    RawTask(flag="task18", task_name="SSRF to RCE", category="web", description="Metadata abuse"),
+    RawTask(flag="task19", task_name="Malware config", category="forensic", description="C2 extractor"),
+    RawTask(flag="task20", task_name="Reverse Polish", category="other", description="Obfuscated calc"),
 ]
 
 

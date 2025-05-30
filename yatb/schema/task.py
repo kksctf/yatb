@@ -101,6 +101,9 @@ class Task(EBaseModel):
 
         return True
 
+    def solved_by(self, user: User):
+        return user and user.user_id in self.pwned_by
+
     @staticmethod
     def regenerate_md(content: str) -> str:
         return md.markdownCSS(content, config.MD_CLASSES_TASKS, config.MD_ATTRS_TASKS)

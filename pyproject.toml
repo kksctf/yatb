@@ -38,6 +38,7 @@ dependencies = [
     "loguru~=0.7.2",
     "requests==2.32.3",
     "python-multipart==0.0.20",
+    "babel==2.17.0",
 ]
 
 

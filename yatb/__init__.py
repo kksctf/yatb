@@ -3,9 +3,8 @@ from pathlib import Path
 
 from fastapi import FastAPI
 from fastapi.staticfiles import StaticFiles
-from fastapi.templating import Jinja2Templates
 
-from . import utils
+from . import utils, i18n
 from .config import settings
 
 app = FastAPI(
@@ -13,6 +12,7 @@ app = FastAPI(
     redoc_url=settings.FASTAPI_REDOC_URL,
     openapi_url=settings.FASTAPI_OPENAPI_URL,
 )
+app.add_middleware(i18n.LocaleMiddleware)
 
 _base_path = Path(__file__).resolve().parent
 app.mount("/static", StaticFiles(directory=_base_path / "view" / "static"), name="static")

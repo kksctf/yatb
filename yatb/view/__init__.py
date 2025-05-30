@@ -18,7 +18,7 @@ from starlette.templating import _TemplateResponse
 from fastapi import Query
 from fastapi.responses import HTMLResponse
 
-from .. import auth, schema
+from .. import auth, schema, i18n
 from ..api import api_tasks, api_users
 from ..config import settings
 from ..utils.log_helper import get_logger
@@ -98,6 +98,27 @@ templates.env.globals["generate_form"] = generate_form
 templates.env.globals["FormFieldType"] = FormFieldType
 templates.env.globals["FormContext"] = FormContext
 templates.env.globals["FormContexts"] = FormContexts
+
+
+import gettext, pathlib
+
+TRANSLATIONS = {
+    lang: gettext.translation(
+        domain="messages",
+        localedir=pathlib.Path(__file__).parent.parent / "locale",
+        languages=[lang],
+        fallback=True,
+    )
+    for lang in i18n.SUPPORTED
+}
+
+
+def _(text: str, request: Request) -> str:
+    return TRANSLATIONS[request.state.lang].gettext(text)
+
+
+templates.env.globals.update(_=_)
+
 
 from . import admin  # noqa
 

@@ -1,0 +1,12 @@
+{
+	servers {
+		trusted_proxies static private_ranges
+	}
+}
+
+http:// {
+	root /static/* /usr/caddy
+	file_server /static/*
+
+	reverse_proxy yatb:80
+}

@@ -76,24 +76,6 @@ documentation = "https://github.com/kksctf/yatb"
 # black config enabled.
 [tool.black]
 line-length = 120
-include = '\.pyi?$'
-exclude = '''
-
-(
-  /(
-      \.eggs         # exclude a few common directories in the
-    | \.git          # root of the project
-    | \.hg
-    | \.mypy_cache
-    | \.tox
-    | \.venv
-    | _build
-    | buck-out
-    | build
-    | dist
-  )/
-)
-'''
 
 [tool.ruff]
 line-length = 120
@@ -102,7 +84,7 @@ line-length = 120
 fix = false
 
 # python 3.10 target?
-target-version = "py311"
+target-version = "py312"
 
 [tool.ruff.lint]
 task-tags = ["TODO", "FIXME", "WTF", "XXX"]
@@ -133,8 +115,12 @@ ignore = [
     "G004",   #   | ruff?                 | Logging statement uses f-string                                         # i care, but not this proj
 ]
 
+[tool.ruff.lint.per-file-ignores]
+"**/{tests}/*" = ["S101", "INP001", "ANN201"]
+
 
 [tool.pytest.ini_options]
-addopts = "--pyargs yatb --cov=yatb"
-env = ["DEBUG=False", "ENABLE_METRICS=false", "TESTING=True"]
+addopts = "--cov=./yatb --cov-report=xml:coverage.xml -cov-config=.coveragerc"
+env = ["DEBUG=0", "ENABLE_METRICS=0", "TESTING=1"]
 filterwarnings = ["ignore::DeprecationWarning"]
+testpaths = ["tests"]

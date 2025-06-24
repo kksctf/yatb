@@ -30,7 +30,7 @@ class Settings(BaseSettings):
 
     # database name
     DB_NAME: str = "yatb"
-    MONGO: MongoDsn = "mongodb://root:root@127.0.0.1:27017"  # type: ignore
+    MONGO: MongoDsn = "mongodb://127.0.0.1:27017"  # type: ignore
 
     # JWT settings
     JWT_SECRET_KEY: str = _DEFAULT_TOKEN

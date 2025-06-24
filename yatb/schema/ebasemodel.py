@@ -3,7 +3,7 @@ import types
 import typing
 from typing import TYPE_CHECKING, Any, ClassVar, Self, TypeAlias, Union, get_args, get_origin
 
-from pydantic import BaseModel, computed_field, create_model
+from pydantic import BaseModel, Field, computed_field, create_model
 from pydantic.fields import FieldInfo
 
 from ..utils.log_helper import get_logger

@@ -2,7 +2,8 @@
 
 from fastapi import status
 
-from .. import config, schema
+from yatb import config, schema
+
 from . import ClientEx, app
 from . import client as client_cl
 

@@ -1,11 +1,9 @@
 import uuid
 
-import pytest
+from yatb import schema
 
-from .. import schema
-from . import TestClient, app
+from . import TestClient, app, test_auth
 from . import client as client_cl
-from . import test_auth
 
 client = client_cl
 

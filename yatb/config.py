@@ -16,6 +16,7 @@ class DefaultTokenError(ValueError):
 class Settings(BaseSettings):
     DEBUG: bool = False
     PROFILING: bool = False
+    TESTING: bool = False
 
     TOKEN_PATH: str = "/api/users/login"
 
@@ -65,7 +66,7 @@ class Settings(BaseSettings):
 
     @model_validator(mode="after")
     def check_non_default_tokens(self) -> Self:
-        if self.DEBUG:
+        if self.DEBUG or self.TESTING:
             return self
 
         token_check_list = ["JWT_SECRET_KEY", "FLAG_SIGN_KEY", "API_TOKEN", "WS_API_TOKEN"]

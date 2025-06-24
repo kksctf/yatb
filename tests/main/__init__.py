@@ -6,9 +6,9 @@ import pytest
 from fastapi.testclient import TestClient
 from httpx import Response
 
-from .. import app, schema
-from ..config import settings
-from ..db.beanie import db
+from yatb import app, schema
+from yatb.config import settings
+from yatb.db.beanie import db
 
 settings.DB_NAME = "yatb_testing"
 
@@ -125,7 +125,3 @@ def client(request):
 
     print("Client shutdown")
     client.__exit__()
-
-
-# from . import test_auth  # noqa
-# from . import test_main  # noqa

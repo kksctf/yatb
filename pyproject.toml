@@ -20,9 +20,9 @@ keywords = ["ctf", "jeopardy", "ctf-platform", "fastapi"]
 classifiers = ["Topic :: Software Development"]
 
 dependencies = [
-    "pydantic ~= 2.8.2",
-    "pydantic-settings ~= 2.3.4",
-    "fastapi ~= 0.112.0",
+    "pydantic ~= 2.11.7",
+    "pydantic-settings ~= 2.10.1",
+    "fastapi ~= 0.115.13",
     "aiohttp ~= 3.10.3",
     "aiofiles ~= 24.1.0",
     "python-jose[cryptography] ~= 3.3.0",

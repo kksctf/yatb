@@ -62,7 +62,7 @@ class EBaseModel(BaseModel):
 
                 new_union = Union[tuple(new_union_base)]  # type: ignore  # noqa: UP007, PGH003 # так надо.
 
-                target_fields[field_name] = (
+                target_fields[field_name] = (  # type: ignore # WTF: ???
                     new_union,
                     field_value,
                 )

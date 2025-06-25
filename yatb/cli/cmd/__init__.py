@@ -16,9 +16,9 @@ from . import get as get_cmds
 from . import load as load_cmds
 from . import stress as stress_cmds
 
-get_cmds = get_cmds
-stress_cmds = stress_cmds
-load_cmds = load_cmds
+get_cmds = get_cmds  # noqa: PLW0127
+stress_cmds = stress_cmds  # noqa: PLW0127
+load_cmds = load_cmds  # noqa: PLW0127
 
 tasks_to_create: list[RawTask] = [
     RawTask(

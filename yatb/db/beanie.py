@@ -311,15 +311,18 @@ class DBClient:
     async def init(self) -> None:
         self.client = AsyncIOMotorClient(str(settings.MONGO), tz_aware=True)
         self.db = self.client[settings.DB_NAME]
-        await init_beanie(database=self.db, document_models=[TaskDB, UserDB])  # type: ignore # bad library ;(
+        await init_beanie(
+            database=self.db,
+            document_models=[TaskDB, UserDB],
+        )
         logger.info("Beanie init ok")
 
     async def close(self) -> None:
         logger.info("DB close ok")
 
     async def reset_db(self) -> None:
-        if not settings.DEBUG:
-            logger.warning("DB Reset without debug")
+        if not (settings.DEBUG or settings.TESTING):
+            logger.warning(f"DB Reset without debug ({settings.DEBUG = }) or testing {settings.TESTING = }")
             return
 
         await self.client.drop_database(settings.DB_NAME)

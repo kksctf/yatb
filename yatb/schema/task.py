@@ -3,7 +3,7 @@ import uuid
 from typing import Annotated, ClassVar
 from zoneinfo import ZoneInfo
 
-from pydantic import Field
+from pydantic import Field, computed_field
 
 from .. import config
 from ..config import settings
@@ -52,6 +52,8 @@ class Task(EBaseModel):
         "description",
         "flag",
         "hidden",
+        "points",
+        "solves",
     }
 
     task_id: uuid.UUID = Field(default_factory=uuid.uuid4)
@@ -146,6 +148,16 @@ class Task(EBaseModel):
 
     def short_desc(self) -> str:
         return f"task_id={self.task_id} task_name={self.task_name} hidden={self.hidden} points={self.scoring.points}"
+
+    @computed_field
+    @property
+    def points(self) -> int:
+        return self.scoring.points
+
+    @computed_field
+    @property
+    def solves(self) -> int:
+        return len(self.pwned_by)
 
 
 class TaskForm(EBaseModel):

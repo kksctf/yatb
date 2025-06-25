@@ -15,8 +15,9 @@ class DefaultTokenError(ValueError):
 
 class Settings(BaseSettings):
     DEBUG: bool = False
-    PROFILING: bool = False
     TESTING: bool = False
+
+    PROFILING: bool = False
 
     TOKEN_PATH: str = "/api/users/login"
 

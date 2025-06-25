@@ -63,12 +63,13 @@ class SimpleAuth(AuthBase):
         def check_valid(self) -> bool:
             if settings.DEBUG:
                 return True
+
             if (
                 len(self.internal.username) < SimpleAuth.auth_settings.MIN_USERNAME_LEN
                 or len(self.internal.username) > SimpleAuth.auth_settings.MAX_USERNAME_LEN
             ):
                 return False
-            if len(self.internal.password) < SimpleAuth.auth_settings.MIN_PASSWORD_LEN:
+            if len(self.internal.password) < SimpleAuth.auth_settings.MIN_PASSWORD_LEN:  # noqa: SIM103
                 return False
             return True
 

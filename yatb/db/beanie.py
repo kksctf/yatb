@@ -13,32 +13,19 @@ from pydantic import PlainSerializer
 
 from .. import app
 from ..config import settings
-from ..schema import EBaseModel, Task, TaskForm, User, auth
-from ..schema.ebasemodel import FilterFieldsType
+from ..schema import EBaseModelV2, Task, TaskForm, User, auth
 from ..utils.log_helper import get_logger
 
 logger = get_logger("db.beanie")
 
-_T = TypeVar("_T", bound=EBaseModel)
-_TT = TypeVar("_TT", bound=EBaseModel)
+_T = TypeVar("_T", bound=EBaseModelV2)
+_TT = TypeVar("_TT", bound=EBaseModelV2)
 
 # SER_UUID = PlainSerializer(lambda x: bson.Binary.from_uuid(x), return_type=bson.Binary, when_used="json")
 # SER_UUID = PlainSerializer(lambda x: str, return_type=str, when_used="json")
 
 
-class DocumentEx(Document, EBaseModel, Generic[_T]):
-    @final
-    @classmethod
-    def build_model(
-        cls: type[Self],
-        include: FilterFieldsType,
-        exclude: FilterFieldsType,
-        name: str = "sub",
-        *,
-        public: bool = True,
-    ) -> type[Self]:
-        return cls
-
+class DocumentEx(Document, EBaseModelV2, Generic[_T]):
     @classmethod
     def make_db_model(cls: type[Self], base: _T) -> Self:
         return cls.model_validate(base, from_attributes=True)
@@ -137,7 +124,7 @@ class TaskDB(DocumentEx[Task], Task):
 class UserDB(DocumentEx[User], User):
     # solved_tasks: dict[Annotated[uuid.UUID, SER_UUID], datetime.datetime] = {}
 
-    class ScoreboardProjection(EBaseModel):
+    class ScoreboardProjection(EBaseModelV2):
         user_id: uuid.UUID
         username: str
         score: int

@@ -24,7 +24,7 @@ async def api_tasks_get(user: auth.CURR_USER_SAFE) -> list[schema.Task.public_mo
     return list(tasks)
 
 
-class BRMessage(schema.EBaseModel):
+class BRMessage(schema.EBaseModelV2):
     task_name: str
     user_name: str
     points: int

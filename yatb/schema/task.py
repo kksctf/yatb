@@ -3,13 +3,13 @@ import uuid
 from typing import Annotated, ClassVar
 from zoneinfo import ZoneInfo
 
-from pydantic import Field, computed_field
+from pydantic import computed_field
 
 from .. import config
 from ..config import settings
 from ..utils import md
 from ..utils.log_helper import get_logger
-from .ebasemodel import EBaseModel
+from .ebasemodelv2 import EBaseModelV2, Field, PresentationLevel
 from .flags import DynamicKKSFlag, Flag, StaticFlag
 from .scoring import DynamicKKSScoring, Scoring, StaticScoring
 from .user import User
@@ -38,7 +38,7 @@ FlagUnion = Annotated[
 ]
 
 
-class Task(EBaseModel):
+class Task(EBaseModelV2):
     __public_fields__: ClassVar = {
         "task_id",
         "task_name",
@@ -56,7 +56,7 @@ class Task(EBaseModel):
         "solves",
     }
 
-    task_id: uuid.UUID = Field(default_factory=uuid.uuid4)
+    task_id: uuid.UUID = Field(default_factory=uuid.uuid4, level=PresentationLevel.public)
 
     task_name: str
     category: str
@@ -160,7 +160,7 @@ class Task(EBaseModel):
         return len(self.pwned_by)
 
 
-class TaskForm(EBaseModel):
+class TaskForm(EBaseModelV2):
     task_name: str
     category: str
     scoring: ScoringUnion

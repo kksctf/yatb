@@ -44,12 +44,12 @@ def origin_is_union(tp: type[Any] | None) -> bool:
 
 
 class PresentationLevel(Enum):
-    all = auto()
+    public = auto()
     admin = auto()
     private = auto()
 
     def is_visible(self, target: Self) -> bool:
-        if self == self.all:
+        if self == self.public:
             return True
 
         if self == self.admin and target in (self.admin, self.private):
@@ -323,17 +323,24 @@ MODELS_CACHE: dict[tuple, type[RawBaseModel]] = {}  # pyright: ignore[reportGene
 
 
 class EBaseModelV2(RawBaseModel):
-    _model_all: type[RawBaseModel]
-    _model_admin: type[RawBaseModel]
+    _model_public: ClassVar[type[RawBaseModel]]
+    _model_admin: ClassVar[type[RawBaseModel]]
+
+    public_model: ClassVar[type[RawBaseModel]]
+    admin_model: ClassVar[type[RawBaseModel]]
 
     @classmethod
     def __pydantic_init_subclass__(cls, **kwargs) -> None:
         super().__pydantic_init_subclass__(**kwargs)
-        cls._model_all = cls.build_model(PresentationLevel.all)
-        cls._model_admin = cls.build_model(PresentationLevel.admin)
+
+        cls._model_public = cls._create_leveled_model(PresentationLevel.public)
+        cls._model_admin = cls._create_leveled_model(PresentationLevel.admin)
+
+        cls.public_model = cls._create_leveled_model(PresentationLevel.public)
+        cls.admin_model = cls._create_leveled_model(PresentationLevel.admin)
 
     @classmethod
-    def build_model(cls, level: PresentationLevel) -> type[RawBaseModel]:
+    def _create_leveled_model(cls, level: PresentationLevel) -> type[RawBaseModel]:
         cache_key = (cls.__module__, cls.__qualname__, level)
 
         if model := MODELS_CACHE.get(cache_key):
@@ -350,6 +357,10 @@ class EBaseModelV2(RawBaseModel):
                 logger.error(f"WTF broken field {cls.__qualname__}: {field_name}, {field = }")
                 continue
 
+            if not field.level or not isinstance(field.level, PresentationLevel):
+                logger.error(f"WTF field with strange level {cls.__qualname__}: {field_name}, {field = }")
+                continue
+
             if not field.level.is_visible(level):
                 continue
 
@@ -357,7 +368,7 @@ class EBaseModelV2(RawBaseModel):
                 new_union_base: list[Any] = []
                 for union_member in get_args(annotation):
                     if issubclass(union_member, EBaseModelV2):
-                        new_union_base.append(union_member.build_model(level))
+                        new_union_base.append(union_member._create_leveled_model(level))
                     else:
                         new_union_base.append(union_member)
 
@@ -373,7 +384,7 @@ class EBaseModelV2(RawBaseModel):
                     ),
                 )
             elif isinstance(annotation, type) and issubclass(annotation, EBaseModelV2):
-                new_field_cls = annotation.build_model(level)
+                new_field_cls = annotation._create_leveled_model(level)
                 new_fields[field_name] = (
                     new_field_cls,
                     FieldInfo.merge_field_infos(

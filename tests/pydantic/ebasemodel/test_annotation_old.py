@@ -1,0 +1,33 @@
+from collections.abc import Callable
+from typing import Annotated, Union, get_args
+
+from pydantic import BaseModel
+from pydantic import Field as RawField
+
+from yatb.ebasemodelv2 import EBaseModelV2, ExtraMeta, Field, PresentationLevel
+
+PublicInt = Annotated[int, Field(ExtraMeta(PresentationLevel.public), ...)]
+AdminInt = Annotated[int, Field(ExtraMeta(PresentationLevel.admin), ...)]
+PrivateInt = Annotated[int, Field(ExtraMeta(PresentationLevel.private), ...)]
+
+
+class SimpleClass(EBaseModelV2):
+    public_field: PublicInt
+    admin_field: AdminInt
+    private_field: PrivateInt
+
+
+def test_simple_annotation_old_public():
+    model = SimpleClass._model_public
+
+    assert "public_field" in model.model_fields
+    assert "admin_field" not in model.model_fields
+    assert "private_field" not in model.model_fields
+
+
+def test_simple_annotation_old_admin():
+    model = SimpleClass._model_admin
+
+    assert "public_field" in model.model_fields
+    assert "admin_field" in model.model_fields
+    assert "private_field" not in model.model_fields

@@ -2,13 +2,13 @@ from typing import Union, get_args
 
 from pydantic import BaseModel
 
-from yatb.schema.ebasemodelv2 import EBaseModelV2, Field, PresentationLevel
+from yatb.ebasemodelv2 import EBaseModelV2, Field, PresentationLevel, ExtraMeta
 
 
 class SimpleClass(EBaseModelV2):
-    public_field: int = Field(level=PresentationLevel.public)
-    admin_field: int = Field(level=PresentationLevel.admin)
-    private_field: int = Field(level=PresentationLevel.private)
+    public_field: int = Field(ExtraMeta(PresentationLevel.public), ...)
+    admin_field: int = Field(ExtraMeta(PresentationLevel.admin), ...)
+    private_field: int = Field(ExtraMeta(PresentationLevel.private), ...)
 
 
 def test_simple_class_public():
@@ -25,4 +25,3 @@ def test_simple_class_admin():
     assert "public_field" in model.model_fields
     assert "admin_field" in model.model_fields
     assert "private_field" not in model.model_fields
-

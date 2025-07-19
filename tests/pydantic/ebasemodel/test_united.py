@@ -2,13 +2,13 @@ from typing import Union, get_args
 
 from pydantic import BaseModel
 
-from yatb.schema.ebasemodelv2 import EBaseModelV2, Field, PresentationLevel
+from yatb.ebasemodelv2 import EBaseModelV2, Field, ExtraMeta, PresentationLevel
 
 
 class SimpleUnitedClass(EBaseModelV2):
-    public_united: int | str = Field(level=PresentationLevel.public)
-    admin_united: int | str = Field(level=PresentationLevel.admin)
-    private_united: int | str = Field(level=PresentationLevel.private)
+    public_united: int | str = Field(ExtraMeta(PresentationLevel.public), ...)
+    admin_united: int | str = Field(ExtraMeta(PresentationLevel.admin), ...)
+    private_united: int | str = Field(ExtraMeta(PresentationLevel.private), ...)
 
 
 def test_simple_united_class_all():
@@ -27,18 +27,18 @@ def test_simple_united_class_admin():
 
 class UnitedClass(EBaseModelV2):
     class NestedA(EBaseModelV2):
-        public_field_a: int = Field(level=PresentationLevel.public)
-        admin_field_a: int = Field(level=PresentationLevel.admin)
-        private_field_a: int = Field(level=PresentationLevel.private)
+        public_field_a: int = Field(ExtraMeta(PresentationLevel.public), ...)
+        admin_field_a: int = Field(ExtraMeta(PresentationLevel.admin), ...)
+        private_field_a: int = Field(ExtraMeta(PresentationLevel.private), ...)
 
     class NestedB(EBaseModelV2):
-        public_field_b: int = Field(level=PresentationLevel.public)
-        admin_field_b: int = Field(level=PresentationLevel.admin)
-        private_field_b: int = Field(level=PresentationLevel.private)
+        public_field_b: int = Field(ExtraMeta(PresentationLevel.public), ...)
+        admin_field_b: int = Field(ExtraMeta(PresentationLevel.admin), ...)
+        private_field_b: int = Field(ExtraMeta(PresentationLevel.private), ...)
 
-    public_united: NestedA | NestedB = Field(level=PresentationLevel.public)
-    admin_united: NestedA | NestedB = Field(level=PresentationLevel.admin)
-    private_united: NestedA | NestedB = Field(level=PresentationLevel.private)
+    public_united: NestedA | NestedB = Field(ExtraMeta(PresentationLevel.public), ...)
+    admin_united: NestedA | NestedB = Field(ExtraMeta(PresentationLevel.admin), ...)
+    private_united: NestedA | NestedB = Field(ExtraMeta(PresentationLevel.private), ...)
 
 
 def test_united_class_all():

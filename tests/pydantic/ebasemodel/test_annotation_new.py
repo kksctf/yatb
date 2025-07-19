@@ -1,12 +1,14 @@
+from collections.abc import Callable
 from typing import Annotated, Union, get_args
 
 from pydantic import BaseModel
+from pydantic import Field as RawField
 
-from yatb.schema.ebasemodelv2 import EBaseModelV2, Field, PresentationLevel
+from yatb.ebasemodelv2 import EBaseModelV2, ExtraMeta, Field, PresentationLevel
 
-type PublicInt = Annotated[int, Field(level=PresentationLevel.public)]
-type AdminInt = Annotated[int, Field(level=PresentationLevel.admin)]
-type PrivateInt = Annotated[int, Field(level=PresentationLevel.private)]
+type PublicInt = Annotated[int, Field(ExtraMeta(PresentationLevel.public), ...)]
+type AdminInt = Annotated[int, Field(ExtraMeta(PresentationLevel.admin), ...)]
+type PrivateInt = Annotated[int, Field(ExtraMeta(PresentationLevel.private), ...)]
 
 
 class SimpleClass(EBaseModelV2):
@@ -15,7 +17,7 @@ class SimpleClass(EBaseModelV2):
     private_field: PrivateInt
 
 
-def test_simple_annotation_public():
+def test_simple_annotation_new_public():
     model = SimpleClass._model_public
 
     assert "public_field" in model.model_fields
@@ -23,7 +25,7 @@ def test_simple_annotation_public():
     assert "private_field" not in model.model_fields
 
 
-def test_simple_annotation_admin():
+def test_simple_annotation_new_admin():
     model = SimpleClass._model_admin
 
     assert "public_field" in model.model_fields

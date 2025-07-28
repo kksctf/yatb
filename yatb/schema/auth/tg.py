@@ -10,7 +10,7 @@ from pydantic_settings import SettingsConfigDict
 
 from ...ebasemodelv2.types import Admin, Public
 from ...utils.log_helper import get_logger
-from .auth_base import AuthBase
+from .base import AuthBase
 
 logger = get_logger("schema.auth")
 

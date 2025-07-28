@@ -12,7 +12,7 @@ from ...config import settings
 from ...ebasemodelv2 import EBaseModelV2
 from ...ebasemodelv2.types import Admin, Private, Public
 from ...utils.log_helper import get_logger
-from .auth_base import AuthBase
+from .base import AuthBase
 
 logger = get_logger("schema.auth")
 

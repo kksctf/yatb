@@ -29,7 +29,7 @@ async def check_for_existing_model(
 
 def generic_handler_generator(cls: type[schema.auth.AuthBase]) -> Callable:
     """
-    This is a little crazy "generic generator" for handling universal auth way.
+    A little crazy "generic generator" for handling universal auth way.
     Should work for most of possible authentification ways.
     """
 

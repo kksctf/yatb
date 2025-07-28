@@ -1,14 +1,10 @@
 from pydantic import BaseModel
 
-from ..ebasemodelv2 import EBaseModelV2
-from ..utils.log_helper import get_logger
 from .auth import AuthBase, CTFTimeOAuth, OAuth, SimpleAuth, TelegramAuth
 from .flags import DynamicKKSFlag, Flag, StaticFlag
 from .scoring import DynamicKKSScoring, Scoring, StaticScoring
 from .task import FlagUnion, ScoringUnion, Task, TaskForm
 from .user import User
-
-logger = get_logger("schema")
 
 
 class FlagForm(BaseModel):

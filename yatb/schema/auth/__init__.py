@@ -2,9 +2,10 @@ from typing import Annotated, TypeAlias, Union
 
 from pydantic import Field
 
-from ...config import settings
-from ...utils.log_helper import get_logger
-from .auth_base import AuthBase
+from yatb.config import settings
+from yatb.utils.log_helper import get_logger
+
+from .base import AuthBase
 from .oauth import CTFTimeOAuth, DiscordOAuth, GithubOAuth, OAuth
 from .simple import SimpleAuth
 from .tg import TelegramAuth
@@ -13,13 +14,13 @@ from .token_auth import TokenAuth
 logger = get_logger("schema.auth")
 
 ENABLED_AUTH_WAYS: list[type[AuthBase]] = [
-    TokenAuth,
+    TokenAuth,  # token auth - always enabled
 ]
 
 for auth_way in settings.ENABLED_AUTH_WAYS:
     try:
         ENABLED_AUTH_WAYS.append(globals()[auth_way])
-    except KeyError as ex:
+    except KeyError as ex:  # noqa: PERF203 # it's okay
         logger.critical(f"{auth_way} not found")
         raise Exception("death") from ex  # noqa: TRY002
 

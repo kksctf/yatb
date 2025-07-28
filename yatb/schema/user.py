@@ -8,7 +8,7 @@ from ..ebasemodelv2 import Admin, EBaseModelV2, Private, Public
 from ..ebasemodelv2 import PresentationLevel as P
 from ..utils.log_helper import get_logger
 from .auth import ANNOTATED_TYPING_AUTH
-from .auth.auth_base import AuthBase
+from .auth.base import AuthBase
 
 logger = get_logger("schema.user")
 

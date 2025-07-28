@@ -2,7 +2,7 @@ import uuid
 from collections.abc import Iterable, Sequence
 from typing import TypeVar
 
-from fastapi import APIRouter, Depends, HTTPException, Request, Response, status
+from fastapi import APIRouter, HTTPException, Request, Response, status
 
 from yatb import auth, schema
 from yatb.config import settings
@@ -43,7 +43,7 @@ async def api_scoreboard_get_internal() -> Sequence[schema.User]:
 
 
 async def api_scoreboard_get_internal_shrinked() -> Sequence[UserDB.ScoreboardProjection]:
-    users = await UserDB.get_all_projected(UserDB.ScoreboardProjection)
+    users = await UserDB.get_all_projected(UserDB.ScoreboardProjection)  # pyright: ignore[reportArgumentType] # FIXME: shit
 
     return filter_scoreboard(users.values())
 

@@ -3,19 +3,18 @@
 
 import datetime
 import uuid
-from typing import Annotated, ClassVar
+from typing import Annotated
 from zoneinfo import ZoneInfo
 
 from pydantic import BaseModel, Field, computed_field
 
 from .. import config
 from ..config import settings
-from ..ebasemodelv2 import Admin, EBaseModelV2, Private, Public
-from ..ebasemodelv2 import PresentationLevel as P
+from ..ebasemodelv2 import Admin, EBaseModelV2, Public
 from ..utils import md
 from ..utils.log_helper import get_logger
-from .flags import DynamicKKSFlag, Flag, StaticFlag
-from .scoring import DynamicKKSScoring, Scoring, StaticScoring
+from .flags import DynamicKKSFlag, StaticFlag
+from .scoring import DynamicKKSScoring, StaticScoring
 from .user import User
 
 logger = get_logger("schema.task")

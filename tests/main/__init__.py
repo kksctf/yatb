@@ -35,7 +35,7 @@ class ClientExRaw(TestClient):
             json=LoginForm(username=username, password=password).model_dump(mode="json"),
         )
 
-    def create_task_raw(  # noqa: PLR0913
+    def create_task_raw(
         self,
         task_name: str,
         category: str,
@@ -86,7 +86,7 @@ class ClientEx(ClientExRaw):
     #     resp.raise_for_status()
     #     return schema.User.public_model().model_validate(resp.json())
 
-    def create_task(  # noqa: PLR0913
+    def create_task(
         self,
         task_name: str,
         category: str,
@@ -118,8 +118,8 @@ class ClientEx(ClientExRaw):
         return schema.User.public_model.model_validate(resp.json())
 
 
-@pytest.fixture()
-def client(request):
+@pytest.fixture
+def client() -> typing.Generator[ClientEx, typing.Any, None]:
     print("Client init")
     client = ClientEx(app).__enter__()
 
@@ -136,7 +136,3 @@ def enable_debug() -> typing.Generator[None, typing.Any, None]:
         yield
     finally:
         settings.DEBUG = False
-
-
-# from . import test_auth  # noqa
-# from . import test_main  # noqa

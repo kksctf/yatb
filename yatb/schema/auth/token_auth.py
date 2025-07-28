@@ -1,14 +1,8 @@
-import hashlib
-import hmac
-import os
 from collections.abc import Callable
 from typing import ClassVar, Hashable, Literal, Self
 
-from fastapi import HTTPException, Request, Response, status
-from pydantic_settings import SettingsConfigDict
+from fastapi import Request, Response
 
-from ...config import settings
-from ...ebasemodelv2 import EBaseModelV2
 from ...ebasemodelv2.types import Admin, Public
 from ...utils.log_helper import get_logger
 from .base import AuthBase

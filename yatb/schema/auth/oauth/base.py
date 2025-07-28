@@ -5,10 +5,10 @@ import aiohttp
 from fastapi import HTTPException, Query, Request, Response, status
 from pydantic_settings import SettingsConfigDict
 
-from yatb.ebasemodelv2 import Admin, EBaseModelV2, Private, Public
+from yatb.ebasemodelv2 import Public
 from yatb.utils.log_helper import get_logger
 
-from ..base import AuthBase, RouterParams
+from ..base import AuthBase
 
 logger = get_logger("schema.auth.oauth")
 

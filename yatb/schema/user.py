@@ -1,11 +1,10 @@
 import datetime
 import uuid
-from typing import Annotated, ClassVar, Literal, Self
+from typing import Literal, Self
 
 from pydantic import Field, model_validator
 
-from ..ebasemodelv2 import Admin, EBaseModelV2, Private, Public
-from ..ebasemodelv2 import PresentationLevel as P
+from ..ebasemodelv2 import Admin, EBaseModelV2, Public
 from ..utils.log_helper import get_logger
 from .auth import ANNOTATED_TYPING_AUTH
 from .auth.base import AuthBase

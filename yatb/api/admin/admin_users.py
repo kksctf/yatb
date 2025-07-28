@@ -1,15 +1,13 @@
 import uuid
 from typing import Annotated, Mapping
 
-from fastapi import APIRouter, Cookie, Depends, FastAPI, Header, HTTPException, Query, Request, Response, status
+from fastapi import Depends, HTTPException, status
 from pydantic import BaseModel
 
-from yatb import auth, schema
-from yatb.config import settings
-from yatb.db import TaskDB, UserDB
-from yatb.utils.log_helper import get_logger
+from yatb import schema
+from yatb.db import UserDB
 
-from . import CURR_ADMIN, logger, router
+from . import CURR_ADMIN, router
 
 
 async def api_admin_users_internal() -> Mapping[uuid.UUID, schema.User]:

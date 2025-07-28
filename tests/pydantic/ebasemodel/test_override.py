@@ -1,8 +1,5 @@
-from collections.abc import Callable
-from typing import Annotated, Union, get_args
+from typing import Annotated
 
-from pydantic import BaseModel
-from pydantic import Field as RawField
 
 from yatb.ebasemodelv2 import EBaseModelV2, PresentationLevel
 

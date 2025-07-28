@@ -1,5 +1,5 @@
 from enum import Enum, auto
-from typing import Annotated, Self
+from typing import Self
 
 
 class PresentationLevel(Enum):

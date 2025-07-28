@@ -1,11 +1,11 @@
 from collections.abc import Callable, Hashable
-from typing import ClassVar, Literal, Self, TypeAlias
+from typing import ClassVar, Literal, Self
 
 from fastapi import Request, Response
 from pydantic import BaseModel
 from pydantic_settings import BaseSettings, SettingsConfigDict
 
-from yatb.ebasemodelv2 import Admin, EBaseModelV2, Private, Public
+from yatb.ebasemodelv2 import EBaseModelV2, Public
 
 type RouterParams = dict[str, str | object]
 

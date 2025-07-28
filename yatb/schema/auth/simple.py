@@ -9,7 +9,6 @@ from pydantic import BaseModel
 from pydantic_settings import SettingsConfigDict
 
 from ...config import settings
-from ...ebasemodelv2 import EBaseModelV2
 from ...ebasemodelv2.types import Admin, Private, Public
 from ...utils.log_helper import get_logger
 from .base import AuthBase

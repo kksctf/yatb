@@ -1,8 +1,6 @@
 from threading import Lock
 import pickle
-from typing import Callable
 from prometheus_client.metrics import MetricWrapperBase
-from prometheus_fastapi_instrumentator.metrics import Info
 from prometheus_client import Counter, Gauge
 
 # some flag statistic

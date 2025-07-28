@@ -1,15 +1,14 @@
 import datetime
 import uuid
 from collections.abc import Hashable, Mapping
-from typing import Annotated, Any, ClassVar, Generic, Literal, Self, TypeVar, final
+from typing import Any, ClassVar, Literal, Self
 
-import bson
 import pymongo
 from beanie import BulkWriter, Document, init_beanie
 from beanie.operators import And as _And
 from beanie.operators import Set
 from motor.motor_asyncio import AsyncIOMotorClient, AsyncIOMotorDatabase
-from pydantic import BaseModel, PlainSerializer
+from pydantic import BaseModel
 
 from .app import app
 from .config import settings

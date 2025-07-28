@@ -1,4 +1,4 @@
-from typing import Annotated, Literal
+from typing import Annotated
 
 from .level import PresentationLevel as P
 

@@ -1,4 +1,4 @@
-from typing import Annotated, Union, get_args
+from typing import Annotated
 
 from pydantic import BaseModel
 

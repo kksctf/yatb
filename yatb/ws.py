@@ -21,7 +21,7 @@ class ConnectionManager:
         for connection in self.active_connections:
             await connection.send_text(message)
 
-    async def broadcast_json(self, data: Any, mode: str = "text") -> None:
+    async def broadcast_json(self, data: Any, mode: str = "text") -> None:  # noqa: ANN401
         for connection in self.active_connections:
             await connection.send_json(data=data, mode=mode)
 

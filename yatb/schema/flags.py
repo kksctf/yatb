@@ -1,10 +1,9 @@
 import binascii
 import hmac
-from typing import Annotated, ClassVar, Literal
+from typing import Literal
 
 from ..config import settings
-from ..ebasemodelv2 import Admin, EBaseModelV2, Private, Public
-from ..ebasemodelv2 import PresentationLevel as P
+from ..ebasemodelv2 import Admin, EBaseModelV2, Public
 from .user import User
 
 

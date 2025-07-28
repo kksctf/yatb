@@ -1,5 +1,5 @@
 import markdown
-from typing import Dict, Optional
+import markdown.treeprocessors
 
 
 class ClassAdderTreeprocessor(markdown.treeprocessors.Treeprocessor):
@@ -32,12 +32,12 @@ class ClassAdderExtension(markdown.Extension):
         for key, value in kwargs.items():
             self.setConfig(key, value)
 
-    def get_class_for_tag(self, tag) -> Optional[str]:
+    def get_class_for_tag(self, tag) -> str | None:
         if tag in self.getConfig("replace"):
             return self.getConfig("replace")[tag]
         return None
 
-    def extendMarkdown(self, md, md_globals):
+    def extendMarkdown(self, md):
         treeprocessor = ClassAdderTreeprocessor(md)
         treeprocessor.set_config(self)
         md.treeprocessors.register(treeprocessor, "class-ext", 0)
@@ -67,12 +67,12 @@ class AttributeExtension(markdown.Extension):
         for key, value in kwargs.items():
             self.setConfig(key, value)
 
-    def get_attrs_for_tag(self, tag) -> Optional[str]:
+    def get_attrs_for_tag(self, tag) -> str | None:
         if tag in self.getConfig("attrs"):
             return self.getConfig("attrs")[tag]
         return None
 
-    def extendMarkdown(self, md, md_globals):
+    def extendMarkdown(self, md):
         treeprocessor = AttributeTreeprocessor(md)
         treeprocessor.set_config(self)
         md.treeprocessors.register(treeprocessor, "attrib-ext", 0)
@@ -82,6 +82,6 @@ class AttributeExtension(markdown.Extension):
 def markdownCSS(txt, config, attrs_config={}):
     ext = ClassAdderExtension(replace=config)
     ext_attrs = AttributeExtension(attrs=attrs_config)
-    md = markdown.Markdown(extensions=[ext, ext_attrs], safe_mode="escape")
+    md = markdown.Markdown(extensions=[ext, ext_attrs], safe_mode="escape")  # pyright: ignore[reportCallIssue] # FIXME: Wtf
     html = md.convert(txt)
     return html

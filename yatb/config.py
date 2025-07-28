@@ -19,8 +19,6 @@ class Settings(BaseSettings):
 
     PROFILING: bool = False
 
-    TOKEN_PATH: str = "/api/users/login"
-
     # bot token for notifications
     BOT_TOKEN: str | None = None
     CHAT_ID: int | None = None

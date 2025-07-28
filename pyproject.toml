@@ -124,3 +124,6 @@ addopts = "--cov=./yatb --cov-report=xml:coverage.xml -cov-config=.coveragerc"
 env = ["DEBUG=0", "ENABLE_METRICS=0", "TESTING=1", "DB_NAME=yatb_unittesting"]
 filterwarnings = ["ignore::DeprecationWarning"]
 testpaths = ["tests"]
+
+[tool.pyright]
+reportIncompatibleVariableOverride = "information"

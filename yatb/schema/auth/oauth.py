@@ -5,8 +5,8 @@ import aiohttp
 from fastapi import HTTPException, Query, Request, Response, status
 from pydantic_settings import SettingsConfigDict
 
+from ...ebasemodelv2 import Admin, EBaseModelV2, Private, Public
 from ...utils.log_helper import get_logger
-from ..ebasemodel import EBaseModel
 from .auth_base import AuthBase, RouterParams
 
 logger = get_logger("schema.auth")
@@ -14,7 +14,7 @@ logger = get_logger("schema.auth")
 
 class OAuth(AuthBase):
     class AuthModel(AuthBase.AuthModel):
-        classtype: Literal["OAuth"] = "OAuth"
+        classtype: Public[Literal["OAuth"]] = "OAuth"
 
     class Form(AuthBase.Form):
         code: str = Query(...)
@@ -81,26 +81,18 @@ class OAuth(AuthBase):
         )
 
 
-class CTFTimeOAuth_Team(EBaseModel):
-    __admin_only_fields__: ClassVar = {
-        "id",
-        "name",
-        "country",
-        "logo",
-    }
-
-    id: int
-    name: str
-    country: str | None
-    logo: str | None
+class CTFTimeOAuthTeam(EBaseModelV2):
+    id: Admin[int]
+    name: Admin[str]
+    country: Admin[str | None]
+    logo: Admin[str | None]
 
 
 class CTFTimeOAuth(OAuth):
     class AuthModel(OAuth.AuthModel):
-        __admin_only_fields__: ClassVar = {"team"}
-        classtype: Literal["CTFTimeOAuth"] = "CTFTimeOAuth"
+        classtype: Public[Literal["CTFTimeOAuth"]] = "CTFTimeOAuth"
 
-        team: CTFTimeOAuth_Team
+        team: Admin[CTFTimeOAuthTeam]
 
         def is_admin(self) -> bool:
             return self.team.id in CTFTimeOAuth.auth_settings.ADMIN_IDS
@@ -148,22 +140,14 @@ class CTFTimeOAuth(OAuth):
 
 class GithubOAuth(OAuth):
     class AuthModel(OAuth.AuthModel):
-        __admin_only_fields__: ClassVar = {
-            "id",
-            "login",
-            "avatar_url",
-            "name",
-            "email",
-            "url",
-        }
-        classtype: Literal["GithubOAuth"] = "GithubOAuth"
+        classtype: Public[Literal["GithubOAuth"]] = "GithubOAuth"
 
-        id: int
-        login: str
-        avatar_url: str
-        name: str | None
-        email: str | None
-        url: str
+        id: Admin[int]
+        login: Admin[str]
+        avatar_url: Admin[str]
+        name: Admin[str | None]
+        email: Admin[str | None]
+        url: Admin[str]
 
         def is_admin(self) -> bool:
             return self.id in GithubOAuth.auth_settings.ADMIN_IDS
@@ -208,16 +192,11 @@ class GithubOAuth(OAuth):
 
 class DiscordOAuth(OAuth):
     class AuthModel(OAuth.AuthModel):
-        __admin_only_fields__: ClassVar = {
-            "id",
-            "username",
-            "discriminator",
-        }
-        classtype: Literal["DiscordOAuth"] = "DiscordOAuth"
+        classtype: Public[Literal["DiscordOAuth"]] = "DiscordOAuth"
 
-        id: int
-        username: str
-        discriminator: str
+        id: Admin[int]
+        username: Admin[str]
+        discriminator: Admin[str]
 
         def is_admin(self) -> bool:
             return self.id in DiscordOAuth.auth_settings.ADMIN_IDS

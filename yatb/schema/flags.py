@@ -1,18 +1,17 @@
 import binascii
 import hmac
-from typing import ClassVar, Literal
+from typing import Annotated, ClassVar, Literal
 
 from ..config import settings
-from .ebasemodel import EBaseModel
+from ..ebasemodelv2 import Admin, EBaseModelV2, Private, Public
+from ..ebasemodelv2 import PresentationLevel as P
 from .user import User
 
 
-class Flag(EBaseModel):
-    __public_fields__: ClassVar = {"classtype"}
-    __admin_only_fields__: ClassVar = {"flag_base"}
+class Flag(EBaseModelV2):
+    classtype: Public[Literal["Flag"]] = "Flag"
 
-    classtype: Literal["Flag"] = "Flag"
-    flag_base: str = settings.FLAG_BASE
+    flag_base: Admin[str] = settings.FLAG_BASE
 
     def sanitization(self, user_flag: str) -> str:
         if self.flag_base + "{" in user_flag:
@@ -21,33 +20,30 @@ class Flag(EBaseModel):
             user_flag = user_flag[:-1]
         user_flag = self.flag_base + "{" + user_flag + "}"
 
-        return user_flag
+        return user_flag  # noqa: RET504
 
     def flag_value(self, user: User) -> str:
         return self.flag_base + "{test_flag}"
 
     def flag_checker(self, user_flag: str, user: User) -> bool:
-        if self.flag_value(user) == self.sanitization(user_flag):
+        if self.flag_value(user) == self.sanitization(user_flag):  # noqa: SIM103
             return True
-        else:
-            return False
+        return False
 
 
 class StaticFlag(Flag):
-    __admin_only_fields__: ClassVar = {"flag_base", "flag"}
+    classtype: Public[Literal["StaticFlag"]] = "StaticFlag"
 
-    classtype: Literal["StaticFlag"] = "StaticFlag"
-    flag: str
+    flag: Admin[str]
 
     def flag_value(self, user: User) -> str:
         return self.flag_base + "{" + self.flag + "}"
 
 
 class DynamicKKSFlag(Flag):
-    __admin_only_fields__: ClassVar = {"flag_base", "dynamic_flag_base"}
+    classtype: Public[Literal["DynamicKKSFlag"]] = "DynamicKKSFlag"
 
-    classtype: Literal["DynamicKKSFlag"] = "DynamicKKSFlag"
-    dynamic_flag_base: str
+    dynamic_flag_base: Admin[str]
 
     def flag_value(self, user: User) -> str:
         flag_part = "{" + self.dynamic_flag_base + "}" + f"{user.user_id}"

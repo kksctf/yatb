@@ -8,25 +8,25 @@ from fastapi import HTTPException, Request, Response, status
 from pydantic_settings import SettingsConfigDict
 
 from ...config import settings
+from ...ebasemodelv2 import EBaseModelV2
+from ...ebasemodelv2.types import Admin, Public
 from ...utils.log_helper import get_logger
-from ..ebasemodel import EBaseModel
 from .auth_base import AuthBase
 
 logger = get_logger("schema.auth")
 
 
-class TokenAuth:
+class TokenAuth(AuthBase):
     FAKE: bool = True
 
     class AuthModel(AuthBase.AuthModel):
-        __public_fields__ = {"classtype"}
         __admin_only_fields__: ClassVar = {
             "username",
         }
 
-        classtype: Literal["AuthBase"] = "AuthBase"
+        classtype: Public[Literal["AuthBase"]] = "AuthBase"
 
-        username: str
+        username: Admin[str]
 
         def is_admin(self) -> bool:
             return True
@@ -43,7 +43,7 @@ class TokenAuth:
 
     class Form(AuthBase.Form):
         async def populate(self, req: Request, resp: Response) -> "AuthBase.AuthModel":
-            raise Exception("No.")
+            raise Exception("No.")  # noqa: TRY002
 
     class AuthSettings(AuthBase.AuthSettings):
         pass

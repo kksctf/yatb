@@ -9,25 +9,22 @@ from beanie import BulkWriter, Document, init_beanie
 from beanie.operators import And as _And
 from beanie.operators import Set
 from motor.motor_asyncio import AsyncIOMotorClient, AsyncIOMotorDatabase
-from pydantic import PlainSerializer
+from pydantic import BaseModel, PlainSerializer
 
-from .. import app
+from ..app import app
 from ..config import settings
 from ..schema import EBaseModelV2, Task, TaskForm, User, auth
 from ..utils.log_helper import get_logger
 
 logger = get_logger("db.beanie")
 
-_T = TypeVar("_T", bound=EBaseModelV2)
-_TT = TypeVar("_TT", bound=EBaseModelV2)
-
 # SER_UUID = PlainSerializer(lambda x: bson.Binary.from_uuid(x), return_type=bson.Binary, when_used="json")
 # SER_UUID = PlainSerializer(lambda x: str, return_type=str, when_used="json")
 
 
-class DocumentEx(Document, EBaseModelV2, Generic[_T]):
+class DocumentEx[T: EBaseModelV2](Document):
     @classmethod
-    def make_db_model(cls: type[Self], base: _T) -> Self:
+    def make_db_model(cls: type[Self], base: T) -> Self:
         return cls.model_validate(base, from_attributes=True)
 
     def update_entry_raw(self, data: dict[str, Any]) -> None:
@@ -124,12 +121,12 @@ class TaskDB(DocumentEx[Task], Task):
 class UserDB(DocumentEx[User], User):
     # solved_tasks: dict[Annotated[uuid.UUID, SER_UUID], datetime.datetime] = {}
 
-    class ScoreboardProjection(EBaseModelV2):
+    class ScoreboardProjection(BaseModel):
         user_id: uuid.UUID
         username: str
         score: int
         solved_tasks: dict[uuid.UUID, datetime.datetime]
-        is_admin: bool
+        is_admin: bool  # TODO: wtf with rights and fields
 
         def get_last_solve_time(self) -> tuple[uuid.UUID, datetime.datetime] | tuple[Literal[""], datetime.datetime]:
             if len(self.solved_tasks) > 0:
@@ -264,7 +261,7 @@ class UserDB(DocumentEx[User], User):
         return {i.user_id: i for i in await cls.find_all().to_list()}
 
     @classmethod
-    async def get_all_projected(cls: type[Self], projection: type[_TT]) -> dict[uuid.UUID, _TT]:
+    async def get_all_projected[T: EBaseModelV2](cls: type[Self], projection: type[T]) -> dict[uuid.UUID, T]:
         return {i.user_id: i for i in await cls.find_all().project(projection).to_list()}  # type: ignore # FIXME: fix.
 
     @classmethod

@@ -5,11 +5,13 @@ from collections.abc import Callable
 from typing import ClassVar, Literal, Self
 
 from fastapi import HTTPException, Request, Response, status
+from pydantic import BaseModel
 from pydantic_settings import SettingsConfigDict
 
 from ...config import settings
+from ...ebasemodelv2 import EBaseModelV2
+from ...ebasemodelv2.types import Admin, Private, Public
 from ...utils.log_helper import get_logger
-from ..ebasemodel import EBaseModel
 from .auth_base import AuthBase
 
 logger = get_logger("schema.auth")
@@ -27,16 +29,10 @@ def check_password(salt: bytes, pw_hash: bytes, password: str) -> bool:
 
 class SimpleAuth(AuthBase):
     class AuthModel(AuthBase.AuthModel):
-        __admin_only_fields__: ClassVar = {
-            "username",
-        }
-        __private_fields__: ClassVar = {
-            "password_hash",
-        }
-        classtype: Literal["SimpleAuth"] = "SimpleAuth"
+        classtype: Public[Literal["SimpleAuth"]] = "SimpleAuth"
 
-        username: str
-        password_hash: tuple[bytes, bytes]
+        username: Admin[str]
+        password_hash: Private[tuple[bytes, bytes]]
 
         def is_admin(self) -> bool:
             if settings.DEBUG and self.username == SimpleAuth.auth_settings.DEBUG_USERNAME:
@@ -51,7 +47,7 @@ class SimpleAuth(AuthBase):
             return self.username
 
     class Form(AuthBase.Form):
-        class _Internal(EBaseModel):
+        class _Internal(BaseModel):
             username: str
             password: str
 

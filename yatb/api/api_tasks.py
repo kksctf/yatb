@@ -2,6 +2,7 @@ import uuid
 from datetime import UTC, datetime
 
 from fastapi import APIRouter, Depends, HTTPException, status
+from pydantic import BaseModel
 
 from .. import auth, schema
 from ..config import settings
@@ -24,7 +25,7 @@ async def api_tasks_get(user: auth.CURR_USER_SAFE) -> list[schema.Task.public_mo
     return list(tasks)
 
 
-class BRMessage(schema.EBaseModelV2):
+class BRMessage(BaseModel):
     task_name: str
     user_name: str
     points: int

@@ -1,48 +1,36 @@
 import datetime
 import uuid
-from typing import ClassVar, Literal, Self
+from typing import Annotated, ClassVar, Literal, Self
 
 from pydantic import Field, model_validator
 
+from ..ebasemodelv2 import Admin, EBaseModelV2, Private, Public
+from ..ebasemodelv2 import PresentationLevel as P
 from ..utils.log_helper import get_logger
 from .auth import ANNOTATED_TYPING_AUTH
 from .auth.auth_base import AuthBase
-from .ebasemodel import EBaseModel
 
 logger = get_logger("schema.user")
 
 
-class User(EBaseModel):
-    __public_fields__: ClassVar = {
-        "user_id",
-        "username",
-        "score",
-        "solved_tasks",
-        "affilation",
-        "country",
-        "profile_pic",
-    }
-    __admin_only_fields__: ClassVar = {
-        "is_admin",
-        "auth_source",
-    }
-    __private_fields__: ClassVar = set()
+class ExtraInfo(EBaseModelV2):
+    affilation: Public[str] = ""
+    country: Public[str] = ""
+    profile_pic: Public[str | None] = None
 
-    user_id: uuid.UUID = Field(default_factory=uuid.uuid4)
 
-    username: str = "unknown"
+class User(EBaseModelV2):
+    user_id: Public[uuid.UUID] = Field(default_factory=uuid.uuid4)
 
-    score: int = 0
+    username: Public[str] = "unknown"
 
-    solved_tasks: dict[uuid.UUID, datetime.datetime] = {}  # uuid or task :hm
-    is_admin: bool = False
+    score: Public[int] = 0
 
-    affilation: str = ""
-    country: str = ""
+    solved_tasks: Public[dict[uuid.UUID, datetime.datetime]] = {}  # noqa: RUF012
 
-    profile_pic: str | None = None
+    is_admin: Admin[bool] = False
 
-    auth_source: ANNOTATED_TYPING_AUTH  # type: ignore
+    auth_source: Admin[ANNOTATED_TYPING_AUTH]  # pyright: ignore[reportInvalidTypeForm]
 
     @property
     def au_s(self) -> AuthBase.AuthModel:  # WTF: dirty hack... ;(

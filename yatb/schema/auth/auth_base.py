@@ -2,20 +2,19 @@ from collections.abc import Callable, Hashable
 from typing import ClassVar, Literal, Self, TypeAlias
 
 from fastapi import Request, Response
+from pydantic import BaseModel
 from pydantic_settings import BaseSettings, SettingsConfigDict
 
-from ..ebasemodel import EBaseModel
+from ...ebasemodelv2 import Admin, EBaseModelV2, Private, Public
 
-RouterParams: TypeAlias = dict[str, str | object]
+type RouterParams = dict[str, str | object]
 
 
 class AuthBase:
     FAKE: bool = False
 
-    class AuthModel(EBaseModel):
-        __public_fields__ = {"classtype"}
-
-        classtype: Literal["AuthBase"] = "AuthBase"
+    class AuthModel(EBaseModelV2):
+        classtype: Public[Literal["AuthBase"]] = "AuthBase"
 
         def is_admin(self) -> bool:
             # raise NotImplementedError("AuthBase.is_admin not implemented")
@@ -37,7 +36,7 @@ class AuthBase:
             # raise NotImplementedError("AuthBase.generate_username not implemented")
             return "undefined"
 
-    class Form(EBaseModel):
+    class Form(BaseModel):
         async def populate(self, req: Request, resp: Response) -> "AuthBase.AuthModel":
             # raise NotImplementedError("AuthBase.Form.populate not implemented")
             return AuthBase.AuthModel()

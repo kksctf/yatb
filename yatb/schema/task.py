@@ -1,15 +1,19 @@
+# import pdb
+# pdb.set_trace()
+
 import datetime
 import uuid
 from typing import Annotated, ClassVar
 from zoneinfo import ZoneInfo
 
-from pydantic import computed_field
+from pydantic import BaseModel, Field, computed_field
 
 from .. import config
 from ..config import settings
+from ..ebasemodelv2 import Admin, EBaseModelV2, Private, Public
+from ..ebasemodelv2 import PresentationLevel as P
 from ..utils import md
 from ..utils.log_helper import get_logger
-from .ebasemodelv2 import EBaseModelV2, Field, PresentationLevel
 from .flags import DynamicKKSFlag, Flag, StaticFlag
 from .scoring import DynamicKKSScoring, Scoring, StaticScoring
 from .user import User
@@ -28,51 +32,44 @@ def template_format_time(date: datetime.datetime) -> str:  # from alb1or1x_shit.
     return "unknown"
 
 
-ScoringUnion = Annotated[
+type ScoringUnion = Annotated[
     StaticScoring | DynamicKKSScoring,
     Field(discriminator="classtype"),
 ]
-FlagUnion = Annotated[
+type FlagUnion = Annotated[
     StaticFlag | DynamicKKSFlag,
     Field(discriminator="classtype"),
 ]
 
 
 class Task(EBaseModelV2):
-    __public_fields__: ClassVar = {
-        "task_id",
-        "task_name",
-        "category",
-        "scoring",
-        "description_html",
-        "author",
-        "pwned_by",
-    }
-    __admin_only_fields__: ClassVar = {
-        "description",
-        "flag",
-        "hidden",
-        "points",
-        "solves",
-    }
+    task_id: Public[uuid.UUID] = Field(default_factory=uuid.uuid4)
 
-    task_id: uuid.UUID = Field(default_factory=uuid.uuid4, level=PresentationLevel.public)
+    task_name: Public[str]
+    category: Public[str]
 
-    task_name: str
-    category: str
+    scoring: Public[ScoringUnion]
 
-    scoring: ScoringUnion
+    description: Admin[str]
+    description_html: Public[str]
 
-    description: str
-    description_html: str
+    flag: Admin[FlagUnion]
 
-    flag: FlagUnion
+    pwned_by: Public[dict[uuid.UUID, datetime.datetime]] = {}  # noqa: RUF012
 
-    pwned_by: dict[uuid.UUID, datetime.datetime] = {}
+    hidden: Admin[bool] = True
 
-    hidden: bool = True
+    author: Public[str]
 
-    author: str
+    @computed_field
+    @property
+    def points(self) -> Public[int]:
+        return self.scoring.points
+
+    @computed_field
+    @property
+    def solves(self) -> Public[int]:
+        return len(self.pwned_by)
 
     # @computed_field
     @property
@@ -149,18 +146,8 @@ class Task(EBaseModelV2):
     def short_desc(self) -> str:
         return f"task_id={self.task_id} task_name={self.task_name} hidden={self.hidden} points={self.scoring.points}"
 
-    @computed_field
-    @property
-    def points(self) -> int:
-        return self.scoring.points
 
-    @computed_field
-    @property
-    def solves(self) -> int:
-        return len(self.pwned_by)
-
-
-class TaskForm(EBaseModelV2):
+class TaskForm(BaseModel):
     task_name: str
     category: str
     scoring: ScoringUnion

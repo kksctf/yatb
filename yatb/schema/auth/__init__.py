@@ -13,7 +13,7 @@ from .token_auth import TokenAuth
 logger = get_logger("schema.auth")
 
 ENABLED_AUTH_WAYS: list[type[AuthBase]] = [
-    TokenAuth,  # type: ignore # types wtf
+    TokenAuth,
 ]
 
 for auth_way in settings.ENABLED_AUTH_WAYS:
@@ -21,7 +21,7 @@ for auth_way in settings.ENABLED_AUTH_WAYS:
         ENABLED_AUTH_WAYS.append(globals()[auth_way])
     except KeyError as ex:
         logger.critical(f"{auth_way} not found")
-        raise Exception("death") from ex  # noqa: TRY002, EM101
+        raise Exception("death") from ex  # noqa: TRY002
 
 logger.info(f"Loaded next auth ways: {ENABLED_AUTH_WAYS}")
 

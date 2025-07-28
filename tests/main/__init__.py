@@ -7,7 +7,8 @@ import pytest
 from fastapi.testclient import TestClient
 from httpx import Response
 
-from yatb import app, schema
+from yatb import schema
+from yatb.app import app
 from yatb.config import settings
 from yatb.db.beanie import db
 

@@ -3,22 +3,18 @@ from typing import ClassVar, Literal
 
 from pydantic import computed_field
 
+from ..ebasemodelv2 import Admin, EBaseModelV2, Private, Public
 from ..utils.log_helper import get_logger
-from .ebasemodel import EBaseModel
 
 logger = get_logger("schema.scoring")
 
 
-class Scoring(EBaseModel):
-    __public_fields__: ClassVar = {
-        "classtype",
-        "points",
-    }
-    classtype: Literal["Scoring"] = "Scoring"
+class Scoring(EBaseModelV2):
+    classtype: Public[Literal["Scoring"]] = "Scoring"
 
     @computed_field
     @property
-    def points(self) -> int:
+    def points(self) -> Public[int]:
         return -1337
 
     def solve_task(self) -> bool:
@@ -30,19 +26,15 @@ class Scoring(EBaseModel):
     def reset(self) -> None:
         pass
 
-    # class Config:
-    #    extra = Extra.allow
-
 
 class StaticScoring(Scoring):
-    __admin_only_fields__: ClassVar = {"static_points"}
-    classtype: Literal["StaticScoring"] = "StaticScoring"
+    classtype: Public[Literal["StaticScoring"]] = "StaticScoring"
 
-    static_points: int
+    static_points: Admin[int]
 
     @computed_field
     @property
-    def points(self) -> int:
+    def points(self) -> Public[int]:
         return self.static_points
 
     def solve_task(self) -> bool:
@@ -50,17 +42,16 @@ class StaticScoring(Scoring):
 
 
 class DynamicKKSScoring(Scoring):
-    __admin_only_fields__: ClassVar = {"solves", "decay", "minimum", "maximum"}
-    classtype: Literal["DynamicKKSScoring"] = "DynamicKKSScoring"
+    classtype: Public[Literal["DynamicKKSScoring"]] = "DynamicKKSScoring"
 
-    solves: int = 0
-    decay: int = 50
-    minimum: int = 100
-    maximum: int = 1000
+    solves: Admin[int] = 0
+    decay: Admin[int] = 50
+    minimum: Admin[int] = 100
+    maximum: Admin[int] = 1000
 
     @computed_field
     @property
-    def points(self) -> int:
+    def points(self) -> Public[int]:
         if self.solves == 0:
             return self.maximum
         if self.solves >= self.decay:

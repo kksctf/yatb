@@ -114,7 +114,7 @@ def setup_loggers(
     return root_logger
 
 
-if settings.DEBUG:
+if settings.DEBUG or settings.TESTING:
     root_logger = setup_loggers(
         base_name=APP_NAME,
         modules=MODULES,

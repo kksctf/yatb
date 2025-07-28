@@ -8,6 +8,7 @@ from fastapi import HTTPException, Query, Request, Response, status
 from pydantic import field_validator, model_validator
 from pydantic_settings import SettingsConfigDict
 
+from ...ebasemodelv2.types import Admin, Public
 from ...utils.log_helper import get_logger
 from .auth_base import AuthBase
 
@@ -16,18 +17,12 @@ logger = get_logger("schema.auth")
 
 class TelegramAuth(AuthBase):
     class AuthModel(AuthBase.AuthModel):
-        __admin_only_fields__: ClassVar = {
-            "tg_id",
-            "tg_username",
-            "tg_first_name",
-            "tg_last_name",
-        }
-        classtype: Literal["TelegramAuth"] = "TelegramAuth"
+        classtype: Public[Literal["TelegramAuth"]] = "TelegramAuth"
 
-        tg_id: int
-        tg_username: str | None = None
-        tg_first_name: str
-        tg_last_name: str | None = None
+        tg_id: Admin[int]
+        tg_username: Admin[str | None] = None
+        tg_first_name: Admin[str]
+        tg_last_name: Admin[str | None] = None
 
         def is_admin(self) -> bool:
             is_admin: bool = False
@@ -128,8 +123,8 @@ class TelegramAuth(AuthBase):
     def generate_html(cls: type[Self], url_for: Callable) -> str:
         return f"""
         <script async src="https://telegram.org/js/telegram-widget.js?15"
-        data-telegram-login="{ cls.auth_settings.BOT_USERNAME }"
-        data-size="large" data-userpic="true" data-auth-url="{ url_for(cls.router_params["name"]) }"
+        data-telegram-login="{cls.auth_settings.BOT_USERNAME}"
+        data-size="large" data-userpic="true" data-auth-url="{url_for(cls.router_params["name"])}"
         data-request-access="write"></script>
         """
 

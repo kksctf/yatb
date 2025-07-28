@@ -17,7 +17,7 @@ from .ebasemodelv2 import EBaseModelV2
 from .schema import Task, TaskForm, User, auth
 from .utils.log_helper import get_logger
 
-logger = get_logger("db.beanie")
+logger = get_logger("db")
 
 # SER_UUID = PlainSerializer(lambda x: bson.Binary.from_uuid(x), return_type=bson.Binary, when_used="json")
 # SER_UUID = PlainSerializer(lambda x: str, return_type=str, when_used="json")

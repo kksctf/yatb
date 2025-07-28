@@ -109,7 +109,6 @@ ignore = [
     "EM101",  #   | ruff?                 |                                                                         # i care, but not this proj
     "EM102",  #   | ruff?                 | Exception must not use an f-string literal, assign to variable first    # i care, but not this proj
     "ERA001", #   | ruff?                 | commented out code                                                      # i know. and what?
-    "F401",   #   | pyflakes              | %r imported but unused                                                  # pylance cover it
     "TID252", #   | flake8-tidy-imports   | Relative imports are banned                                             # no.
     "TRY003", #   | ruff?                 | Avoid specifying long messages outside the exception class              # i care, but not this proj
     "G004",   #   | ruff?                 | Logging statement uses f-string                                         # i care, but not this proj
@@ -117,7 +116,9 @@ ignore = [
 
 [tool.ruff.lint.per-file-ignores]
 "**/{tests}/*" = ["S101", "INP001", "ANN201"]
+# пока не умеем в автоформат __all__, делаем так.
 
+"**/__init__.py" = ["F401"]
 
 [tool.pytest.ini_options]
 addopts = "--cov=./yatb --cov-report=xml:coverage.xml -cov-config=.coveragerc"
@@ -126,4 +127,7 @@ filterwarnings = ["ignore::DeprecationWarning"]
 testpaths = ["tests"]
 
 [tool.pyright]
+# classtype thing
 reportIncompatibleVariableOverride = "information"
+# return models
+reportInvalidTypeForm = "information"

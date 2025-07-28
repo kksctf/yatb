@@ -1,14 +1,12 @@
-from typing import Union, get_args
+from typing import Annotated
 
-from pydantic import BaseModel
-
-from yatb.ebasemodelv2 import EBaseModelV2, Field, PresentationLevel, ExtraMeta
+from yatb.ebasemodelv2 import EBaseModelV2, PresentationLevel
 
 
 class SimpleClass(EBaseModelV2):
-    public_field: int = Field(ExtraMeta(PresentationLevel.public), ...)
-    admin_field: int = Field(ExtraMeta(PresentationLevel.admin), ...)
-    private_field: int = Field(ExtraMeta(PresentationLevel.private), ...)
+    public_field: Annotated[int, PresentationLevel.public]
+    admin_field: Annotated[int, PresentationLevel.admin]
+    private_field: Annotated[int, PresentationLevel.private]
 
 
 def test_simple_class_public():

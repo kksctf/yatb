@@ -1,19 +1,23 @@
-from typing import Union, get_args
+from typing import Annotated, Union, get_args
 
 from pydantic import BaseModel
 
-from yatb.ebasemodelv2 import EBaseModelV2, ExtraMeta, Field, PresentationLevel
+from yatb.ebasemodelv2 import EBaseModelV2, PresentationLevel
+
+type PublicInt = Annotated[int, PresentationLevel.public]
+type AdminInt = Annotated[int, PresentationLevel.admin]
+type PrivateInt = Annotated[int, PresentationLevel.private]
 
 
 class NestedClass(EBaseModelV2):
     class Nested(EBaseModelV2):
-        public_field: int = Field(ExtraMeta(PresentationLevel.public), ...)
-        admin_field: int = Field(ExtraMeta(PresentationLevel.admin), ...)
-        private_field: int = Field(ExtraMeta(PresentationLevel.private), ...)
+        public_field: PublicInt
+        admin_field: AdminInt
+        private_field: PrivateInt
 
-    public_nested: Nested = Field(ExtraMeta(PresentationLevel.public), ...)
-    admin_nested: Nested = Field(ExtraMeta(PresentationLevel.admin), ...)
-    private_nested: Nested = Field(ExtraMeta(PresentationLevel.private), ...)
+    public_nested: Annotated[Nested, PresentationLevel.public]
+    admin_nested: Annotated[Nested, PresentationLevel.admin]
+    private_nested: Annotated[Nested, PresentationLevel.private]
 
 
 def test_nested_class_all():

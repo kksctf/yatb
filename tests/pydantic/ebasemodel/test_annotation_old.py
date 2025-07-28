@@ -1,14 +1,10 @@
-from collections.abc import Callable
-from typing import Annotated, Union, get_args
+from typing import Annotated
 
-from pydantic import BaseModel
-from pydantic import Field as RawField
+from yatb.ebasemodelv2 import EBaseModelV2, PresentationLevel
 
-from yatb.ebasemodelv2 import EBaseModelV2, ExtraMeta, Field, PresentationLevel
-
-PublicInt = Annotated[int, Field(ExtraMeta(PresentationLevel.public), ...)]
-AdminInt = Annotated[int, Field(ExtraMeta(PresentationLevel.admin), ...)]
-PrivateInt = Annotated[int, Field(ExtraMeta(PresentationLevel.private), ...)]
+PublicInt = Annotated[int, PresentationLevel.public]
+AdminInt = Annotated[int, PresentationLevel.admin]
+PrivateInt = Annotated[int, PresentationLevel.private]
 
 
 class SimpleClass(EBaseModelV2):

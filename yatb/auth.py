@@ -10,7 +10,7 @@ from jose import JWTError, jwt
 
 from . import schema
 from .config import settings
-from .db.beanie import UserDB
+from .db import UserDB
 from .utils.log_helper import get_logger
 
 logger = get_logger("auth")

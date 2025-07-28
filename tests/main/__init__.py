@@ -10,7 +10,7 @@ from httpx import Response
 from yatb import schema
 from yatb.app import app
 from yatb.config import settings
-from yatb.db.beanie import db
+from yatb.db import db
 
 settings.DB_NAME = "yatb_testing"
 

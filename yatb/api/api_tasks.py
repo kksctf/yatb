@@ -4,11 +4,12 @@ from datetime import UTC, datetime
 from fastapi import APIRouter, Depends, HTTPException, status
 from pydantic import BaseModel
 
-from .. import auth, schema
-from ..config import settings
-from ..db.beanie import TaskDB
-from ..utils import metrics, tg
-from ..ws import ws_manager
+from yatb import auth, schema
+from yatb.config import settings
+from yatb.db import TaskDB
+from yatb.utils import metrics, tg
+from yatb.ws import ws_manager
+
 from . import logger
 
 router = APIRouter(

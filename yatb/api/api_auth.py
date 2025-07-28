@@ -3,9 +3,10 @@ from typing import Literal, cast
 
 from fastapi import APIRouter, Depends, HTTPException, Request, Response, status
 
-from .. import auth, db, schema
-from ..db.beanie import UserDB
-from ..utils import metrics
+from yatb import auth, schema
+from yatb.db import UserDB
+from yatb.utils import metrics
+
 from . import logger
 
 router = APIRouter(

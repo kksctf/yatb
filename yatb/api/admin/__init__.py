@@ -2,10 +2,10 @@ from typing import Annotated
 
 from fastapi import APIRouter, Depends, Header, HTTPException, Query, status
 
-from ... import auth, schema
-from ...config import settings
-from ...db.beanie import TaskDB, UserDB
-from ...utils.log_helper import get_logger
+from yatb import auth, schema
+from yatb.config import settings
+from yatb.db import TaskDB, UserDB
+from yatb.utils.log_helper import get_logger
 
 _fake_admin_user = schema.User(
     username="token_bot",

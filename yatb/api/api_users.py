@@ -4,9 +4,10 @@ from typing import TypeVar
 
 from fastapi import APIRouter, Depends, HTTPException, Request, Response, status
 
-from .. import auth, schema
-from ..config import settings
-from ..db.beanie import TaskDB, UserDB
+from yatb import auth, schema
+from yatb.config import settings
+from yatb.db import TaskDB, UserDB
+
 from .api_tasks import api_tasks_get
 
 router = APIRouter(

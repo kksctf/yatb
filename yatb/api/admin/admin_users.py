@@ -4,10 +4,11 @@ from typing import Annotated, Mapping
 from fastapi import APIRouter, Cookie, Depends, FastAPI, Header, HTTPException, Query, Request, Response, status
 from pydantic import BaseModel
 
-from ... import auth, schema
-from ...config import settings
-from ...db.beanie import TaskDB, UserDB
-from ...utils.log_helper import get_logger
+from yatb import auth, schema
+from yatb.config import settings
+from yatb.db import TaskDB, UserDB
+from yatb.utils.log_helper import get_logger
+
 from . import CURR_ADMIN, logger, router
 
 

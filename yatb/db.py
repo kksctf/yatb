@@ -11,10 +11,11 @@ from beanie.operators import Set
 from motor.motor_asyncio import AsyncIOMotorClient, AsyncIOMotorDatabase
 from pydantic import BaseModel, PlainSerializer
 
-from ..app import app
-from ..config import settings
-from ..schema import EBaseModelV2, Task, TaskForm, User, auth
-from ..utils.log_helper import get_logger
+from .app import app
+from .config import settings
+from .ebasemodelv2 import EBaseModelV2
+from .schema import Task, TaskForm, User, auth
+from .utils.log_helper import get_logger
 
 logger = get_logger("db.beanie")
 

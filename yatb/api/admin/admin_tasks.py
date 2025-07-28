@@ -6,9 +6,10 @@ from beanie import BulkWriter
 from beanie.operators import Set
 from fastapi import Depends, HTTPException, status
 
-from ... import schema
-from ...config import settings
-from ...db.beanie import TaskDB, UserDB
+from yatb import schema
+from yatb.config import settings
+from yatb.db import TaskDB, UserDB
+
 from . import CURR_ADMIN, logger, router
 
 

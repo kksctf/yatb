@@ -1,7 +1,8 @@
-from threading import Lock
 import pickle
-from prometheus_client.metrics import MetricWrapperBase
+from threading import Lock
+
 from prometheus_client import Counter, Gauge
+from prometheus_client.metrics import MetricWrapperBase
 
 # some flag statistic
 solves_per_user = Counter(

@@ -1,5 +1,5 @@
-from collections.abc import Callable
-from typing import ClassVar, Hashable, Literal, Self
+from collections.abc import Callable, Hashable
+from typing import ClassVar, Literal, Self
 
 from fastapi import Request, Response
 

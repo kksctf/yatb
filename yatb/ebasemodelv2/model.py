@@ -181,7 +181,7 @@ class EBaseModelV2(RawBaseModel):
             new_computed_fields[field_name] = resolved[1]
 
         ret = create_model(
-            f"{cls.__qualname__}__l_{level.name}",
+            f"{cls.__qualname__}_{level.name}",
             __doc__=cls.__doc__,
             __base__=None,
             __config__=cls.model_config,

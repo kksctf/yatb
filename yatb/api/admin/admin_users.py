@@ -1,5 +1,6 @@
 import uuid
-from typing import Annotated, Mapping
+from collections.abc import Mapping
+from typing import Annotated
 
 from fastapi import Depends, HTTPException, status
 from pydantic import BaseModel

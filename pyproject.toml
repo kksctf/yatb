@@ -116,6 +116,7 @@ ignore = [
 
 [tool.ruff.lint.per-file-ignores]
 "**/{tests}/*" = ["S101", "INP001", "ANN201"]
+"**/{tests}/pydantic/ebasemodel/*" = ["SLF001"]
 # пока не умеем в автоформат __all__, делаем так.
 
 "**/__init__.py" = ["F401"]

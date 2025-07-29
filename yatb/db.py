@@ -10,7 +10,6 @@ from beanie.operators import Set
 from motor.motor_asyncio import AsyncIOMotorClient, AsyncIOMotorDatabase
 from pydantic import BaseModel
 
-from .app import app
 from .config import settings
 from .ebasemodelv2 import EBaseModelV2
 from .schema import Task, TaskForm, User, auth
@@ -286,11 +285,8 @@ class UserDB(DocumentEx[User], User):
 
 
 class DBClient:
-    client: AsyncIOMotorClient  # type: ignore # bad library ;(
-    db: AsyncIOMotorDatabase  # type: ignore # bad library ;(
-
-    def __init__(self) -> None:
-        pass
+    client: AsyncIOMotorClient
+    db: AsyncIOMotorDatabase
 
     async def init(self) -> None:
         self.client = AsyncIOMotorClient(str(settings.MONGO), tz_aware=True)
@@ -310,22 +306,6 @@ class DBClient:
             return
 
         await self.client.drop_database(settings.DB_NAME)
-
-
-@app.on_event("startup")
-async def startup_event():
-    await db.init()
-
-
-@app.on_event("shutdown")
-async def shutdown_event():
-    await db.close()
-
-
-# async def init_db():
-#     await db.init()
-#     yield
-#     await db.close()
 
 
 db = DBClient()

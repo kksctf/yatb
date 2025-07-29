@@ -9,8 +9,7 @@ from pydantic_settings import BaseSettings, SettingsConfigDict
 _DEFAULT_TOKEN = "default_token_CHANGE_ME"  # noqa: S105 # intended
 
 
-class DefaultTokenError(ValueError):
-    pass
+class DefaultTokenError(ValueError): ...
 
 
 class Settings(BaseSettings):

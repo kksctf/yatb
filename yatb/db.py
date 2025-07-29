@@ -12,7 +12,7 @@ from pydantic import BaseModel
 
 from .config import settings
 from .ebasemodelv2 import EBaseModelV2
-from .schema import Task, TaskForm, User, auth
+from .schema import FlagCheckResult, Task, TaskForm, User, auth
 from .utils.log_helper import get_logger
 
 logger = get_logger("db")
@@ -66,16 +66,8 @@ class TaskDB(DocumentEx[Task], Task):
         return self
 
     @classmethod
-    async def populate(cls: type[Self], new_task: TaskForm, author: User) -> Self:
-        task = cls(
-            task_name=new_task.task_name,
-            category=new_task.category,
-            scoring=new_task.scoring,
-            description=new_task.description,
-            description_html=Task.regenerate_md(new_task.description),
-            flag=new_task.flag,
-            author=(new_task.author if new_task.author != "" else f"@{author.username}"),
-        )
+    async def populate(cls, new_task: TaskForm, author: User) -> Self:
+        task = new_task.to_task(cls, author)
         await task.insert()  # type: ignore # WTF: bad library
         return task
 
@@ -90,8 +82,14 @@ class TaskDB(DocumentEx[Task], Task):
     @classmethod
     async def find_by_flag(cls: type[Self], flag: str, user: User) -> Self | None:
         for task in await cls.find_all().to_list():
-            if task.flag.flag_checker(flag, user):
+            result = task.flag.flag_checker(flag, user)
+            if result == FlagCheckResult.valid:
                 return task
+
+            if result == FlagCheckResult.invalid:
+                continue
+
+            logger.warning(f"user=[{user.short_desc()}], task=[{task.short_desc()}], {flag=}, {result.name=}")
 
         return None
 

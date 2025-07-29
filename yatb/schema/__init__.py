@@ -1,7 +1,7 @@
 from pydantic import BaseModel
 
 from .auth import AuthBase, CTFTimeOAuth, OAuth, SimpleAuth, TelegramAuth
-from .flags import DynamicKKSFlag, Flag, StaticFlag
+from .flags import DynamicKKSFlag, Flag, FlagCheckResult, StaticFlag
 from .scoring import DynamicKKSScoring, Scoring, StaticScoring
 from .task import FlagUnion, ScoringUnion, Task, TaskForm
 from .user import User

@@ -94,7 +94,7 @@ class Task(EBaseModelV2):
 
         # if task is hidden and no user/not admin:
         # always hide
-        if self.hidden:
+        if self.hidden:  # noqa: SIM103
             return False
 
         return True
@@ -153,3 +153,15 @@ class TaskForm(BaseModel):
     description: str
     flag: FlagUnion
     author: str = ""
+
+    def to_task[T: Task](self, cls: type[T], author: User) -> T:
+        task = cls(
+            task_name=self.task_name,
+            category=self.category,
+            scoring=self.scoring,
+            description=self.description,
+            description_html=cls.regenerate_md(self.description),
+            flag=self.flag,
+            author=(self.author if self.author != "" else f"@{author.username}"),
+        )
+        return task

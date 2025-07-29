@@ -1,10 +1,18 @@
 import binascii
 import hmac
+from enum import Enum, auto
 from typing import Literal
 
-from ..config import settings
-from ..ebasemodelv2 import Admin, EBaseModelV2, Public
+from yatb.config import settings
+from yatb.ebasemodelv2 import Admin, EBaseModelV2, Public
+
 from .user import User
+
+
+class FlagCheckResult(Enum):
+    invalid = auto()
+    valid = auto()
+    invalid_sign = auto()
 
 
 class Flag(EBaseModelV2):
@@ -24,10 +32,11 @@ class Flag(EBaseModelV2):
     def flag_value(self, user: User) -> str:
         return self.flag_base + "{test_flag}"
 
-    def flag_checker(self, user_flag: str, user: User) -> bool:
-        if self.flag_value(user) == self.sanitization(user_flag):  # noqa: SIM103
-            return True
-        return False
+    def flag_checker(self, user_flag: str, user: User) -> FlagCheckResult:
+        if self.flag_value(user) == self.sanitization(user_flag):
+            return FlagCheckResult.valid
+
+        return FlagCheckResult.invalid
 
 
 class StaticFlag(Flag):
@@ -44,7 +53,24 @@ class DynamicKKSFlag(Flag):
 
     dynamic_flag_base: Admin[str]
 
-    def flag_value(self, user: User) -> str:
+    def flag_parts(self, user: User) -> tuple[str, str]:
         flag_part = "{" + self.dynamic_flag_base + "}" + f"{user.user_id}"
         hash = hmac.digest(settings.FLAG_SIGN_KEY.encode(), flag_part.encode(), "sha256")
-        return self.flag_base + "{" + self.dynamic_flag_base + "_" + binascii.hexlify(hash).decode()[0:14] + "}"
+        return self.dynamic_flag_base, binascii.hexlify(hash).decode()[0:14]
+
+    def flag_value(self, user: User) -> str:
+        base, hash = self.flag_parts(user)
+        return self.flag_base + "{" + base + "_" + hash + "}"
+
+    def flag_checker(self, user_flag: str, user: User) -> FlagCheckResult:
+        sanitized_flag = self.sanitization(user_flag)
+        if self.flag_value(user) == sanitized_flag:
+            return FlagCheckResult.valid
+
+        # some of copypaste, but i have no idea how to make this without copypaste
+        base, hash = self.flag_parts(user)
+        prefix = self.flag_base + "{" + base
+        if sanitized_flag.startswith(prefix):
+            return FlagCheckResult.invalid_sign
+
+        return FlagCheckResult.invalid

@@ -2,7 +2,7 @@ import uuid
 from datetime import UTC, datetime
 from typing import Annotated
 
-from fastapi import APIRouter, HTTPException, status
+from fastapi import APIRouter, Depends, HTTPException, status
 from pydantic import BaseModel
 
 from yatb import auth, schema
@@ -29,15 +29,25 @@ async def get_task(task_id: uuid.UUID, user: auth.CURR_USER_SAFE) -> TaskDB:
     return task
 
 
-CURRENT_TASK = Annotated[TaskDB, Depends(get_task)]
-
-
-@router.get("/")
-async def api_tasks_get(user: auth.CURR_USER_SAFE) -> list[schema.Task.public_model]:
+async def get_tasks(user: auth.CURR_USER_SAFE) -> list[TaskDB]:
     tasks = await TaskDB.get_all()
     tasks = tasks.values()
     tasks = filter(lambda x: x.visible_for_user(user), tasks)
     return list(tasks)
+
+
+CURRENT_TASK = Annotated[TaskDB, Depends(get_task)]
+VISIBLE_TASKS = Annotated[list[TaskDB], Depends(get_tasks)]
+
+
+@router.get("/")
+async def api_tasks_get(tasks: VISIBLE_TASKS) -> list[schema.Task.public_model]:
+    return tasks
+
+
+@router.get("/{task_id}")
+async def api_task_get(task: CURRENT_TASK) -> schema.Task.public_model:
+    return task
 
 
 class BRMessage(BaseModel):
@@ -45,11 +55,6 @@ class BRMessage(BaseModel):
     user_name: str
     points: int
     is_fb: bool
-
-
-@router.get("/{task_id}")
-async def api_task_get(task: CURRENT_TASK) -> schema.Task.public_model:
-    return task
 
 
 @router.post("/submit_flag")

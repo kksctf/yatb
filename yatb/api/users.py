@@ -8,68 +8,38 @@ from yatb import auth, schema
 from yatb.config import settings
 from yatb.db import TaskDB, UserDB
 
-from .api_tasks import api_tasks_get
+from .tasks import get_tasks
 
 router = APIRouter(
     prefix="/users",
     tags=["users"],
 )
 
-_T = TypeVar("_T", schema.User, UserDB.ScoreboardProjection)
-
-
-def filter_scoreboard(users: Iterable[_T]) -> Sequence[_T]:
-    ret = users
-
-    if not settings.DEBUG:
-        ret = filter(lambda x: not x.is_admin, ret)
-
-    ret = sorted(
-        ret,
-        key=lambda i: (
-            -i.score,
-            i.get_last_solve_time()[1],
-        ),
-        reverse=False,
-    )
-
-    return ret
-
-
-async def api_scoreboard_get_internal() -> Sequence[schema.User]:
-    users = await UserDB.get_all()
-
-    return filter_scoreboard(users.values())
-
-
-async def api_scoreboard_get_internal_shrinked() -> Sequence[UserDB.ScoreboardProjection]:
-    users = await UserDB.get_all_projected(UserDB.ScoreboardProjection)  # pyright: ignore[reportArgumentType] # FIXME: shit
-
-    return filter_scoreboard(users.values())
-
 
 @router.get("/scoreboard")
 async def api_scoreboard_get() -> Sequence[schema.User.public_model]:
-    users = await api_scoreboard_get_internal()
-    return users  # noqa: RET504
+    return await UserDB.get_filtered_scoreboard()
 
 
 @router.get("/ctftime_scoreboard")
-async def api_task_get_ctftime_scoreboard(*, fullScoreboard: bool = False):
-    scoreboard = await api_scoreboard_get_internal()
+async def api_task_get_ctftime_scoreboard(*, fullScoreboard: bool = False):  # noqa: N803
+    scoreboard = await UserDB.get_filtered_scoreboard()
     standings = []
     tasks = None
     full_tasks_list = None
+
     if fullScoreboard:
-        tasks_list = await api_tasks_get(None)  # we don't need to export hidden tasks
+        tasks_list = await get_tasks(None)  # we don't need to export hidden tasks
         full_tasks_list = await TaskDB.get_all()
         tasks = [x.task_name for x in tasks_list]
+
     for i, user in enumerate(scoreboard):
         obj = {
             "pos": i + 1,
             "team": user.username,
             "score": user.score,
         }
+
         if fullScoreboard and full_tasks_list:
             obj["taskStats"] = {}
             for solved_task in user.solved_tasks:
@@ -78,6 +48,7 @@ async def api_task_get_ctftime_scoreboard(*, fullScoreboard: bool = False):
                     "time": user.solved_tasks[solved_task],
                 }
         standings.append(obj)
+
     if fullScoreboard:
         return {
             "tasks": tasks,

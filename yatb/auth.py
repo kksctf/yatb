@@ -1,8 +1,8 @@
 import uuid
 from datetime import UTC, datetime, timedelta
-from typing import Annotated
+from typing import Annotated, TypeAlias
 
-from fastapi import Depends, HTTPException, Request, status
+from fastapi import Depends, Header, HTTPException, Query, Request, status
 from fastapi.openapi.models import OAuthFlows as OAuthFlowsModel
 from fastapi.security import OAuth2
 from fastapi.security.utils import get_authorization_scheme_param
@@ -15,44 +15,33 @@ from .utils.log_helper import get_logger
 
 logger = get_logger("auth")
 
-
-class OAuth2PasswordBearerWithCookie(OAuth2):
-    def __init__(
-        self,
-        *,
-        scheme_name: str | None = None,
-        scopes: dict | None = None,
-        description: str | None = None,
-        auto_error: bool = True,
-    ) -> None:
-        scopes = scopes or {}
-
-        flows = OAuthFlowsModel()  # password={"tokenUrl": tokenUrl, "scopes": scopes}
-        super().__init__(flows=flows, scheme_name=scheme_name, description=description, auto_error=auto_error)
-
-    async def __call__(self, request: Request) -> str:
-        authorization_cookie = request.cookies.get("access_token", None)
-        authorization_header = request.headers.get("X-Auth-Token", None)
-
-        if not authorization_cookie and not authorization_header:
-            raise HTTPException(
-                status_code=status.HTTP_401_UNAUTHORIZED,
-                detail="No cookie or header",
-                headers={"WWW-Authenticate": "Bearer"},
-            )
-
-        scheme, param = get_authorization_scheme_param(authorization_header or authorization_cookie)
-        if scheme.lower() != "bearer":
-            raise HTTPException(
-                status_code=status.HTTP_401_UNAUTHORIZED,
-                detail="Not authenticated",
-                headers={"WWW-Authenticate": "Bearer"},
-            )
-
-        return param
+_fake_admin_user = schema.User(
+    username="token_bot",
+    is_admin=True,
+    auth_source=schema.auth.TokenAuth.AuthModel(username="hardcoded_token"),
+)
 
 
-oauth2_scheme = OAuth2PasswordBearerWithCookie()
+async def token_puller(request: Request) -> str:
+    authorization_cookie = request.cookies.get("access_token", None)
+    authorization_header = request.headers.get("X-Auth-Token", None)
+
+    if not authorization_cookie and not authorization_header:
+        raise HTTPException(
+            status_code=status.HTTP_401_UNAUTHORIZED,
+            detail="No cookie or header",
+            headers={"WWW-Authenticate": "Bearer"},
+        )
+
+    scheme, param = get_authorization_scheme_param(authorization_header or authorization_cookie)
+    if scheme.lower() != "bearer":
+        raise HTTPException(
+            status_code=status.HTTP_401_UNAUTHORIZED,
+            detail="Not authenticated",
+            headers={"WWW-Authenticate": "Bearer"},
+        )
+
+    return param
 
 
 def create_access_token(data: dict, expires_delta: timedelta = timedelta(minutes=15)) -> str:
@@ -72,7 +61,7 @@ def create_user_token(user: schema.User) -> str:
     )
 
 
-async def get_current_user(token: str = Depends(oauth2_scheme)) -> UserDB:
+async def get_current_user(token: Annotated[str, Depends(token_puller)]) -> UserDB:
     credentials_exception = HTTPException(
         status_code=status.HTTP_401_UNAUTHORIZED,
         detail="Could not validate credentials",
@@ -98,12 +87,33 @@ async def get_current_user(token: str = Depends(oauth2_scheme)) -> UserDB:
 async def get_current_user_safe(request: Request) -> UserDB | None:
     user = None
     try:
-        user = await get_current_user(await oauth2_scheme(request))
+        user = await get_current_user(await token_puller(request))
     except HTTPException:
         user = None
 
     return user
 
 
-CURR_USER = Annotated[UserDB, Depends(get_current_user)]
-CURR_USER_SAFE = Annotated[UserDB | None, Depends(get_current_user_safe)]
+async def admin_checker(
+    user: "CURR_USER_SAFE",
+    token_header: str | None = Header(None, alias="X-Token"),
+    token_query: str | None = Query(None, alias="token"),
+) -> schema.User:
+    if user and user.is_admin:
+        return user
+
+    if token_header and token_header == settings.API_TOKEN:
+        return _fake_admin_user
+    if token_query and token_query == settings.API_TOKEN:
+        return _fake_admin_user
+
+    raise HTTPException(
+        status_code=status.HTTP_403_FORBIDDEN,
+        detail="No.",
+    )
+
+
+# https://github.com/fastapi/fastapi/issues/10719, https://github.com/fastapi/fastapi/pull/13920
+CURR_USER: TypeAlias = Annotated[UserDB, Depends(get_current_user)]
+CURR_USER_SAFE: TypeAlias = Annotated[UserDB | None, Depends(get_current_user_safe)]
+CURR_ADMIN: TypeAlias = Annotated[UserDB, Depends(admin_checker)]

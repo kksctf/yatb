@@ -7,10 +7,11 @@ from beanie.operators import Set
 from fastapi import Depends, HTTPException, status
 
 from yatb import schema
+from yatb.auth import CURR_ADMIN
 from yatb.config import settings
 from yatb.db import TaskDB, UserDB
 
-from . import CURR_ADMIN, logger, router
+from . import logger, router
 
 
 async def get_task(task_id: uuid.UUID) -> TaskDB:

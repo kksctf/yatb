@@ -10,11 +10,11 @@ router = APIRouter(
 
 
 from . import admin  # noqa
-from . import api_auth  # noqa
-from . import api_tasks  # noqa
-from . import api_users  # noqa
+from . import auth  # noqa
+from . import tasks  # noqa
+from . import users  # noqa
 
-api_users.router.include_router(api_auth.router)
-router.include_router(api_users.router)
-router.include_router(api_tasks.router)
+users.router.include_router(auth.router)
+router.include_router(users.router)
+router.include_router(tasks.router)
 router.include_router(admin.router)

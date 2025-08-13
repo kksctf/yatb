@@ -22,8 +22,8 @@ from fastui.components.display import DisplayLookup, DisplayMode
 from fastui.events import BackEvent, GoToEvent
 
 from ... import auth, config, schema
-from ...api import api_tasks, api_users
-from ...api.admin import CURR_ADMIN, admin_checker
+from ...api import tasks, users
+from ...api.admin import CURR_ADMIN
 from ...api.admin import admin_tasks as api_admin_tasks
 from ...api.admin import admin_users as api_admin_users
 from ...utils.log_helper import get_logger
@@ -49,77 +49,6 @@ async def admin_index(req: Request, resp: Response, user: CURR_ADMIN):
         {
             "request": req,
             "curr_user": user,
-        },
-        ignore_admin=False,
-    )
-
-
-@router.get("/tasks")
-async def admin_tasks(req: Request, resp: Response, user: CURR_ADMIN):
-    tasks_list = await api_tasks.api_tasks_get(user)
-    return await response_generator(
-        req,
-        "admin/tasks_admin.jhtml",
-        {
-            "request": req,
-            "curr_user": user,
-            "task_class": schema.Task,
-            "task_form_class": schema.TaskForm,
-            "tasks_list": tasks_list,
-        },
-        ignore_admin=False,
-    )
-
-
-@router.get("/task/{task_id}")
-async def admin_task_get(req: Request, resp: Response, task_id: uuid.UUID, user: CURR_ADMIN):
-    tasks_list = await api_tasks.api_tasks_get(user)
-    selected_task = await api_tasks.api_task_get(task_id, user)
-    return await response_generator(
-        req,
-        "admin/tasks_admin.jhtml",
-        {
-            "request": req,
-            "curr_user": user,
-            "task_class": schema.Task,
-            "task_form_class": schema.TaskForm,
-            "tasks_list": tasks_list,
-            "selected_task": selected_task,
-        },
-        ignore_admin=False,
-    )
-
-
-@router.get("/users")
-async def admin_users(req: Request, resp: Response, user: CURR_ADMIN):
-    users_dict = await api_admin_users.api_admin_users_internal()
-    return await response_generator(
-        req,
-        "admin/users_admin.jhtml",
-        {
-            "request": req,
-            "curr_user": user,
-            "user_class": schema.User,
-            # "user_form_class": schema.UserForm,
-            "users_list": users_dict.values(),
-        },
-        ignore_admin=False,
-    )
-
-
-@router.get("/user/{user_id}")
-async def admin_user_get(req: Request, resp: Response, admin: CURR_ADMIN, user: api_admin_users.CURR_USER):
-    users_dict = await api_admin_users.api_admin_users_internal()
-    return await response_generator(
-        req,
-        "admin/users_admin.jhtml",
-        {
-            "request": req,
-            "curr_user": admin,
-            "user_class": schema.User,
-            # "user_form_class": schema.UserForm,
-            "users_list": users_dict.values(),
-            "selected_user": user,
         },
         ignore_admin=False,
     )

@@ -6,9 +6,10 @@ from fastapi import Depends, HTTPException, status
 from pydantic import BaseModel
 
 from yatb import schema
+from yatb.auth import CURR_ADMIN
 from yatb.db import UserDB
 
-from . import CURR_ADMIN, router
+from . import router
 
 
 async def api_admin_users_internal() -> Mapping[uuid.UUID, schema.User]:

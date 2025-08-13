@@ -3,37 +3,10 @@ from typing import Annotated
 from fastapi import APIRouter, Depends, Header, HTTPException, Query, status
 
 from yatb import auth, schema
+from yatb.auth import CURR_ADMIN
 from yatb.config import settings
 from yatb.db import TaskDB, UserDB
 from yatb.utils.log_helper import get_logger
-
-_fake_admin_user = schema.User(
-    username="token_bot",
-    is_admin=True,
-    auth_source=schema.auth.TokenAuth.AuthModel(username="hardcoded_token"),
-)
-
-
-async def admin_checker(
-    user: auth.CURR_USER_SAFE,
-    token_header: str | None = Header(None, alias="X-Token"),
-    token_query: str | None = Query(None, alias="token"),
-) -> UserDB:
-    if user and user.is_admin:
-        return user
-
-    if token_header and token_header == settings.API_TOKEN:
-        return _fake_admin_user  # type: ignore
-    if token_query and token_query == settings.API_TOKEN:
-        return _fake_admin_user  # type: ignore
-
-    raise HTTPException(
-        status_code=status.HTTP_403_FORBIDDEN,
-        detail="No.",
-    )
-
-
-CURR_ADMIN = Annotated[UserDB, Depends(admin_checker)]
 
 logger = get_logger("api.admin")
 router = APIRouter(
@@ -59,11 +32,11 @@ async def api_detele_everything_but_tasks(admin: CURR_ADMIN) -> None:
 
     for user in (await UserDB.get_all()).values():
         if not user.is_admin:
-            await user.delete()  # type: ignore # WTF: great library
+            await user.delete()
 
     for task in (await TaskDB.get_all()).values():
         task.pwned_by.clear()
-        await task.save()  # type: ignore # WTF: great library
+        await task.save()
 
 
 @router.delete("/db")
@@ -81,13 +54,13 @@ async def api_detele_everything(admin: CURR_ADMIN, *, force: bool = False) -> No
         if len(user.solved_tasks) and not force:
             continue
 
-        await user.delete()  # type: ignore # WTF: great library
+        await user.delete()
 
     for task in (await TaskDB.get_all()).values():
         if len(task.pwned_by) and not force:
             continue
 
-        await task.delete()  # type: ignore # WTF: great library
+        await task.delete()
 
 
 from . import admin_tasks  # noqa

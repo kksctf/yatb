@@ -8,8 +8,6 @@
 
         {% set head_data.pages = {
             ("NG ADMIN",): url_for('admin_ng_html_landing', path=""),
-            ("TASKS ADMIN",): url_for('admin_tasks'),
-            ("USERS ADMIN",): url_for('admin_users'),
             ("Back to board",): url_for('index'),
         } %}
 

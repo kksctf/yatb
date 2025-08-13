@@ -3,7 +3,7 @@
 
 import datetime
 import uuid
-from typing import Annotated
+from typing import Annotated, TypeAlias
 from zoneinfo import ZoneInfo
 
 from pydantic import BaseModel, Field, computed_field
@@ -31,11 +31,12 @@ def template_format_time(date: datetime.datetime) -> str:  # from alb1or1x_shit.
     return "unknown"
 
 
-type ScoringUnion = Annotated[
+# https://github.com/pydantic/pydantic/issues/11552
+ScoringUnion: TypeAlias = Annotated[
     StaticScoring | DynamicKKSScoring,
     Field(discriminator="classtype"),
 ]
-type FlagUnion = Annotated[
+FlagUnion: TypeAlias = Annotated[
     StaticFlag | DynamicKKSFlag,
     Field(discriminator="classtype"),
 ]
@@ -75,12 +76,16 @@ class Task(EBaseModelV2):
     def color_category(self) -> str:
         if self.category.lower() == "crypto":
             return "crypto"
-        elif self.category.lower() == "web":
+
+        if self.category.lower() == "web":
             return "web"
-        elif self.category.lower() in ["binary", "reverse", "pwn", "rev"]:
+
+        if self.category.lower() in ["binary", "reverse", "pwn", "rev"]:
             return "binary"
-        elif self.category.lower() == "forensic":
+
+        if self.category.lower() == "forensic":
             return "forensic"
+
         return "other"
 
     def visible_for_user(self, user: User | None = None) -> bool:
@@ -106,25 +111,26 @@ class Task(EBaseModelV2):
     @staticmethod
     def is_date_after_migration(dt: datetime.datetime) -> bool:
         migration_time = datetime.datetime.fromtimestamp(1605065347, tz=datetime.UTC)
-        if dt > migration_time:
+        if dt > migration_time:  # noqa: SIM103
             return True
         return False
 
     # TODO: @Rubikoid, move this code somewhere else?
     @staticmethod
-    def humanize_time(delta: datetime.timedelta) -> str:
-        dt = datetime.datetime.min + delta  # timedelta to datetime conversion :shrug:
+    def humanize_time(delta: datetime.timedelta) -> str:  # noqa: PLR0911
+        dt = datetime.datetime.min.replace(tzinfo=datetime.UTC) + delta  # timedelta to datetime conversion :shrug:
+
         if dt.year > 1:
-            return f"{dt.year - 1} year{'' if dt.year == 2 else 's'}"
+            return f"{dt.year - 1} year{'' if dt.year == 2 else 's'}"  # noqa: PLR2004
         if dt.month > 1:
-            return f"{dt.month - 1} month{'' if dt.month == 2 else 's'}"
+            return f"{dt.month - 1} month{'' if dt.month == 2 else 's'}"  # noqa: PLR2004
         if dt.day > 1:
-            return f"{dt.day - 1} day{'' if dt.day == 2 else 's'}"
-        elif dt.hour > 0:
+            return f"{dt.day - 1} day{'' if dt.day == 2 else 's'}"  # noqa: PLR2004
+        if dt.hour > 0:
             return f"{dt.hour} hour{'' if dt.hour == 1 else 's'}"
-        elif dt.minute > 0:
+        if dt.minute > 0:
             return f"{dt.minute} minute{'' if dt.minute == 1 else 's'}"
-        elif dt.second > 0:
+        if dt.second > 0:
             return f"{dt.second} second{'' if dt.second == 1 else 's'}"
         return ""
 
@@ -159,7 +165,7 @@ class TaskForm(BaseModel):
         if not str_author.startswith("@"):
             str_author = f"@{str_author}"
 
-        task = cls(
+        return cls(
             task_name=self.task_name,
             category=self.category,
             scoring=self.scoring,
@@ -168,4 +174,3 @@ class TaskForm(BaseModel):
             flag=self.flag,
             author=str_author,
         )
-        return task

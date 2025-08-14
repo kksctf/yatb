@@ -27,7 +27,7 @@
       {{ task.description_html | safe }}
     </div>
 
-    {% if task.solved_by(curr_user) %}
+    {% if task.is_solved_by(curr_user) %}
       <article class="message is-success">
         <div class="message-body">
           ✅ You have already solved this challenge. Great job!

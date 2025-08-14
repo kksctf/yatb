@@ -1,5 +1,5 @@
-<div class="card {% if task.solved_by(curr_user) %}solved{% endif %}">
-  <header class="card-header {% if task.solved_by(curr_user) %}has-background-success{% endif %}">
+<div class="card {% if task.is_solved_by(curr_user) %}solved{% endif %}">
+  <header class="card-header {% if task.is_solved_by(curr_user) %}has-background-success{% endif %}">
     <a href="/tasks/{{ task.task_id }}" class="card-header-title is-size-6">{{ task.task_name }}</a>
     <span class="tag is-light">{{ task.scoring.points }}</span>
   </header>

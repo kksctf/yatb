@@ -6,7 +6,7 @@ from fastapi import FastAPI
 from fastapi.staticfiles import StaticFiles
 from prometheus_fastapi_instrumentator import Instrumentator
 
-from . import api, main, utils, view
+from . import api, i18n, main, utils, view
 from .config import settings
 from .db import db
 
@@ -26,6 +26,7 @@ app = FastAPI(
     openapi_url=settings.FASTAPI_OPENAPI_URL,
     lifespan=lifespan,
 )
+app.add_middleware(i18n.LocaleMiddleware)
 
 _base_path = Path(__file__).resolve().parent
 app.mount("/static", StaticFiles(directory=_base_path / "view" / "static"), name="static")

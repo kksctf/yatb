@@ -1,4 +1,5 @@
 import asyncio
+import gettext
 import uuid
 from collections.abc import Mapping
 from pathlib import Path
@@ -11,13 +12,13 @@ from fastapi.templating import Jinja2Templates
 from starlette.routing import Router
 from starlette.templating import _TemplateResponse
 
-from yatb import auth, schema, i18n
+from yatb import auth, i18n, schema
 from yatb.api import tasks, users
 from yatb.config import settings
-from ..db.task import TaskDB
-from ..db.user import UserDB
+from yatb.db.task import TaskDB
+from yatb.db.user import UserDB
+from yatb.utils.httpx import IS_HTTPX
 from yatb.utils.log_helper import get_logger
-
 
 logger = get_logger("view")
 
@@ -79,6 +80,21 @@ def version_string() -> str:
     return f"kks-tb-{settings.VERSION}"
 
 
+TRANSLATIONS = {
+    lang: gettext.translation(
+        domain="messages",
+        localedir=Path(__file__).parent.parent / "locale",
+        languages=[lang],
+        fallback=True,
+    )
+    for lang in i18n.SUPPORTED
+}
+
+
+def _(text: str, request: Request) -> str:
+    return TRANSLATIONS[request.state.lang].gettext(text)
+
+
 templates.env.globals["version_string"] = version_string
 templates.env.globals["len"] = len
 templates.env.globals["template_format_time"] = schema.task.template_format_time
@@ -91,30 +107,7 @@ templates.env.globals["DEBUG"] = settings.DEBUG
 templates.env.globals["FLAG_BASE"] = settings.FLAG_BASE
 templates.env.globals["CTF_NAME"] = settings.CTF_NAME
 
-templates.env.globals["generate_form"] = generate_form
-templates.env.globals["FormFieldType"] = FormFieldType
-templates.env.globals["FormContext"] = FormContext
-templates.env.globals["FormContexts"] = FormContexts
-
-
-import gettext, pathlib
-
-TRANSLATIONS = {
-    lang: gettext.translation(
-        domain="messages",
-        localedir=pathlib.Path(__file__).parent.parent / "locale",
-        languages=[lang],
-        fallback=True,
-    )
-    for lang in i18n.SUPPORTED
-}
-
-
-def _(text: str, request: Request) -> str:
-    return TRANSLATIONS[request.state.lang].gettext(text)
-
-
-templates.env.globals.update(_=_)
+templates.env.globals["_"] = _
 
 from . import admin  # noqa
 
@@ -130,7 +123,7 @@ async def index(request: Request, user: auth.CURR_USER_SAFE) -> HTMLResponse:
 @router.get("/tasks")
 async def tasks_get(
     req: Request,
-    resp: Response,
+    is_httpx: IS_HTTPX,
     user: auth.CURR_USER_SAFE,
     tasks: tasks.VISIBLE_TASKS,
     category: list[str] | None = Query(None),
@@ -142,11 +135,7 @@ async def tasks_get(
 
     uid2name = {uid: (await api_users.api_users_get(uid, user)).username for uid in uid_set}
 
-    # Detect if this is an HTMX call (partial refresh) or a full-page load
-    partial_refresh = req.headers.get("hx-request") == "true"
-
-    if not partial_refresh:
-        # templates.TemplateResponse("tasks.jhtml", ctx)
+    if not is_httpx:
         return await response_generator(
             req,
             "tasks.jhtml",
@@ -161,7 +150,7 @@ async def tasks_get(
 
     show_solved = "show_solved" in req.query_params
     if not show_solved and user:
-        tasks = [t for t in tasks if not t.solved_by(user)]
+        tasks = [t for t in tasks if not t.is_solved_by(user)]
 
     return await response_generator(
         req,
@@ -191,14 +180,17 @@ async def tasks_get_task(
 
 
 @router.get("/scoreboard")
-async def scoreboard_page(request: Request, user: auth.CURR_USER_SAFE, tasks: tasks.VISIBLE_TASKS) -> HTMLResponse:
+async def scoreboard_page(
+    request: Request,
+    is_httpx: IS_HTTPX,
+    user: auth.CURR_USER_SAFE,
+    tasks: tasks.VISIBLE_TASKS,
+) -> HTMLResponse:
     scoreboard = await UserDB.get_filtered_projected_scoreboard()
-
-    partial_refresh = request.headers.get("hx-request") == "true"
 
     return await response_generator(
         request,
-        "scoreboard.jhtml" if not partial_refresh else "partials/scoreboard_table.jhtml",
+        "scoreboard.jhtml" if not is_httpx else "partials/scoreboard_table.jhtml",
         {
             "curr_user": user,
             "scoreboard": scoreboard,

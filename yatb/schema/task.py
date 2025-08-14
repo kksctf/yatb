@@ -104,7 +104,7 @@ class Task(EBaseModelV2):
 
         return True
 
-    def solved_by(self, user: User):
+    def is_solved_by(self, user: User) -> bool:
         return user and user.user_id in self.pwned_by
 
     @staticmethod

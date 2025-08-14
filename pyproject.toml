@@ -82,9 +82,13 @@ homepage = "https://github.com/kksctf/yatb"
 repository = "https://github.com/kksctf/yatb"
 documentation = "https://github.com/kksctf/yatb"
 
+### BLACK
+
 # black config enabled.
 [tool.black]
 line-length = 120
+
+### RUFF
 
 [tool.ruff]
 line-length = 120
@@ -131,14 +135,31 @@ ignore = [
 # пока не умеем в автоформат __all__, делаем так.
 "**/__init__.py" = ["F401"]
 
+### PYTEST
+
 [tool.pytest.ini_options]
 addopts = "--cov=./yatb --cov-report=xml:coverage.xml -cov-config=.coveragerc"
 env = ["DEBUG=0", "ENABLE_METRICS=0", "TESTING=1", "DB_NAME=yatb_unittesting"]
 filterwarnings = ["ignore::DeprecationWarning"]
 testpaths = ["tests"]
 
+### PYRIGHT
+
 [tool.pyright]
 # classtype thing
 reportIncompatibleVariableOverride = "information"
 # return models
 reportInvalidTypeForm = "information"
+
+### BABEL
+
+[[tool.babel.mappings]]
+method = "python"
+pattern = "**.py"
+
+[[tool.babel.mappings]]
+method = "jinja2"
+pattern = "**/templates/**.jhtml"
+encoding = "utf-8"
+extensions = "jinja2.ext.i18n"
+keywords = "_ ngettext:1,2"

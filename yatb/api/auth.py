@@ -1,11 +1,12 @@
 from collections.abc import Callable
-from typing import Literal, cast, Annotated
+from typing import Annotated, Literal, cast
 
-from fastapi import APIRouter, Depends, HTTPException, Request, Response, status, Form
+from fastapi import APIRouter, Depends, Form, HTTPException, Request, Response, status
 
 from yatb import auth, schema
 from yatb.db import UserDB
 from yatb.utils import metrics
+from yatb.utils.httpx import IS_HTTPX
 
 from . import logger
 
@@ -74,7 +75,12 @@ def generic_handler_generator(cls: type[schema.auth.AuthBase]) -> Callable:
     return generic_handler
 
 
-async def api_auth_simple_login(req: Request, resp: Response, form: Annotated[schema.SimpleAuth.Form, Form()]):
+async def api_auth_simple_login(
+    req: Request,
+    resp: Response,
+    is_httpx: IS_HTTPX,
+    form: Annotated[schema.SimpleAuth.Form, Form()],
+):
     # almost the same generic, but for login/password form, due to additional login.
     model = await form.populate(req, resp)
     user = await UserDB.get_user_uniq_field(schema.SimpleAuth.AuthModel, model.get_uniq_field())
@@ -96,7 +102,7 @@ async def api_auth_simple_login(req: Request, resp: Response, form: Annotated[sc
     access_token = auth.create_user_token(user)
     resp.set_cookie(key="access_token", value=f"Bearer {access_token}", httponly=True)
 
-    if req.headers.get("HX-Request") == "true":
+    if is_httpx:
         resp.headers["HX-Redirect"] = "/tasks"  # or "/"
         return "ok"
 
@@ -105,7 +111,12 @@ async def api_auth_simple_login(req: Request, resp: Response, form: Annotated[sc
     return "ok"
 
 
-async def api_auth_simple_register(req: Request, resp: Response, form: Annotated[schema.SimpleAuth.Form, Form()]):
+async def api_auth_simple_register(
+    req: Request,
+    resp: Response,
+    is_httpx: IS_HTTPX,
+    form: Annotated[schema.SimpleAuth.Form, Form()],
+):
     # almost the same generic, but for login/password form, due to additional login.
     model = await form.populate(req, resp)
 
@@ -125,7 +136,7 @@ async def api_auth_simple_register(req: Request, resp: Response, form: Annotated
     access_token = auth.create_user_token(user)
     resp.set_cookie(key="access_token", value=f"Bearer {access_token}", httponly=True)
 
-    if req.headers.get("HX-Request") == "true":
+    if is_httpx:
         resp.headers["HX-Redirect"] = "/tasks"  # or "/"
         return "ok"
 

@@ -6,7 +6,7 @@ from fastapi import FastAPI
 from fastapi.staticfiles import StaticFiles
 from prometheus_fastapi_instrumentator import Instrumentator
 
-from . import api, i18n, main, utils, view
+from . import api, i18n, main, view
 from .config import settings
 from .db import db
 

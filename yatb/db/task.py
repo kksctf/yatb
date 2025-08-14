@@ -1,18 +1,11 @@
-import datetime
 import uuid
-from collections.abc import Hashable, Mapping
-from typing import Any, ClassVar, Literal, Self
+from typing import ClassVar, Self
 
 import pymongo
-from beanie import BulkWriter, Document, init_beanie
-from beanie.operators import And as _And
+from beanie import BulkWriter
 from beanie.operators import Set
-from motor.motor_asyncio import AsyncIOMotorClient, AsyncIOMotorDatabase
-from pydantic import BaseModel
 
-from yatb.config import settings
-from yatb.ebasemodelv2 import EBaseModelV2
-from yatb.schema import FlagCheckResult, Task, TaskForm, User, auth
+from yatb.schema import FlagCheckResult, Task, TaskForm, User
 from yatb.utils.log_helper import get_logger
 
 from .base import DocumentEx

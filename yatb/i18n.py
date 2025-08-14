@@ -1,6 +1,6 @@
+from babel.core import negotiate_locale
 from fastapi import Request
 from starlette.middleware.base import BaseHTTPMiddleware
-from babel.core import negotiate_locale
 
 SUPPORTED = ["en", "ru"]
 DEFAULT = "en"

@@ -1,11 +1,9 @@
 import uuid
-from collections.abc import Iterable, Sequence
-from typing import TypeVar
+from collections.abc import Sequence
 
 from fastapi import APIRouter, HTTPException, Request, Response, status
 
 from yatb import auth, schema
-from yatb.config import settings
 from yatb.db import TaskDB, UserDB
 
 from .tasks import get_tasks

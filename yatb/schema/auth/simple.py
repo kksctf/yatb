@@ -5,7 +5,6 @@ from collections.abc import Callable
 from typing import ClassVar, Literal, Self
 
 from fastapi import HTTPException, Request, Response, status
-from pydantic import BaseModel
 from pydantic_settings import SettingsConfigDict
 
 from ...config import settings

@@ -13,7 +13,7 @@ from starlette.routing import Router
 from starlette.templating import _TemplateResponse
 
 from yatb import auth, i18n, schema
-from yatb.api import tasks, users
+from yatb.api import tasks
 from yatb.config import settings
 from yatb.db.task import TaskDB
 from yatb.db.user import UserDB
@@ -126,14 +126,11 @@ async def tasks_get(
     is_httpx: IS_HTTPX,
     user: auth.CURR_USER_SAFE,
     tasks: tasks.VISIBLE_TASKS,
+    show_solved: bool | None = Query(default=None),
     category: list[str] | None = Query(None),
 ) -> HTMLResponse:
-    # collect every user UUID appearing in first/last pwn lists
-    uid_set: set[uuid.UUID] = set()
-    for t in tasks:
-        uid_set.update(t.pwned_by.keys())
-
-    uid2name = {uid: (await api_users.api_users_get(uid, user)).username for uid in uid_set}
+    users = await UserDB.get_all_projected(UserDB.ScoreboardProjection)
+    uid2name = {uuid: user.username for uuid, user in users.items()}
 
     if not is_httpx:
         return await response_generator(
@@ -148,7 +145,6 @@ async def tasks_get(
 
     tasks = [t for t in tasks if t.category in (category or [])]
 
-    show_solved = "show_solved" in req.query_params
     if not show_solved and user:
         tasks = [t for t in tasks if not t.is_solved_by(user)]
 

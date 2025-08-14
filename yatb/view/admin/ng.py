@@ -1,32 +1,19 @@
-import uuid
 
 from fastapi import (
-    Cookie,
-    Depends,
-    FastAPI,
-    HTTPException,
-    Query,
     Request,
-    Response,
-    WebSocket,
-    WebSocketDisconnect,
-    WebSocketException,
-    status,
 )
 from fastapi.responses import HTMLResponse
 from fastapi.routing import APIRouter
 from fastui import AnyComponent, FastUI, prebuilt_html
 from fastui import components as c
-from fastui.components.display import DisplayLookup, DisplayMode
+from fastui.components.display import DisplayLookup
 from fastui.events import BackEvent, GoToEvent
 
-from ... import auth, config, schema
-from ...api import tasks, users
+from ... import schema
 from ...api.admin import CURR_ADMIN
 from ...api.admin import admin_tasks as api_admin_tasks
 from ...api.admin import admin_users as api_admin_users
 from ...utils.log_helper import get_logger
-from ...ws import ws_manager
 
 logger = get_logger("view")
 

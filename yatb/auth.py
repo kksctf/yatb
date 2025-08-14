@@ -3,8 +3,6 @@ from datetime import UTC, datetime, timedelta
 from typing import Annotated, TypeAlias
 
 from fastapi import Depends, Header, HTTPException, Query, Request, status
-from fastapi.openapi.models import OAuthFlows as OAuthFlowsModel
-from fastapi.security import OAuth2
 from fastapi.security.utils import get_authorization_scheme_param
 from jose import JWTError, jwt
 

@@ -1,7 +1,6 @@
 import cyclopts
 import rich.console
 from pydantic_settings import BaseSettings
-from rich.console import Console
 
 
 class Settings(BaseSettings):

@@ -3,6 +3,9 @@ ruff := "uv run ruff"
 yatb:
     uv run uvicorn yatb.app:app
 
+cli *args:
+    uv run -m yatb.cli {{ args }}
+
 precom: fix format
 
 fix:

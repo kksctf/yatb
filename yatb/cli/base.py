@@ -4,7 +4,7 @@ from pydantic_settings import BaseSettings
 
 
 class Settings(BaseSettings):
-    server: str
+    server: str = "http://127.0.0.1:8000"
 
 
 settings = Settings()  # pyright: ignore[reportCallIssue]

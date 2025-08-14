@@ -1,63 +1,59 @@
 {% extends "base.jhtml" %}
-{% import "macro.jhtml" as macro with context %}
 
-{% block head %}
-    {% set head_data.page_name = "Scoreboard" %}
-    {{ super() }}
+{% block title %}Scoreboard{% endblock %}
+
+{% block extra_head %}
+  <!-- Font-Awesome for check / x / star icons -->
+  <link rel="stylesheet"
+        href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.5.0/css/all.min.css">
+  <style>
+    /* indicator box 20×20, centred glyph */
+    .sb-indicator {
+      width: 2.5rem; height: 2.5rem;
+      display:flex; align-items:center; justify-content:center;
+      font-size:0.75rem;
+      line-height:1;                       /* tighter vertical align   */
+    }
+    .sb-solved        { background:var(--bulma-success); color: #222;}  /* normal solve  */
+    .sb-solved-last   { background:var(--bulma-primary); color: #222;}  /* user’s last   */
+    .sb-solved-first  { background:var(--bulma-info); color: #222;}  /* first blood   */
+    .sb-unsolved      { color:#555; }          /* simple “x”    */
+
+    /* tiny red dot for “just solved” */
+    .sb-last-dot {
+      position:absolute; top:-2px; right:-2px;
+      width:.5rem; height:.5rem; border-radius:50%;
+      background:#dc2626; border:1px solid #222;
+      z-index: 99999;
+    }
+
+    .sb-star {
+      position:absolute; top:-4px; right:-6px;
+      font-size:.55rem; color:#ffc107;
+      z-index: 99999;
+    }
+  </style>
 {% endblock %}
 
 {% block content %}
-    <div class="container-fluid px-0">
-        <table class="table mt-1 border">
-            <thead>
-                <tr>
-                    <th scope="col">#</th>
-                    <th scope="col">username</th>
-                    <th scope="col">score</th>
-                    <th scope="col"></th>
-                </tr>
-            </thead>
-            <tbody>
-                {% for i, user in enumerate(scoreboard) %}
-                    {% if len(user.solved_tasks) > 0 %}
-                        {% set last_solve_info = user.get_last_solve_time() %}
-                    {% endif %}
-                    <tr>
-                        <th scope="row">{{ i + 1 }}</th>
-                        <td>
-                            <div class="d-flex flex-wrap">{{ user.username }}</div>
-                        </td>
-                        <td>{{ user.score }}</td>
-                        <td class="p-0">
-                            <div class="d-flex justify-content-center flex-wrap">
-                            {% for task in all_tasks|sort(attribute='scoring.points')|sort(attribute='category') %}
-                                {% set tooltip = str(task.scoring.points) + " | " + task.task_name + " | " + task.category %}
-                                {% if task.task_id in user.solved_tasks %}
-                                    {% set tooltip = tooltip + " | " + template_format_time(user.solved_tasks[task.task_id]) %}
-                                {% endif %}
+<h1 class="title is-3">Scoreboard</h1>
 
-                                <div class="m-0 p-0 position-relative" data-bs-toggle="tooltip" data-bs-placement="top" data-bs-title="{{ tooltip }}">
-                                    {% if task.task_id in user.solved_tasks %}
-                                        {% if task.task_id == last_solve_info[0] %}
-                                            <span class="position-absolute top-0 start-100 translate-middle p-1 bg-danger border border-dark rounded-circle" style="z-index: 99;"></span>
-                                            <div class="bi bi-check scoreboard-indicator-fontsize" style="background-color: #d9ed92;"></div>
-                                        {% else %}
-                                            <div class="bi bi-check scoreboard-indicator-fontsize" style="background-color: #99d98c;"></div>
-                                        {% endif %}
-                                    {% else %}
-                                        <div class="bi bi-x scoreboard-indicator-fontsize"></div>
-                                    {% endif %}
-                                </div>
-                            {% endfor %}
-                            </div>
-                        </td>
-                    </tr>
-                {% endfor %}
-            </tbody>
-        </table>
-    </div>
-{% endblock %}
+<table class="table is-fullwidth">
+  <thead>
+    <tr>
+      <th></th>
+      <th>who</th>
+      <th>how much</th>
+      <th></th>
+    </tr>
+  </thead>
 
-{% block footer %}
-    {{ super() }}
+  <tbody id="scoreboard-body"
+         hx-get="/scoreboard"
+         hx-trigger="load, every 30s"
+         hx-target="#scoreboard-body"
+         hx-swap="innerHTML">
+    {% include "partials/scoreboard_table.jhtml" %}
+  </tbody>
+</table>
 {% endblock %}

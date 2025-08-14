@@ -3,23 +3,26 @@ import uuid
 from collections.abc import Mapping
 from pathlib import Path
 
-from fastapi import BackgroundTasks, Depends, Request, Response
+from fastapi import BackgroundTasks, Query, Request, Response
+from fastapi.responses import HTMLResponse
 from fastapi.routing import APIRoute as _APIRoute
 from fastapi.routing import APIRouter
 from fastapi.templating import Jinja2Templates
 from starlette.routing import Router
 from starlette.templating import _TemplateResponse
 
-from yatb import auth, schema
+from yatb import auth, schema, i18n
 from yatb.api import tasks, users
 from yatb.config import settings
+from ..db.task import TaskDB
 from ..db.user import UserDB
 from yatb.utils.log_helper import get_logger
+
 
 logger = get_logger("view")
 
 _base_path = Path(__file__).resolve().parent
-templ = Jinja2Templates(directory=_base_path / "templates")
+templates = Jinja2Templates(directory=_base_path / "templates")
 
 router = APIRouter(
     prefix="",
@@ -61,7 +64,7 @@ async def response_generator(  # noqa: PLR0913 # impossible to fix
     context_base.update(context)
     return await asyncio.get_running_loop().run_in_executor(
         None,
-        lambda: templ.TemplateResponse(
+        lambda: templates.TemplateResponse(
             name=filename,
             context=context_base,
             status_code=status_code,
@@ -76,17 +79,42 @@ def version_string() -> str:
     return f"kks-tb-{settings.VERSION}"
 
 
-templ.env.globals["version_string"] = version_string
-templ.env.globals["len"] = len
-templ.env.globals["template_format_time"] = schema.task.template_format_time
-templ.env.globals["set"] = set
-templ.env.globals["str"] = str
-templ.env.globals["isinstance"] = isinstance
-templ.env.globals["enumerate"] = enumerate
+templates.env.globals["version_string"] = version_string
+templates.env.globals["len"] = len
+templates.env.globals["template_format_time"] = schema.task.template_format_time
+templates.env.globals["set"] = set
+templates.env.globals["str"] = str
+templates.env.globals["isinstance"] = isinstance
+templates.env.globals["enumerate"] = enumerate
 
-templ.env.globals["DEBUG"] = settings.DEBUG
-templ.env.globals["FLAG_BASE"] = settings.FLAG_BASE
-templ.env.globals["CTF_NAME"] = settings.CTF_NAME
+templates.env.globals["DEBUG"] = settings.DEBUG
+templates.env.globals["FLAG_BASE"] = settings.FLAG_BASE
+templates.env.globals["CTF_NAME"] = settings.CTF_NAME
+
+templates.env.globals["generate_form"] = generate_form
+templates.env.globals["FormFieldType"] = FormFieldType
+templates.env.globals["FormContext"] = FormContext
+templates.env.globals["FormContexts"] = FormContexts
+
+
+import gettext, pathlib
+
+TRANSLATIONS = {
+    lang: gettext.translation(
+        domain="messages",
+        localedir=pathlib.Path(__file__).parent.parent / "locale",
+        languages=[lang],
+        fallback=True,
+    )
+    for lang in i18n.SUPPORTED
+}
+
+
+def _(text: str, request: Request) -> str:
+    return TRANSLATIONS[request.state.lang].gettext(text)
+
+
+templates.env.globals.update(_=_)
 
 from . import admin  # noqa
 
@@ -95,48 +123,53 @@ router.include_router(admin.router)
 
 @router.get("/")
 @router.get("/index")
-async def index(req: Request, resp: Response, user: auth.CURR_USER_SAFE, visible_tasks: tasks.VISIBLE_TASKS):
-    return await tasks_get_all(req, resp, user, visible_tasks)
+async def index(request: Request, user: auth.CURR_USER_SAFE) -> HTMLResponse:
+    return await response_generator(request, "index.jhtml", {"curr_user": user})
 
 
 @router.get("/tasks")
-async def tasks_get_all(req: Request, resp: Response, user: auth.CURR_USER_SAFE, visible_tasks: tasks.VISIBLE_TASKS):
+async def tasks_get(
+    req: Request,
+    resp: Response,
+    user: auth.CURR_USER_SAFE,
+    tasks: tasks.VISIBLE_TASKS,
+    category: list[str] | None = Query(None),
+) -> HTMLResponse:
+    # collect every user UUID appearing in first/last pwn lists
+    uid_set: set[uuid.UUID] = set()
+    for t in tasks:
+        uid_set.update(t.pwned_by.keys())
+
+    uid2name = {uid: (await api_users.api_users_get(uid, user)).username for uid in uid_set}
+
+    # Detect if this is an HTMX call (partial refresh) or a full-page load
+    partial_refresh = req.headers.get("hx-request") == "true"
+
+    if not partial_refresh:
+        # templates.TemplateResponse("tasks.jhtml", ctx)
+        return await response_generator(
+            req,
+            "tasks.jhtml",
+            {
+                "curr_user": user,
+                "tasks": tasks,
+                "uid2name": uid2name,
+            },
+        )
+
+    tasks = [t for t in tasks if t.category in (category or [])]
+
+    show_solved = "show_solved" in req.query_params
+    if not show_solved and user:
+        tasks = [t for t in tasks if not t.solved_by(user)]
+
     return await response_generator(
         req,
-        "tasks.jhtml",
+        "partials/task_container.jhtml",
         {
-            "request": req,
             "curr_user": user,
-            "tasks": visible_tasks,
-        },
-    )
-
-
-@router.get("/scoreboard")
-async def scoreboard_get(req: Request, resp: Response, user: auth.CURR_USER_SAFE, visible_tasks: tasks.VISIBLE_TASKS):
-    scoreboard = await UserDB.get_filtered_projected_scoreboard()
-
-    return await response_generator(
-        req,
-        "scoreboard.jhtml",
-        {
-            "request": req,
-            "curr_user": user,
-            "scoreboard": scoreboard,
-            "all_tasks": visible_tasks,
-        },
-    )
-
-
-@router.get("/login")
-async def login_get(req: Request, resp: Response, user: auth.CURR_USER_SAFE):
-    return await response_generator(
-        req,
-        "login.jhtml",
-        {
-            "request": req,
-            "curr_user": user,
-            "auth_ways": schema.auth.ENABLED_AUTH_WAYS,
+            "tasks": tasks,
+            "uid2name": uid2name,
         },
     )
 
@@ -144,17 +177,54 @@ async def login_get(req: Request, resp: Response, user: auth.CURR_USER_SAFE):
 @router.get("/tasks/{task_id}")
 async def tasks_get_task(
     req: Request,
-    resp: Response,
-    task_id: uuid.UUID,
+    task: tasks.CURRENT_TASK,
     user: auth.CURR_USER_SAFE,
-):
-    task = await tasks.get_task(task_id, user)
+) -> HTMLResponse:
     return await response_generator(
         req,
         "task.jhtml",
         {
-            "request": req,
             "curr_user": user,
             "selected_task": task,
+        },
+    )
+
+
+@router.get("/scoreboard")
+async def scoreboard_page(request: Request, user: auth.CURR_USER_SAFE, tasks: tasks.VISIBLE_TASKS) -> HTMLResponse:
+    scoreboard = await UserDB.get_filtered_projected_scoreboard()
+
+    partial_refresh = request.headers.get("hx-request") == "true"
+
+    return await response_generator(
+        request,
+        "scoreboard.jhtml" if not partial_refresh else "partials/scoreboard_table.jhtml",
+        {
+            "curr_user": user,
+            "scoreboard": scoreboard,
+            "all_tasks": tasks,
+        },
+    )
+
+
+@router.get("/profile")
+async def profile_page(request: Request, user: auth.CURR_USER_SAFE) -> HTMLResponse:
+    return await response_generator(
+        request,
+        "profile.jhtml",
+        {
+            "curr_user": user,
+        },
+    )
+
+
+@router.get("/login")
+async def login_get(req: Request, user: auth.CURR_USER_SAFE) -> HTMLResponse:
+    return await response_generator(
+        req,
+        "login.jhtml",
+        {
+            "curr_user": user,
+            "auth_ways": schema.auth.ENABLED_AUTH_WAYS,
         },
     )

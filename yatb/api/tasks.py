@@ -2,7 +2,7 @@ import uuid
 from datetime import UTC, datetime
 from typing import Annotated
 
-from fastapi import APIRouter, Depends, HTTPException, status
+from fastapi import APIRouter, Depends, Form, HTTPException, status
 from pydantic import BaseModel
 
 from yatb import auth, schema
@@ -58,7 +58,7 @@ class BRMessage(BaseModel):
 
 
 @router.post("/submit_flag")
-async def api_task_submit_flag(flag: schema.FlagForm, user: auth.CURR_USER) -> uuid.UUID:
+async def api_task_submit_flag(flag: Annotated[schema.FlagForm, Form()], user: auth.CURR_USER) -> uuid.UUID:
     if datetime.now(tz=UTC) < settings.EVENT_START_TIME:
         raise HTTPException(
             status_code=status.HTTP_425_TOO_EARLY,

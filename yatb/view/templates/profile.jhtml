@@ -1,0 +1,47 @@
+{% extends "base.jhtml" %}
+
+{% block title %}Profile – {{ curr_user.username }}{% endblock %}
+
+{% block content %}
+<h1 class="title is-3">Profile</h1>
+
+<div class="box">
+
+  <!-- Avatar & username -->
+  <div class="media mb-4">
+    <figure class="media-left">
+      <p class="image is-96x96 has-background-grey-lighter has-text-weight-bold
+                is-flex is-justify-content-center is-align-items-center"
+         style="border-radius:50%; font-size:2rem;">
+        {{ curr_user.username[0]|upper }}
+      </p>
+    </figure>
+    <div class="media-content">
+      <p class="title is-4 mb-0">{{ curr_user.username }}</p>
+      {% if curr_user.team %}
+        <p class="subtitle is-6">Team: {{ curr_user.team }}</p>
+      {% endif %}
+    </div>
+  </div>
+
+  <!-- Details table -->
+  <table class="table is-fullwidth">
+    <tbody>
+      <tr>
+        <th>Email</th>
+        <td>{{ curr_user.email or "—" }}</td>
+      </tr>
+      <tr>
+        <th>Score</th>
+        <td>{{ curr_user.score }}</td>
+      </tr>
+    </tbody>
+  </table>
+
+  <!-- Placeholder for future edit form -->
+  <p class="has-text-grey-light">
+    ⚙️ Editing coming soon…
+  </p>
+</div>
+
+{% endblock %}

@@ -37,11 +37,19 @@ dependencies = [
     "formgen@git+https://github.com/kksctf/formgen.git@master",
     "loguru ~= 0.7.2",
     "fastui ~= 0.7.0",
+    "python-multipart==0.0.20",
+    "babel==2.17.0",
 ]
 
 
 [project.optional-dependencies]
-cli = ["typer ~= 0.9.0", "rich ~= 13.6.0", "pydantic-yaml ~= 1.2.0", "cyclopts"]
+cli = [
+    "typer ~= 0.9.0",
+    "rich ~= 13.6.0",
+    "pydantic-yaml ~= 1.5.1",
+    "ruamel.yaml==0.18.10",
+    "cyclopts",
+]
 profiling = ["pyinstrument"]
 
 [dependency-groups]

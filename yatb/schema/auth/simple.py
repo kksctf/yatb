@@ -46,25 +46,22 @@ class SimpleAuth(AuthBase):
             return self.username
 
     class Form(AuthBase.Form):
-        class _Internal(BaseModel):
-            username: str
-            password: str
-
-        internal: _Internal
+        username: str
+        password: str
 
         def check_password(self, model: "SimpleAuth.AuthModel") -> bool:
-            return check_password(model.password_hash[0], model.password_hash[1], self.internal.password)
+            return check_password(model.password_hash[0], model.password_hash[1], self.password)
 
         def check_valid(self) -> bool:
             if settings.DEBUG:
                 return True
 
             if (
-                len(self.internal.username) < SimpleAuth.auth_settings.MIN_USERNAME_LEN
-                or len(self.internal.username) > SimpleAuth.auth_settings.MAX_USERNAME_LEN
+                len(self.username) < SimpleAuth.auth_settings.MIN_USERNAME_LEN
+                or len(self.username) > SimpleAuth.auth_settings.MAX_USERNAME_LEN
             ):
                 return False
-            if len(self.internal.password) < SimpleAuth.auth_settings.MIN_PASSWORD_LEN:  # noqa: SIM103
+            if len(self.password) < SimpleAuth.auth_settings.MIN_PASSWORD_LEN:
                 return False
             return True
 
@@ -74,8 +71,8 @@ class SimpleAuth(AuthBase):
                     status_code=status.HTTP_400_BAD_REQUEST,
                     detail="Invalid data",
                 )
-            password_hash = hash_password(self.internal.password)
-            return SimpleAuth.AuthModel(username=self.internal.username, password_hash=password_hash)
+            password_hash = hash_password(self.password)
+            return SimpleAuth.AuthModel(username=self.username, password_hash=password_hash)
 
     class AuthSettings(AuthBase.AuthSettings):
         DEBUG_USERNAME: str = "Rubikoid"
@@ -99,17 +96,30 @@ class SimpleAuth(AuthBase):
             passw_resrictions = ""
         return f"""
         Login:<br>
-        <form class="login_form">
+
+        <form
+            action="/api/users/auth/simple_login"
+            method="post"
+            hx-post="/api/users/auth/simple_login"
+            hx-swap="none">
             <input type="text" name="username" value="" placeholder="username" {login_resrictions}>
             <input type="password" name="password" value="" placeholder="password" {passw_resrictions}>
-            <button class="w-100 btn btn-warning mt-1" type="submit">Login</button>
+            <button class="button is-warning is-fullwidth">
+                Login
+            </button>
         </form>
 
         Register:<br>
-        <form class="register_form">
+        <form
+            action="/api/users/auth/simple_register"
+            method="post"
+            hx-post="/api/users/auth/simple_register"
+            hx-swap="none">
             <input type="text" name="username" value="" placeholder="username" {login_resrictions}>
             <input type="password" name="password" value="" placeholder="password" {passw_resrictions}>
-            <button class="w-100 btn btn-warning mt-1" type="submit">Register</button>
+            <button class="button is-warning is-fullwidth">
+                Register
+            </button>
         </form>
         """
 

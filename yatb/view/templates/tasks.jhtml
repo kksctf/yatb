@@ -9,14 +9,14 @@
 <!-- ── filters (trigger HTMX GETs) ───────────────────────────── -->
 <div class="mb-4">
     <label class="checkbox mr-3">
-        <input type="checkbox" name="show_solved" hx-get="{{ url_for('tasks_get') }}" hx-target="#tasks-container"
+        <input type="checkbox" name="show_solved" hx-get="{{ url_for('tasks_page') }}" hx-target="#tasks-container"
             hx-include="closest .section" checked>
         Show solved
     </label>
 
     {% for cat in ['crypto', 'binary', 'web', 'forensic', 'other'] %}  {# TODO: dynamic category retrieval #}
     <label class="checkbox mr-2">
-        <input type="checkbox" name="category" value="{{ cat }}" hx-get="{{ url_for('tasks_get') }}"
+        <input type="checkbox" name="category" value="{{ cat }}" hx-get="{{ url_for('tasks_page') }}"
             hx-target="#tasks-container" hx-include="closest .section" checked>
         {{ cat|capitalize }}
     </label>

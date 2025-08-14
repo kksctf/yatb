@@ -1,84 +1,76 @@
 <!DOCTYPE html>
 <html lang="en">
-
-<head>
-    <meta charset="utf-8">
-    <title>{% block title %}HTMX YATB{% endblock %}</title>
-
-    <link rel="stylesheet" href="{{ url_for('static', path='layout.css') }}">
-    
-    <!-- Bulma & HTMX from CDNs -->
-    <link rel="stylesheet" href="https://cdn.jsdelivr.net/npm/bulma@1.0.1/css/bulma.min.css">
-    <script src="https://unpkg.com/htmx.org@2.0.4"></script>
-
-    {# optional per-page extra tags #}
-    {% block extra_head %}{% endblock %}
-</head>
-
-<body>
-    <nav class="navbar" role="navigation" aria-label="main navigation">
-        <div class="navbar-brand">
-            <a class="navbar-item" href="/">
-                <figure class="image is-24x24">
-                    <img src="{{ url_for('static', path='logo.png') }}" />
-                </figure>
-                HTMX YATB
-            </a>
-        </div>
-        <div class="navbar-menu">
-            <div class="navbar-start">
-                <a class="navbar-item" href="/tasks">{{ _("Challenges", request) }}</a>
-                <a class="navbar-item" href="/scoreboard">{{ _("Scoreboard", request) }}</a>
+    <head>
+        <meta charset="utf-8">
+        <title>
+            {% block title %}HTMX YATB{% endblock %}
+        </title>
+        <link rel="stylesheet" href="{{ url_for('static', path='layout.css') }}">
+        <!-- Bulma & HTMX from CDNs -->
+        <link rel="stylesheet"
+              href="https://cdn.jsdelivr.net/npm/bulma@1.0.1/css/bulma.min.css">
+        <script src="https://unpkg.com/htmx.org@2.0.4"></script>
+        {# optional per-page extra tags #}
+        {% block extra_head %}{% endblock %}
+    </head>
+    <body>
+        <nav class="navbar" role="navigation" aria-label="main navigation">
+            <div class="navbar-brand">
+                <a class="navbar-item" href="{{ url_for('index') }}">
+                    <figure class="image is-24x24">
+                        <img src="{{ url_for('static', path='logo.png') }}" />
+                    </figure>
+                    HTMX YATB
+                </a>
             </div>
-            <div class="navbar-end">
-                {% if curr_user %}
-                    <!-- response placeholder -->
-                    <div id="flag-submit-result" class="navbar-item"></div>
-                    <form class="navbar-item"
-                        method="post"
-                        action="/api/tasks/submit_flag"
-                        hx-post="/api/tasks/submit_flag"
-                        hx-target="#flag-submit-result"
-                        hx-swap="innerHTML">
-
-                    <div class="field has-addons">
-                        <p class="control">
-                        <span class="button is-static">{{ FLAG_BASE }}{</span>
-                        </p>
-
-                        <p class="control is-expanded">
-                        <input class="input" name="flag"
-                                placeholder="sampl3_fl4g"
-                                required>
-                        </p>
-
-                        <p class="control">
-                        <span class="button is-static">}</span>
-                        </p>
-
-                        <p class="control">
-                        <button class="button is-info">{{ _("Submit", request) }}</button>
-                        </p>
-                    </div>
-                    </form>
-                    <a class="navbar-item" href="/profile">{{ curr_user.username }}</a>
-                    <a class="navbar-item" href="{{ url_for('api_users_logout') }}">{{ _("Logout", request) }}</a>
-                {% else %}
-                    <a class="navbar-item" href="/login">{{ _("Login", request) }}</a>
-                {% endif %}
+            <div class="navbar-menu">
+                <div class="navbar-start">
+                    <a class="navbar-item" href="{{ url_for('tasks_page') }}">{{ _("Challenges", request) }}</a>
+                    <a class="navbar-item" href="{{ url_for('scoreboard_page') }}">{{ _("Scoreboard", request) }}</a>
+                </div>
+                <div class="navbar-end">
+                    {% if curr_user %}
+                        <!-- response placeholder -->
+                        <div id="flag-submit-result" class="navbar-item"></div>
+                        <form class="navbar-item"
+                              method="post"
+                              action="{{ url_for('api_task_submit_flag') }}"
+                              hx-post="{{ url_for('api_task_submit_flag') }}"
+                              hx-target="#flag-submit-result"
+                              hx-swap="innerHTML">
+                            <div class="field has-addons">
+                                <p class="control">
+                                    <span class="button is-static">{{ FLAG_BASE }}{</span>
+                                </p>
+                                <p class="control is-expanded">
+                                    <input class="input" name="flag" placeholder="sampl3_fl4g" required>
+                                </p>
+                                <p class="control">
+                                    <span class="button is-static">}</span>
+                                </p>
+                                <p class="control">
+                                    <button class="button is-info">{{ _("Submit", request) }}</button>
+                                </p>
+                            </div>
+                        </form>
+                        <a class="navbar-item" href="{{ url_for('profile_page') }}">{{ curr_user.username }}</a>
+                        {% if curr_user.is_admin %}<a class="navbar-item" href="{{ url_for('admin_index') }}">Admin area</a>{% endif %}
+                        <a class="navbar-item" href="{{ url_for('api_users_logout') }}">{{ _("Logout", request) }}</a>
+                    {% else %}
+                        <a class="navbar-item" href="{{ url_for('login_page') }}">{{ _("Login", request) }}</a>
+                    {% endif %}
+                </div>
             </div>
-        </div>
-    </nav>
-
-    <section class="section">
-        <div class="container">
-            {% block content %}{% endblock %}
-        </div>
-    </section>
-
-    {% block footer %}
-    <footer class="footer has-text-centered">2025 kksctf</footer>
-    {% endblock %}
-</body>
-
+        </nav>
+        <section class="section">
+            <div class="container">
+                {% block content %}{% endblock %}
+            </div>
+        </section>
+        {% block footer %}
+            <footer class="footer has-text-centered">
+                2025 kksctf
+            </footer>
+        {% endblock %}
+    </body>
 </html>

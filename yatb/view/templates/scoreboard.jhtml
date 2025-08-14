@@ -49,7 +49,7 @@
   </thead>
 
   <tbody id="scoreboard-body"
-         hx-get="/scoreboard"
+         hx-get="{{ url_for('scoreboard_page') }}"
          hx-trigger="load, every 30s"
          hx-target="#scoreboard-body"
          hx-swap="innerHTML">

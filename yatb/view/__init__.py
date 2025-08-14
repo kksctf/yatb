@@ -121,7 +121,7 @@ async def index(request: Request, user: auth.CURR_USER_SAFE) -> HTMLResponse:
 
 
 @router.get("/tasks")
-async def tasks_get(
+async def tasks_page(
     req: Request,
     is_httpx: IS_HTTPX,
     user: auth.CURR_USER_SAFE,
@@ -160,7 +160,7 @@ async def tasks_get(
 
 
 @router.get("/tasks/{task_id}")
-async def tasks_get_task(
+async def one_task_page(
     req: Request,
     task: tasks.CURRENT_TASK,
     user: auth.CURR_USER_SAFE,
@@ -207,7 +207,7 @@ async def profile_page(request: Request, user: auth.CURR_USER_SAFE) -> HTMLRespo
 
 
 @router.get("/login")
-async def login_get(req: Request, user: auth.CURR_USER_SAFE) -> HTMLResponse:
+async def login_page(req: Request, user: auth.CURR_USER_SAFE) -> HTMLResponse:
     return await response_generator(
         req,
         "login.jhtml",

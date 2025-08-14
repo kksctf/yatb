@@ -41,7 +41,7 @@ dependencies = [
 
 
 [project.optional-dependencies]
-cli = ["typer ~= 0.9.0", "rich ~= 13.6.0", "pydantic-yaml ~= 1.2.0"]
+cli = ["typer ~= 0.9.0", "rich ~= 13.6.0", "pydantic-yaml ~= 1.2.0", "cyclopts"]
 profiling = ["pyinstrument"]
 
 [dependency-groups]
@@ -118,8 +118,9 @@ ignore = [
 [tool.ruff.lint.per-file-ignores]
 "**/{tests}/*" = ["S101", "INP001", "ANN201"]
 "**/{tests}/pydantic/ebasemodel/*" = ["SLF001"]
-# пока не умеем в автоформат __all__, делаем так.
+"**/*/cli/*" = ["ANN201"]
 
+# пока не умеем в автоформат __all__, делаем так.
 "**/__init__.py" = ["F401"]
 
 [tool.pytest.ini_options]

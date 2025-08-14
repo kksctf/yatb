@@ -1,18 +1,17 @@
-import typer
+import cyclopts
+import rich.console
 from pydantic_settings import BaseSettings
 from rich.console import Console
 
 
 class Settings(BaseSettings):
-    files_url: str = "http://127.0.0.1:9999"
-    base_url: str = "http://127.0.0.1:8080"
-
-    tasks_ip: str = "127.0.0.1"
-
-    tasks_domain: str = "tasks.kksctf.ru"
-    flag_base: str = "kks"
+    server: str
 
 
-settings = Settings()
-tapp = typer.Typer()
-c = Console()
+settings = Settings()  # pyright: ignore[reportCallIssue]
+c = rich.console.Console()
+app = cyclopts.App()
+
+
+if __name__ == "__main__":
+    app()

@@ -4,16 +4,22 @@ from types import TracebackType
 
 import httpx
 
-from .. import app, auth, config, schema
+from yatb import auth, config, schema
+from yatb.app import app
+from yatb.config import settings as yatb_settings
+
 from .base import settings
-from .models import AllTasks, AllUsers, RawTask, RawUser, UserPrivate, UserPublic
+from .models import AllTasks, AllUsers
 
 
 class YATB:
     s: httpx.AsyncClient
 
-    def __init__(self) -> None:
-        self.s = httpx.AsyncClient(base_url=settings.base_url)
+    def __init__(self, *, set_default_token: bool = True) -> None:
+        self.s = httpx.AsyncClient(base_url=settings.server)
+
+        if set_default_token:
+            self.set_admin_token(yatb_settings.API_TOKEN)
 
     def set_admin_token(self, token: str = config.settings.API_TOKEN) -> None:
         self.s.headers["X-Token"] = token
@@ -21,45 +27,45 @@ class YATB:
     def make_user_token(self, user: schema.User) -> str:
         return f"Bearer {auth.create_user_token(user)}"
 
-    async def register_user(self, user: RawUser) -> UserPrivate:
-        resp = await self.s.post(
-            app.url_path_for("api_auth_simple_register"),
-            json=schema.SimpleAuth.Form._Internal(
-                username=user.username,
-                password=user.password,
-            ).model_dump(mode="json"),
-        )
-        resp.raise_for_status()
+    # async def register_user(self, user: RawUser) -> UserPrivate:
+    #     resp = await self.s.post(
+    #         app.url_path_for("api_auth_simple_register"),
+    #         json=schema.SimpleAuth.Form._Internal(
+    #             username=user.username,
+    #             password=user.password,
+    #         ).model_dump(mode="json"),
+    #     )
+    #     resp.raise_for_status()
 
-        ret = await self.find_user_by_name(user.username)
-        if not ret:
-            raise Exception("WTF")
-        return ret
+    #     ret = await self.find_user_by_name(user.username)
+    #     if not ret:
+    #         raise Exception("WTF")
+    #     return ret
 
-    async def get_self(self) -> UserPublic:
-        return UserPublic.model_validate((await self.s.get(app.url_path_for("api_users_me"))).json())
+    async def get_self(self) -> schema.User:
+        return schema.User.public_model.model_validate((await self.s.get(app.url_path_for("api_users_me"))).json())
 
     async def get_all_tasks(self) -> dict[uuid.UUID, schema.Task]:
         resp = AllTasks.model_validate((await self.s.get(app.url_path_for("api_admin_tasks"))).json())
         return resp.root
 
-    async def get_all_users(self) -> dict[uuid.UUID, UserPrivate]:
+    async def get_all_users(self) -> dict[uuid.UUID, schema.User]:
         resp = AllUsers.model_validate((await self.s.get(app.url_path_for("api_admin_users"))).json())
         return resp.root
 
-    async def assign_task_to_user(self, user_id: uuid.UUID, task_id: uuid.UUID) -> UserPrivate:
+    async def assign_task_to_user(self, user_id: uuid.UUID, task_id: uuid.UUID) -> schema.User:
         resp = await self.s.post(
             app.url_path_for("api_admin_assign_task_to_user", user_id=user_id),
             params={"task_id": str(task_id)},
         )
-        return UserPrivate.model_validate(resp.json())
+        return schema.User.admin_model.model_validate(resp.json())
 
-    async def deassign_task_to_user(self, user_id: uuid.UUID, task_id: uuid.UUID) -> UserPrivate:
+    async def deassign_task_to_user(self, user_id: uuid.UUID, task_id: uuid.UUID) -> schema.User:
         resp = await self.s.post(
             app.url_path_for("api_admin_deassign_task_to_user", user_id=user_id),
             params={"task_id": str(task_id)},
         )
-        return UserPrivate.model_validate(resp.json())
+        return schema.User.admin_model.model_validate(resp.json())
 
     async def detele_everything_but_tasks(self):
         resp = await self.s.delete(app.url_path_for("api_detele_everything_but_tasks"))
@@ -69,7 +75,7 @@ class YATB:
         resp = await self.s.delete(app.url_path_for("api_detele_everything"))
         resp.raise_for_status()
 
-    async def find_user_by_name(self, username: str) -> UserPrivate | None:
+    async def find_user_by_name(self, username: str) -> schema.User | None:
         users = await self.get_all_users()
         for user in users.values():
             if user.username == username:
@@ -85,18 +91,11 @@ class YATB:
 
         return None
 
-    async def create_task(self, task: RawTask) -> schema.Task:
+    async def create_task(self, task: schema.TaskForm) -> schema.Task:
         new_task = (
             await self.s.post(
                 app.url_path_for("api_admin_task_create"),
-                json=schema.TaskForm(
-                    task_name=task.task_name,
-                    description=task.description,
-                    category=task.category,
-                    flag=schema.flags.StaticFlag(flag=task.flag, flag_base=settings.flag_base),
-                    scoring=schema.scoring.DynamicKKSScoring(),
-                    author=task.author,
-                ).model_dump(mode="json"),
+                json=task.model_dump(mode="json"),
             )
         ).json()
         return schema.Task.model_validate(new_task)
@@ -116,7 +115,7 @@ class YATB:
                 json=task.model_dump(mode="json"),
             )
         ).json()
-        return schema.Task.model_validate(new_task)
+        return schema.Task.admin_model.model_validate(new_task)
 
     async def solve_as_user(self, user: schema.User, flag: str) -> str:
         token = self.make_user_token(user)

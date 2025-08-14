@@ -1,1 +1,1 @@
-from .cmd import tapp
+from .base import app, c, settings

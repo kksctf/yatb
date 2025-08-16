@@ -100,6 +100,15 @@ class YATB:
         ).json()
         return schema.Task.model_validate(new_task)
 
+    async def create_task_full_form(self, task: schema.TaskForm) -> schema.Task:
+        new_task = (
+            await self.s.post(
+                app.url_path_for("api_admin_task_create"),
+                json=task.model_dump(mode="json"),
+            )
+        ).json()
+        return schema.Task.model_validate(new_task)
+
     async def admin_recalc_scoreboard(self) -> None:
         resp = await self.s.get(app.url_path_for("api_admin_recalc_scoreboard"))
         resp.raise_for_status()

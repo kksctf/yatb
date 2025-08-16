@@ -7,12 +7,18 @@ from typing import Annotated, TypeAlias
 from zoneinfo import ZoneInfo
 
 from pydantic import BaseModel, Field, computed_field
+from enum import Enum
+from typing import Annotated, ClassVar
+from zoneinfo import ZoneInfo
 
-from .. import config
-from ..config import settings
-from ..ebasemodelv2 import Admin, EBaseModelV2, Public
-from ..utils import md
-from ..utils.log_helper import get_logger
+from pydantic import Field, computed_field
+from typing_extensions import TypeVar
+
+from yatb import config
+from yatb.config import settings
+from yatb.ebasemodelv2 import Admin, EBaseModelV2, Public
+from yatb.utils import md
+from yatb.utils.log_helper import get_logger
 from .flags import DynamicKKSFlag, StaticFlag
 from .scoring import DynamicKKSScoring, StaticScoring
 from .user import User
@@ -42,6 +48,15 @@ FlagUnion: TypeAlias = Annotated[
 ]
 
 
+class DynamicTaskType(Enum):
+    BUILDER = "builder"
+    SERVICE = "service"
+
+
+class DynamicTaskInfo(EBaseModelV2):
+    dynamic_task_type: Admin[DynamicTaskType]
+
+
 class Task(EBaseModelV2):
     task_id: Public[uuid.UUID] = Field(default_factory=uuid.uuid4)
 
@@ -60,6 +75,8 @@ class Task(EBaseModelV2):
     hidden: Admin[bool] = True
 
     author: Public[str]
+
+    dynamic_task_info: Admin[DynamicTaskInfo | None] = None
 
     @computed_field
     @property
@@ -169,6 +186,8 @@ class TaskForm(BaseModel):
     flag: FlagUnion
     author: str = ""
 
+    dynamic_task_info: DynamicTaskInfo | None = None
+
     def to_task[T: Task](self, cls: type[T], author: User) -> T:
         str_author = self.author if self.author != "" else f"@{author.username}"
         if not str_author.startswith("@"):
@@ -182,4 +201,5 @@ class TaskForm(BaseModel):
             description_html=cls.regenerate_md(self.description),
             flag=self.flag,
             author=str_author,
+            dynamic_task_info=self.dynamic_task_info,
         )

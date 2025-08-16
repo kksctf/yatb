@@ -107,6 +107,7 @@ celerybeat.pid
 # Environments
 .env
 .venv
+.linvenv
 env/
 venv/
 ENV/
@@ -147,5 +148,10 @@ cython_debug/
 
 logs/
 
+yatb_prod
+
 # env
 yatb.env
+k3s.yaml
+dynamic_tasks_app/wtf
+yatb_state.json

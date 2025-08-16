@@ -7,6 +7,7 @@ from fastapi.staticfiles import StaticFiles
 from prometheus_fastapi_instrumentator import Instrumentator
 
 from . import api, i18n, main, view
+from .api.api_dynamic_tasks import __client
 from .config import settings
 from .db import db
 
@@ -14,10 +15,11 @@ from .db import db
 @asynccontextmanager
 async def lifespan(app: FastAPI):
     await db.init()
-    try:
-        yield
-    finally:
-        await db.close()
+    async with __client:
+        try:
+            yield
+        finally:
+            await db.close()
 
 
 app = FastAPI(

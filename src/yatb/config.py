@@ -62,6 +62,9 @@ class Settings(BaseSettings):
         "DiscordOAuth",
     ]
 
+    DYNAMIC_TASKS_CONTROLLER: str | None = None
+    DYNAMIC_TASKS_CONTROLLER_TOKEN: str | None = None
+
     @model_validator(mode="after")
     def check_non_default_tokens(self) -> Self:
         if self.DEBUG or self.TESTING:

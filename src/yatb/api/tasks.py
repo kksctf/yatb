@@ -19,6 +19,13 @@ router = APIRouter(
 )
 
 
+class BRMessage(BaseModel):
+    task_name: str
+    user_name: str
+    points: int
+    is_fb: bool
+
+
 async def get_task(task_id: uuid.UUID, user: auth.CURR_USER_SAFE) -> TaskDB:
     task = await TaskDB.find_by_task_uuid(task_id)
     if not task or not task.visible_for_user(user):
@@ -48,13 +55,6 @@ async def api_tasks_get(tasks: VISIBLE_TASKS) -> list[schema.Task.public_model]:
 @router.get("/{task_id}")
 async def api_task_get(task: CURRENT_TASK) -> schema.Task.public_model:
     return task
-
-
-class BRMessage(BaseModel):
-    task_name: str
-    user_name: str
-    points: int
-    is_fb: bool
 
 
 @router.post("/submit_flag")

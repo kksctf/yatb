@@ -1,0 +1,4 @@
+cyclopts==2.9.3
+rich==13.7.1
+httpx==0.22.0
+pydantic-yaml==1.2.0

@@ -1,6 +1,6 @@
-from fastapi import FastAPI
 import os
 
+from fastapi import FastAPI
 from fastapi.responses import PlainTextResponse
 
 FLAG = os.environ.get("FLAG", "flag{example}")

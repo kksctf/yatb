@@ -2,8 +2,7 @@ from dataclasses import dataclass
 from pathlib import Path
 from typing import Annotated
 
-from loguru import logger
-from pydantic import AfterValidator, BaseModel, BeforeValidator, ValidationInfo, field_validator, validator
+from pydantic import AfterValidator, BaseModel, BeforeValidator, ValidationInfo
 
 from ..utils.pydantic_yaml import parse_yaml_file_as
 

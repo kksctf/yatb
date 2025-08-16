@@ -1,20 +1,18 @@
 import datetime
-from collections.abc import Callable
 from ipaddress import ip_address
-from typing import Annotated, Literal, Self, TypeAlias, cast
+from typing import Annotated, Self, TypeAlias
 from uuid import UUID
 
 import httpx
 import humanize
-from fastapi import APIRouter, Depends, HTTPException, Request, Response, status
+from fastapi import APIRouter, Depends, HTTPException, status
 from fastapi.responses import HTMLResponse
 from httpx import AsyncClient
 from pydantic import BaseModel, TypeAdapter
 
-from yatb import auth, db, schema
+from yatb import auth, schema
 from yatb.config import settings
-from yatb.db import TaskDB, UserDB
-from yatb.utils import metrics
+from yatb.db import TaskDB
 from yatb.utils.log_helper import get_logger
 
 from .tasks import CURRENT_TASK, get_task

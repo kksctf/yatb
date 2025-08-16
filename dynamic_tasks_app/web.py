@@ -1,11 +1,9 @@
 from contextlib import asynccontextmanager
-from uuid import UUID
 
-from fastapi import APIRouter, FastAPI, HTTPException, Request, status
+from fastapi import APIRouter, FastAPI, HTTPException, status
 
 from dynamic_tasks_app.connectors import ExternalDynamicTaskInfo
 
-from .config import settings
 from .connectors import DynamicTaskInfo
 from .connectors.errors import GenericConnectorError, InstanceNotFoundError
 from .connectors.kub import KubeConnector

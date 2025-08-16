@@ -1,9 +1,7 @@
-import asyncio
 from contextlib import AsyncExitStack
 from pathlib import Path
 
 from cyclopts import App
-from loguru import logger
 
 from .connectors.compose import load_compose
 from .connectors.kub import KubeConnector

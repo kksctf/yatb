@@ -3,22 +3,18 @@
 
 import datetime
 import uuid
+from enum import Enum
 from typing import Annotated, TypeAlias
 from zoneinfo import ZoneInfo
 
 from pydantic import BaseModel, Field, computed_field
-from enum import Enum
-from typing import Annotated, ClassVar
-from zoneinfo import ZoneInfo
-
-from pydantic import Field, computed_field
-from typing_extensions import TypeVar
 
 from yatb import config
 from yatb.config import settings
 from yatb.ebasemodelv2 import Admin, EBaseModelV2, Public
 from yatb.utils import md
 from yatb.utils.log_helper import get_logger
+
 from .flags import DynamicKKSFlag, StaticFlag
 from .scoring import DynamicKKSScoring, StaticScoring
 from .user import User

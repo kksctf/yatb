@@ -15,7 +15,7 @@ router = APIRouter(
 
 
 @router.get("/scoreboard")
-async def api_scoreboard_get() -> Sequence[schema.User.public_model]:
+async def api_scoreboard_get(user: auth.CURR_USER_SCOREBOARD) -> Sequence[schema.User.public_model]:
     return await UserDB.get_filtered_scoreboard()
 
 
@@ -84,12 +84,12 @@ async def api_users_get(user_id: uuid.UUID, user: auth.CURR_USER) -> schema.User
 
 
 @router.get("/{user_id}/username")
-async def api_users_get_username(user_id: uuid.UUID) -> str:
-    req_user = await UserDB.find_by_user_uuid(user_id)
-    if not req_user:
+async def api_users_get_username(user_id: uuid.UUID, user: auth.CURR_USER_SCOREBOARD) -> str:
+    target_user = await UserDB.find_by_user_uuid(user_id)
+    if not target_user:
         raise HTTPException(
             status_code=status.HTTP_404_NOT_FOUND,
             detail="ID not found",
             headers={"WWW-Authenticate": "Bearer"},
         )
-    return req_user.username
+    return target_user.username

@@ -37,6 +37,8 @@ class Settings(BaseSettings):
 
     UUID_TO_PATH_MAPPING: dict[UUID, Path] = {}
 
+    ADMIN_PASSWORD: str = _DEFAULT_TOKEN
+
     @property
     def kube_config_path(self) -> str | None:
         if not self.KUBE_CONFIG_PATH:
@@ -53,7 +55,7 @@ class Settings(BaseSettings):
         if self.DEBUG or self.TESTING:
             return self
 
-        token_check_list = ["DYNAMIC_TASKS_CONTROLLER_TOKEN"]
+        token_check_list = ["DYNAMIC_TASKS_CONTROLLER_TOKEN", "ADMIN_PASSWORD"]
         for token_name in token_check_list:
             if getattr(self, token_name) == _DEFAULT_TOKEN:
                 raise DefaultTokenError(f"Field '{token_name}' have default token value")

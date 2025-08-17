@@ -65,6 +65,8 @@ class Settings(BaseSettings):
     DYNAMIC_TASKS_CONTROLLER: str | None = None
     DYNAMIC_TASKS_CONTROLLER_TOKEN: str | None = None
 
+    PRIVATE_SCOREBOARD: bool = False
+
     @model_validator(mode="after")
     def check_non_default_tokens(self) -> Self:
         if self.DEBUG or self.TESTING:
@@ -87,7 +89,7 @@ class Settings(BaseSettings):
                 else ""
             )
         else:
-            self.VERSION += "0.6.3a0"
+            self.VERSION += "0.6.4"
             if self.COMMIT:
                 self.VERSION += f"-{self.COMMIT[:8]}"
 

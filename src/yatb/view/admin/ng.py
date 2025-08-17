@@ -1,4 +1,3 @@
-
 from fastapi import (
     Request,
 )
@@ -128,8 +127,9 @@ async def admin_ng_users(req: Request, admin: CURR_ADMIN) -> list[AnyComponent]:
             columns=[
                 DisplayLookup(field="username", title="Name", on_click=GoToEvent(url=url_gen(req, "user/{user_id}"))),
                 DisplayLookup(field="is_admin", title="Admin"),
-                # DisplayLookup(field="points", title="Points"),
-                # DisplayLookup(field="solves", title="Solve Count"),
+                DisplayLookup(field="points", title="Points"),
+                DisplayLookup(field="solves", title="Solve Count"),
+                DisplayLookup(field="hidden", title="Hidden?"),
             ],
         ),
         title="Users",

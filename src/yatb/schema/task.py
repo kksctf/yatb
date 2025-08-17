@@ -47,6 +47,7 @@ FlagUnion: TypeAlias = Annotated[
 class DynamicTaskType(Enum):
     BUILDER = "builder"
     SERVICE = "service"
+    BUILDER_AND_SERVICE = "builder_and_service"
 
 
 class DynamicTaskInfo(EBaseModelV2):
@@ -73,6 +74,8 @@ class Task(EBaseModelV2):
     author: Public[str]
 
     dynamic_task_info: Admin[DynamicTaskInfo | None] = None
+
+    req_tasks: Admin[list[uuid.UUID]] = Field(default_factory=list)
 
     @computed_field
     @property
@@ -114,6 +117,14 @@ class Task(EBaseModelV2):
         # always hide
         if self.hidden:  # noqa: SIM103
             return False
+
+        if self.req_tasks:
+            if not user:
+                return False
+
+            # every element of self.req_tasks is in user.solved_tasks
+            # i.e. user solved all of tasks in req.tasks
+            return set(self.req_tasks) <= set(user.solved_tasks)
 
         return True
 
@@ -175,6 +186,8 @@ class Task(EBaseModelV2):
 
 
 class TaskForm(BaseModel):
+    task_id: uuid.UUID | None = None
+
     task_name: str
     category: str
     scoring: ScoringUnion
@@ -184,12 +197,14 @@ class TaskForm(BaseModel):
 
     dynamic_task_info: DynamicTaskInfo | None = None
 
+    req_tasks: list[uuid.UUID] = []
+
     def to_task[T: Task](self, cls: type[T], author: User) -> T:
         str_author = self.author if self.author != "" else f"@{author.username}"
         if not str_author.startswith("@"):
             str_author = f"@{str_author}"
 
-        return cls(
+        task = cls(
             task_name=self.task_name,
             category=self.category,
             scoring=self.scoring,
@@ -198,4 +213,11 @@ class TaskForm(BaseModel):
             flag=self.flag,
             author=str_author,
             dynamic_task_info=self.dynamic_task_info,
+            req_tasks=self.req_tasks,
         )
+
+        # WTF: shitcode
+        if self.task_id:
+            task.task_id = self.task_id
+
+        return task

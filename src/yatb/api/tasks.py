@@ -65,16 +65,17 @@ async def api_task_submit_flag(flag: Annotated[schema.FlagForm, Form()], user: a
             detail="CTF has not started yet",
         )
 
-    task = await TaskDB.find_by_flag(flag.flag, user)
+    cleaned_flag = flag.flag.strip()
+    task = await TaskDB.find_by_flag(cleaned_flag, user)
     if task:
-        logger.info(f"{user.short_desc()} state=found task with flag flag={flag.flag}, task={task.short_desc()}.")
+        logger.info(f"{user.short_desc()} state=found task with flag flag={cleaned_flag!r}, task={task.short_desc()}")
     else:
-        logger.info(f"{user.short_desc()} state=not_found task with flag={flag.flag}")
+        logger.info(f"{user.short_desc()} state=not_found task with flag={cleaned_flag!r}")
         metrics.bad_solves_per_user.labels(user_id=user.user_id, username=user.username).inc()
 
-    if not task or not task.visible_for_user(user):
-        if task and not task.visible_for_user(user):
-            logger.warning(f"Кто-то {user} попытался решить хидден таск {task}")
+    if not task or not (visible := task.visible_for_user(user)):
+        if task and not visible:
+            logger.warning(f"Someone {user.short_desc()} trying to solve hidden task {task}")
             raise HTTPException(
                 status_code=status.HTTP_404_NOT_FOUND,
                 detail="Bad flag",
@@ -112,6 +113,10 @@ async def api_task_submit_flag(flag: Annotated[schema.FlagForm, Form()], user: a
         metrics.solves_per_user.labels(user_id=user.user_id, username=user.username).inc()
 
     ret = await user.solve_task_bw(task)
+
+    # TODO: maybe this is counter-UX...
+    if task.dynamic_task_info and (client := get_client_safe()):
+        await client.stop(DynamicTaskInfo.build(task=task, user=user))
 
     msg = BRMessage(
         task_name=task.task_name,

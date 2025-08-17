@@ -1,6 +1,6 @@
 from contextlib import asynccontextmanager
 
-from fastapi import APIRouter, FastAPI, HTTPException, status
+from fastapi import APIRouter, Depends, FastAPI, HTTPException, Request, status
 
 from .connectors import DynamicTaskInfo, ExternalDynamicTaskInfo
 from .connectors.errors import GenericConnectorError, InstanceNotFoundError
@@ -24,11 +24,27 @@ app = FastAPI(
     #     middleware=[process_exception],
 )
 
+from . import view
 
-# TODO: token check
+app.include_router(view.api_rotuer)
+app.include_router(view.base_router)
+
+
+async def check_token(request: Request):
+    token = request.headers.get("X-Token", None)
+    if token != settings.DYNAMIC_TASKS_CONTROLLER_TOKEN:
+        raise HTTPException(
+            status_code=status.HTTP_401_UNAUTHORIZED,
+            detail="invalid token",
+        )
+
+
 router = APIRouter(
     prefix="/api",
     tags=["api"],
+    dependencies=[
+        Depends(check_token),
+    ],
 )
 
 
@@ -72,13 +88,13 @@ async def api_stop(task_info: DynamicTaskInfo):
 
 
 @router.post("/restart")
-async def api_restart(task_info: DynamicTaskInfo):
+async def api_restart(task_info: DynamicTaskInfo) -> ExternalDynamicTaskInfo:
     async with execption_handler():
         return await connector.restart(task_info)
 
 
 @router.post("/extend")
-async def api_extend(task_info: DynamicTaskInfo):
+async def api_extend(task_info: DynamicTaskInfo) -> ExternalDynamicTaskInfo:
     async with execption_handler():
         return await connector.extend(task_info)
 

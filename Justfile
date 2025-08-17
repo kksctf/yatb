@@ -18,4 +18,11 @@ fix-EXE002:
     {{ ruff }} check --select 'EXE002' --output-format json . | jq '.[] | .filename' -r | xargs chmod -x
 
 reset-rights:
-    git diff --numstat | awk '{ if ($1 == "0" && $2 == "0") print $3 }' | xargs -I{} git checkout HEAD -- "{}"
+    git diff --numstat | awk '{ if ($1 == "0" && $2 == "0") print $3 }' 
+    # | xargs -I{} git checkout HEAD -- "{}"
+
+reset-rights-x:
+    git diff --numstat --staged | awk '{ if ($1 == "0" && $2 == "0") print $3 }' 
+    # | xargs -I{} git restore --staged -- "{}"
+    # | xargs -I{} git restore --staged -- "{}"
+    # | xargs -I{} git checkout HEAD -- "{}"

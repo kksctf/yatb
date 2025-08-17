@@ -3,10 +3,12 @@ import uuid
 from types import TracebackType
 
 import httpx
+from dynamic_tasks_app.config import settings as dtc_settings
 
 from yatb import auth, config, schema
 from yatb.app import app
 from yatb.config import settings as yatb_settings
+from yatb.shared.s3.client import MinioEx
 
 from .base import settings
 from .models import AllTasks, AllUsers
@@ -14,12 +16,29 @@ from .models import AllTasks, AllUsers
 
 class YATB:
     s: httpx.AsyncClient
+    s3: MinioEx
 
     def __init__(self, *, set_default_token: bool = True) -> None:
         self.s = httpx.AsyncClient(base_url=settings.server)
 
         if set_default_token:
             self.set_admin_token(yatb_settings.API_TOKEN)
+
+        self.s3 = MinioEx(
+            endpoint=dtc_settings.s3_endpoint,
+            access_key=dtc_settings.S3_ACCESS,
+            secret_key=dtc_settings.S3_SECRET,
+            secure=False,  # http for False, https for True
+        )
+
+    async def setup_s3(self) -> None:
+        await self.s3.setup_buckets(
+            [
+                dtc_settings.STATIC_BUCKET_NAME,
+                dtc_settings.TASKS_BUCKET_NAME,
+                dtc_settings.BUILD_RESULT_BUCKET_NAME,
+            ],
+        )
 
     def set_admin_token(self, token: str = config.settings.API_TOKEN) -> None:
         self.s.headers["X-Token"] = token
@@ -138,6 +157,7 @@ class YATB:
 
     async def __aenter__(self):
         self.s = await self.s.__aenter__()
+        await self.setup_s3()
         return self
 
     async def __aexit__(

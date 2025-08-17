@@ -137,7 +137,7 @@ class UserDB(DocumentEx[User], User):
 
         if old_score != self.score:
             logger.warning(f"Recalc: smth wrong with {self.short_desc()}, {old_score} != {self.score}!")
-            # don't update score, if it not changed
+            # update score, if it changed
             await self.update(Set({UserDB.score: self.score}), bulk_writer=bw)
 
     async def solve_task_bw(self, task: TaskDB) -> uuid.UUID:

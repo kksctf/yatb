@@ -15,7 +15,9 @@ function load_all_dynamic_info() {
 
 function set_status(task_id, info) {
     $("#data-" + task_id).html(info);
-    updateMacy();
+    if ("macy" in window) {
+        updateMacy();
+    }
 }
 
 $(".dynamic_task_info").click(function (event) {
@@ -33,7 +35,7 @@ $(".dynamic_task_start").click(function (event) {
     event.preventDefault();
     let task_id = this.dataset.id;
 
-    
+
     set_status(task_id, "Task building in process")
 
     preq(api_list["api_dynamic_task_start"], { "task_id": task_id }, { method: 'GET' })
@@ -61,6 +63,17 @@ $(".dynamic_task_restart").click(function (event) {
     preq(api_list["api_dynamic_task_restart"], { "task_id": task_id }, { method: 'GET' })
         .then(get_text)
         .then(ok_toast_generator("Restart dynamic task"), nok_toast_generator("Restart dynamic task"))
+        .then((data) => {
+            set_status(task_id, data.text);
+        });
+});
+
+$(".dynamic_task_extend").click(function (event) {
+    event.preventDefault();
+    let task_id = this.dataset.id;
+    preq(api_list["api_dynamic_task_extend"], { "task_id": task_id }, { method: 'GET' })
+        .then(get_text)
+        .then(ok_toast_generator("Extend dynamic task"), nok_toast_generator("Extend dynamic task"))
         .then((data) => {
             set_status(task_id, data.text);
         });

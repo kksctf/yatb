@@ -1,0 +1,13 @@
+name: "Testing task"
+description: "testing task, flag is flag{testing}"
+
+author: "Rubikoid"
+category: "web"
+
+flag: "flag{testing}"
+
+dynamic_scoring: true
+
+dynamic_features:
+  - BUILDER
+  - SERVICE

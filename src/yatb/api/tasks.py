@@ -35,16 +35,10 @@ async def get_task(task_id: uuid.UUID, user: auth.CURR_USER_SAFE) -> TaskDB:
         )
     return task
 
-
-async def get_tasks(user: auth.CURR_USER_SAFE) -> list[TaskDB]:
-    tasks = await TaskDB.get_all()
-    tasks = tasks.values()
-    tasks = filter(lambda x: x.visible_for_user(user), tasks)
-    return list(tasks)
-
-
 CURRENT_TASK = Annotated[TaskDB, Depends(get_task)]
 VISIBLE_TASKS = Annotated[list[TaskDB], Depends(get_tasks)]
+
+from .api_dynamic_tasks import get_client_safe  # TODO: circullar dependency
 
 
 @router.get("/")
@@ -115,8 +109,8 @@ async def api_task_submit_flag(flag: Annotated[schema.FlagForm, Form()], user: a
     ret = await user.solve_task_bw(task)
 
     # TODO: maybe this is counter-UX...
-    if task.dynamic_task_info and (client := get_client_safe()):
-        await client.stop(DynamicTaskInfo.build(task=task, user=user))
+    if task.dti and (client := get_client_safe()):
+        await client.stop(UserTaskPair(task=task, user=user))
 
     msg = BRMessage(
         task_name=task.task_name,

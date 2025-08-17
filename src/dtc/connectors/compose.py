@@ -39,6 +39,16 @@ class ServiceBuild(BaseModel):
     dockerfile: RelateivePath = Path("Dockerfile")
 
 
+class ResourceRequirements(BaseModel):
+    cpu: str
+    memory: str
+
+
+class Resource(BaseModel):
+    requests: ResourceRequirements = ResourceRequirements(cpu="100m", memory="64Mi")
+    limits: ResourceRequirements = ResourceRequirements(cpu="800m", memory="1Gi")
+
+
 class Service(BaseModel):
     image: str | None = None
 
@@ -48,7 +58,13 @@ class Service(BaseModel):
 
     ports: list[Port] = []
 
-    environment: list[str] = []
+    environment: dict[str, str] | list[str] = {}
+
+    expose: list[int] = []
+
+    resource: Resource = Resource()
+
+    vm: bool = False
 
     @property
     def prepared_command(self) -> list[str] | None:
@@ -64,9 +80,17 @@ class Service(BaseModel):
     def parsed_env(self) -> dict[str, str]:
         ret = {}
 
-        for raw_env in self.environment:
-            spl = raw_env.split("=", maxsplit=1)
-            ret[spl[0]] = spl[1]
+        if isinstance(self.environment, list):
+            for raw_env in self.environment:
+                spl = raw_env.split("=", maxsplit=1)
+                key, value = spl
+                if value.startswith('"') and value.endswith('"'):
+                    value = value[1:-1]
+
+                ret[key] = value
+
+        elif isinstance(self.environment, dict):
+            ret = self.environment
 
         return ret
 

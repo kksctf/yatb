@@ -62,8 +62,8 @@ class Settings(BaseSettings):
         "DiscordOAuth",
     ]
 
-    DYNAMIC_TASKS_CONTROLLER: str | None = None
-    DYNAMIC_TASKS_CONTROLLER_TOKEN: str | None = None
+    DYNAMIC_TASKS_ETCD: str | None = None
+    DYNAMIC_TASKS_ETCD_PORT: int = 2379
 
     PRIVATE_SCOREBOARD: bool = False
 

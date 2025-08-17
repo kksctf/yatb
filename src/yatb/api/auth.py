@@ -15,7 +15,6 @@ router = APIRouter(
     tags=["auth"],
 )
 
-
 async def check_for_existing_model(
     model: schema.auth.AuthBase.AuthModel,
     check_for_class: type[schema.auth.AuthBase.AuthModel],
@@ -69,6 +68,8 @@ def generic_handler_generator(cls: type[schema.auth.AuthBase]) -> Callable:
         resp.status_code = status.HTTP_303_SEE_OTHER
         resp.headers["Location"] = str(req.url_for("index"))
 
+        await on_user_login(user, new=None)
+
         return "ok"
 
     generic_handler.__annotations__["form"] = cls.Form
@@ -102,12 +103,14 @@ async def api_auth_simple_login(
     access_token = auth.create_user_token(user)
     resp.set_cookie(key="access_token", value=f"Bearer {access_token}", httponly=True)
 
+
     if is_httpx:
         resp.headers["HX-Redirect"] = "/tasks"  # or "/"
         return "ok"
 
     resp.status_code = status.HTTP_303_SEE_OTHER
     resp.headers["Location"] = str(req.url_for("index"))
+
     return "ok"
 
 
@@ -142,6 +145,7 @@ async def api_auth_simple_register(
 
     resp.status_code = status.HTTP_303_SEE_OTHER
     resp.headers["Location"] = str(req.url_for("index"))
+
     return "ok"
 
 

@@ -52,16 +52,24 @@ class DynamicKKSScoring(Scoring):
     @computed_field
     @property
     def points(self) -> Public[int]:
-        if self.solves == 0:
+        # No need to calculate anything if there is no solves
+        if self.solves <= 0:
             return self.maximum
+
+        # Enforce the absolute floor once the decay threshold is met.
         if self.solves >= self.decay:
             return self.minimum
 
-        coeff = 495 - (1 - math.pow(self.decay / (10**6), 0.25)) * 65.91 * math.log(self.decay)
-        out = self.maximum - coeff * math.log(self.solves)
-        if out > self.maximum:
-            logger.warning(f"Wtf why more than maximum at {self}")
-        return min(max(self.minimum, math.ceil(out)), self.maximum)
+        # --- Hill‑curve (sigmoid) parameters ---
+        # k: solves *after the plateau* where the score is ~½ between max & min
+        k = 6  # solves count where the score is ~½ way between max and min
+        p = 3  # steepness exponent: larger => sharper drop
+
+        # Hill (generalised logistic) curve:
+        raw = self.minimum + (self.maximum - self.minimum) / (1 + ((self.solves - 1) / k) ** p)
+
+        # Ensure the final score stays within [minimum, maximum].
+        return max(self.minimum, min(self.maximum, math.ceil(raw)))
 
     def solve_task(self) -> bool:
         self.solves += 1

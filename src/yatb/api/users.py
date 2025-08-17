@@ -1,12 +1,27 @@
 import uuid
 from collections.abc import Sequence
 
-from fastapi import APIRouter, HTTPException, Request, Response, status
+from fastapi import (
+    APIRouter,
+    HTTPException,
+    Query,
+    Request,
+    Response,
+    WebSocket,
+    WebSocketDisconnect,
+    WebSocketException,
+    status,
+)
 
 from yatb import auth, schema
 from yatb.db import TaskDB, UserDB
 
+from .. import auth, schema
+from ..config import settings
+from ..db.beanie import TaskDB, UserDB
+from . import logger
 from .tasks import get_tasks
+from .ws import AlertData, ws_manager
 
 router = APIRouter(
     prefix="/users",
@@ -93,3 +108,36 @@ async def api_users_get_username(user_id: uuid.UUID, user: auth.CURR_USER_SCOREB
             headers={"WWW-Authenticate": "Bearer"},
         )
     return target_user.username
+
+
+@router.post("/alert")
+async def post_alert(
+    alert: AlertData,
+    token: str | None = Query(default=None),
+) -> str:
+    if not token or token != settings.WS_API_TOKEN:
+        return "not ok"
+
+    await ws_manager.send_alert(alert)
+
+    return "ok"
+
+
+@router.websocket("/ws")
+async def websocket_events(
+    websocket: WebSocket,
+):
+    try:
+        user = await auth.get_current_user(websocket.cookies.get("access_token", "").replace("Bearer ", ""))
+    except HTTPException as ex:
+        logger.exception(f"{websocket.cookies = } {websocket.headers = } no user {ex = }")
+        raise WebSocketException(code=status.WS_1008_POLICY_VIOLATION) from ex
+
+    logger.info(f"{user.short_desc() = } connected to WS")
+    await ws_manager.connect(user, websocket)
+    try:
+        await websocket.send_json({"ping": "ping"})
+        while True:
+            await websocket.receive_text()
+    except WebSocketDisconnect:
+        ws_manager.disconnect(user, websocket)

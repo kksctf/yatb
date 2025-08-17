@@ -3,16 +3,9 @@ from datetime import datetime, timedelta
 from typing import Annotated
 
 from fastapi import (
-    Cookie,
     Depends,
-    FastAPI,
     HTTPException,
-    Query,
     Request,
-    Response,
-    WebSocket,
-    WebSocketDisconnect,
-    WebSocketException,
     status,
 )
 from fastapi.responses import HTMLResponse
@@ -20,9 +13,8 @@ from fastapi.routing import APIRouter
 from fastapi.security import HTTPBasic, HTTPBasicCredentials
 from fastui import AnyComponent, FastUI, prebuilt_html
 from fastui import components as c
-from fastui.components.display import DisplayLookup, DisplayMode
+from fastui.components.display import DisplayLookup
 from fastui.events import BackEvent, GoToEvent
-from loguru import logger
 from pydantic import BaseModel
 
 from .config import settings
@@ -82,8 +74,10 @@ class ServiceInfo(BaseModel):
 
 async def get_services() -> list[ServiceInfo]:
     ret: list[ServiceInfo] = []
+    
+    return ret
 
-    for (task_id, user_id), task in connector.tasks_index.items():
+    for (task_id, user_id), task in connector.ltis.items():
         if task.expiration_id:
             expiration_info = await connector.expiration_controller.get(
                 task.expiration_id,

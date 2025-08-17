@@ -14,7 +14,6 @@ router = APIRouter(
     tags=["admin"],
 )
 
-
 # @router.get("/save_db")
 # async def save_db(user: CURR_ADMIN):
 #     await db.shutdown_event()
@@ -23,7 +22,7 @@ router = APIRouter(
 
 @router.delete("/db_users")
 async def api_detele_everything_but_tasks(admin: CURR_ADMIN) -> None:
-    if not settings.DEBUG and admin != _fake_admin_user:
+    if not settings.DEBUG and admin != auth._fake_admin_user:
         logger.error(f"{admin} чистить юзеров на проде")
         raise HTTPException(
             status_code=status.HTTP_403_FORBIDDEN,
@@ -41,7 +40,7 @@ async def api_detele_everything_but_tasks(admin: CURR_ADMIN) -> None:
 
 @router.delete("/db")
 async def api_detele_everything(admin: CURR_ADMIN, *, force: bool = False) -> None:
-    if not settings.DEBUG and admin != _fake_admin_user:
+    if not settings.DEBUG and admin != auth._fake_admin_user:
         logger.error(f"{admin} чистит бд!")
         raise HTTPException(
             status_code=status.HTTP_403_FORBIDDEN,

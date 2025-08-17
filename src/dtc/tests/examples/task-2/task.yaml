@@ -1,0 +1,12 @@
+name: "Testing task - 2"
+description: "testing2 task, flag is kks{testing2}"
+
+author: "Rubikoid"
+category: "web"
+
+flag: "kks{testing2}"
+
+dynamic_scoring: true
+
+dynamic_features:
+  - service

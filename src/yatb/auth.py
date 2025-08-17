@@ -92,6 +92,29 @@ async def get_current_user_safe(request: Request) -> UserDB | None:
     return user
 
 
+async def get_current_user_or_redirect_login(request: Request) -> UserDB | None:
+    user = None
+    try:
+        user = await get_current_user(await token_puller(request))
+    except HTTPException:
+        raise HTTPException(
+            status_code=status.HTTP_302_FOUND,
+            headers={"Location": "/login"},
+        )
+
+    return user
+
+
+async def current_user_for_scoreboard(user: "CURR_USER_SAFE") -> UserDB | None:
+    if settings.PRIVATE_SCOREBOARD and not user:
+        raise HTTPException(
+            status_code=status.HTTP_403_FORBIDDEN,
+            detail="Private scoreboard",
+        )
+
+    return user
+
+
 async def admin_checker(
     user: "CURR_USER_SAFE",
     token_header: str | None = Header(None, alias="X-Token"),
@@ -112,6 +135,9 @@ async def admin_checker(
 
 
 # https://github.com/fastapi/fastapi/issues/10719, https://github.com/fastapi/fastapi/pull/13920
-CURR_USER: TypeAlias = Annotated[UserDB, Depends(get_current_user)]
-CURR_USER_SAFE: TypeAlias = Annotated[UserDB | None, Depends(get_current_user_safe)]
-CURR_ADMIN: TypeAlias = Annotated[UserDB, Depends(admin_checker)]
+CURR_USER: TypeAlias = Annotated[UserDB, Depends(get_current_user)]  # noqa: UP040
+CURR_USER_SAFE: TypeAlias = Annotated[UserDB | None, Depends(get_current_user_safe)]  # noqa: UP040
+CURR_USER_SCOREBOARD: TypeAlias = Annotated[UserDB | None, Depends(current_user_for_scoreboard)]  # noqa: UP040
+CURR_USER_OR_REDIRECT_LOGIN: TypeAlias = Annotated[UserDB | None, Depends(get_current_user_or_redirect_login)]  # noqa: UP040
+
+CURR_ADMIN: TypeAlias = Annotated[schema.User, Depends(admin_checker)]  # noqa: UP040

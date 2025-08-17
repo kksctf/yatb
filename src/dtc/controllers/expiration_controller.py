@@ -11,7 +11,7 @@ from ..config import DEFAULT_TTL
 
 
 @dataclass
-class StackInfo:
+class ExpirationTracker:
     id: UUID
     stack: AsyncExitStack
     death_time: datetime.datetime
@@ -55,7 +55,7 @@ class StackInfo:
 
 class ExpirationController:
     root_stack: AsyncExitStack
-    stacks: dict[UUID, StackInfo]
+    stacks: dict[UUID, ExpirationTracker]
     stacks_lock: asyncio.Lock
 
     def __init__(self) -> None:
@@ -63,15 +63,15 @@ class ExpirationController:
         self.stacks = {}
         self.stacks_lock = asyncio.Lock()
 
-    async def get(self, id: UUID) -> StackInfo:
+    async def get(self, id: UUID) -> ExpirationTracker:
         async with self.stacks_lock:
             return self.stacks[id]
 
-    async def push_stack(self, stack: AsyncExitStack) -> StackInfo:
+    async def push_stack(self, stack: AsyncExitStack) -> ExpirationTracker:
         stack = await self.root_stack.enter_async_context(stack)
 
         async with self.stacks_lock:
-            info = StackInfo.build(stack)
+            info = ExpirationTracker.build(stack)
             self.stacks[info.id] = info
 
         await self._create_death_task(info)
@@ -80,7 +80,7 @@ class ExpirationController:
 
         return info
 
-    async def extend_life(self, id: UUID, by: datetime.timedelta) -> StackInfo:
+    async def extend_life(self, id: UUID, by: datetime.timedelta) -> ExpirationTracker:
         info = await self.get(id)
         info.extend_life(by)
 
@@ -90,7 +90,7 @@ class ExpirationController:
 
         return info
 
-    async def kill(self, info: StackInfo) -> None:
+    async def kill(self, info: ExpirationTracker) -> None:
         await info.die()
 
         async with self.stacks_lock:
@@ -98,7 +98,7 @@ class ExpirationController:
 
         logger.info(f"{info = } is cleaned")
 
-    async def _create_death_task(self, info: StackInfo) -> None:
+    async def _create_death_task(self, info: ExpirationTracker) -> None:
         async def _task() -> None:
             try:
                 await asyncio.sleep(info.time_left.seconds + 1)

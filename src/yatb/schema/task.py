@@ -1,9 +1,9 @@
 # import pdb
 # pdb.set_trace()
 
+from collections.abc import Sequence
 import datetime
 import uuid
-from enum import Enum
 from typing import Annotated, TypeAlias
 from zoneinfo import ZoneInfo
 
@@ -15,6 +15,7 @@ from yatb.ebasemodelv2 import Admin, EBaseModelV2, Public
 from yatb.utils import md
 from yatb.utils.log_helper import get_logger
 
+from ..shared.dtc.models import DynamicTaskFeatures
 from .flags import DynamicKKSFlag, StaticFlag
 from .scoring import DynamicKKSScoring, StaticScoring
 from .user import User
@@ -34,24 +35,21 @@ def template_format_time(date: datetime.datetime) -> str:  # from alb1or1x_shit.
 
 
 # https://github.com/pydantic/pydantic/issues/11552
-ScoringUnion: TypeAlias = Annotated[
+ScoringUnion: TypeAlias = Annotated[  # noqa: UP040
     StaticScoring | DynamicKKSScoring,
     Field(discriminator="classtype"),
 ]
-FlagUnion: TypeAlias = Annotated[
+FlagUnion: TypeAlias = Annotated[  # noqa: UP040
     StaticFlag | DynamicKKSFlag,
     Field(discriminator="classtype"),
 ]
 
 
-class DynamicTaskType(Enum):
-    BUILDER = "builder"
-    SERVICE = "service"
-    BUILDER_AND_SERVICE = "builder_and_service"
-
-
 class DynamicTaskInfo(EBaseModelV2):
-    dynamic_task_type: Admin[DynamicTaskType]
+    features: Admin[DynamicTaskFeatures]
+    service_info: Admin[tuple[str, str] | None] = None
+    builder_info: Admin[tuple[str, str] | None] = None
+    s3_url: Admin[str | None] = None
 
 
 class Task(EBaseModelV2):
@@ -73,7 +71,7 @@ class Task(EBaseModelV2):
 
     author: Public[str]
 
-    dynamic_task_info: Admin[DynamicTaskInfo | None] = None
+    dti: Admin[DynamicTaskInfo | None] = None
 
     req_tasks: Admin[list[uuid.UUID]] = Field(default_factory=list)
 
@@ -195,9 +193,9 @@ class TaskForm(BaseModel):
     flag: FlagUnion
     author: str = ""
 
-    dynamic_task_info: DynamicTaskInfo | None = None
+    dti: DynamicTaskInfo | None = None
 
-    req_tasks: list[uuid.UUID] = []
+    req_tasks: Sequence[uuid.UUID] = []
 
     def to_task[T: Task](self, cls: type[T], author: User) -> T:
         str_author = self.author if self.author != "" else f"@{author.username}"
@@ -212,8 +210,8 @@ class TaskForm(BaseModel):
             description_html=cls.regenerate_md(self.description),
             flag=self.flag,
             author=str_author,
-            dynamic_task_info=self.dynamic_task_info,
-            req_tasks=self.req_tasks,
+            dti=self.dti,
+            req_tasks=list(self.req_tasks),
         )
 
         # WTF: shitcode

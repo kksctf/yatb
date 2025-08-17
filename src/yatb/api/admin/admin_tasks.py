@@ -21,7 +21,7 @@ async def get_task(task_id: uuid.UUID) -> TaskDB:
             status_code=status.HTTP_404_NOT_FOUND,
             detail="Task not found",
         )
-
+    logger.info(f"{task = }")
     return task
 
 
@@ -135,6 +135,7 @@ async def api_admin_find_flag_owner(flag: str, user: CURR_ADMIN):
 
     task, target_user = task_user
     return {"task": task, "target_user": target_user}
+
 
 # TODO: А можно ли это сделать нормально?
 

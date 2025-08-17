@@ -1,3 +1,4 @@
+
 from fastapi import (
     Request,
 )
@@ -12,6 +13,7 @@ from ... import schema
 from ...api.admin import CURR_ADMIN
 from ...api.admin import admin_tasks as api_admin_tasks
 from ...api.admin import admin_users as api_admin_users
+from ...auth import CURR_ADMIN
 from ...utils.log_helper import get_logger
 
 logger = get_logger("view")
@@ -87,6 +89,7 @@ async def admin_ng_tasks(req: Request, admin: CURR_ADMIN) -> list[AnyComponent]:
                 DisplayLookup(field="category", title="Category"),
                 DisplayLookup(field="points", title="Points"),
                 DisplayLookup(field="solves", title="Solve Count"),
+                DisplayLookup(field="hidden", title="Hidden?"),
             ],
         ),
         title="Tasks",
@@ -127,9 +130,8 @@ async def admin_ng_users(req: Request, admin: CURR_ADMIN) -> list[AnyComponent]:
             columns=[
                 DisplayLookup(field="username", title="Name", on_click=GoToEvent(url=url_gen(req, "user/{user_id}"))),
                 DisplayLookup(field="is_admin", title="Admin"),
-                DisplayLookup(field="points", title="Points"),
-                DisplayLookup(field="solves", title="Solve Count"),
-                DisplayLookup(field="hidden", title="Hidden?"),
+                # DisplayLookup(field="points", title="Points"),
+                # DisplayLookup(field="solves", title="Solve Count"),
             ],
         ),
         title="Users",

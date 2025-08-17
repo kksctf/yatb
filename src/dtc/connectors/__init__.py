@@ -1,9 +1,14 @@
 import asyncio
 import datetime
+import hashlib
+import typing
 from abc import ABC, abstractmethod
 from contextlib import AsyncExitStack
-from dataclasses import dataclass
+from dataclasses import dataclass, field
 from enum import Enum
+from functools import lru_cache
+from pathlib import Path
+from tempfile import TemporaryDirectory
 from types import TracebackType
 from typing import Self
 from uuid import UUID, uuid4
@@ -11,99 +16,93 @@ from uuid import UUID, uuid4
 from loguru import logger
 from pydantic import BaseModel
 
+from yatb.shared.dtc.client import DynamicTasksEtcdClient, TaskRPCEvent, TaskWatchEvent
+from yatb.shared.dtc.models import (
+    DynamicTaskFeatures,
+    DynamicTaskInfo,
+    DynamicTaskInfoBase,
+    DynamicTaskInfoBuilding,
+    DynamicTaskInfoReady,
+    DynamicTaskQuery,
+    DynamicTaskState,
+    HostPortPair,
+    VPNGlobalState,
+    VPNUserInfoGenerated,
+    is_taskinfo_building,
+    is_taskinfo_deleting,
+    is_taskinfo_prepared,
+    is_taskinfo_ready,
+    is_vpninfo_generated,
+)
+
+from ..config import settings
 from ..controllers import ExpirationController, PortsController
-from ..controllers.ports_controller import HostPortPair
+from ..controllers.ports_controller import PortsEnv
 from .errors import GenericConnectorError, InstanceNotFoundError
-
-
-class DynamicTaskType(Enum):
-    BUILDER = "builder"
-    SERVICE = "service"
-    BUILDER_AND_SERVICE = "builder_and_service"
-
-
-class DynamicTaskInfo(BaseModel):
-    name: str
-    descriptor: UUID
-
-    type: DynamicTaskType
-
-    user_id: str
-    user_admin: bool = False
-
-    flag: str
 
 
 @dataclass
 class LocalTaskInfo:
-    id: UUID
+    exit_stack: AsyncExitStack
+    ports_env: PortsEnv
 
-    task_descriptor: UUID
-    user_id: str
-
-    flag: str
-
-    _info: DynamicTaskInfo
-
-    expiration_id: UUID | None = None
-    hp: HostPortPair | None = None
-
-    @property
-    def hp_ok(self) -> HostPortPair:
-        if not self.hp:
-            raise Exception
-        return self.hp
-
-    @property
-    def expiration_id_ok(self) -> UUID:
-        if not self.expiration_id:
-            raise Exception
-        return self.expiration_id
-
-    @classmethod
-    def build(
-        cls,
-        info: DynamicTaskInfo,
-    ) -> Self:
-        return cls(
-            id=uuid4(),
-            task_descriptor=info.descriptor,
-            user_id=info.user_id,
-            flag=info.flag,
-            _info=info,
-        )
-
-
-class ExternalDynamicTaskInfo(BaseModel):
-    id: UUID
-
-    task_descriptor: UUID
-
-    user_id: str
-
-    hp: HostPortPair
-
-    least_time: datetime.timedelta
+    @staticmethod
+    @lru_cache(maxsize=128)
+    def devire_static_random_seq(source: str) -> str:
+        # FIXME: wtf this is it...
+        return hashlib.sha512(b"o4i765vob347t5v" + source.encode() + b"p3v85yb345yvb345").hexdigest()[:16]
 
 
 class BaseConnector(ABC):
-    tasks_index: dict[tuple[UUID, str], LocalTaskInfo]
-    tasks_lock: asyncio.Lock
+    etcd: DynamicTasksEtcdClient
+
+    lti_lock: asyncio.Lock
+    ltis: dict[tuple[UUID, UUID], LocalTaskInfo]
 
     expiration_controller: ExpirationController
     ports_controller: PortsController
 
-    def __init__(self, expiration_controller: ExpirationController, ports_controller: PortsController) -> None:
+    run_workers: bool = True
+    jobs: asyncio.PriorityQueue[typing.Coroutine]
+    workers: list[asyncio.Task[None]]
+
+    watcher_task: asyncio.Task[None]
+
+    _PASSIVE: bool = False
+
+    def __init__(
+        self,
+        expiration_controller: ExpirationController,
+        ports_controller: PortsController,
+        *,
+        run_workers: bool = settings.DO_WORK,
+    ) -> None:
         super().__init__()
 
-        self.tasks_index = {}
-        self.tasks_lock = asyncio.Lock()
+        self.lti_lock = asyncio.Lock()
+        self.ltis = {}
 
         self.expiration_controller = expiration_controller
         self.ports_controller = ports_controller
 
+        self.run_workers = run_workers
+        self.jobs = asyncio.PriorityQueue()
+        self.workers = []
+
+        self.etcd = DynamicTasksEtcdClient(settings.DYNAMIC_TASKS_ETCD, port=settings.DYNAMIC_TASKS_ETCD_PORT)
+
     async def __aenter__(self) -> Self:
         await self.init()
+        await self.etcd.__aenter__()
+
+        if self.run_workers:
+            for _ in range(settings.ASYNC_WORKERS_COUNT):
+                self.workers.append(asyncio.create_task(self.worker()))
+
+            self.watcher_task = asyncio.create_task(self.watcher())
+
+            logger.info(f"{len(self.workers) = } created")
+
         return self
 
     async def __aexit__(
@@ -112,108 +111,228 @@ class BaseConnector(ABC):
         exc_value: BaseException | None,
         traceback: TracebackType | None,
     ) -> None:
+        await self.etcd.__aexit__()
         await self.close()
+
+    # async def passive(self) -> None:
+    #     self._PASSIVE = True
+    #     self.run_workers = False
 
     @abstractmethod
     async def init(self) -> None:
         raise NotImplementedError
 
     async def close(self) -> None:
+        if self.run_workers:
+            for worker in self.workers:
+                worker.cancel("stopping")
+                await worker
+
+            self.watcher_task.cancel("stopping")
+            await self.watcher_task
+
+        # logger.critical(f"Closing ports_controller")
         await self.ports_controller.close()
+        # logger.critical(f"Closed ports_controller, Closing expiration_controller")
         await self.expiration_controller.close()
+        # logger.critical(f"Closed expiration_controller")
 
     @abstractmethod
-    async def _start(self, ltask_info: LocalTaskInfo) -> AsyncExitStack:
+    async def _start(
+        self,
+        task_info: DynamicTaskInfoBuilding,
+        lti: LocalTaskInfo,
+        vpn_state: VPNGlobalState,
+        vpn_user: VPNUserInfoGenerated,
+    ) -> None:
         raise NotImplementedError
 
-    async def _stop(self, ltask_info: LocalTaskInfo) -> None:
-        if not ltask_info.expiration_id:
-            raise GenericConnectorError("Task is not initialized yet")
-
-        expiration_stack_info = await self.expiration_controller.get(ltask_info.expiration_id)
-
-        if task := expiration_stack_info.death_task:
-            task.cancel()
-
-        await self.expiration_controller.kill(expiration_stack_info)
+    async def _start_vm(
+        self,
+        task_info: DynamicTaskInfoBuilding,
+        lti: LocalTaskInfo,
+        vpn_state: VPNGlobalState,
+        vpn_user: VPNUserInfoGenerated,
+    ):
+        raise NotImplementedError
 
     @abstractmethod
-    async def _restart(self, ltask_info: LocalTaskInfo) -> None:
+    async def _build(self, task_info: DynamicTaskInfoBuilding, lti: LocalTaskInfo) -> None:
         raise NotImplementedError
 
-    async def _info(self, ltask_info: LocalTaskInfo) -> ExternalDynamicTaskInfo:
-        if not ltask_info.expiration_id:
-            raise GenericConnectorError("Task is not initialized yet")
+    async def _stop(self, task_info: DynamicTaskInfo) -> None:
+        # if not (is_taskinfo_ready(task_info) or is_taskinfo_deleting(task_info)):
+        #     raise GenericConnectorError("Task is not initialized yet or not deleting")
 
-        expiration_info = await self.expiration_controller.get(ltask_info.expiration_id)
+        if is_taskinfo_ready(task_info) or is_taskinfo_deleting(task_info):
+            try:
+                expiration_stack_info = await self.expiration_controller.get(task_info.expiration_id)
 
-        return ExternalDynamicTaskInfo(
-            id=ltask_info.id,
-            task_descriptor=ltask_info.task_descriptor,
-            user_id=ltask_info.user_id,
-            hp=ltask_info.hp_ok,
-            least_time=expiration_info.time_left,
-        )
+                if task := expiration_stack_info.death_task:
+                    task.cancel()
 
-    async def init_ltask_info(self, task_info: DynamicTaskInfo) -> LocalTaskInfo:
-        async with self.tasks_lock:
-            k = (task_info.descriptor, task_info.user_id)
+                await self.expiration_controller.kill(expiration_stack_info)
+            except KeyError as ex:
+                logger.error(f"No expiration container for {task_info = }")
+        elif is_taskinfo_building(task_info):
+            try:
+                lti = await self.get_lti(task_info)
+                await lti.exit_stack.aclose()
+            except InstanceNotFoundError:
+                logger.warning(f"No lti for {task_info = } on deleting, but seems ok???")
+            await self.etcd.delete_task(task_info)  # type: ignore # FIXME: shit
 
-            if k in self.tasks_index:
+        if is_taskinfo_deleting(task_info):
+            await self.etcd.delete_task(task_info)
+
+    async def _restart(self, task_info: DynamicTaskInfo):
+        await self._stop(task_info)
+        return await self.start(task_info)
+
+    async def worker(self) -> None:
+        while True:
+            try:
+                job = await self.jobs.get()
+            except asyncio.CancelledError as ex:
+                logger.info(f"{ex = }")
+                break
+
+            try:
+                await job
+                self.jobs.task_done()
+            except Exception as ex:
+                logger.exception("wtf")
+
+    async def handle_event(self, event: TaskWatchEvent) -> None:
+        match event.model.state:
+            case DynamicTaskState.PREPARED:
+                await self.jobs.put(self.start(event.model))
+
+    async def handle_rpc_event(self, event: TaskRPCEvent) -> None:
+        match event.rpc_action:
+            case DynamicTaskQuery.EXTEND:
+                if not is_taskinfo_ready(event.model):
+                    return
+                await self.jobs.put(self.extend(event.model))
+            case DynamicTaskQuery.RESTART:
+                if not is_taskinfo_ready(event.model):
+                    return
+                await self.jobs.put(self.restart(event.model))
+            case DynamicTaskQuery.STOP:
+                await self.jobs.put(self.stop(event.model))  # type: ignore # FIXME: shit
+
+        # TODO: hmmm возможно надо делать не тут
+        await self.etcd.ack_query_task(event)
+
+    async def watcher(self) -> None:
+        async for event in self.etcd.watch_tasks():
+            logger.debug(f"Got {event = }")
+
+            try:
+                if isinstance(event, TaskRPCEvent):
+                    await self.handle_rpc_event(event)
+                else:
+                    await self.handle_event(event)
+            except Exception as ex:
+                logger.warning(f"{ex = } for {event = }")
+
+    async def init_lti(self, task_info: DynamicTaskInfo) -> LocalTaskInfo:
+        async with self.lti_lock:
+            # if not task_info.user_admin:
+            counter = 0
+            for _, user_id in self.ltis:
+                if task_info.user_id == user_id:
+                    counter += 1
+
+            if counter > 0:
+                raise GenericConnectorError(
+                    f"Stop other tasks before running another one, you have {counter = } tasks running",
+                )
+
+            k = (task_info.task_id, task_info.user_id)
+
+            if k in self.ltis:
                 raise GenericConnectorError("This task for your team already exsits")
 
-            self.tasks_index[k] = LocalTaskInfo.build(task_info)
-            return self.tasks_index[k]
+            exit_stack = AsyncExitStack()
+            self.ltis[k] = LocalTaskInfo(
+                exit_stack=exit_stack,
+                ports_env=await exit_stack.enter_async_context(self.ports_controller.get_env()),
+            )
 
-    async def get_ltask_info(self, task_info: DynamicTaskInfo) -> LocalTaskInfo:
-        async with self.tasks_lock:
-            k = (task_info.descriptor, task_info.user_id)
+            return self.ltis[k]
 
-            if k not in self.tasks_index:
+    async def get_lti(self, task_info: DynamicTaskInfo) -> LocalTaskInfo:
+        return await self.get_lti_raw_key((task_info.task_id, task_info.user_id))
+
+    async def get_lti_raw_key(self, key: tuple[UUID, UUID]) -> LocalTaskInfo:
+        async with self.lti_lock:
+            if key not in self.ltis:
                 raise InstanceNotFoundError("No task found")
 
-            return self.tasks_index[k]
+            return self.ltis[key]
 
-    def free_ltask_info(self, task_info: DynamicTaskInfo) -> None:
+    def free_lti(self, task_info: DynamicTaskInfo) -> None:
         # since this is sync method, we can do not lock
-        assert not self.tasks_lock.locked()
+        assert not self.lti_lock.locked()
 
-        k = (task_info.descriptor, task_info.user_id)
+        k = (task_info.task_id, task_info.user_id)
 
-        del self.tasks_index[k]
+        if k not in self.ltis:
+            logger.warning(f"WTF no {k = } in tasks index while deliting (possible doublefree)")
+            return
 
-    async def start(self, task_info: DynamicTaskInfo) -> ExternalDynamicTaskInfo:
-        ltask_info = await self.init_ltask_info(task_info)
-        ltask_info.hp = self.ports_controller.get_host_and_port()
+        del self.ltis[k]
 
-        logger.info(f"Got port {ltask_info.hp = }")
+    async def start(self, task_info: DynamicTaskInfoBase) -> DynamicTaskInfoReady:
+        lti = await self.init_lti(task_info)
+        lti.exit_stack.callback(lambda: self.free_lti(task_info))
 
-        stack = await self._start(ltask_info)
-        stack.callback(lambda: self.ports_controller.free_port(ltask_info.hp_ok))
-        stack.callback(lambda: self.free_ltask_info(task_info))
+        task_info = await self.etcd.make_task_building(task_info)
 
-        info = await self.expiration_controller.push_stack(stack)
-        logger.info(f"Pushed {info = }")
-        ltask_info.expiration_id = info.id
+        vpn_state = await self.etcd.get_global()
+        vpn_user = await self.etcd.get_vpn_info(task_info.user_id)
+        if not vpn_state or not vpn_user or not is_vpninfo_generated(vpn_user):
+            raise Exception
 
-        return await self._info(ltask_info)
+        try:
+            for feature in task_info.features:
+                match feature:
+                    case DynamicTaskFeatures.SERVICE:
+                        await self._start(task_info, lti, vpn_state=vpn_state, vpn_user=vpn_user)
+                    case DynamicTaskFeatures.VM:
+                        await self._start_vm(task_info, lti, vpn_state=vpn_state, vpn_user=vpn_user)
+                    case DynamicTaskFeatures.BUILDER:
+                        task_info.static_link = await self._build(task_info, lti)
+        except Exception as ex:
+            logger.error(f"Got {ex!r} while building or running {task_info = }")
+            await lti.exit_stack.aclose()
+            raise GenericConnectorError("Something went wrong ;(") from ex
+        else:
+            tracker = await self.expiration_controller.push_stack(lti.exit_stack)
+            logger.info(f"Pushed {tracker = }")
 
-    async def stop(self, task_info: DynamicTaskInfo) -> None:
-        ltask_info = await self.get_ltask_info(task_info)
-        await self._stop(ltask_info)
+            task_info.expiration_id = tracker.id
+            task_info.time_of_death = tracker.death_time
 
-    async def restart(self, task_info: DynamicTaskInfo) -> None:
-        ltask_info = await self.get_ltask_info(task_info)
-        await self._restart(ltask_info)
+            task_info.hps = [HostPortPair(host=i.host, port=i.port) for i in lti.ports_env.tracking_ports]
 
-    async def extend(self, task_info: DynamicTaskInfo) -> None:
-        ltask_info = await self.get_ltask_info(task_info)
-        await self.expiration_controller.extend_life(ltask_info.expiration_id_ok, datetime.timedelta(minutes=1))
+            task_info = await self.etcd.make_task_ready(task_info)
 
-    async def info_task(self, task_info: DynamicTaskInfo) -> ExternalDynamicTaskInfo:
-        ltask_info = await self.get_ltask_info(task_info)
-        return await self._info(ltask_info)
+            return task_info
 
-    # async def info_id(self, dynamic_task_id: UUID) -> ExternalDynamicTaskInfo:
-    #     ltask_info = self.tasks[dynamic_task_id]
-    #     return await self._info(ltask_info)
+    async def stop(self, task_info: DynamicTaskInfoReady) -> None:
+        try:
+            task_info = await self.etcd.make_task_deleting(task_info)
+        except Exception as ex:
+            logger.exception(f"{task_info = }")
+
+        await self._stop(task_info)
+
+    async def restart(self, task_info: DynamicTaskInfoReady):
+        return await self._restart(task_info)
+
+    async def extend(self, task_info: DynamicTaskInfoReady) -> None:
+        tracker = await self.expiration_controller.extend_life(task_info.expiration_id, datetime.timedelta(hours=1))
+        task_info.time_of_death = tracker.death_time
+        await self.etcd.task_model_update(task_info)

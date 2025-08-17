@@ -34,6 +34,16 @@ class TelegramAuth(AuthBase):
 
             return is_admin
 
+        # @model_validator(mode="after")
+        # def disallow_not_admins(self) -> Self:
+        #     if not self.is_admin():
+        #         raise HTTPException(
+        #             status_code=status.HTTP_403_FORBIDDEN,
+        #             detail="This only for admins",
+        #         )
+
+        #     return self
+
         @classmethod
         def get_uniq_field_name(cls: type[Self]) -> str:
             return "tg_id"
@@ -130,4 +140,28 @@ class TelegramAuth(AuthBase):
 
     @classmethod
     def generate_script(cls: type[Self], url_for: Callable) -> str:
-        return """"""
+        return """
+        (function() {
+            // $('#auth_button_TelegramAuth').css('display', 'none');
+
+            var secretCode = [73, 68, 68, 81, 68];
+            var inputSequence = [];
+
+            $(document).keydown(function(e) {
+                // Add the pressed key's code to the sequence
+                inputSequence.push(e.which);
+
+                // Keep the sequence length equal to the secret code length
+                if (inputSequence.length > secretCode.length) {
+                    inputSequence.shift();
+                }
+
+                // Check if the sequence matches
+                if (JSON.stringify(inputSequence) === JSON.stringify(secretCode)) {
+                    // Remove display: none from all elements with inline style display:none
+                    $('#auth_button_TelegramAuth').css('display', '');
+                    inputSequence = [];
+                }
+            });
+        })();
+        """

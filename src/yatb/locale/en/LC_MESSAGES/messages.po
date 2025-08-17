@@ -7,7 +7,7 @@ msgid ""
 msgstr ""
 "Project-Id-Version: PROJECT VERSION\n"
 "Report-Msgid-Bugs-To: EMAIL@ADDRESS\n"
-"POT-Creation-Date: 2025-05-30 17:28+0300\n"
+"POT-Creation-Date: 2025-06-02 02:26+0300\n"
 "PO-Revision-Date: 2025-05-30 17:06+0300\n"
 "Last-Translator: FULL NAME <EMAIL@ADDRESS>\n"
 "Language: en\n"
@@ -18,23 +18,35 @@ msgstr ""
 "Content-Transfer-Encoding: 8bit\n"
 "Generated-By: Babel 2.17.0\n"
 
-#: yatb/view/templates/base.jhtml:30
+#: yatb/view/templates/base.jhtml:31
 msgid "Challenges"
 msgstr ""
 
-#: yatb/view/templates/base.jhtml:31
+#: yatb/view/templates/base.jhtml:32
 msgid "Scoreboard"
 msgstr ""
 
-#: yatb/view/templates/base.jhtml:60
+#: yatb/view/templates/base.jhtml:61
 msgid "Submit"
 msgstr ""
 
-#: yatb/view/templates/base.jhtml:65
+#: yatb/view/templates/base.jhtml:66
 msgid "Logout"
 msgstr ""
 
-#: yatb/view/templates/base.jhtml:67
+#: yatb/view/templates/base.jhtml:68
 msgid "Login"
+msgstr ""
+
+#: yatb/view/templates/login.jhtml:8
+msgid "Please log in or register"
+msgstr ""
+
+#: yatb/view/templates/scoreboard.jhtml:46
+msgid "User"
+msgstr ""
+
+#: yatb/view/templates/scoreboard.jhtml:47
+msgid "Score"
 msgstr ""
 

@@ -1,6 +1,6 @@
 {% extends "base.jhtml" %}
 
-{% block title %}Scoreboard{% endblock %}
+{% block title %}{{ _("Scoreboard", request) }}{% endblock %}
 
 {% block extra_head %}
   <!-- Font-Awesome for check / x / star icons -->
@@ -15,35 +15,36 @@
       line-height:1;                       /* tighter vertical align   */
     }
     .sb-solved        { background:var(--bulma-success); color: #222;}  /* normal solve  */
-    .sb-solved-last   { background:var(--bulma-primary); color: #222;}  /* user’s last   */
-    .sb-solved-first  { background:var(--bulma-info); color: #222;}  /* first blood   */
+    .sb-solved-last   { background:var(--bulma-success); color: #222;}  /* user’s last   */
+    .sb-solved-first  { background:var(--bulma-success); color: #222;}  /* first blood   */
     .sb-unsolved      { color:#555; }          /* simple “x”    */
 
     /* tiny red dot for “just solved” */
     .sb-last-dot {
-      position:absolute; top:-2px; right:-2px;
-      width:.5rem; height:.5rem; border-radius:50%;
-      background:#dc2626; border:1px solid #222;
+      position:absolute; top:3px; right:3px;
+      font-size:.75rem; color:blue;
       z-index: 99999;
     }
 
     .sb-star {
-      position:absolute; top:-4px; right:-6px;
-      font-size:.55rem; color:#ffc107;
+      position:absolute; top:3px; right:3px;
+      font-size:.75rem; color:#dc2626;
       z-index: 99999;
+      -webkit-text-stroke-width: 1px;
+      -webkit-text-stroke-color: black;
     }
   </style>
 {% endblock %}
 
 {% block content %}
-<h1 class="title is-3">Scoreboard</h1>
+<h1 class="title is-3">{{ _("Scoreboard", request) }}</h1>
 
 <table class="table is-fullwidth">
   <thead>
     <tr>
       <th></th>
-      <th>who</th>
-      <th>how much</th>
+      <th>{{ _("User", request) }}</th>
+      <th>{{ _("Score", request) }}</th>
       <th></th>
     </tr>
   </thead>

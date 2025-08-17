@@ -15,33 +15,35 @@
             {% set tooltip = tooltip ~ ' | ' ~ template_format_time(user.solved_tasks[task.task_id]) %}
           {% endif %}
 
-          <div class="sb-indicator
-                      {% if task.task_id in user.solved_tasks %}
-                         {% if user.user_id == task.first_pwned_str()[0] %}
-                            sb-solved-first
-                         {% elif task.task_id == last_task_id %}
-                            sb-solved-last
-                         {% else %}
-                            sb-solved
-                         {% endif %}
-                      {% else %}
-                         sb-unsolved
-                      {% endif %}"
-               title="{{ tooltip }}"
-               style="position:relative;">
+          <a href="/tasks/{{ task.task_id }}" class="sb-link">
+            <div class="sb-indicator
+                        {% if task.task_id in user.solved_tasks %}
+                           {% if user.user_id == task.first_pwned_str()[0] %}
+                              sb-solved-first
+                           {% elif task.task_id == last_task_id %}
+                              sb-solved-last
+                           {% else %}
+                              sb-solved
+                           {% endif %}
+                        {% else %}
+                           sb-unsolved
+                        {% endif %}"
+                 title="{{ tooltip }}"
+                 style="position:relative;">
 
-            {% if task.task_id in user.solved_tasks %}
-              <i class="fa-solid fa-check"></i>
+              {% if task.task_id in user.solved_tasks %}
+                <i class="fa-solid fa-check"></i>
 
-              {% if user.user_id == task.first_pwned_str()[0] %}
-                <i class="fa-solid fa-star sb-star"></i>
-              {% elif task.task_id == last_task_id %}
-                <span class="sb-last-dot"></span>
+                {% if user.user_id == task.first_pwned_str()[0] %}
+                  <i class="fa-solid fa-droplet sb-star"></i>
+                {% elif task.task_id == last_task_id %}
+                  <i class="fa-solid fa-forward sb-last-dot"></i>
+                {% endif %}
+              {% else %}
+                <i class="fa-solid fa-xmark"></i>
               {% endif %}
-            {% else %}
-              <i class="fa-solid fa-xmark"></i>
-            {% endif %}
-          </div>
+            </div>
+          </a>
         {% endfor %}
       </div>
     </td>

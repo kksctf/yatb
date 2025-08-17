@@ -5,7 +5,7 @@
 {% block content %}
 <section class="section">
   <div class="container is-max-desktop has-text-centered">
-    <h1 class="title is-3">Представьтесь, пожалуйста</h1>
+    <h1 class="title is-3">{{ _("Please log in or register", request) }}</h1>
 
     {# ───────────────  available auth methods  ──────────────── #}
     {% for auth_way in auth_ways if not auth_way.FAKE %}

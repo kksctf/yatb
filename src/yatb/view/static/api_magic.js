@@ -69,11 +69,10 @@ function init_form_class() {
 
 function ok_toast_generator(toast_name) {
     return (data) => {
-        $.toast({
-            type: 'success',
-            title: toast_name,
-            subtitle: 'now',
-            content: '<pre>' + JSON.stringify(data.json) + '</pre>',
+        showToast({
+            header: toast_name,
+            message: '<pre class="mb-0">' + JSON.stringify(data.json) + '</pre>',
+            variant: 'success',
             delay: 5000,
         });
         return data;
@@ -82,11 +81,10 @@ function ok_toast_generator(toast_name) {
 
 function nok_toast_generator(toast_name, pass = false) {
     return (data) => {
-        $.toast({
-            type: 'error',
-            title: toast_name,
-            subtitle: 'now',
-            content: data,
+        showToast({
+            header: toast_name,
+            message: '<pre class="mb-0">' + (typeof data === 'string' ? data : JSON.stringify(data)) + '</pre>',
+            variant: 'danger',
             delay: 5000,
         });
         if (pass)

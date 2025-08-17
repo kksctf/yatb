@@ -1,3 +1,17 @@
+body {
+    display: flex;
+    min-height: 100vh;
+    flex-direction: column;
+}
+
+body>.section {
+    flex: 1 0 auto;
+}
+
+footer.footer {
+    margin-top: auto;
+}
+
 /* Masonry-ish grid without JS */
 .task-grid {
     display: grid;

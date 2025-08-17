@@ -152,6 +152,9 @@ yatb_prod
 
 # env
 yatb.env
-k3s.yaml
-dynamic_tasks_app/wtf
+k3s*.yaml
+src/dtc/wtf
 yatb_state.json
+
+*.qcow
+*.qcow2

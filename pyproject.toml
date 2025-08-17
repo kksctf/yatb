@@ -39,6 +39,7 @@ dependencies = [
     "fastui ~= 0.7.0",
     "python-multipart==0.0.20",
     "babel==2.17.0",
+    "aetcd~=1.0.0a4",
 ]
 
 
@@ -52,7 +53,7 @@ cli = [
 ]
 profiling = ["pyinstrument"]
 dynamic = [
-    "lightkube~=0.15.3",
+    "lightkube~=0.17.2",
     "miniopy-async~=1.20.1",
     "loguru~=0.7.2",
     "ruamel.yaml~=0.18.6",

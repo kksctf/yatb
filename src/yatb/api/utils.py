@@ -3,8 +3,8 @@ from typing import Annotated
 
 from fastapi import Depends, HTTPException, status
 
-from .. import auth
-from ..db.beanie import TaskDB
+from yatb import auth
+from yatb.db import TaskDB
 
 
 async def get_task(task_id: uuid.UUID, user: auth.CURR_USER_SAFE) -> TaskDB:
@@ -17,4 +17,12 @@ async def get_task(task_id: uuid.UUID, user: auth.CURR_USER_SAFE) -> TaskDB:
     return task
 
 
+async def get_tasks(user: auth.CURR_USER_SAFE) -> list[TaskDB]:
+    tasks = await TaskDB.get_all()
+    tasks = tasks.values()
+    tasks = filter(lambda x: x.visible_for_user(user), tasks)
+    return list(tasks)
+
+
 CURRENT_TASK = Annotated[TaskDB, Depends(get_task)]
+VISIBLE_TASKS = Annotated[list[TaskDB], Depends(get_tasks)]

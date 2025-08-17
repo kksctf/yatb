@@ -14,13 +14,11 @@ from fastapi import (
 )
 
 from yatb import auth, schema
+from yatb.config import settings
 from yatb.db import TaskDB, UserDB
 
-from .. import auth, schema
-from ..config import settings
-from ..db.beanie import TaskDB, UserDB
 from . import logger
-from .tasks import get_tasks
+from .utils import get_tasks
 from .ws import AlertData, ws_manager
 
 router = APIRouter(
@@ -36,6 +34,12 @@ async def api_scoreboard_get(user: auth.CURR_USER_SCOREBOARD) -> Sequence[schema
 
 @router.get("/ctftime_scoreboard")
 async def api_task_get_ctftime_scoreboard(*, fullScoreboard: bool = False):  # noqa: N803
+    if settings.PRIVATE_SCOREBOARD:
+        raise HTTPException(
+            status.HTTP_403_FORBIDDEN,
+            detail="private scoreboard enabled",
+        )
+
     scoreboard = await UserDB.get_filtered_scoreboard()
     standings = []
     tasks = None

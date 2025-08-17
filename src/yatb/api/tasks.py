@@ -12,6 +12,8 @@ from yatb.utils import metrics, tg
 from yatb.ws import ws_manager
 
 from . import logger
+from .api_dynamic_tasks import UserTaskPair, get_client_safe
+from .utils import CURRENT_TASK, VISIBLE_TASKS
 
 router = APIRouter(
     prefix="/tasks",
@@ -24,21 +26,6 @@ class BRMessage(BaseModel):
     user_name: str
     points: int
     is_fb: bool
-
-
-async def get_task(task_id: uuid.UUID, user: auth.CURR_USER_SAFE) -> TaskDB:
-    task = await TaskDB.find_by_task_uuid(task_id)
-    if not task or not task.visible_for_user(user):
-        raise HTTPException(
-            status_code=status.HTTP_404_NOT_FOUND,
-            detail="No task",
-        )
-    return task
-
-CURRENT_TASK = Annotated[TaskDB, Depends(get_task)]
-VISIBLE_TASKS = Annotated[list[TaskDB], Depends(get_tasks)]
-
-from .api_dynamic_tasks import get_client_safe  # TODO: circullar dependency
 
 
 @router.get("/")
@@ -68,7 +55,7 @@ async def api_task_submit_flag(flag: Annotated[schema.FlagForm, Form()], user: a
         metrics.bad_solves_per_user.labels(user_id=user.user_id, username=user.username).inc()
 
     if not task or not (visible := task.visible_for_user(user)):
-        if task and not visible:
+        if task and not visible:  # pyright: ignore[reportPossiblyUnboundVariable] # boolean things is hard for pylance
             logger.warning(f"Someone {user.short_desc()} trying to solve hidden task {task}")
             raise HTTPException(
                 status_code=status.HTTP_404_NOT_FOUND,

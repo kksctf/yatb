@@ -8,13 +8,14 @@ from fastapi import APIRouter, Depends, HTTPException, status
 from fastapi.responses import HTMLResponse, PlainTextResponse
 from pydantic import BaseModel
 
-from .. import auth
-from ..config import settings
-from ..db.beanie import TaskDB, UserDB
-from ..shared.dtc.client import DynamicTasksEtcdClient, TaskUserPair
-from ..shared.dtc.models import DynamicTaskInfo, DynamicTaskInfoReady, DynamicTaskQuery, DynamicTaskState
-from ..shared.dtc.models.vpn import is_vpninfo_generated
-from ..utils.log_helper import get_logger
+from yatb import auth
+from yatb.config import settings
+from yatb.db import TaskDB, UserDB
+from yatb.shared.dtc.client import DynamicTasksEtcdClient, TaskUserPair
+from yatb.shared.dtc.models import DynamicTaskInfo, DynamicTaskInfoReady, DynamicTaskQuery, DynamicTaskState
+from yatb.shared.dtc.models.vpn import is_vpninfo_generated
+from yatb.utils.log_helper import get_logger
+
 from .utils import CURRENT_TASK
 
 logger = get_logger("api.dynamic_tasks")

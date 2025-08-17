@@ -1,5 +1,3 @@
-# ruff: noqa: S101, S106, ANN201 # this is a __test file__
-
 from fastapi import status
 
 from yatb import schema
@@ -9,7 +7,7 @@ from . import client as client_cl
 
 client = client_cl
 
-LoginForm = schema.SimpleAuth.Form._Internal  # noqa: SLF001
+LoginForm = schema.SimpleAuth.Form
 
 
 def test_register(client: ClientEx):

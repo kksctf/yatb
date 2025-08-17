@@ -1,12 +1,6 @@
-import uuid
-from datetime import UTC, datetime
-from typing import Annotated
+from fastapi import APIRouter
 
-from fastapi import APIRouter, Depends, HTTPException, status
-
-from .. import auth
-from ..db.beanie import TaskDB
-from ..utils.log_helper import get_logger
+from yatb.utils.log_helper import get_logger
 
 logger = get_logger("api")
 router = APIRouter(
@@ -14,8 +8,8 @@ router = APIRouter(
     tags=["api"],
 )
 
-from . import admin  # noqa
 from . import auth  # noqa
+from . import admin  # noqa
 from . import tasks  # noqa
 from . import users  # noqa
 from . import api_dynamic_tasks  # noqa

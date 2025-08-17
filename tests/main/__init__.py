@@ -1,5 +1,3 @@
-# ruff: noqa: S101, S106, ANN201, T201 # this is a __test file__
-
 import typing
 from contextlib import contextmanager
 
@@ -14,7 +12,7 @@ from yatb.db import db
 
 settings.DB_NAME = "yatb_testing"
 
-LoginForm = schema.SimpleAuth.Form._Internal  # noqa: SLF001
+LoginForm = schema.SimpleAuth.Form
 
 
 class ClientExRaw(TestClient):

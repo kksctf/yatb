@@ -1,10 +1,10 @@
 {% extends "base.jhtml" %}
 
-{% block title %}Tasks{% endblock %}
+{% block title %}{{ _("Challenges", request) }}{% endblock %}
 {% block extra_head %}{% endblock %}
 
 {% block content %}
-<h1 class="title is-3">Tasks</h1>
+<h1 class="title is-3">{{ _("Challenges", request) }}</h1>
 
 <!-- ── filters (trigger HTMX GETs) ───────────────────────────── -->
 <div class="mb-4">

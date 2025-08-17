@@ -1,0 +1,12 @@
+{% extends "base.jhtml" %}
+{% block title %}Messages{% endblock %}
+{% block content %}
+<h1 class="title is-3">Recent messages</h1>
+<ul>
+  {% for m in msgs %}
+    <li>{{ m.ts[:19] }} – {{ m.text }}</li>
+  {% else %}
+    <p>No messages yet.</p>
+  {% endfor %}
+</ul>
+{% endblock %}

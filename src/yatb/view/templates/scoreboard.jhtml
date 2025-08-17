@@ -40,17 +40,20 @@
       width: var(--sb-cell);
       min-width: var(--sb-cell);
       max-width: var(--sb-cell);
-      padding: 0;
       position: relative;
       overflow: visible;
     }
     .sb-rot {
       position: absolute;
       left: calc(var(--sb-cell) / 2);
-      transform: rotate(-45deg);
+      transform: rotate(-30deg);
       transform-origin: bottom left;
       white-space: nowrap;
       text-align: left;
+    }
+    .sb-rot:link, .sb-rot:visited, .sb-rot:hover, .sb-rot:focus, .sb-rot:active { 
+      color: inherit;
+      text-decoration: none;
     }
     .sb-rot span { font-size:.8rem; }
     /* make indicator columns exactly the square width */
@@ -69,7 +72,7 @@
       <th>{{ _("Score", request) }}</th>
       {% for task in all_tasks | sort(attribute='category') | sort(attribute='scoring.points') %}
         <th class="sb-rot-th">
-          <div class="sb-rot"><span>{{ task.points }} | {{ task.task_name }}</span></div>
+          <a class="sb-rot" href="/tasks/{{ task.task_id }}"><span>{{ task.points }} | {{ task.task_name }}</span></a>
         </th>
       {% endfor %}
     </tr>

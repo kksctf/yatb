@@ -2,8 +2,8 @@ import asyncio
 
 from rich.prompt import Prompt
 
-from yatb.cli.base import app, c
-from yatb.cli.client import YATB
+from ycli.base import app, c
+from ycli.client import YATB
 
 
 @app.command()

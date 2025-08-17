@@ -35,6 +35,7 @@ dependencies = [
     "websockets ~= 12.0",
     "httpx ~= 0.28.0",
     "loguru ~= 0.7.2",
+    # "fastui@git+https://github.com/pydantic/FastUI#egg=main",
     "fastui ~= 0.7.0",
     "python-multipart==0.0.20",
     "babel==2.17.0",
@@ -80,6 +81,9 @@ packages = ["src/dtc", "src/yatb", "src/ycli"]
 
 [tool.hatch.build.hooks.babel]
 locale_dir = "src/yatb/locale"
+
+[tool.hatch.metadata]
+allow-direct-references = true
 
 [project.urls]
 homepage = "https://github.com/kksctf/yatb"

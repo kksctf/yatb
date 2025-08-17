@@ -5,9 +5,9 @@ from uuid import UUID
 
 from pydantic_yaml import parse_yaml_raw_as
 
-from yatb.cli.base import app, c, settings
-from yatb.cli.client import YATB
-from yatb.cli.models import FileTask
+from ycli.base import app, c, settings
+from ycli.client import YATB
+from ycli.models import FileTask
 from yatb.schema.task import Task
 
 

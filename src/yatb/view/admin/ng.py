@@ -1,4 +1,3 @@
-
 from fastapi import (
     Request,
 )
@@ -15,6 +14,8 @@ from ...api.admin import admin_tasks as api_admin_tasks
 from ...api.admin import admin_users as api_admin_users
 from ...auth import CURR_ADMIN
 from ...utils.log_helper import get_logger
+
+c.Link.model_rebuild()
 
 logger = get_logger("view")
 

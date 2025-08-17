@@ -1,7 +1,7 @@
 from pydantic import BaseModel
 
-from yatb.cli.base import app, c
-from yatb.cli.client import YATB
+from ycli.base import app, c
+from ycli.client import YATB
 
 
 class ShortTask(BaseModel):

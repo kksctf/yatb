@@ -36,7 +36,8 @@
                 <!-- response placeholder -->
                 <div id="flag-submit-result" class="navbar-item"></div>
                 <form class="navbar-item" method="post" action="{{ url_for('api_task_submit_flag') }}"
-                    hx-post="{{ url_for('api_task_submit_flag') }}" hx-target="#flag-submit-result" hx-swap="innerHTML">
+                    hx-post="{{ url_for('api_task_submit_flag') }}" hx-target="#flag-submit-result" hx-swap="innerHTML"
+                    hx-on::after-request="if (event.detail && event.detail.successful) window.location.reload()">
                     <div class="field has-addons">
                         <p class="control">
                             <span class="button is-static">{{ FLAG_BASE }}{</span>
@@ -53,9 +54,12 @@
                     </div>
                 </form>
                 <a class="navbar-item" href="{{ url_for('profile_page') }}">{{ curr_user.username }}</a>
-                {% if curr_user.is_admin %}<a class="navbar-item" href="{{ url_for('admin_index') }}">Admin area</a>{%
-                endif %}
-                <a class="navbar-item" href="{{ url_for('api_users_logout') }}">{{ _("Logout", request) }}</a>
+                {% if curr_user.is_admin %}
+                <a class="navbar-item" href="{{ url_for('admin_index') }}">Admin area</a>
+                {% endif %}
+                <a class="navbar-item" href="{{ url_for('api_users_logout') }}">
+                    {{ _("Logout", request)}}
+                </a>
                 {% else %}
                 <a class="navbar-item" href="{{ url_for('login_page') }}">{{ _("Login", request) }}</a>
                 {% endif %}

@@ -35,10 +35,6 @@ TRANSLATIONS = {
     for lang in i18n.SUPPORTED
 }
 
-# FIXME: debug
-for trn in TRANSLATIONS.values():
-    logger.debug(f"{trn.gettext("Challenges") = }")
-
 router = APIRouter(
     prefix="",
     tags=["view"],

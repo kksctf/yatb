@@ -7,7 +7,7 @@ msgid ""
 msgstr ""
 "Project-Id-Version: PROJECT VERSION\n"
 "Report-Msgid-Bugs-To: EMAIL@ADDRESS\n"
-"POT-Creation-Date: 2025-06-02 02:26+0300\n"
+"POT-Creation-Date: 2025-08-17 20:42+0300\n"
 "PO-Revision-Date: 2025-05-30 17:05+0300\n"
 "Last-Translator: FULL NAME <EMAIL@ADDRESS>\n"
 "Language: ru\n"
@@ -19,35 +19,38 @@ msgstr ""
 "Content-Transfer-Encoding: 8bit\n"
 "Generated-By: Babel 2.17.0\n"
 
-#: yatb/view/templates/base.jhtml:31
+#: src/yatb/view/__init__.py:40 src/yatb/view/templates/base.jhtml:30
+#: src/yatb/view/templates/tasks.jhtml:3 src/yatb/view/templates/tasks.jhtml:7
 msgid "Challenges"
 msgstr "Задания"
 
-#: yatb/view/templates/base.jhtml:32
-msgid "Scoreboard"
-msgstr "Рейтинг"
-
-#: yatb/view/templates/base.jhtml:61
-msgid "Submit"
-msgstr "Сдать"
-
-#: yatb/view/templates/base.jhtml:66
-msgid "Logout"
-msgstr "Выйти"
-
-#: yatb/view/templates/base.jhtml:68
-msgid "Login"
-msgstr "Войти"
-
-#: yatb/view/templates/login.jhtml:8
-msgid "Please log in or register"
-msgstr "Войдите или зарегистрируйтесь"
-
-#: yatb/view/templates/scoreboard.jhtml:46
+#: src/yatb/view/__init__.py:41 src/yatb/view/templates/scoreboard.jhtml:46
 msgid "User"
 msgstr "Пользователь"
 
-#: yatb/view/templates/scoreboard.jhtml:47
+#: src/yatb/view/templates/base.jhtml:31
+#: src/yatb/view/templates/scoreboard.jhtml:3
+#: src/yatb/view/templates/scoreboard.jhtml:40
+msgid "Scoreboard"
+msgstr "Рейтинг"
+
+#: src/yatb/view/templates/base.jhtml:50
+msgid "Submit"
+msgstr "Сдать"
+
+#: src/yatb/view/templates/base.jhtml:57
+msgid "Logout"
+msgstr "Выйти"
+
+#: src/yatb/view/templates/base.jhtml:59
+msgid "Login"
+msgstr "Войти"
+
+#: src/yatb/view/templates/login.jhtml:8
+msgid "Please log in or register"
+msgstr "Войдите или зарегистрируйтесь"
+
+#: src/yatb/view/templates/scoreboard.jhtml:47
 msgid "Score"
 msgstr "Счет"
 

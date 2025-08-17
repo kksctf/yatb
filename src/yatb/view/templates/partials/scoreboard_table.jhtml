@@ -6,46 +6,45 @@
     <td>{{ user.username }}</td>
     <td>{{ user.score }}</td>
 
+    {% for task in all_tasks | sort(attribute='category') | sort(attribute='scoring.points') %}
     <td class="p-0">
-      <div class="is-flex is-flex-wrap-wrap is-justify-content-center">
+      <div class="is-justify-content-center">
+        {% set tooltip = task.scoring.points ~ ' | ' ~ task.task_name %}
+        {% if task.task_id in user.solved_tasks %}
+          {% set tooltip = tooltip ~ ' | ' ~ template_format_time(user.solved_tasks[task.task_id]) %}
+        {% endif %}
 
-        {% for task in all_tasks | sort(attribute='category') | sort(attribute='scoring.points') %}
-          {% set tooltip = task.scoring.points ~ ' | ' ~ task.task_name %}
-          {% if task.task_id in user.solved_tasks %}
-            {% set tooltip = tooltip ~ ' | ' ~ template_format_time(user.solved_tasks[task.task_id]) %}
-          {% endif %}
+        <a href="/tasks/{{ task.task_id }}" class="sb-link">
+          <div class="sb-indicator
+                      {% if task.task_id in user.solved_tasks %}
+                          {% if user.user_id == task.first_pwned_str()[0] %}
+                            sb-solved-first
+                          {% elif task.task_id == last_task_id %}
+                            sb-solved-last
+                          {% else %}
+                            sb-solved
+                          {% endif %}
+                      {% else %}
+                          sb-unsolved
+                      {% endif %}"
+                title="{{ tooltip }}"
+                style="position:relative;">
 
-          <a href="/tasks/{{ task.task_id }}" class="sb-link">
-            <div class="sb-indicator
-                        {% if task.task_id in user.solved_tasks %}
-                           {% if user.user_id == task.first_pwned_str()[0] %}
-                              sb-solved-first
-                           {% elif task.task_id == last_task_id %}
-                              sb-solved-last
-                           {% else %}
-                              sb-solved
-                           {% endif %}
-                        {% else %}
-                           sb-unsolved
-                        {% endif %}"
-                 title="{{ tooltip }}"
-                 style="position:relative;">
+            {% if task.task_id in user.solved_tasks %}
+              <i class="fa-solid fa-check"></i>
 
-              {% if task.task_id in user.solved_tasks %}
-                <i class="fa-solid fa-check"></i>
-
-                {% if user.user_id == task.first_pwned_str()[0] %}
-                  <i class="fa-solid fa-droplet sb-star"></i>
-                {% elif task.task_id == last_task_id %}
-                  <i class="fa-solid fa-forward sb-last-dot"></i>
-                {% endif %}
-              {% else %}
-                <i class="fa-solid fa-xmark"></i>
+              {% if user.user_id == task.first_pwned_str()[0] %}
+                <i class="fa-solid fa-droplet sb-star"></i>
+              {% elif task.task_id == last_task_id %}
+                <i class="fa-solid fa-forward sb-last-dot"></i>
               {% endif %}
-            </div>
-          </a>
-        {% endfor %}
+            {% else %}
+              <i class="fa-solid fa-xmark"></i>
+            {% endif %}
+          </div>
+        </a>
       </div>
     </td>
+    {% endfor %}
   </tr>
 {% endfor %}

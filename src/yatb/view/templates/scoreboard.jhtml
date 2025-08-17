@@ -7,9 +7,10 @@
   <link rel="stylesheet"
         href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.5.0/css/all.min.css">
   <style>
+    :root { --sb-cell: 2.5rem; }
     /* indicator box 20×20, centred glyph */
     .sb-indicator {
-      width: 2.5rem; height: 2.5rem;
+      width: var(--sb-cell); height: var(--sb-cell);
       display:flex; align-items:center; justify-content:center;
       font-size:0.75rem;
       line-height:1;                       /* tighter vertical align   */
@@ -17,9 +18,8 @@
     .sb-solved        { background:var(--bulma-success); color: #222;}  /* normal solve  */
     .sb-solved-last   { background:var(--bulma-success); color: #222;}  /* user’s last   */
     .sb-solved-first  { background:var(--bulma-success); color: #222;}  /* first blood   */
-    .sb-unsolved      { color:#555; }          /* simple “x”    */
+    .sb-unsolved      { color:#555; }
 
-    /* tiny red dot for “just solved” */
     .sb-last-dot {
       position:absolute; top:3px; right:3px;
       font-size:.75rem; color:blue;
@@ -33,19 +33,45 @@
       -webkit-text-stroke-width: 1px;
       -webkit-text-stroke-color: black;
     }
+
+    /* rotated task header labels */
+    .sb-tasks-head {  }
+    .sb-rot-th {
+      width: var(--sb-cell);
+      min-width: var(--sb-cell);
+      max-width: var(--sb-cell);
+      padding: 0;
+      position: relative;
+      overflow: visible;
+    }
+    .sb-rot {
+      position: absolute;
+      left: calc(var(--sb-cell) / 2);
+      transform: rotate(-45deg);
+      transform-origin: bottom left;
+      white-space: nowrap;
+      text-align: left;
+    }
+    .sb-rot span { font-size:.8rem; }
+    /* make indicator columns exactly the square width */
+    #scoreboard-table td:has(> .sb-indicator) { padding: 0; }
   </style>
 {% endblock %}
 
 {% block content %}
 <h1 class="title is-3">{{ _("Scoreboard", request) }}</h1>
 
-<table class="table is-fullwidth">
+<table id="scoreboard-table" class="table is-fullwidth">
   <thead>
-    <tr>
+    <tr class="sb-tasks-head">
       <th></th>
       <th>{{ _("User", request) }}</th>
       <th>{{ _("Score", request) }}</th>
-      <th></th>
+      {% for task in all_tasks | sort(attribute='category') | sort(attribute='scoring.points') %}
+        <th class="sb-rot-th">
+          <div class="sb-rot"><span>{{ task.points }} | {{ task.task_name }}</span></div>
+        </th>
+      {% endfor %}
     </tr>
   </thead>
 

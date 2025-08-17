@@ -1,35 +1,27 @@
 {
   lib,
-  my-lib,
   config,
   pkgs,
   inputs,
+  simpleSecrets,
   ...
 }:
 
 let
-  types = lib.types;
+  rCfg = config.rubikoid.ctf;
+  cfg = rCfg.yatb;
 
-  cfg = config.services.yatb.yatb;
-  ctfCfg = config.ctf;
-
+  k3s = rCfg.k3s;
   settings = cfg.settings;
-
-  k3sSettings = config.rubikoid.services.k3s;
-  dtcConfig = config.rubikoid.services.dtc;
-
-  yatb = (inputs.self.yatb_source pkgs);
-  package = cfg.package;
 in
-# env = cfg.env;
 {
-  options.services.yatb.yatb = with lib; {
-    enable = mkEnableOption "The yatb service";
+  options.rubikoid.ctf.yatb = with lib; {
+    enable = mkEnableOption "yatb";
 
     package = mkOption {
       type = types.package;
-      default = yatb.env;
-      defaultText = literalExpression "yatb.env";
+      default = inputs.yatb.packages.x86_64-linux.default;
+      defaultText = literalExpression "inputs.yatb.packages.x86_64-linux.default";
       description = "YATB env";
     };
 
@@ -43,7 +35,7 @@ in
 
       port = mkOption {
         type = types.port;
-        default = 9900;
+        default = 9000;
         description = "The port on which to listen.";
       };
     };
@@ -95,34 +87,22 @@ in
         description = "Enabled auth ways";
       };
 
-      dynamic = {
-        controller = mkOption {
-          type = types.nullOr types.str;
-          default = null;
-          description = "address of dynamic tasks controller";
-        };
-
-        token = mkOption {
-          type = types.nullOr types.str;
-          default = null;
-          description = "token for controller";
-        };
-      };
-
       extra = mkOption {
         type = types.attrs;
+        default = { };
       };
     };
 
     publicAddr = mkOption {
       type = types.str;
       description = "public address of yatb";
+      default = rCfg.rootDomain;
     };
 
-    openFirewall = mkOption {
-      default = false;
-      type = types.bool;
-      description = "Whether to open the firewall for the specified port.";
+    s3ProxyAddr = mkOption {
+      type = types.str;
+      description = "public address of yatb";
+      default = "s3.${rCfg.rootDomain}";
     };
 
     extraArgs = mkOption {
@@ -142,10 +122,21 @@ in
       };
     };
 
-    networking.firewall.allowedTCPPorts = lib.mkIf cfg.openFirewall [
+    networking.firewall.allowedTCPPorts = [
       80
       443
     ];
+
+    networking.domains = {
+      enable = true;
+      baseDomains = {
+        ${rCfg.rootDomain} = {
+          a.data = simpleSecrets.cluster.${config.device}.public;
+        };
+      };
+      subDomains."${rCfg.rootDomain}" = { };
+      subDomains."s3.${rCfg.rootDomain}" = { };
+    };
 
     services.caddy = {
       enable = true;
@@ -161,29 +152,11 @@ in
         in
         {
           ${cfg.publicAddr}.extraConfig = yatbCaddyCfg;
-          # "yatb.prod.${cfg.publicAddr}".extraConfig = yatbCaddyCfg;
 
-          ${ctfCfg.staticDomain}.extraConfig = ''
-            root * ${ctfCfg.staticFolder}
-            file_server browse
-          '';
-
-          "http://${dtcConfig.s3PublicAddr}".extraConfig = ''
+          "http://${cfg.s3ProxyAddr}".extraConfig = ''
             reverse_proxy http://127.0.0.1:${toString (cfg.http.port + 1)}
           '';
         };
-    };
-
-    systemd.tmpfiles.settings = {
-      "11-ctf-static" = {
-        ${ctfCfg.staticFolder} = {
-          d = {
-            mode = "0775";
-            user = "root";
-            group = "root";
-          };
-        };
-      };
     };
 
     systemd.services.yatb = {
@@ -205,20 +178,22 @@ in
         FASTAPI_REDOC_URL = "/${settings.docsPrefix}-redoc";
         FASTAPI_OPENAPI_URL = "/${settings.docsPrefix}-openapi.json";
 
-        FLAG_BASE = settings.flagBase;
-        CTF_NAME = settings.ctfName;
+        # FLAG_BASE = settings.flagBase;
+        # CTF_NAME = settings.ctfName;
 
         API_TOKEN = settings.keys.apiToken;
         WS_API_TOKEN = settings.keys.wsApiToken;
 
         ENABLED_AUTH_WAYS = builtins.toJSON settings.authWays;
 
-        DYNAMIC_TASKS_CONTROLLER = settings.dynamic.controller;
-        DYNAMIC_TASKS_CONTROLLER_TOKEN = settings.dynamic.token;
+        # DYNAMIC_TASKS_ETCD = simpleSecrets.cluster.${config.device}.internal;
+        # DYNAMIC_TASKS_ETCD_PORT = toString config.rubikoid.ctf.etcd.port;
+
+        # VPN_HOST = simpleSecrets.cluster..public;
       } // settings.extra;
 
       serviceConfig = {
-        ExecStart = "${package}/bin/uvicorn app:app --host '${cfg.http.host}' --port '${toString cfg.http.port}' ${lib.strings.escapeShellArgs cfg.extraArgs}";
+        ExecStart = "${cfg.package}/bin/uvicorn yatb:app --host '${cfg.http.host}' --port '${toString cfg.http.port}' ${lib.strings.escapeShellArgs cfg.extraArgs}";
         Restart = "on-failure";
         KillSignal = "SIGINT";
 
@@ -235,20 +210,26 @@ in
       wantedBy = [ "multi-user.target" ];
 
       environment = {
-        DOCKER_REGISTRY_HOST = "0";
-        EXTERNAL_IPS = "[]";
+        S3_HOST = k3s.clusterHead;
+        S3_PORT = toString k3s.minio.port;
+        S3_ACCESS = k3s.minio.accessKey;
+        S3_SECRET = k3s.minio.secretKey;
+
+        JWT_SECRET_KEY = settings.keys.jwt;
+        FLAG_SIGN_KEY = settings.keys.flagSign;
+        API_TOKEN = settings.keys.apiToken;
+        WS_API_TOKEN = settings.keys.wsApiToken;
+
+        ADMIN_PASSWORD = "";
+
+        S3_HOST_KANIKO = "";
+        DOCKER_REGISTRY_HOST = "";
         EXTERNAL_TO_INTERNAL_IPS_MAPPING = "{}";
-
-        S3_HOST = k3sSettings.domain;
-        S3_PORT = k3sSettings.minio.port;
-        S3_ACCESS = k3sSettings.minio.accessKey;
-        S3_SECRET = k3sSettings.minio.secretKey;
-
-        DYNAMIC_TASKS_CONTROLLER_TOKEN = settings.dynamic.token;
+        DYNAMIC_TASKS_ETCD = "";
       };
 
       serviceConfig = {
-        ExecStart = "${package}/bin/uvicorn dynamic_tasks_app.s3_serve:app --host '${cfg.http.host}' --port '${toString (cfg.http.port + 1)}' ${lib.strings.escapeShellArgs cfg.extraArgs}";
+        ExecStart = "${cfg.package}/bin/uvicorn dynamic_tasks_app.s3_serve:app --host '${cfg.http.host}' --port '${toString (cfg.http.port + 1)}' ${lib.strings.escapeShellArgs cfg.extraArgs}";
         Restart = "on-failure";
         KillSignal = "SIGINT";
         # DynamicUser = "yes";

@@ -1,33 +1,29 @@
 {
   lib,
-  my-lib,
   config,
   pkgs,
   inputs,
+  simpleSecrets,
   ...
 }:
 
 let
-  types = lib.types;
+  rCfg = config.rubikoid.ctf;
+  cfg = rCfg.dtc;
 
-  cfg = config.services.yatb.dtc;
-  ctfCfg = config.ctf;
+  k3s = rCfg.k3s;
+  yatb = rCfg.yatb;
 
   settings = cfg.settings;
-
-  yatbSettings = config.services.yatb.yatb.settings;
-  k3sSettings = config.services.yatb.k3s;
-
-  package = cfg.package;
 in
 {
-  options.services.yatb.dtc = with lib; {
+  options.rubikoid.ctf.dtc = with lib; {
     enable = mkEnableOption "The yatb's dynamic task controller service";
 
     package = mkOption {
       type = types.package;
-      default = pkgs.yatb;
-      defaultText = literalExpression "pkgs.yatb";
+      default = inputs.yatb.packages.x86_64-linux.default;
+      defaultText = literalExpression "inputs.yatb.packages.x86_64-linux.default";
       description = "YATB env";
     };
 
@@ -47,12 +43,6 @@ in
     };
 
     settings = {
-      token = mkOption {
-        type = types.nullOr types.str;
-        default = yatbSettings.dynamic.token;
-        description = "token for controller";
-      };
-
       k3s = mkOption {
         type = types.str;
         default = "/etc/rancher/k3s/k3s.yaml";
@@ -74,22 +64,6 @@ in
       };
     };
 
-    publicAddr = mkOption {
-      type = types.str;
-      description = "public address of dtc";
-    };
-
-    s3PublicAddr = mkOption {
-      type = types.str;
-      description = "public address of s3 proxy";
-    };
-
-    openFirewall = mkOption {
-      default = false;
-      type = types.bool;
-      description = "Whether to open the firewall for the specified port.";
-    };
-
     extraArgs = mkOption {
       type = types.listOf types.str;
       default = [ ];
@@ -107,46 +81,41 @@ in
 
         LOGURU_LEVEL = "TRACE";
 
-        DYNAMIC_TASKS_CONTROLLER_TOKEN = settings.token;
-
         KUBE_CONFIG_PATH = settings.k3s;
 
-        DOCKER_REGISTRY_HOST = k3sSettings.dockerDomain;
+        S3_HOST = k3s.clusterHead;
+        S3_PORT = toString k3s.minio.port;
+        S3_ACCESS = k3s.minio.accessKey;
+        S3_SECRET = k3s.minio.secretKey;
+        S3_HOST_KANIKO = k3s.clusterHead;
 
-        S3_HOST = k3sSettings.domain;
-        S3_PORT = k3sSettings.minio.port;
-        S3_ACCESS = k3sSettings.minio.accessKey;
-        S3_SECRET = k3sSettings.minio.secretKey;
+        DYNAMIC_TASKS_ETCD = simpleSecrets.cluster.${config.device}.internal;
+        DYNAMIC_TASKS_ETCD_PORT = toString config.rubikoid.ctf.etcd.port;
 
-        PORT_START = toString settings.ports.start;
-        PORT_END = toString settings.ports.end;
+        DOCKER_REGISTRY_HOST = k3s.clusterHead;
 
-        UUID_TO_PATH_MAPPING = builtins.toJSON ctfCfg.pathToUUIDMapping;
+        EXTERNAL_TO_INTERNAL_IPS_MAPPING = builtins.toJSON {
+          master = [
+            simpleSecrets.cluster.pod1.internal
+            simpleSecrets.cluster.pod1.wg
+          ];
+        };
 
-        EXTERNAL_TO_INTERNAL_IPS_MAPPING = builtins.toJSON ctfCfg.externalToInternalMapping;
+        S3_PROXY_HOST = "https://${yatb.s3ProxyAddr}";
 
-        S3_PROXY_HOST = "http://${cfg.s3PublicAddr}";
+        # DO_WORK = "false";
+
+        ADMIN_PASSWORD = "oiyuv4b5o2ivu34tbvknjy34g5khv23g5";
+
+        JWT_SECRET_KEY = yatb.settings.keys.jwt;
+        FLAG_SIGN_KEY = yatb.settings.keys.flagSign;
+        API_TOKEN = yatb.settings.keys.apiToken;
+        WS_API_TOKEN = yatb.settings.keys.wsApiToken;
+        # PORT_START = toString settings.ports.start;
+        # PORT_END = toString settings.ports.end;
       };
     in
     {
-      networking.firewall.allowedTCPPorts = lib.mkIf cfg.openFirewall [
-        cfg.http.port
-        8443
-      ];
-
-      services.caddy = {
-        enable = true;
-
-        virtualHosts = {
-          "${cfg.publicAddr}:8443".extraConfig = ''
-            tls internal
-            reverse_proxy http://127.0.0.1:${toString cfg.http.port}
-          '';
-        };
-      };
-
-      systemd.services.caddy.path = with pkgs; [ nss ];
-
       systemd.services = {
         dtc = {
           enable = true;
@@ -157,7 +126,7 @@ in
           environment = env;
 
           serviceConfig = {
-            ExecStart = "${package}/bin/uvicorn dynamic_tasks_app.web:app --host '${cfg.http.host}' --port '${toString cfg.http.port}' ${lib.strings.escapeShellArgs cfg.extraArgs}";
+            ExecStart = "${cfg.package}/bin/uvicorn dynamic_tasks_app.web:app --host '${cfg.http.host}' --port '${toString cfg.http.port}' ${lib.strings.escapeShellArgs cfg.extraArgs}";
             Restart = "on-failure";
             KillSignal = "SIGINT";
             # DynamicUser = "yes";

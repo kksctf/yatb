@@ -25,6 +25,20 @@ logger = get_logger("view")
 _base_path = Path(__file__).resolve().parent
 templates = Jinja2Templates(directory=_base_path / "templates")
 
+TRANSLATIONS = {
+    lang: gettext.translation(
+        domain="messages",
+        localedir=Path(__file__).parent.parent / "locale",
+        languages=[lang],
+        fallback=True,
+    )
+    for lang in i18n.SUPPORTED
+}
+
+# FIXME: debug
+for trn in TRANSLATIONS.values():
+    logger.debug(f"{trn.gettext("Challenges") = }")
+
 router = APIRouter(
     prefix="",
     tags=["view"],
@@ -78,17 +92,6 @@ async def response_generator(  # noqa: PLR0913 # impossible to fix
 
 def version_string() -> str:
     return f"kks-tb-{settings.VERSION}"
-
-
-TRANSLATIONS = {
-    lang: gettext.translation(
-        domain="messages",
-        localedir=Path(__file__).parent.parent / "locale",
-        languages=[lang],
-        fallback=True,
-    )
-    for lang in i18n.SUPPORTED
-}
 
 
 def _(text: str, request: Request) -> str:

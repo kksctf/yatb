@@ -507,6 +507,35 @@ wheels = [
 ]
 
 [[package]]
+name = "hatch-babel"
+version = "0.1.2"
+source = { registry = "https://pypi.org/simple" }
+dependencies = [
+    { name = "babel" },
+    { name = "hatchling" },
+    { name = "typing-extensions" },
+]
+sdist = { url = "https://files.pythonhosted.org/packages/4a/e9/7ccde937bcf8179d50402c950d0b50734d4deb100469f40c7f515008164a/hatch_babel-0.1.2.tar.gz", hash = "sha256:ae6c18dffd460d1a08650949338212880c025a3ff36e95b49b62bbe1dd9f3b87", size = 3428 }
+wheels = [
+    { url = "https://files.pythonhosted.org/packages/23/e4/88fd3db60bed0e2e044fae71bf820216872155ee3dea799ec82f8626a64f/hatch_babel-0.1.2-py3-none-any.whl", hash = "sha256:34f6930b0dd65681e1a61be7317d44dbec313cdc0059c5237a6971fbb7eaca6a", size = 3571 },
+]
+
+[[package]]
+name = "hatchling"
+version = "1.27.0"
+source = { registry = "https://pypi.org/simple" }
+dependencies = [
+    { name = "packaging" },
+    { name = "pathspec" },
+    { name = "pluggy" },
+    { name = "trove-classifiers" },
+]
+sdist = { url = "https://files.pythonhosted.org/packages/8f/8a/cc1debe3514da292094f1c3a700e4ca25442489731ef7c0814358816bb03/hatchling-1.27.0.tar.gz", hash = "sha256:971c296d9819abb3811112fc52c7a9751c8d381898f36533bb16f9791e941fd6", size = 54983 }
+wheels = [
+    { url = "https://files.pythonhosted.org/packages/08/e7/ae38d7a6dfba0533684e0b2136817d667588ae3ec984c1a4e5df5eb88482/hatchling-1.27.0-py3-none-any.whl", hash = "sha256:d3a2f3567c4f926ea39849cdf924c7e99e6686c9c8e288ae1037c8fa2a5d937b", size = 75794 },
+]
+
+[[package]]
 name = "httpcore"
 version = "1.0.9"
 source = { registry = "https://pypi.org/simple" }
@@ -1252,6 +1281,15 @@ wheels = [
 ]
 
 [[package]]
+name = "trove-classifiers"
+version = "2025.8.6.13"
+source = { registry = "https://pypi.org/simple" }
+sdist = { url = "https://files.pythonhosted.org/packages/c3/21/707af14daa638b0df15b5d5700349e0abdd3e5140069f9ab6e0ccb922806/trove_classifiers-2025.8.6.13.tar.gz", hash = "sha256:5a0abad839d2ed810f213ab133d555d267124ddea29f1d8a50d6eca12a50ae6e", size = 16932 }
+wheels = [
+    { url = "https://files.pythonhosted.org/packages/d5/44/323a87d78f04d5329092aada803af3612dd004a64b69ba8b13046601a8c9/trove_classifiers-2025.8.6.13-py3-none-any.whl", hash = "sha256:c4e7fc83012770d80b3ae95816111c32b085716374dccee0d3fbf5c235495f9f", size = 14121 },
+]
+
+[[package]]
 name = "typer"
 version = "0.9.4"
 source = { registry = "https://pypi.org/simple" }
@@ -1385,6 +1423,7 @@ dependencies = [
     { name = "beanie" },
     { name = "fastapi" },
     { name = "fastui" },
+    { name = "hatch-babel" },
     { name = "httpx" },
     { name = "humanize" },
     { name = "jinja2" },
@@ -1441,6 +1480,7 @@ requires-dist = [
     { name = "docker-registry-client-async", marker = "extra == 'dynamic'", specifier = "~=0.2.11" },
     { name = "fastapi", specifier = "~=0.115.13" },
     { name = "fastui", specifier = "~=0.7.0" },
+    { name = "hatch-babel", specifier = "~=0.1.2" },
     { name = "httpx", specifier = "~=0.28.0" },
     { name = "humanize", specifier = "~=4.10.0" },
     { name = "jinja2", specifier = "~=3.1.2" },

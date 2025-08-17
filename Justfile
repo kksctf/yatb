@@ -3,6 +3,9 @@ ruff := "uv run ruff"
 yatb:
     uv run uvicorn yatb.app:app
 
+debug_yatb:
+    uv run debugpy --listen 5678 --wait-for-client -m uvicorn yatb.app:app
+
 cli *args:
     uv run -m yatb.cli {{ args }}
 

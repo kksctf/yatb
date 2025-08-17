@@ -39,6 +39,7 @@ dependencies = [
     "python-multipart==0.0.20",
     "babel==2.17.0",
     "aetcd~=1.0.0a4",
+    "hatch-babel ~= 0.1.2"
 ]
 
 
@@ -71,11 +72,14 @@ dev = [
 ]
 
 [build-system]
-requires = ["hatchling", "editables ~= 0.5"]
+requires = ["hatchling", "hatch-babel ~= 0.1.2", "editables ~= 0.5"]
 build-backend = "hatchling.build"
 
 [tool.hatch.build.targets.wheel]
 packages = ["src/dtc", "src/yatb", "src/ycli"]
+
+[tool.hatch.build.hooks.babel]
+locale_dir = "src/yatb/locale"
 
 [project.urls]
 homepage = "https://github.com/kksctf/yatb"

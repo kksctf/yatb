@@ -4,9 +4,10 @@
 <head>
     <meta charset="utf-8">
     <title>
-        {% block title %}HTMX YATB{% endblock %}
+        {% block title %}{{ CTF_NAME }}{% endblock %}
     </title>
     <link rel="stylesheet" href="{{ url_for('static', path='layout.css') }}">
+    <link rel="stylesheet" href="{{ url_for('static', path='style.css') }}">
     <!-- Bulma & HTMX from CDNs -->
     <link rel="stylesheet" href="https://cdn.jsdelivr.net/npm/bulma@1.0.1/css/bulma.min.css">
     <script src="https://cdn.jsdelivr.net/npm/bulma-toast@2.4.2/dist/bulma-toast.min.js"></script>
@@ -22,7 +23,7 @@
                 <figure class="image is-24x24">
                     <img src="{{ url_for('static', path='logo.png') }}" />
                 </figure>
-                HTMX YATB
+                {{ CTF_NAME }}
             </a>
         </div>
         <div class="navbar-menu">

@@ -6,6 +6,9 @@ sync:
 yatb:
     uv run uvicorn yatb.app:app
 
+yatb-reload:
+    uv run uvicorn yatb.app:app --reload
+
 debug_yatb:
     uv run debugpy --listen 5678 --wait-for-client -m uvicorn yatb.app:app
 

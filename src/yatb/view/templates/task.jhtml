@@ -1,7 +1,7 @@
 {% extends "base.jhtml" %}
 
 {# ──────────── <head> overrides ──────────── #}
-{% block title %}{{ task.task_name }} – Task{% endblock %}
+{% block title %}{{ selected_task.task_name }} – Task{% endblock %}
 
 {% block content %}
 
@@ -12,22 +12,22 @@
 <div class="card">
   <header class="card-header">
     <p class="card-header-title is-size-4">
-      {{ task.task_name }}
+      {{ selected_task.task_name }}
     </p>
-    <span class="tag is-medium ml-2">{{ task.scoring.points }} pts</span>
+    <span class="tag is-medium ml-2">{{ selected_task.scoring.points }} pts</span>
   </header>
 
   <div class="card-content">
     <p class="mb-2">
-      <strong>Category:</strong> {{ task.category|capitalize }}
+      <strong>Category:</strong> {{ selected_task.category|capitalize }}
     </p>
 
     {# Long description – add rich HTML in the DB or markdown-render beforehand #}
     <div class="content">
-      {{ task.description_html | safe }}
+      {{ selected_task.description_html | safe }}
     </div>
 
-    {% if task.is_solved_by(curr_user) %}
+    {% if selected_task.is_solved_by(curr_user) %}
       <article class="message is-success">
         <div class="message-body">
           ✅ You have already solved this challenge. Great job!
@@ -36,9 +36,9 @@
     {% endif %}
   </div>
 
-  {% if task.attachments %} {# WIP #}
+  {% if selected_task.attachments %} {# WIP #}
   <footer class="card-footer">
-    {% for file in task.attachments %}
+    {% for file in selected_task.attachments %}
       <a href="{{ file.url }}" class="card-footer-item">
         📥 {{ file.name }}
       </a>

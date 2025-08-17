@@ -1,28 +1,35 @@
 {% extends "base.jhtml" %}
 
 {% block title %}{{ _("Challenges", request) }}{% endblock %}
-{% block extra_head %}{% endblock %}
+{% block extra_head %}
+{# do not show filters to non-js users #}
+<script>
+    document.addEventListener('DOMContentLoaded', function () {
+        var el = document.getElementById('task-filters');
+        if (el) el.hidden = false;
+    });
+</script>
+{% endblock %}
 
 {% block content %}
 <h1 class="title is-3">{{ _("Challenges", request) }}</h1>
 
-<!-- ── filters (trigger HTMX GETs) ───────────────────────────── -->
-<div class="mb-4">
+<div id="task-filters" class="mb-4" hidden>
     <label class="checkbox mr-3">
         <input type="checkbox" name="show_solved" hx-get="{{ url_for('tasks_page') }}" hx-target="#tasks-container"
-            hx-include="closest .section" checked>
-        Show solved
+            hx-select="#tasks-container" hx-swap="outerHTML" hx-include="closest .section" checked>
+        {{ _("Show solved", request) }}
     </label>
 
-    {% for cat in ['crypto', 'binary', 'web', 'forensic', 'other'] %}  {# TODO: dynamic category retrieval #}
+    {% for cat in ['crypto', 'binary', 'web', 'forensic', 'other'] %} {# TODO: dynamic category retrieval #}
     <label class="checkbox mr-2">
         <input type="checkbox" name="category" value="{{ cat }}" hx-get="{{ url_for('tasks_page') }}"
-            hx-target="#tasks-container" hx-include="closest .section" checked>
+            hx-target="#tasks-container" hx-select="#tasks-container" hx-swap="outerHTML" hx-include="closest .section"
+            checked>
         {{ cat|capitalize }}
     </label>
     {% endfor %}
 </div>
 
-<!-- first paint or non-JS browsers get the full list -->
 {% include "partials/task_container.jhtml" %}
 {% endblock %}

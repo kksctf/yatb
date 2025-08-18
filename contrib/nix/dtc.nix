@@ -83,22 +83,22 @@ in
 
         KUBE_CONFIG_PATH = settings.k3s;
 
-        S3_HOST = k3s.clusterHead;
+        S3_HOST = rCfg.roles.s3_host;
         S3_PORT = toString k3s.minio.port;
         S3_ACCESS = k3s.minio.accessKey;
         S3_SECRET = k3s.minio.secretKey;
-        S3_HOST_KANIKO = k3s.clusterHead;
+        S3_HOST_KANIKO = rCfg.roles.s3_host;
 
-        DYNAMIC_TASKS_ETCD = simpleSecrets.cluster.${config.device}.internal;
-        DYNAMIC_TASKS_ETCD_PORT = toString config.rubikoid.ctf.etcd.port;
+        DYNAMIC_TASKS_ETCD = "127.0.0.1";
+        DYNAMIC_TASKS_ETCD_PORT = "2379";
 
-        DOCKER_REGISTRY_HOST = k3s.clusterHead;
+        DOCKER_REGISTRY_HOST = rCfg.roles.s3_host;
 
         EXTERNAL_TO_INTERNAL_IPS_MAPPING = builtins.toJSON {
-          master = [
-            simpleSecrets.cluster.pod1.internal
-            simpleSecrets.cluster.pod1.wg
-          ];
+          # master = [
+          #   simpleSecrets.cluster.pod1.internal
+          #   simpleSecrets.cluster.pod1.wg
+          # ];
         };
 
         S3_PROXY_HOST = "https://${yatb.s3ProxyAddr}";
@@ -126,7 +126,7 @@ in
           environment = env;
 
           serviceConfig = {
-            ExecStart = "${cfg.package}/bin/uvicorn dynamic_tasks_app.web:app --host '${cfg.http.host}' --port '${toString cfg.http.port}' ${lib.strings.escapeShellArgs cfg.extraArgs}";
+            ExecStart = "${cfg.package}/bin/uvicorn dtc.web:app --host '${cfg.http.host}' --port '${toString cfg.http.port}' ${lib.strings.escapeShellArgs cfg.extraArgs}";
             Restart = "on-failure";
             KillSignal = "SIGINT";
             # DynamicUser = "yes";

@@ -135,7 +135,8 @@ in
         };
       };
       subDomains."${rCfg.rootDomain}" = { };
-      subDomains."s3.${rCfg.rootDomain}" = { };
+      subDomains."${cfg.publicAddr}" = { };
+      subDomains."${cfg.s3ProxyAddr}" = { };
     };
 
     services.caddy = {
@@ -186,14 +187,14 @@ in
 
         ENABLED_AUTH_WAYS = builtins.toJSON settings.authWays;
 
-        # DYNAMIC_TASKS_ETCD = simpleSecrets.cluster.${config.device}.internal;
-        # DYNAMIC_TASKS_ETCD_PORT = toString config.rubikoid.ctf.etcd.port;
+        DYNAMIC_TASKS_ETCD = "127.0.0.1";
+        DYNAMIC_TASKS_ETCD_PORT = "2379"; # toString config.rubikoid.ctf.etcd.port;
 
         # VPN_HOST = simpleSecrets.cluster..public;
       } // settings.extra;
 
       serviceConfig = {
-        ExecStart = "${cfg.package}/bin/uvicorn yatb:app --host '${cfg.http.host}' --port '${toString cfg.http.port}' ${lib.strings.escapeShellArgs cfg.extraArgs}";
+        ExecStart = "${cfg.package}/bin/uvicorn yatb.app:app --host '${cfg.http.host}' --port '${toString cfg.http.port}' ${lib.strings.escapeShellArgs cfg.extraArgs}";
         Restart = "on-failure";
         KillSignal = "SIGINT";
 
@@ -203,38 +204,38 @@ in
       };
     };
 
-    systemd.services.s3proxy = {
-      enable = true;
-      description = "YATB's dynamic tasks s3 proxy";
-      wants = [ "minio.service" ];
-      wantedBy = [ "multi-user.target" ];
+    # systemd.services.s3proxy = {
+    #   enable = true;
+    #   description = "YATB's dynamic tasks s3 proxy";
+    #   wants = [ "minio.service" ];
+    #   wantedBy = [ "multi-user.target" ];
 
-      environment = {
-        S3_HOST = k3s.clusterHead;
-        S3_PORT = toString k3s.minio.port;
-        S3_ACCESS = k3s.minio.accessKey;
-        S3_SECRET = k3s.minio.secretKey;
+    #   environment = {
+    #     S3_HOST = rCfg.roles.s3_host;
+    #     S3_PORT = toString k3s.minio.port;
+    #     S3_ACCESS = k3s.minio.accessKey;
+    #     S3_SECRET = k3s.minio.secretKey;
 
-        JWT_SECRET_KEY = settings.keys.jwt;
-        FLAG_SIGN_KEY = settings.keys.flagSign;
-        API_TOKEN = settings.keys.apiToken;
-        WS_API_TOKEN = settings.keys.wsApiToken;
+    #     JWT_SECRET_KEY = settings.keys.jwt;
+    #     FLAG_SIGN_KEY = settings.keys.flagSign;
+    #     API_TOKEN = settings.keys.apiToken;
+    #     WS_API_TOKEN = settings.keys.wsApiToken;
 
-        ADMIN_PASSWORD = "";
+    #     ADMIN_PASSWORD = "";
 
-        S3_HOST_KANIKO = "";
-        DOCKER_REGISTRY_HOST = "";
-        EXTERNAL_TO_INTERNAL_IPS_MAPPING = "{}";
-        DYNAMIC_TASKS_ETCD = "";
-      };
+    #     S3_HOST_KANIKO = "";
+    #     DOCKER_REGISTRY_HOST = "";
+    #     EXTERNAL_TO_INTERNAL_IPS_MAPPING = "{}";
+    #     DYNAMIC_TASKS_ETCD = "";
+    #   };
 
-      serviceConfig = {
-        ExecStart = "${cfg.package}/bin/uvicorn dynamic_tasks_app.s3_serve:app --host '${cfg.http.host}' --port '${toString (cfg.http.port + 1)}' ${lib.strings.escapeShellArgs cfg.extraArgs}";
-        Restart = "on-failure";
-        KillSignal = "SIGINT";
-        # DynamicUser = "yes";
-        User = "root";
-      };
-    };
+    #   serviceConfig = {
+    #     ExecStart = "${cfg.package}/bin/uvicorn dtc.s3_serve:app --host '${cfg.http.host}' --port '${toString (cfg.http.port + 1)}' ${lib.strings.escapeShellArgs cfg.extraArgs}";
+    #     Restart = "on-failure";
+    #     KillSignal = "SIGINT";
+    #     # DynamicUser = "yes";
+    #     User = "root";
+    #   };
+    # };
   };
 }

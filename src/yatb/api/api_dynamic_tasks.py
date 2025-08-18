@@ -171,7 +171,7 @@ def get_client_safe() -> DynamicTasksClient | None:
 async def get_dynamic_task(task: CURRENT_TASK) -> TaskDB:
     if not task.dti:
         raise HTTPException(
-            status_code=status.HTTP_400_BAD_REQUEST,
+            status_code=status.HTTP_406_NOT_ACCEPTABLE,
             detail="Bad task",
         )
     return task

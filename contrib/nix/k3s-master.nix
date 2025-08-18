@@ -200,12 +200,12 @@ in
         );
 
         manifests = {
-          kubevirt-operator.source = kubevirt-src.operator;
-          kubevirt-cr.source = kubevirt-src.cr;
+          # kubevirt-operator.source = kubevirt-src.operator;
+          # kubevirt-cr.source = kubevirt-src.cr;
 
-          calico-operator.source = calico-src.operator;
-          calico-tigera-operator.source = calico-src.tigera-operator;
-          calico-cr.source = calico-src.cr;
+          # calico-operator.source = calico-src.operator;
+          # calico-tigera-operator.source = calico-src.tigera-operator;
+          # calico-cr.source = calico-src.cr;
         };
       }
       (lib.mkIf (cfg.role == "server") {

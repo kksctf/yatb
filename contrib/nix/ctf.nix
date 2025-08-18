@@ -14,11 +14,31 @@ in
     rootDomain = mkOption {
       type = types.str;
     };
+
+    roles = lib.mkOption {
+      type = (
+        types.submodule {
+          options = {
+            external_ip = mkOption {
+              type = types.str;
+            };
+          };
+        }
+      );
+    };
+
+    # roles = lib.mkOption {
+    #   type = (
+    #     types.submodule {
+    #       options = {
+
+    #       };
+    #     }
+    #   );
+    # };
   };
 
   config = {
-    rubikoid.ctf = {
-      
-    };
+    rubikoid.ctf = { };
   };
 }

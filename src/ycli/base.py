@@ -4,7 +4,8 @@ from pydantic_settings import BaseSettings, SettingsConfigDict
 
 
 class Settings(BaseSettings):
-    server: str = "http://127.0.0.1:8000"
+    UPSTREAM: str = "http://127.0.0.1:8000"
+    PUBLIC_FILES_DOMAIN: str = "http://127.0.0.1:8001"
 
     model_config = SettingsConfigDict(
         env_file="yatb.env",

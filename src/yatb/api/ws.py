@@ -43,12 +43,12 @@ class ConnectionManager:
         self.active_connections.append(websocket)
         self.user_to_ws[user.user_id].append(websocket)
 
-        client = await _get_client()
-        info = await client.get_vpn_info(user.user_id)
-        if not info or not is_vpninfo_generated(info):
-            return
+        # client = await _get_client()
+        # info = await client.get_vpn_info(user.user_id)
+        # if not info or not is_vpninfo_generated(info):
+        #     return
 
-        self.ip_to_user[info.netinfo.client_ip.compressed] = user.user_id
+        # self.ip_to_user[info.netinfo.client_ip.compressed] = user.user_id
 
         for entry in self.history[user.user_id]:
             await websocket.send_json(data=entry.model_dump_json())

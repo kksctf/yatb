@@ -1,5 +1,6 @@
 from pydantic import BaseModel
 
+from yatb import schema
 from ycli.base import app, c
 from ycli.client import YATB
 
@@ -11,6 +12,15 @@ class ShortTask(BaseModel):
     description: str
 
     flag: str
+
+    def get_form(self) -> schema.TaskForm:
+        return schema.TaskForm(
+            task_name=self.task_name,
+            category=self.category,
+            scoring=schema.DynamicKKSScoring(),
+            description=self.description,
+            flag=schema.StaticFlag(flag=self.flag),
+        )
 
 
 tasks_to_create: list[ShortTask] = [
@@ -46,5 +56,5 @@ tasks_to_create: list[ShortTask] = [
 async def testing_tasks():
     async with YATB() as y:
         for task in tasks_to_create:
-            new_task = await y.create_task(task)
+            new_task = await y.create_task(task.get_form())
             c.log(f"Task created: {new_task = }")

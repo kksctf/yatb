@@ -224,7 +224,7 @@ class _DynamicTasksEtcdClientTasks(_DynamicTasksEtcdClientBase):
                         event,
                         model,
                         prev_model,
-                        rpc_action=rpc,
+                        rpc_action=rpc,  # pyright: ignore[reportPossiblyUnboundVariable] # it's hard to track ifs
                     )
                 else:
                     yield TaskWatchEvent(event, model, prev_model)
@@ -323,5 +323,5 @@ class _DynamicTasksEtcdClientVPNs(_DynamicTasksEtcdClientBase):
         await self._client.put(f"{self.vpns_prefix}/global".encode(), state.make_binary())
 
 
-class DynamicTasksEtcdClient(_DynamicTasksEtcdClientTasks, _DynamicTasksEtcdClientVPNs, _DynamicTasksEtcdClientBase):
+class DynamicTasksEtcdClient(_DynamicTasksEtcdClientTasks, _DynamicTasksEtcdClientBase):
     pass

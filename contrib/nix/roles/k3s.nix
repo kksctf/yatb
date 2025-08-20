@@ -81,7 +81,7 @@ in
                 "--service-cidr=10.43.0.0/16"
                 # "--flannel-backend=none"
                 # "--disable-network-policy"
-                # "--disable=traefik"
+                "--disable=traefik"
               ]
             else
               [ ]

@@ -324,7 +324,7 @@ class KubeApi:
                             # and don't try to resolve http://bucket.ip:port/file
                             EnvVar("S3_FORCE_PATH_STYLE", "true"),
                             # i have AWS. Don't work without this
-                            EnvVar("AWS_REGION", "us-east-1"),  # i have AWS
+                            EnvVar("AWS_REGION", "us-east-1"),  # i hate AWS
                             EnvVar("AWS_ACCESS_KEY_ID", settings.S3_ACCESS),
                             EnvVar("AWS_SECRET_ACCESS_KEY", settings.S3_SECRET),
                         ],
@@ -403,12 +403,12 @@ class KubeApi:
         compose: Compose,
         flag: str,
         *,
-        ip_in_cluster: str | None = None,
+        # ip_in_cluster: str | None = None,
         stack: AsyncExitStack,
         ports_env: PortsEnv,
         skip_build: bool = False,
         extra_env: Mapping[str, str] = {},
-        extra_route: tuple[str, str] | None = None,
+        # extra_route: tuple[str, str] | None = None,
     ) -> Namespace:
         # images: dict[str, str] = {}
         containers: dict[str, Container] = {}
@@ -524,53 +524,27 @@ class KubeApi:
                 service = await stack.enter_async_context(service)
                 services.append(service)
 
-            # FIXME: TMP COMMENT FOR PHD
-            # for port in svc.ports:
-            #     public_hp = await ports_env.get_port()
-            #     service = self.client.ctx(
-            #         self.client.simple_service(
-            #             svc_name,
-            #             ns_name,
-            #             public_hp.port,
-            #             port.internal_port,
-            #             settings.EXTERNAL_TO_INTERNAL_IPS_MAPPING[public_hp.host],
-            #             name_suffix="-public",
-            #         ),
-            #     )
-            #     service = await stack.enter_async_context(service)
-            #     services.append(service)
+            for port in svc.ports:
+                public_hp = await ports_env.get_port()
+                service = self.client.ctx(
+                    self.client.simple_service(
+                        svc_name,
+                        ns_name,
+                        public_hp.port,
+                        port.internal_port,
+                        settings.EXTERNAL_TO_INTERNAL_IPS_MAPPING[public_hp.host],
+                        name_suffix="-public",
+                    ),
+                )
+                service = await stack.enter_async_context(service)
+                services.append(service)
 
             deployment = self.client.ctx(
                 self.client.simple_deployment(
                     svc_name,
                     ns_name,
                     PodSpec(
-                        # initContainers=(
-                        #     [
-                        #         Container(
-                        #             name="route-injector",
-                        #             image="alpine:3.21",
-                        #             command=[
-                        #                 "/bin/sh",
-                        #                 "-c",
-                        #                 f"ip r add {extra_route[1]}/32 dev eth0; ip route add {extra_route[0]} via {extra_route[1]} dev eth0 || sleep 10000",
-                        #             ],
-                        #             securityContext=SecurityContext(capabilities=Capabilities(add=["NET_ADMIN"])),
-                        #         ),
-                        #     ]
-                        #     if extra_route
-                        #     else []
-                        # ),
                         containers=[container],
-                    ),
-                    extra_pod_meta=(
-                        {
-                            "annotations": {
-                                "cni.projectcalico.org/ipAddrs": f'["{ip_in_cluster}"]',
-                            },
-                        }
-                        if ip_in_cluster
-                        else {}
                     ),
                 ),
             )
@@ -789,6 +763,8 @@ class KubeApi:
 
                         logger.info(f"{log = } -> {parsed_log = }, {frm = }, {to = }")
                         break  # TODO: make this better
+                else:
+                    raise Exception("error building shit")
 
         return f"{parsed_log}"
 
@@ -802,6 +778,8 @@ class KubeApi:
         external_ips: list[str],
         stack: AsyncExitStack,
     ) -> tuple[Deployment, Service]:
+        raise Exception
+
         if not ns.metadata or not ns.metadata.name:
             raise Exception
 
@@ -912,6 +890,8 @@ class KubeApi:
         *,
         stack: AsyncExitStack,
     ) -> Deployment:
+        raise Exception
+
         if not ns.metadata or not ns.metadata.name:
             raise Exception
 

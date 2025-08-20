@@ -241,31 +241,31 @@ async def api_dynamic_task_infos(
     return resp
 
 
-@router.get("/vpn")
-async def get_vpn(
-    user: auth.CURR_USER,
-    client: CLIENT,
-) -> PlainTextResponse:
-    state = await client.get_global()
-    if not state:
-        return PlainTextResponse("VPN worker is not ready yet :cry:")
+# @router.get("/vpn")
+# async def get_vpn(
+#     user: auth.CURR_USER,
+#     client: CLIENT,
+# ) -> PlainTextResponse:
+#     state = await client.get_global()
+#     if not state:
+#         return PlainTextResponse("VPN worker is not ready yet :cry:")
 
-    info = await client.get_vpn_info(user.user_id)
-    if not info:
-        info = await client.setup_vpn(user)
+#     info = await client.get_vpn_info(user.user_id)
+#     if not info:
+#         info = await client.setup_vpn(user)
 
-    if not is_vpninfo_generated(info):
-        return PlainTextResponse("Generating your personal VPN...")
+#     if not is_vpninfo_generated(info):
+#         return PlainTextResponse("Generating your personal VPN...")
 
-    data = ""
-    data += f"""
-[Interface]
-PrivateKey = {info.client.private_key}
-Address = {info.netinfo.client_ip!s}/{settings.VPN_USER_NET_PREFIX}
+#     data = ""
+#     data += f"""
+# [Interface]
+# PrivateKey = {info.client.private_key}
+# Address = {info.netinfo.client_ip!s}/{settings.VPN_USER_NET_PREFIX}
 
-[Peer]
-PublicKey = {state.server.public_key}
-AllowedIPs = {info.netinfo.client_ip_with_net(prefix=settings.VPN_USER_NET_PREFIX)!s}, {info.netinfo.task_net!s}
-Endpoint = {settings.VPN_HOST}:{state.port}
-    """.strip()
-    return PlainTextResponse(data)
+# [Peer]
+# PublicKey = {state.server.public_key}
+# AllowedIPs = {info.netinfo.client_ip_with_net(prefix=settings.VPN_USER_NET_PREFIX)!s}, {info.netinfo.task_net!s}
+# Endpoint = {settings.VPN_HOST}:{state.port}
+#     """.strip()
+#     return PlainTextResponse(data)

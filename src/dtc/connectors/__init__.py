@@ -142,8 +142,6 @@ class BaseConnector(ABC):
         self,
         task_info: DynamicTaskInfoBuilding,
         lti: LocalTaskInfo,
-        vpn_state: VPNGlobalState,
-        vpn_user: VPNUserInfoGenerated,
     ) -> None:
         raise NotImplementedError
 
@@ -151,13 +149,11 @@ class BaseConnector(ABC):
         self,
         task_info: DynamicTaskInfoBuilding,
         lti: LocalTaskInfo,
-        vpn_state: VPNGlobalState,
-        vpn_user: VPNUserInfoGenerated,
     ):
         raise NotImplementedError
 
     @abstractmethod
-    async def _build(self, task_info: DynamicTaskInfoBuilding, lti: LocalTaskInfo) -> None:
+    async def _build(self, task_info: DynamicTaskInfoBuilding, lti: LocalTaskInfo) -> str:
         raise NotImplementedError
 
     async def _stop(self, task_info: DynamicTaskInfo) -> None:
@@ -290,18 +286,13 @@ class BaseConnector(ABC):
 
         task_info = await self.etcd.make_task_building(task_info)
 
-        vpn_state = await self.etcd.get_global()
-        vpn_user = await self.etcd.get_vpn_info(task_info.user_id)
-        if not vpn_state or not vpn_user or not is_vpninfo_generated(vpn_user):
-            raise Exception
-
         try:
             for feature in task_info.features:
                 match feature:
                     case DynamicTaskFeatures.SERVICE:
-                        await self._start(task_info, lti, vpn_state=vpn_state, vpn_user=vpn_user)
+                        await self._start(task_info, lti)
                     case DynamicTaskFeatures.VM:
-                        await self._start_vm(task_info, lti, vpn_state=vpn_state, vpn_user=vpn_user)
+                        await self._start_vm(task_info, lti)
                     case DynamicTaskFeatures.BUILDER:
                         task_info.static_link = await self._build(task_info, lti)
         except Exception as ex:

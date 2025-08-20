@@ -5,7 +5,7 @@ from types import TracebackType
 import httpx
 
 # from dtc.config import settings as dtc_settings
-from yatb import auth, config, schema
+from yatb import auth, schema
 from yatb.app import app
 from yatb.config import settings as yatb_settings
 from yatb.shared.s3.client import MinioEx
@@ -19,7 +19,7 @@ class YATB:
     s3: MinioEx
 
     def __init__(self, *, set_default_token: bool = True) -> None:
-        self.s = httpx.AsyncClient(base_url=settings.server)
+        self.s = httpx.AsyncClient(base_url=settings.UPSTREAM)
 
         if set_default_token:
             self.set_admin_token(yatb_settings.API_TOKEN)
@@ -40,7 +40,7 @@ class YATB:
             ],
         )
 
-    def set_admin_token(self, token: str = config.settings.API_TOKEN) -> None:
+    def set_admin_token(self, token: str = yatb_settings.API_TOKEN) -> None:
         self.s.headers["X-Token"] = token
 
     def make_user_token(self, user: schema.User) -> str:

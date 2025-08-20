@@ -19,8 +19,6 @@ from .api import KubeApi
 class KubeConnector(BaseConnector):
     api: KubeApi
 
-    global_wtf: AsyncExitStack
-
     def __init__(
         self,
         *,
@@ -41,34 +39,11 @@ class KubeConnector(BaseConnector):
     async def init(self) -> None:
         await self.api.init()
 
-        self.global_wtf = AsyncExitStack()
-        vpn_state = await self.etcd.get_global()
-        if not vpn_state or not vpn_state.back_vpn or not vpn_state.back_port:
-            raise Exception("bad")
-
-        ns_name, ns = await self.global_wtf.enter_async_context(
-            self.api.run_in_ns(
-                "vpn",
-                annotations={
-                    "cni.projectcalico.org/ipv4pools": f'["test-ipv4-pool"]',
-                },
-            )
-        )
-
-        ovpn = await self.api.openvpn_back(
-            ns,
-            static_key=vpn_state.back_vpn.static_key,
-            external_port=vpn_state.back_port,
-            stack=self.global_wtf,
-        )
-
     async def test(self) -> None:
         await self.api.test()
 
     async def close(self) -> None:
         # logger.critical(f"Closing super().KubeConnector")
-        await self.global_wtf.aclose()
-
         await super().close()
         # logger.critical(f"Closed super().KubeConnector, closing api")
         await self.api.close()
@@ -78,8 +53,6 @@ class KubeConnector(BaseConnector):
         self,
         task_info: DynamicTaskInfoBuilding,
         lti: LocalTaskInfo,
-        vpn_state: VPNGlobalState,
-        vpn_user: VPNUserInfoGenerated,
     ) -> None:
         logger.info(f"Got {task_info = }, resolving path and compose file")
 
@@ -101,34 +74,11 @@ class KubeConnector(BaseConnector):
             )
         )
 
-        ipv4pool = await lti.exit_stack.enter_async_context(
-            self.api.client.ctx_global(
-                self.api.client.simple_ip_pool(
-                    f"{ns_name}-v4",
-                    cidr=vpn_user.netinfo.task_net.compressed,
-                    automatic=False,
-                    block_size=29,  # FIXME: hardcode
-                ),
-            ),
-        )
-
         if not ns.metadata:
-            raise Exception
-
-        if not ipv4pool.metadata or not ipv4pool.metadata.name:
             raise Exception
 
         if not ns.metadata.annotations:
             ns.metadata.annotations = {}
-
-        patch = {
-            "metadata": {
-                "annotations": {
-                    "cni.projectcalico.org/ipv4pools": f'["{ipv4pool.metadata.name}", "test-ipv4-pool"]',
-                },
-            },
-        }
-        ns = await self.api.client.patch(type(ns), name=ns_name, obj=patch)
 
         await self.api.service(
             task_name,
@@ -139,27 +89,16 @@ class KubeConnector(BaseConnector):
             ports_env=lti.ports_env,
             skip_build=False,
             extra_env={"RANDOM_STRING_SEQ": lti.devire_static_random_seq(task_info.flag)},
-            ip_in_cluster=vpn_user.netinfo.task_net_task.compressed,
             stack=lti.exit_stack,
-            extra_route=("10.10.0.0/16", vpn_user.netinfo.task_net_vpn.compressed),
         )
-
-        # fff = next(iter(settings.EXTERNAL_TO_INTERNAL_IPS_MAPPING.values()))
-        # ovpn, svc = await self.api.openvpn(
-        #     ns,
-        #     usernet=vpn_user.netinfo,
-        #     static_key=vpn_user.task.static_key,
-        #     external_ips=fff,
-        #     stack=lti.exit_stack,
-        # )
 
     async def _start_vm(
         self,
         task_info: DynamicTaskInfoBuilding,
         lti: LocalTaskInfo,
-        vpn_state: VPNGlobalState,
-        vpn_user: VPNUserInfoGenerated,
     ):
+        raise Exception
+
         logger.info(f"Got {task_info = }, doing work")
 
         name = f"{task_info.encoded_task_id}-{task_info.encoded_user_id}"
@@ -204,7 +143,7 @@ class KubeConnector(BaseConnector):
             self.api.client.ctx_global(
                 self.api.client.simple_ip_pool(
                     f"{ns_name}-v4",
-                    cidr=vpn_user.netinfo.task_net.compressed,
+                    # cidr=vpn_user.netinfo.task_net.compressed,
                     automatic=False,
                     block_size=29,  # FIXME: hardcode
                 ),
@@ -234,7 +173,7 @@ class KubeConnector(BaseConnector):
                 self.api.client.simple_vm(
                     name="vm",
                     namespace=ns_name,
-                    ip_in_cluster=vpn_user.netinfo.task_net_task.compressed,
+                    # ip_in_cluster=vpn_user.netinfo.task_net_task.compressed,
                     image=self.api.fix_image_name(vm_image),
                     custm=self.api.fix_image_name(customize),
                     cpu=6 if not task_info.user_admin else 12,

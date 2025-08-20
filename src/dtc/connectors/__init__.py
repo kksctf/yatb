@@ -234,16 +234,16 @@ class BaseConnector(ABC):
 
     async def init_lti(self, task_info: DynamicTaskInfo) -> LocalTaskInfo:
         async with self.lti_lock:
-            # if not task_info.user_admin:
-            counter = 0
-            for _, user_id in self.ltis:
-                if task_info.user_id == user_id:
-                    counter += 1
+            if not task_info.user_admin:
+                counter = 0
+                for _, user_id in self.ltis:
+                    if task_info.user_id == user_id:
+                        counter += 1
 
-            if counter > 0:
-                raise GenericConnectorError(
-                    f"Stop other tasks before running another one, you have {counter = } tasks running",
-                )
+                if counter > 0:
+                    raise GenericConnectorError(
+                        f"Stop other tasks before running another one, you have {counter = } tasks running",
+                    )
 
             k = (task_info.task_id, task_info.user_id)
 

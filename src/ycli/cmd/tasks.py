@@ -14,6 +14,8 @@ from ycli.base import app, c, settings
 from ycli.client import YATB
 from ycli.models import FileTask, State
 
+_TASKS_ARHIVE_LIMIT: int = 2
+
 
 async def _upload_task(
     *,
@@ -87,7 +89,7 @@ async def _upload_task(
     public_dir = task_src / "public"
     if public_dir.exists() and (files := list(public_dir.iterdir())):
         files_hash = subprocess.check_output(  # noqa: ASYNC221, S603
-            "sha256sum -b public/*",  # noqa: S607
+            "find ./public -type f -exec sha256sum {} \\;",  # noqa: S607
             shell=True,
             cwd=task_src,
             stderr=subprocess.STDOUT,
@@ -96,20 +98,34 @@ async def _upload_task(
         created_task.description += "\n\n---\n\n"
         created_task.description += '<div class="card-text row d-flex justify-content-between">'
 
-        for file in files:
+        if len(files) > _TASKS_ARHIVE_LIMIT:
+            archive_name = "files.tag.gz"
             created_task.description += (
                 "<a class='btn btn-outline-primary btn-sm col-auto m-1 flex-fill' "
-                f"href='{settings.PUBLIC_FILES_DOMAIN}/shared/{created_task.task_id}/{file.name}' "
-                f"rel='noopener noreferrer' target='_blank'>{file.name}</a>\n"
+                f"href='{settings.PUBLIC_FILES_DOMAIN}/shared/{created_task.task_id}/{archive_name}' "
+                f"rel='noopener noreferrer' target='_blank'>{archive_name}</a>\n"
             )
-            with file.open("rb") as f:
-                await y.s3.put_object(
-                    dtc_settings.STATIC_BUCKET_NAME,
-                    f"{created_task.task_id}/{file.name}",
-                    f,
-                    length=file.stat().st_size,
+            await y.s3.upload_directory(
+                public_dir,
+                dtc_settings.TASKS_BUCKET_NAME,
+                f"{created_task.task_id}/{archive_name}",
+            )
+            c.print(f"\t\t[+] '{created_task.task_name}': uploaded archive ({len(files) = } > 2) from {public_dir!r}")
+        else:
+            for file in files:
+                created_task.description += (
+                    "<a class='btn btn-outline-primary btn-sm col-auto m-1 flex-fill' "
+                    f"href='{settings.PUBLIC_FILES_DOMAIN}/shared/{created_task.task_id}/{file.name}' "
+                    f"rel='noopener noreferrer' target='_blank'>{file.name}</a>\n"
                 )
-            c.print(f"\t\t[+] '{created_task.task_name}': uploaded file {file}")
+                with file.open("rb") as f:
+                    await y.s3.put_object(
+                        dtc_settings.STATIC_BUCKET_NAME,
+                        f"{created_task.task_id}/{file.name}",
+                        f,
+                        length=file.stat().st_size,
+                    )
+                c.print(f"\t\t[+] '{created_task.task_name}': uploaded file {file}")
 
         await y.s3.put_object(
             dtc_settings.STATIC_BUCKET_NAME,
@@ -163,7 +179,7 @@ async def upload_task(
 
 
 @app.command()
-async def prepare_tasks(
+async def upload_tasks(
     main_tasks_dir: Path,
     *,
     drop: bool = False,
@@ -196,12 +212,15 @@ async def prepare_tasks(
 
                 if not (task_src / "task.yaml").exists():
                     continue
-
-                await _upload_task(
-                    y=y,
-                    state=state,
-                    task_to_uuid_copy=task_to_uuid_copy,
-                    tasks_cache=tasks_cache,
-                    task_src=task_src,
-                    req_tasks=[],
-                )
+                try:
+                    await _upload_task(
+                        y=y,
+                        state=state,
+                        task_to_uuid_copy=task_to_uuid_copy,
+                        tasks_cache=tasks_cache,
+                        task_src=task_src,
+                        req_tasks=[],
+                    )
+                except Exception as ex:
+                    c.print(f"Got error {ex = } uploading {task_src = }")
+                    raise

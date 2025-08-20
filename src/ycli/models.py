@@ -29,8 +29,8 @@ class DynamicTaskFeatures(StrEnum):
                 return schema.DynamicTaskFeatures.BUILDER
 
 
-if len(DynamicTaskFeatures) == len(schema.DynamicTaskFeatures):
-    raise Exception(f"{len(DynamicTaskFeatures) == len(schema.DynamicTaskFeatures) = } ???")  # noqa: TRY002
+if len(DynamicTaskFeatures) != len(schema.DynamicTaskFeatures):
+    raise Exception(f"{len(DynamicTaskFeatures) = } { len(schema.DynamicTaskFeatures) = } ???")  # noqa: TRY002
 
 
 class FileTask(BaseModel):

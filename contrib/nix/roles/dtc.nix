@@ -87,8 +87,7 @@ in
 
         EXTERNAL_TO_INTERNAL_IPS_MAPPING = builtins.toJSON {
           "${rCfg.cluster.${config.device}.external}" = [
-            "192.168.199.35"
-            # rCfg.cluster.${config.device}.external
+            rCfg.cluster.${config.device}.funny
           ];
         };
 

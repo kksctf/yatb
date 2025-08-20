@@ -99,7 +99,7 @@ async def _upload_task(
         created_task.description += '<div class="card-text row d-flex justify-content-between">'
 
         if len(files) > _TASKS_ARHIVE_LIMIT:
-            archive_name = "files.tag.gz"
+            archive_name = "files.tar.gz"
             created_task.description += (
                 "<a class='btn btn-outline-primary btn-sm col-auto m-1 flex-fill' "
                 f"href='{settings.PUBLIC_FILES_DOMAIN}/shared/{created_task.task_id}/{archive_name}' "

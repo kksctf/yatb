@@ -11,7 +11,6 @@ let
   rCfg = config.rubikoid.ctf;
   cfg = rCfg.yatb;
 
-  k3s = rCfg.k3s;
   settings = cfg.settings;
 in
 {
@@ -99,12 +98,6 @@ in
       default = rCfg.rootDomain;
     };
 
-    s3ProxyAddr = mkOption {
-      type = types.str;
-      description = "public address of yatb";
-      default = "s3.${rCfg.rootDomain}";
-    };
-
     extraArgs = mkOption {
       type = types.listOf types.str;
       default = [ ];
@@ -118,7 +111,7 @@ in
       enable = true;
       settings = {
         FERRETDB_LISTEN_ADDR = "127.0.0.1:27017";
-        FERRETDB_TELEMETRY = "disabled";
+        FERRETDB_TELEMETRY = "disable";
       };
     };
 
@@ -131,12 +124,11 @@ in
       enable = true;
       baseDomains = {
         ${rCfg.rootDomain} = {
-          a.data = simpleSecrets.cluster.${config.device}.public;
+          a.data = rCfg.roles.external_ip;
         };
       };
-      subDomains."${rCfg.rootDomain}" = { };
+      # subDomains."${rCfg.rootDomain}" = { };
       subDomains."${cfg.publicAddr}" = { };
-      subDomains."${cfg.s3ProxyAddr}" = { };
     };
 
     services.caddy = {
@@ -203,39 +195,5 @@ in
         User = "root";
       };
     };
-
-    # systemd.services.s3proxy = {
-    #   enable = true;
-    #   description = "YATB's dynamic tasks s3 proxy";
-    #   wants = [ "minio.service" ];
-    #   wantedBy = [ "multi-user.target" ];
-
-    #   environment = {
-    #     S3_HOST = rCfg.roles.s3_host;
-    #     S3_PORT = toString k3s.minio.port;
-    #     S3_ACCESS = k3s.minio.accessKey;
-    #     S3_SECRET = k3s.minio.secretKey;
-
-    #     JWT_SECRET_KEY = settings.keys.jwt;
-    #     FLAG_SIGN_KEY = settings.keys.flagSign;
-    #     API_TOKEN = settings.keys.apiToken;
-    #     WS_API_TOKEN = settings.keys.wsApiToken;
-
-    #     ADMIN_PASSWORD = "";
-
-    #     S3_HOST_KANIKO = "";
-    #     DOCKER_REGISTRY_HOST = "";
-    #     EXTERNAL_TO_INTERNAL_IPS_MAPPING = "{}";
-    #     DYNAMIC_TASKS_ETCD = "";
-    #   };
-
-    #   serviceConfig = {
-    #     ExecStart = "${cfg.package}/bin/uvicorn dtc.s3_serve:app --host '${cfg.http.host}' --port '${toString (cfg.http.port + 1)}' ${lib.strings.escapeShellArgs cfg.extraArgs}";
-    #     Restart = "on-failure";
-    #     KillSignal = "SIGINT";
-    #     # DynamicUser = "yes";
-    #     User = "root";
-    #   };
-    # };
   };
 }

@@ -123,7 +123,7 @@ in
     };
 
     role = mkOption {
-      type = lib.types.enum [
+      type = types.enum [
         "agent"
         "server"
       ];
@@ -137,20 +137,7 @@ in
       type = types.str;
     };
 
-    minio = {
-      secretKey = mkOption {
-        type = types.str;
-      };
 
-      accessKey = mkOption {
-        type = types.str;
-      };
-
-      port = mkOption {
-        type = types.int;
-        default = 9000;
-      };
-    };
   };
   config = lib.mkIf cfg.enable {
     environment.systemPackages = with pkgs; [

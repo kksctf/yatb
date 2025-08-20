@@ -6,7 +6,7 @@ from yatb.config import settings
 from yatb.utils.log_helper import get_logger
 
 from .base import AuthBase
-from .oauth import CTFTimeOAuth, DiscordOAuth, GithubOAuth, OAuth
+from .oauth import CTFTimeOAuth, DiscordOAuth, GithubOAuth, GoogleOAuth, OAuth
 from .simple import SimpleAuth
 from .tg import TelegramAuth
 from .token_auth import TokenAuth

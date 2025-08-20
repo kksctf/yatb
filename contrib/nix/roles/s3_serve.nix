@@ -97,7 +97,9 @@ in
         ADMIN_PASSWORD = "";
 
         S3_HOST_KANIKO = "";
+        S3_PORT_KANIKO = "0";
         DOCKER_REGISTRY_HOST = "";
+        DOCKER_REGISTRY_PORT = "0";
         EXTERNAL_TO_INTERNAL_IPS_MAPPING = "{}";
         DYNAMIC_TASKS_ETCD = "";
       };

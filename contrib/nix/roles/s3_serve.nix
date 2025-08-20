@@ -78,7 +78,6 @@ in
         FLAG_SIGN_KEY = "";
         API_TOKEN = "";
         WS_API_TOKEN = "";
-        TASKS_ENCRYPTION_KEY = "";
 
         ADMIN_PASSWORD = "";
 

@@ -31,16 +31,12 @@ in
 
   config = lib.mkIf cfg.enable {
     rubikoid.ctf.k3s = lib.mkMerge [
-      (
-        lib.mkIf cfg.role == "server" {
-          master = rCfg.cluster.${config.device}.internal;
-        }
-      )
-      (
-        lib.mkIf cfg.role == "agent" {
-          slaves = [ rCfg.cluster.${config.device}.internal ];
-        }
-      )
+      (lib.mkIf (cfg.role == "server") {
+        master = rCfg.cluster.${config.device}.internal;
+      })
+      (lib.mkIf (cfg.role == "agent") {
+        slaves = [ rCfg.cluster.${config.device}.internal ];
+      })
     ];
 
     environment.systemPackages = with pkgs; [
@@ -73,9 +69,10 @@ in
           [
             # "--tls-san='yatb-kube-master.nodes.internal.rubikoid.ru'"
             "--node-name=${config.device}"
-            "--node-ip=${rCfg.cluster.${config.device}.internal}"
-            "--node-external-ip=${rCfg.cluster.${config.device}.internal}"
+            # "--node-ip=${rCfg.cluster.${config.device}.internal}"
+            "--node-external-ip=${rCfg.cluster.${config.device}.external}"
             # "--kube-proxy-arg='--proxy-mode=ipvs'"
+            "--flannel-iface=ens3"
           ]
           ++ (
             if cfg.role == "server" then
@@ -84,7 +81,7 @@ in
                 "--service-cidr=10.43.0.0/16"
                 # "--flannel-backend=none"
                 # "--disable-network-policy"
-                "--disable=traefik"
+                # "--disable=traefik"
               ]
             else
               [ ]
@@ -111,35 +108,42 @@ in
       openFirewall = false; # TODO: thonk
     };
 
-    networking.firewall.interfaces.${rCfg.internalIface} = {
+    networking.firewall = {
+      interfaces.${rCfg.internalIface} = {
+        allowedTCPPorts = [
+          443 # k3s???
+          6443 # k3s: required so that pods can reach the API server (running on port 6443 by default)
+          2379 # k3s, etcd clients: required if using a "High Availability Embedded etcd" configuration
+          2380 # k3s, etcd peers: required if using a "High Availability Embedded etcd" configuration
+          10250 # k3s metrics
+          #
+          5000 # docker registry
+          9000 # minio
+          9001 # minio ui
+        ];
+
+        allowedUDPPorts = [
+          8472 # k3s, flannel: required if using multi-node for inter-node networking
+        ];
+      };
+
       allowedTCPPorts = [
         6443 # k3s: required so that pods can reach the API server (running on port 6443 by default)
-        2379 # k3s, etcd clients: required if using a "High Availability Embedded etcd" configuration
-        2380 # k3s, etcd peers: required if using a "High Availability Embedded etcd" configuration
-        10250 # k3s metrics
-        #
-        5000 # docker registry
-        9000 # minio
-        9001 # minio ui
       ];
 
-      allowedUDPPorts = [
-        8472 # k3s, flannel: required if using multi-node for inter-node networking
+      allowedUDPPortRanges = [
+        {
+          from = rCfg.dynamicPorts.start;
+          to = rCfg.dynamicPorts.end;
+        }
+      ];
+
+      allowedTCPPortRanges = [
+        {
+          from = rCfg.dynamicPorts.start;
+          to = rCfg.dynamicPorts.end;
+        }
       ];
     };
-
-    allowedUDPPortRanges = [
-      {
-        from = rCfg.dynamicPorts.start;
-        to = rCfg.dynamicPorts.end;
-      }
-    ];
-
-    allowedTCPPortRanges = [
-      {
-        from = rCfg.dynamicPorts.start;
-        to = rCfg.dynamicPorts.end;
-      }
-    ];
   };
 }

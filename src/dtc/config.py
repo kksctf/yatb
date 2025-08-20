@@ -44,8 +44,6 @@ class Settings(BaseSettings):
 
     ASYNC_WORKERS_COUNT: int = 8
 
-    TASKS_ENCRYPTION_KEY: str = _DEFAULT_TOKEN
-
     DYNAMIC_TASKS_ETCD: str
     DYNAMIC_TASKS_ETCD_PORT: int = 2379
 
@@ -81,7 +79,7 @@ class Settings(BaseSettings):
         if self.DEBUG or self.TESTING:
             return self
 
-        token_check_list = ["ADMIN_PASSWORD", "TASKS_ENCRYPTION_KEY"]
+        token_check_list = ["ADMIN_PASSWORD"]
         for token_name in token_check_list:
             if getattr(self, token_name) == _DEFAULT_TOKEN:
                 raise DefaultTokenError(f"Field '{token_name}' have default token value")

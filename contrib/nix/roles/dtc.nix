@@ -1,4 +1,4 @@
-{ lib, config, pkgs, ... }:
+{ inputs, lib, config, pkgs, ... }:
 
 let
   rCfg = config.rubikoid.ctf;

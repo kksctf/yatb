@@ -15,11 +15,12 @@ in
 
     peerPort = mkOption {
       type = types.int;
-      default = 8379;
+      default = 8380;
     };
 
     peers = mkOption {
       type = types.listOf str;
+      default = [ ];
     };
   };
 
@@ -44,8 +45,8 @@ in
       ];
 
       initialCluster = lib.mkForce (
-        lib.map (host: "${host.name}=http://${host.internal}:${toString host.peerPort}") (
-          lib.attrValues cfg.cluster
+        lib.map (host: "${host.name}=http://${host.internal}:${toString cfg.peerPort}") (
+          lib.attrValues rCfg.cluster
         )
       );
 
@@ -54,7 +55,7 @@ in
 
     networking.firewall.interfaces.${rCfg.internalIface} = {
       allowedTCPPorts = [
-        cfg.port
+        cfg.clientPort
         cfg.peerPort
       ];
     };

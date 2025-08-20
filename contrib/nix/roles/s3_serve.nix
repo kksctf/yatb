@@ -48,7 +48,7 @@ in
       enable = true;
       baseDomains = {
         ${cfg.proxyDomain} = {
-          a.data = ""; # FIXME: ...
+          a.data = rCfg.cluster.${config.device}.external;
         };
       };
       subDomains."${cfg.proxyDomain}" = { };
@@ -60,39 +60,40 @@ in
       virtualHosts."http://${cfg.proxyDomain}".extraConfig = ''
         reverse_proxy http://127.0.0.1:${toString cfg.http.port}
       '';
+    };
 
-      systemd.services.s3proxy = {
-        enable = true;
-        description = "YATB's dynamic tasks s3 proxy";
-        wants = [ "minio.service" ];
-        wantedBy = [ "multi-user.target" ];
+    systemd.services.s3proxy = {
+      enable = true;
+      description = "YATB's dynamic tasks s3 proxy";
+      wants = [ "minio.service" ];
+      wantedBy = [ "multi-user.target" ];
 
-        environment = {
-          S3_HOST = "127.0.0.1";
-          S3_PORT = toString minio.port;
-          S3_ACCESS = minio.accessKey;
-          S3_SECRET = minio.secretKey;
+      environment = {
+        S3_HOST = "127.0.0.1"; # TODO: normal ip lol
+        S3_PORT = toString minio.port;
+        S3_ACCESS = minio.accessKey;
+        S3_SECRET = minio.secretKey;
 
-          JWT_SECRET_KEY = "";
-          FLAG_SIGN_KEY = "";
-          API_TOKEN = "";
-          WS_API_TOKEN = "";
+        JWT_SECRET_KEY = "";
+        FLAG_SIGN_KEY = "";
+        API_TOKEN = "";
+        WS_API_TOKEN = "";
+        TASKS_ENCRYPTION_KEY = "";
 
-          ADMIN_PASSWORD = "";
+        ADMIN_PASSWORD = "";
 
-          S3_HOST_KANIKO = "";
-          DOCKER_REGISTRY_HOST = "";
-          EXTERNAL_TO_INTERNAL_IPS_MAPPING = "{}";
-          DYNAMIC_TASKS_ETCD = "";
-        };
+        S3_HOST_KANIKO = "";
+        DOCKER_REGISTRY_HOST = "";
+        EXTERNAL_TO_INTERNAL_IPS_MAPPING = "{}";
+        DYNAMIC_TASKS_ETCD = "";
+      };
 
-        serviceConfig = {
-          ExecStart = "${cfg.package}/bin/uvicorn dtc.s3_serve:app --host '${cfg.http.host}' --port '${toString (cfg.http.port)}' ${lib.strings.escapeShellArgs cfg.extraArgs}";
-          Restart = "on-failure";
-          KillSignal = "SIGINT";
-          # DynamicUser = "yes";
-          User = "root";
-        };
+      serviceConfig = {
+        ExecStart = "${rCfg.yatb.package}/bin/uvicorn dtc.s3_serve:app --host '${cfg.http.host}' --port '${toString (cfg.http.port)}' ${lib.strings.escapeShellArgs cfg.extraArgs}";
+        Restart = "on-failure";
+        KillSignal = "SIGINT";
+        # DynamicUser = "yes";
+        User = "root";
       };
     };
   };

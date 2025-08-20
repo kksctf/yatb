@@ -53,6 +53,17 @@ in
       );
       default = { };
     };
+
+    dynamicPorts = {
+      start = mkOption {
+        type = types.port;
+        default = 20000;
+      };
+      end = mkOption {
+        type = types.port;
+        default = 40000;
+      };
+    };
   };
 
   config = {

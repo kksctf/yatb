@@ -1,11 +1,4 @@
-{
-  lib,
-  config,
-  pkgs,
-  inputs,
-  simpleSecrets,
-  ...
-}:
+{ lib, config, pkgs, ... }:
 
 let
   rCfg = config.rubikoid.ctf;
@@ -13,6 +6,8 @@ let
 
   k3s = rCfg.k3s;
   yatb = rCfg.yatb;
+  s3 = rCfg.s3;
+  minio = rCfg.minio;
 
   settings = cfg.settings;
 in
@@ -74,27 +69,26 @@ in
 
         KUBE_CONFIG_PATH = settings.k3s;
 
-        S3_HOST = rCfg.roles.s3_host;
-        S3_PORT = toString k3s.minio.port;
-        S3_ACCESS = k3s.minio.accessKey;
-        S3_SECRET = k3s.minio.secretKey;
-        S3_HOST_KANIKO = rCfg.roles.s3_host;
+        S3_HOST = "127.0.0.1"; # TODO: select ip properly
+        S3_HOST_KANIKO = "host.k3s.internal";
 
-        DYNAMIC_TASKS_ETCD = "127.0.0.1";
-        DYNAMIC_TASKS_ETCD_PORT = "2379";
+        DOCKER_REGISTRY_HOST = "host.k3s.internal";
+        DOCKER_REGISTRY_HOST_LOCAL = "127.0.0.1";
 
-        DOCKER_REGISTRY_HOST = rCfg.roles.s3_host;
+        S3_PORT = toString minio.port;
+        S3_ACCESS = minio.accessKey;
+        S3_SECRET = minio.secretKey;
+
+        DYNAMIC_TASKS_ETCD = "127.0.0.1"; # TODO: select ip properly
+        DYNAMIC_TASKS_ETCD_PORT = toString rCfg.etcd.clientPort;
 
         EXTERNAL_TO_INTERNAL_IPS_MAPPING = builtins.toJSON {
-          # master = [
-          #   simpleSecrets.cluster.pod1.internal
-          #   simpleSecrets.cluster.pod1.wg
-          # ];
+          master = [
+            rCfg.cluster.${config.device}.external
+          ];
         };
 
-        S3_PROXY_HOST = "https://${yatb.s3ProxyAddr}";
-
-        # DO_WORK = "false";
+        S3_PROXY_HOST = "https://${s3.proxyDomain}";
 
         ADMIN_PASSWORD = "oiyuv4b5o2ivu34tbvknjy34g5khv23g5";
 
@@ -102,8 +96,9 @@ in
         FLAG_SIGN_KEY = yatb.settings.keys.flagSign;
         API_TOKEN = yatb.settings.keys.apiToken;
         WS_API_TOKEN = yatb.settings.keys.wsApiToken;
-        # PORT_START = toString settings.ports.start;
-        # PORT_END = toString settings.ports.end;
+
+        PORT_START = toString rCfg.dynamicPorts.start;
+        PORT_END = toString rCfg.dynamicPorts.end;
       };
     in
     {

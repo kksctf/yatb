@@ -124,32 +124,23 @@ in
       enable = true;
       baseDomains = {
         ${rCfg.rootDomain} = {
-          a.data = rCfg.roles.external_ip;
+          a.data = rCfg.cluster.${config.device}.external;
         };
       };
-      # subDomains."${rCfg.rootDomain}" = { };
       subDomains."${cfg.publicAddr}" = { };
     };
 
     services.caddy = {
       enable = true;
 
-      virtualHosts =
-        let
-          yatbCaddyCfg = ''
-            root /static/* ${cfg.package + "/lib/python3.12/site-packages/app/view/static"}
-            file_server /static/*
+      virtualHosts = {
+        ${cfg.publicAddr}.extraConfig = ''
+          root /static/* ${cfg.package + "/lib/python3.12/site-packages/app/view/static"}
+          file_server /static/*
 
-            reverse_proxy http://127.0.0.1:${toString cfg.http.port}
-          '';
-        in
-        {
-          ${cfg.publicAddr}.extraConfig = yatbCaddyCfg;
-
-          "http://${cfg.s3ProxyAddr}".extraConfig = ''
-            reverse_proxy http://127.0.0.1:${toString (cfg.http.port + 1)}
-          '';
-        };
+          reverse_proxy http://127.0.0.1:${toString cfg.http.port}
+        '';
+      };
     };
 
     systemd.services.yatb = {
@@ -171,18 +162,16 @@ in
         FASTAPI_REDOC_URL = "/${settings.docsPrefix}-redoc";
         FASTAPI_OPENAPI_URL = "/${settings.docsPrefix}-openapi.json";
 
-        # FLAG_BASE = settings.flagBase;
-        # CTF_NAME = settings.ctfName;
+        FLAG_BASE = settings.flagBase;
+        CTF_NAME = settings.ctfName;
 
         API_TOKEN = settings.keys.apiToken;
         WS_API_TOKEN = settings.keys.wsApiToken;
 
         ENABLED_AUTH_WAYS = builtins.toJSON settings.authWays;
 
-        DYNAMIC_TASKS_ETCD = "127.0.0.1";
-        DYNAMIC_TASKS_ETCD_PORT = "2379"; # toString config.rubikoid.ctf.etcd.port;
-
-        # VPN_HOST = simpleSecrets.cluster..public;
+        DYNAMIC_TASKS_ETCD = "127.0.0.1"; # TODO: select ip properly
+        DYNAMIC_TASKS_ETCD_PORT = toString rCfg.etcd.clientPort;
       } // settings.extra;
 
       serviceConfig = {

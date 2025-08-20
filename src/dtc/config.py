@@ -24,10 +24,14 @@ class Settings(BaseSettings):
     S3_PORT: int = 80
     S3_ACCESS: str
     S3_SECRET: str
+
     S3_HOST_KANIKO: str
+    S3_PORT_KANIKO: int
 
     DOCKER_REGISTRY_HOST: str
+    DOCKER_REGISTRY_PORT: int
     DOCKER_REGISTRY_HOST_LOCAL: str | None = None
+    DOCKER_REGISTRY_PORT_LOCAL: int | None = None
 
     EXTERNAL_TO_INTERNAL_IPS_MAPPING: dict[str, list[str]]
 

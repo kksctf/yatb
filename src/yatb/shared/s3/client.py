@@ -29,7 +29,7 @@ class MinioEx(Minio):
                 GzipFile(fileobj=buff, mode="wb", mtime=0) as gzip,
                 tarfile.open(
                     # https://stackoverflow.com/a/58407810
-                    fileobj=cast(IO[bytes], gzip),  # IDK WHY, but for some reason gzip is not IO[bytes]...
+                    fileobj=cast("IO[bytes]", gzip),  # IDK WHY, but for some reason gzip is not IO[bytes]...
                     mode="w|",
                 ) as tar,
             ):
@@ -92,11 +92,6 @@ class MinioEx(Minio):
         self.s3client = aiohttp.ClientSession(
             connector=aiohttp.TCPConnector(
                 resolver=aiohttp.ThreadedResolver(),
-                # resolver=aiohttp.AsyncResolver(
-                #     nameservers=[
-                #         "203:e236:d155:b11c:ce6d:8c03:6e72:9a41",
-                #     ],
-                # ),
             ),
         )
 
@@ -114,7 +109,16 @@ class MinioEx(Minio):
         # if session is None:
         session = self.s3client
 
-        return await super()._url_open(method, region, bucket_name, object_name, body, headers, query_params, session)
+        return await super()._url_open(
+            method,
+            region,
+            bucket_name,
+            object_name,
+            body,
+            headers,
+            query_params,
+            session,
+        )
 
     async def _execute(
         self,

@@ -90,7 +90,7 @@ class DynamicTasksClient(DynamicTasksEtcdClient):
                 if not isinstance(model, DynamicTaskInfoReady):
                     raise Exception
 
-                vpn_info = await self.get_vpn_info(model.user_id)
+                # vpn_info = await self.get_vpn_info(model.user_id)
 
                 ret = ""
                 ret += "Status: Running <br>"
@@ -106,8 +106,8 @@ class DynamicTasksClient(DynamicTasksEtcdClient):
                     link = f"http://{self.format_addr(hp.host)}:{hp.port}/"
                     ret += f"<a href='{link}'>{link}</a> <br>"
 
-                if vpn_info and is_vpninfo_generated(vpn_info):
-                    ret += f"Your task at {vpn_info.netinfo.task_net_task.compressed} <br>"
+                # if vpn_info and is_vpninfo_generated(vpn_info):
+                #     ret += f"Your task at {vpn_info.netinfo.task_net_task.compressed} <br>"
 
                 now = datetime.datetime.now(tz=datetime.UTC)
                 ret += f"Will die after {humanize.precisedelta(model.time_of_death - now)}"

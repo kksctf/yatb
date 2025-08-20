@@ -64,6 +64,11 @@ in
         default = 40000;
       };
     };
+
+    caddyExtra = mkOption {
+      type = types.str;
+      default = "";
+    };
   };
 
   config = {

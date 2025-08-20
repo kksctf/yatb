@@ -19,15 +19,21 @@ in
 
       port = mkOption {
         type = types.port;
-        default = 9010;
+        default = 8991;
         description = "The port on which to listen.";
       };
     };
 
     proxyDomain = mkOption {
       type = types.str;
-      description = "public address of yatb";
+      description = "public address of s3";
       default = "s3.${rCfg.rootDomain}";
+    };
+
+    rawProxyDomain = mkOption {
+      type = types.str;
+      description = "public address of s3";
+      default = "rawS3.${rCfg.rootDomain}";
     };
 
     extraArgs = mkOption {
@@ -50,15 +56,24 @@ in
         ${cfg.proxyDomain} = {
           a.data = rCfg.cluster.${config.device}.external;
         };
+        ${cfg.rawProxyDomain} = {
+          a.data = rCfg.cluster.${config.device}.external;
+        };
       };
       subDomains."${cfg.proxyDomain}" = { };
+      subDomains."${cfg.rawProxyDomain}" = { };
     };
 
     services.caddy = {
       enable = true;
 
-      virtualHosts."http://${cfg.proxyDomain}".extraConfig = ''
+      virtualHosts."${cfg.proxyDomain}".extraConfig = ''
+        ${rCfg.caddyExtra}
         reverse_proxy http://127.0.0.1:${toString cfg.http.port}
+      '';
+
+      virtualHosts."${cfg.rawProxyDomain}".extraConfig = ''
+        reverse_proxy http://127.0.0.1:${toString minio.port}
       '';
     };
 

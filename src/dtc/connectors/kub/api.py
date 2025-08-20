@@ -140,10 +140,10 @@ class KubeApi:
         return "".join(random.choices(alphabet, k=n))  # noqa: S311
 
     def get_image_name(self, name: str) -> str:
-        return f"{settings.DOCKER_REGISTRY_HOST}:5000/prebuild-images/{name}:latest"
+        return f"{settings.DOCKER_REGISTRY_HOST}:{settings.DOCKER_REGISTRY_PORT}/prebuild-images/{name}:latest"
 
     def fix_image_name(self, src: str) -> str:
-        return src.replace(f"{settings.DOCKER_REGISTRY_HOST}:5000", "registry.local")
+        return src.replace(f"{settings.DOCKER_REGISTRY_HOST}:{settings.DOCKER_REGISTRY_PORT}", "registry.local")
 
     @asynccontextmanager
     async def docker_config_json_secret(
@@ -209,7 +209,7 @@ class KubeApi:
         try:
             parsed = ImageName.parse(destination)
             if settings.DOCKER_REGISTRY_HOST_LOCAL:
-                parsed.endpoint = settings.DOCKER_REGISTRY_HOST_LOCAL
+                parsed.endpoint = f"{settings.DOCKER_REGISTRY_HOST_LOCAL}:{settings.DOCKER_REGISTRY_PORT_LOCAL}"
             # logger.warning(f"{parsed.digest = }")
             # logger.warning(f"{parsed.endpoint = }")
             # logger.warning(f"{parsed.image = }")
@@ -289,9 +289,9 @@ class KubeApi:
                                 "--cache=true",
                                 "--cache-run-layers=true",
                                 "--cache-copy-layers=true",
-                                f"--cache-repo={settings.DOCKER_REGISTRY_HOST}:5000/cache",
+                                f"--cache-repo={settings.DOCKER_REGISTRY_HOST}:{settings.DOCKER_REGISTRY_PORT}/cache",
                                 "--insecure",
-                                f"--insecure-registry={settings.DOCKER_REGISTRY_HOST}:5000",
+                                f"--insecure-registry={settings.DOCKER_REGISTRY_HOST}:{settings.DOCKER_REGISTRY_PORT}",
                                 f"--insecure-registry={settings.DOCKER_REGISTRY_HOST}",
                                 # f"--registry-map",
                             ]
@@ -318,7 +318,7 @@ class KubeApi:
                             # ),
                             EnvVar(
                                 "S3_ENDPOINT",
-                                value=f"http://{settings.S3_HOST_KANIKO}:{settings.S3_PORT}",
+                                value=f"http://{settings.S3_HOST_KANIKO}:{settings.S3_PORT_KANIKO}",
                             ),
                             # need to specify this to use path-stye minio,
                             # and don't try to resolve http://bucket.ip:port/file
@@ -346,12 +346,12 @@ class KubeApi:
         # upload special caching tag
         img_name = ImageName.parse(destination)
         if settings.DOCKER_REGISTRY_HOST_LOCAL:
-            img_name.endpoint = settings.DOCKER_REGISTRY_HOST_LOCAL
+            img_name.endpoint = f"{settings.DOCKER_REGISTRY_HOST_LOCAL}:{settings.DOCKER_REGISTRY_PORT_LOCAL}"
         manifest = await self.drca.get_manifest(img_name)
 
         patched_img = img_name.clone().set_tag(hash_digest)
         if settings.DOCKER_REGISTRY_HOST_LOCAL:
-            patched_img.endpoint = settings.DOCKER_REGISTRY_HOST_LOCAL
+            patched_img.endpoint = f"{settings.DOCKER_REGISTRY_HOST_LOCAL}:{settings.DOCKER_REGISTRY_PORT_LOCAL}"
         await self.drca.put_manifest(patched_img, manifest.manifest)
 
         return destination

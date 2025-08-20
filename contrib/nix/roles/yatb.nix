@@ -34,7 +34,7 @@ in
 
       port = mkOption {
         type = types.port;
-        default = 9000;
+        default = 8990;
         description = "The port on which to listen.";
       };
     };
@@ -135,6 +135,7 @@ in
 
       virtualHosts = {
         ${cfg.publicAddr}.extraConfig = ''
+          ${rCfg.caddyExtra}
           root /static/* ${cfg.package + "/lib/python3.12/site-packages/app/view/static"}
           file_server /static/*
 

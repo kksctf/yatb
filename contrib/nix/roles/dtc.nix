@@ -70,10 +70,13 @@ in
         KUBE_CONFIG_PATH = settings.k3s;
 
         S3_HOST = "127.0.0.1"; # TODO: select ip properly
-        S3_HOST_KANIKO = "host.k3s.internal";
+        S3_HOST_KANIKO = "s3-fwr.kube-system.svc.cluster.local";
+        S3_PORT_KANIKO = "9002";
 
-        DOCKER_REGISTRY_HOST = "host.k3s.internal";
-        DOCKER_REGISTRY_HOST_LOCAL = "127.0.0.1";
+        DOCKER_REGISTRY_HOST = "docker-registry-fwr.kube-system.svc.cluster.local";
+        DOCKER_REGISTRY_PORT = "5001";
+        DOCKER_REGISTRY_HOST_LOCAL = "127.0.0.1"; # TODO: make it better
+        DOCKER_REGISTRY_PORT_LOCAL = "5000"; # TODO: make it better
 
         S3_PORT = toString minio.port;
         S3_ACCESS = minio.accessKey;
@@ -83,8 +86,9 @@ in
         DYNAMIC_TASKS_ETCD_PORT = toString rCfg.etcd.clientPort;
 
         EXTERNAL_TO_INTERNAL_IPS_MAPPING = builtins.toJSON {
-          master = [
-            rCfg.cluster.${config.device}.external
+          "${rCfg.cluster.${config.device}.external}" = [
+            "192.168.199.35"
+            # rCfg.cluster.${config.device}.external
           ];
         };
 

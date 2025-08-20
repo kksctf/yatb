@@ -3,6 +3,86 @@
 let
   rCfg = config.rubikoid.ctf;
   cfg = rCfg.k3s;
+
+  fix-localhost-access =
+    let
+      generate =
+        { name, hostPort, kubePort }:
+        [
+          {
+            apiVersion = "apps/v1";
+            kind = "DaemonSet";
+            metadata = {
+              name = "${name}-forwarder";
+              namespace = "kube-system";
+            };
+            spec = {
+              selector.matchLabels.app = "${name}-forwarder";
+              template = {
+                metadata.labels.app = "${name}-forwarder";
+                spec = {
+                  nodeSelector."kubernetes.io/hostname" = "yatb-temp"; # FIXME
+                  hostNetwork = true;
+                  dnsPolicy = "ClusterFirstWithHostNet";
+                  containers = [
+                    {
+                      name = "socat";
+                      image = "alpine/socat:1.8.0.0";
+                      args = [
+                        "TCP-LISTEN:${toString kubePort},reuseaddr,fork,keepalive,bind=0.0.0.0"
+                        "TCP:127.0.0.1:${toString hostPort}"
+                      ];
+                      ports = [
+                        {
+                          containerPort = kubePort;
+                          hostPort = kubePort;
+                        }
+                      ];
+                    }
+                  ];
+                };
+              };
+            };
+          }
+          {
+            apiVersion = "v1";
+            kind = "Service";
+            metadata = {
+              name = "${name}-fwr";
+              namespace = "kube-system";
+            };
+            spec = {
+              selector.app = "${name}-forwarder";
+              clusterIP = null;
+              internalTrafficPolicy = "Local";
+              ports = [
+                {
+                  name = "http";
+                  port = kubePort;
+                  targetPort = kubePort;
+                }
+              ];
+            };
+          }
+        ];
+    in
+    rec {
+      rawManifests =
+        (generate {
+          name = "docker-registry";
+          hostPort = 5000;
+          kubePort = 5001;
+        })
+        ++ (generate {
+          name = "s3";
+          hostPort = 9000;
+          kubePort = 9002;
+        });
+
+      manifest = pkgs.writeText "docker-registry-manifest.yaml" (
+        builtins.concatStringsSep "\n---\n" (map (entry: lib.generators.toYAML { } entry) rawManifests)
+      );
+    };
 in
 {
   options.rubikoid.ctf.k3s = with lib; {
@@ -88,7 +168,9 @@ in
           )
         );
 
-        manifests = { };
+        manifests = {
+          fix-localhost-access.source = fix-localhost-access.manifest;
+        };
       }
       (lib.mkIf (cfg.role == "server") {
         clusterInit = true;

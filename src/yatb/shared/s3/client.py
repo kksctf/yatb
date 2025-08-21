@@ -19,7 +19,14 @@ class MinioEx(Minio):
                 await self.make_bucket(bucket)
                 logger.info(f"Created s3 {bucket = }")
 
-    async def upload_directory(self, source: Path, bucket_name: str, object_name: str) -> str:
+    async def upload_directory(
+        self,
+        source: Path,
+        bucket_name: str,
+        object_name: str,
+        *,
+        ignore_cache: bool = False,
+    ) -> str:
         assert source.is_absolute()
         assert source.is_dir()
 
@@ -46,7 +53,11 @@ class MinioEx(Minio):
                 # logger.info(f"{info = }")
                 # logger.info(f"{info.metadata = }")
 
-                if info.metadata and info.metadata["x-amz-meta-dtc-checksum-sha256"] == hash_digest:
+                if (
+                    not ignore_cache
+                    and info.metadata
+                    and info.metadata["x-amz-meta-dtc-checksum-sha256"] == hash_digest
+                ):
                     return hash_digest
             except S3Error as ex:
                 pass

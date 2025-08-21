@@ -42,6 +42,8 @@ class AuthBase:
             return AuthBase.AuthModel()
 
     class AuthSettings(BaseSettings):
+        # ONLY_ADMIN: bool = False # TODO: make it in base class
+
         model_config = SettingsConfigDict(
             env_file="yatb.env",
             env_file_encoding="utf-8",

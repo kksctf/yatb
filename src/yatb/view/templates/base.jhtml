@@ -12,6 +12,7 @@
     <link rel="stylesheet" href="https://cdn.jsdelivr.net/npm/bulma@1.0.1/css/bulma.min.css">
     <script src="https://cdn.jsdelivr.net/npm/bulma-toast@2.4.2/dist/bulma-toast.min.js"></script>
     <script src="https://unpkg.com/htmx.org@2.0.4"></script>
+    <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/7.0.0/css/all.min.css" integrity="sha512-DxV+EoADOkOygM4IR9yXP8Sb2qwgidEmeqAEmDKIOfPRQZOWbXCzLC6vjbZyy0vPisbH2SyW27+ddLVCN+OMzQ==" crossorigin="anonymous" referrerpolicy="no-referrer" />
     {# optional per-page extra tags #}
     {% block extra_head %}{% endblock %}
 </head>
@@ -88,11 +89,34 @@
     </script>
     {% endif %}
 
-    {% block footer %}
-    <footer class="footer has-text-centered">
-        2025 kksctf
-    </footer>
-    {% endblock %}
+{% block footer %}
+<footer class="footer" role="contentinfo" aria-label="Site footer">
+  <div class="container">
+    <nav class="level is-mobile" aria-label="Footer navigation">
+      <div class="level-left">
+        <div class="level-item">
+          <span class="is-size-7 has-text-grey">&copy; 2025 kksctf</span>
+        </div>
+      </div>
+
+      <div class="level-item has-text-centered">
+        <span class="is-size-7">{{ version_string() }}</span>
+      </div>
+
+      <div class="level-right">
+        <div class="level-item">
+          <a href="https://github.com/kksctf/yatb" class="is-size-7" target="_blank" rel="noopener" aria-label="Open project on GitHub">
+            <span class="icon is-small" aria-hidden="true" style="vertical-align:-2px;">
+              <i class="fa-brands fa-github"></i>
+            </span>
+            <span>GitHub</span>
+          </a>
+        </div>
+      </div>
+    </nav>
+  </div>
+</footer>
+{% endblock %}
 </body>
 
 </html>

@@ -106,14 +106,24 @@ class TelegramAuth(AuthBase):
             return self
 
         async def populate(self, req: Request, resp: Response) -> "TelegramAuth.AuthModel":
-            return TelegramAuth.AuthModel(
+            model = TelegramAuth.AuthModel(
                 tg_id=self.id,
                 tg_first_name=self.first_name,
                 tg_last_name=self.last_name,
                 tg_username=self.username,
             )
 
+            if TelegramAuth.auth_settings.ONLY_ADMIN and not model.is_admin():
+                raise HTTPException(
+                    status_code=status.HTTP_403_FORBIDDEN,
+                    detail="You are not an admin",
+                )
+
+            return model
+
     class AuthSettings(AuthBase.AuthSettings):
+        ONLY_ADMIN: bool = False
+
         BOT_TOKEN: str = ""
         BOT_USERNAME: str = ""
 
@@ -140,6 +150,9 @@ class TelegramAuth(AuthBase):
 
     @classmethod
     def generate_script(cls: type[Self], url_for: Callable) -> str:
+        if not TelegramAuth.auth_settings.ONLY_ADMIN:
+            return ""
+
         return """
         (function() {
             // $('#auth_button_TelegramAuth').css('display', 'none');

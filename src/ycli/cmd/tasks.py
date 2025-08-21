@@ -10,6 +10,7 @@ from pydantic_yaml import parse_yaml_raw_as
 from dtc.config import settings as dtc_settings
 from yatb.schema import DynamicTaskFeatures
 from yatb.schema.task import Task
+from dtc.connectors.compose import load_compose
 from ycli.base import app, c, settings
 from ycli.client import YATB
 from ycli.models import FileTask, State
@@ -52,7 +53,7 @@ async def _upload_task(
         c.print(f"Created task: {created_task}\n")
 
     created_task = tasks_cache[state.task_to_uuid[task_src]]
-    c.print(f"Found task: {created_task}\n")
+    c.print(f"Found task: {created_task.task_name!r}\n")
 
     created_task.task_name = task_info.name
     created_task.description = task_info.description
@@ -62,6 +63,11 @@ async def _upload_task(
     if created_task.dti:
         deploy_dir = task_src / "deploy"
         if deploy_dir.exists() and (files := list(deploy_dir.iterdir())):
+            try:
+                load_compose(deploy_dir)
+            except Exception as ex:
+                c.print(f"ERR: task {task_info.name!r} has invalid compose!")
+
             path = f"{created_task.task_id}/deploy.tar.gz"
             hash_digest = await y.s3.upload_directory(
                 deploy_dir,
@@ -107,8 +113,9 @@ async def _upload_task(
             )
             await y.s3.upload_directory(
                 public_dir,
-                dtc_settings.TASKS_BUCKET_NAME,
+                dtc_settings.STATIC_BUCKET_NAME,
                 f"{created_task.task_id}/{archive_name}",
+                ignore_cache=False,
             )
             c.print(f"\t\t[+] '{created_task.task_name}': uploaded archive ({len(files) = } > 2) from {public_dir!r}")
         else:
@@ -143,7 +150,7 @@ async def _upload_task(
         created_task.description = created_task.description.strip() + "</div>"
 
     created_task = await y.update_task(task=created_task)
-    c.print(f"Updated task: {created_task}")
+    c.print(f"Updated task: {created_task.task_name!r}")
     return created_task
 
 

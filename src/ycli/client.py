@@ -137,10 +137,12 @@ class YATB:
         resp.raise_for_status()
 
     async def update_task(self, task: schema.Task) -> schema.Task:
+        serialized = task.model_dump(mode="json", warnings=False)
+
         new_task = (
             await self.s.post(
                 app.url_path_for("api_admin_task_edit", task_id=task.task_id),
-                json=task.model_dump(mode="json"),
+                json=serialized,
             )
         ).json()
         return schema.Task.admin_model.model_validate(new_task)
@@ -167,3 +169,4 @@ class YATB:
         traceback: TracebackType | None = None,
     ) -> None:
         await self.s.__aexit__(exc_type=exc_type, exc_value=exc_value, traceback=traceback)  # type: ignore
+        await self.s3.s3client.close()

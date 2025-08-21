@@ -130,6 +130,7 @@ async def tasks_page(
 ) -> HTMLResponse:
     users = await UserDB.get_all_projected(UserDB.ScoreboardProjection)
     uid2name = {uuid: user.username for uuid, user in users.items()}
+    categories = set(t.category for t in tasks)
 
     if not is_httpx:
         return await response_generator(
@@ -138,6 +139,7 @@ async def tasks_page(
             {
                 "curr_user": user,
                 "tasks": tasks,
+                "categories": categories,
                 "uid2name": uid2name,
             },
         )

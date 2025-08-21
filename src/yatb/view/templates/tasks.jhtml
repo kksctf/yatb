@@ -21,7 +21,7 @@
         {{ _("Show solved", request) }}
     </label>
 
-    {% for cat in ['crypto', 'binary', 'web', 'forensic', 'other'] %} {# TODO: dynamic category retrieval #}
+    {% for cat in categories | sort %}
     <label class="checkbox mr-2">
         <input type="checkbox" name="category" value="{{ cat }}" hx-get="{{ url_for('tasks_page') }}"
             hx-target="#tasks-container" hx-select="#tasks-container" hx-swap="outerHTML" hx-include="closest .section"

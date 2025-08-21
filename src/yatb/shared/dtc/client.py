@@ -1,5 +1,5 @@
 import asyncio
-from collections.abc import AsyncGenerator
+from collections.abc import AsyncGenerator, Container, Sequence
 from dataclasses import dataclass
 from typing import NamedTuple, Self
 from uuid import UUID
@@ -7,7 +7,8 @@ from uuid import UUID
 from aetcd import Client, Event, EventKind
 from loguru import logger
 
-from ... import schema
+from yatb import schema
+
 from .models import (
     DynamicTaskInfo,
     DynamicTaskInfoBase,
@@ -17,6 +18,7 @@ from .models import (
     DynamicTaskInfoReady,
     DynamicTaskQuery,
     DynamicTaskQueryStatus,
+    DynamicTaskState,
     VPNGlobalState,
     VPNUserInfo,
     VPNUserInfoBase,
@@ -124,15 +126,62 @@ class _DynamicTasksEtcdClientTasks(_DynamicTasksEtcdClientBase):
             if not value.key.endswith(b"/rpc")
         ]
 
+    async def watch_for(
+        self,
+        key: bytes,
+        states: Container[DynamicTaskState],
+        ready_event: asyncio.Event,
+    ) -> DynamicTaskInfo:
+        # TODO: maybe handle DELETE event?)
+
+        if not self._client._watcher:
+            raise Exception
+
+        event_queue = asyncio.Queue()
+
+        watcher_callback = await self._client._watcher.add_callback(
+            key,
+            event_queue.put,
+            range_end=None,
+            start_revision=None,
+            progress_notify=False,
+            kind=None,
+            prev_kv=False,
+            watch_id=None,
+            fragment=False,
+        )
+
+        ready_event.set()
+
+        try:
+            while True:
+                event: Event = await asyncio.wait_for(event_queue.get(), None)
+                model = self._task_bytes_to_model(event.kv.value, f"{key = }")
+                if model.state in states:
+                    return model
+        finally:
+            await self._client._watcher.cancel(watcher_callback.watch_id)  # pyright: ignore[reportArgumentType]
+
     async def setup_task(self, task: schema.Task, user: schema.User) -> DynamicTaskInfo:
         model = DynamicTaskInfoBase.build(task=task, user=user)
         key = self._full_task_key_h(TaskUserPair(task.task_id, user.user_id))
 
-        await self._client.put(key, model.make_binary())
-        # TODO: hangs everything...
-        event: Event = await self._client.watch_once(key)  # TODO: maybe handle DELETE event?)
+        watcher_ready = asyncio.Event()
+        watcher = asyncio.create_task(
+            self.watch_for(
+                key,
+                states={
+                    # DynamicTaskState.BUILDING,
+                    DynamicTaskState.READY,
+                },
+                ready_event=watcher_ready,
+            ),
+        )
+        await watcher_ready.wait()
 
-        return self._task_bytes_to_model(event.kv.value, f"{key = }")
+        await self._client.put(key, model.make_binary())
+
+        return await asyncio.wait_for(watcher, 30)
 
     async def query_task(self, handle: TaskUserPair, query: DynamicTaskQuery) -> DynamicTaskQueryStatus:
         if not await self._client.get(self._full_task_key_h(handle)):  # TODO: make this check better

@@ -3,7 +3,7 @@
     <a href="{{ url_for('one_task_page', task_id=task.task_id) }}" class="card-header-title is-size-6">
       {{ task.task_name}}
     </a>
-    <span class="tag is-light is-medium">{{ task.scoring.points }}</span>
+    <span class="tag is-medium">{{ task.scoring.points }}</span>
   </header>
 
   <div class="card-content">

@@ -76,28 +76,32 @@ class FileTask(BaseModel):
 
         return flag_model
 
+    def get_dti(self) -> schema.DynamicTaskInfo:
+        return schema.DynamicTaskInfo(features=self.full_features)
+
+    def get_scoring(self) -> schema.ScoringUnion:
+        if self.dynamic_scoring:
+            return schema.DynamicKKSScoring()
+        return schema.StaticScoring(static_points=1337)
+
+    def get_description(self) -> str:
+        return self.description.strip().strip('"').strip("'")
+
     def get_form(
         self,
         *,
         old_task_uuid: uuid.UUID | None = None,
         req_tasks: Sequence[uuid.UUID] = [],
     ) -> schema.TaskForm:
-        description = self.description.strip().strip('"').strip("'")
-
-        if self.dynamic_scoring:  # noqa: SIM108
-            scoring = schema.DynamicKKSScoring()
-        else:
-            scoring = schema.StaticScoring(static_points=1337)
-
         return schema.TaskForm(
             task_id=old_task_uuid,
             task_name=self.name,
             category=self.category,
-            scoring=scoring,
-            description=description,
+            scoring=self.get_scoring(),
+            description=self.get_description(),
             flag=self.get_flag(),
             author=self.author,
-            dti=schema.DynamicTaskInfo(features=self.full_features),
+            dti=self.get_dti(),
             req_tasks=req_tasks,
         )
 

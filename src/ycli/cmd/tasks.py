@@ -53,11 +53,16 @@ async def _upload_task(
         c.print(f"Created task: {created_task}\n")
 
     created_task = tasks_cache[state.task_to_uuid[task_src]]
-    c.print(f"Found task: {created_task.task_name!r}\n")
+    c.print(f"Found task: {created_task.task_name!r}")
 
     created_task.task_name = task_info.name
-    created_task.description = task_info.description
+    created_task.category = task_info.category
+    created_task.scoring = task_info.get_scoring()
+    created_task.description = task_info.get_description()
     created_task.flag = task_info.get_flag()
+    created_task.author = task_info.author
+    created_task.dti = task_info.get_dti()
+    created_task.req_tasks = list(req_tasks)
     created_task.hidden = task_info.hidden
 
     if created_task.dti:
@@ -117,7 +122,7 @@ async def _upload_task(
                 f"{created_task.task_id}/{archive_name}",
                 ignore_cache=False,
             )
-            c.print(f"\t\t[+] '{created_task.task_name}': uploaded archive ({len(files) = } > 2) from {public_dir!r}")
+            c.print(f"[+] '{created_task.task_name}': uploaded archive ({len(files) = } > 2) from {public_dir!r}")
         else:
             for file in files:
                 created_task.description += (
@@ -132,7 +137,7 @@ async def _upload_task(
                         f,
                         length=file.stat().st_size,
                     )
-                c.print(f"\t\t[+] '{created_task.task_name}': uploaded file {file}")
+                c.print(f"[+] '{created_task.task_name}': uploaded file {file}")
 
         await y.s3.put_object(
             dtc_settings.STATIC_BUCKET_NAME,

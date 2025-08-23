@@ -10,6 +10,7 @@ from yatb import schema
 from yatb.auth import CURR_ADMIN
 from yatb.config import settings
 from yatb.db import TaskDB, UserDB
+from yatb.schema.flags import FlagCheckResult
 
 from . import logger, router
 
@@ -23,6 +24,16 @@ async def get_task(task_id: uuid.UUID) -> TaskDB:
         )
     logger.info(f"{task = }")
     return task
+
+
+async def find_by_flag_for_all(flag: str) -> tuple[TaskDB, UserDB] | None:
+    for user in await UserDB.find_all().to_list():
+        for task in await TaskDB.find_all().to_list():
+            result = task.flag.flag_checker(flag, user)
+            if result == FlagCheckResult.valid:
+                return task, user
+
+    return None
 
 
 CURR_TASK = Annotated[TaskDB, Depends(get_task)]
@@ -126,11 +137,11 @@ async def api_admin_task_edit(new_task: schema.Task, task: CURR_TASK, user: CURR
 
 @router.get("/flag/find")
 async def api_admin_find_flag_owner(flag: str, user: CURR_ADMIN):
-    task_user = await TaskDB.find_by_flag_for_all(flag)
+    task_user = await find_by_flag_for_all(flag)
     if not task_user:
         raise HTTPException(
             status_code=status.HTTP_404_NOT_FOUND,
-            detail=f"unk...",
+            detail="unk...",
         )
 
     task, target_user = task_user

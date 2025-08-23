@@ -8,7 +8,7 @@ from fastapi import APIRouter, Depends, HTTPException, status
 from fastapi.responses import HTMLResponse
 from pydantic import BaseModel
 
-from yatb import auth
+from yatb import auth, schema
 from yatb.config import settings
 from yatb.db import TaskDB, UserDB
 from yatb.shared.dtc.client import DynamicTasksEtcdClient, TaskUserPair
@@ -26,8 +26,8 @@ router = APIRouter(
 
 
 class UserTaskPair(NamedTuple):
-    user: UserDB
-    task: TaskDB
+    user: schema.User
+    task: schema.Task
 
     def t(self) -> TaskUserPair:
         return TaskUserPair(task=self.task.task_id, user=self.user.user_id)
@@ -80,7 +80,7 @@ class DynamicTasksClient(DynamicTasksEtcdClient):
 
         match model.state:
             case DynamicTaskState.PREPARED:
-                return "Status: task building"
+                return "Status: task preparing for build"
 
             case DynamicTaskState.BUILDING:
                 return "Status: task building"

@@ -4,6 +4,43 @@ let
   rCfg = config.rubikoid.ctf;
   cfg = rCfg.k3s;
 
+  kubevirt-src = rec {
+    version = "v1.5.1";
+
+    operator = pkgs.fetchurl {
+      url = "https://github.com/kubevirt/kubevirt/releases/download/${version}/kubevirt-operator.yaml";
+      hash = "sha256-tmYjXqqTD+FNjIryGNgTPhvmGEsW0bBVVOsDy53QL5E=";
+    };
+
+    cr = pkgs.writeText "kubevirt-cr.yaml" (
+      lib.generators.toYAML { } {
+        apiVersion = "kubevirt.io/v1";
+        kind = "KubeVirt";
+        metadata = {
+          name = "kubevirt";
+          namespace = "kubevirt";
+        };
+        spec = {
+          certificateRotateStrategy = { };
+          configuration = {
+            developerConfiguration = {
+              # featureGates = [
+              #   "HostDisk"
+              # ];
+              # logVerbosity = {
+              #   virtLauncher = 3;
+              #   virtHandler = 3;
+              # };
+            };
+          };
+          customizeComponents = { };
+          imagePullPolicy = "IfNotPresent";
+          workloadUpdateStrategy = { };
+        };
+      }
+    );
+  };
+
   fix-localhost-access =
     let
       generate =
@@ -107,6 +144,8 @@ in
       type = types.listOf types.str;
       default = [ ];
     };
+
+    kubevirt = mkEnableOption "kubevirt";
   };
 
   config = lib.mkIf cfg.enable {
@@ -121,8 +160,8 @@ in
 
     environment.systemPackages = with pkgs; [
       k9s
-      kubevirt
-      calicoctl
+      (lib.mkIf cfg.kubevirt kubevirt)
+      # calicoctl
       iptables
     ];
 
@@ -168,9 +207,15 @@ in
           )
         );
 
-        manifests = {
-          fix-localhost-access.source = fix-localhost-access.manifest;
-        };
+        manifests = lib.mkMerge [
+          {
+            fix-localhost-access.source = fix-localhost-access.manifest;
+          }
+          (lib.mkIf cfg.kubevirt {
+            kubevirt-operator.source = kubevirt-src.operator;
+            kubevirt-cr.source = kubevirt-src.cr;
+          })
+        ];
       }
       (lib.mkIf (cfg.role == "server") {
         clusterInit = true;

@@ -10,7 +10,7 @@ from yatb.app import app
 from yatb.config import settings as yatb_settings
 from yatb.shared.s3.client import MinioEx
 
-from .base import c, settings
+from .base import settings
 from .models import AllTasks, AllUsers
 
 

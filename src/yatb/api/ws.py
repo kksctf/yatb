@@ -9,9 +9,6 @@ from pydantic import BaseModel
 
 from yatb import schema
 
-from ..shared.dtc.models.vpn import is_vpninfo_generated
-from .api_dynamic_tasks import _get_client
-
 
 class AlertData(BaseModel):
     src_ip: str

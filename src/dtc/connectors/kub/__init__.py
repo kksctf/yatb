@@ -39,9 +39,6 @@ class KubeConnector(BaseConnector):
     async def init(self) -> None:
         await self.api.init()
 
-    async def test(self) -> None:
-        await self.api.test()
-
     async def close(self) -> None:
         # logger.critical(f"Closing super().KubeConnector")
         await super().close()
@@ -56,9 +53,6 @@ class KubeConnector(BaseConnector):
     ) -> None:
         logger.info(f"Got {task_info = }, resolving path and compose file")
 
-        # TODO: wtf...
-        # src = settings.UUID_TO_PATH_MAPPING[task_info.task_id]
-        # src = src.resolve()
         src = await self.unpack_data(task_info, lti, service=True)
 
         compose = load_compose(src)
@@ -71,7 +65,7 @@ class KubeConnector(BaseConnector):
                     "rubikoid.ru/dtc-user-id": f"{task_info.user_id!s}",
                     "rubikoid.ru/dtc-task-id": f"{task_info.task_id!s}",
                 },
-            )
+            ),
         )
 
         if not ns.metadata:
@@ -139,35 +133,6 @@ class KubeConnector(BaseConnector):
             )
         )
 
-        ipv4pool = await lti.exit_stack.enter_async_context(
-            self.api.client.ctx_global(
-                self.api.client.simple_ip_pool(
-                    f"{ns_name}-v4",
-                    # cidr=vpn_user.netinfo.task_net.compressed,
-                    automatic=False,
-                    block_size=29,  # FIXME: hardcode
-                ),
-            ),
-        )
-
-        if not ns.metadata:
-            raise Exception
-
-        if not ipv4pool.metadata or not ipv4pool.metadata.name:
-            raise Exception
-
-        if not ns.metadata.annotations:
-            ns.metadata.annotations = {}
-
-        patch = {
-            "metadata": {
-                "annotations": {
-                    "cni.projectcalico.org/ipv4pools": f'["{ipv4pool.metadata.name}", "test-ipv4-pool"]',
-                },
-            },
-        }
-        ns = await self.api.client.patch(type(ns), name=ns_name, obj=patch)
-
         vm = await lti.exit_stack.enter_async_context(
             self.api.client.ctx(
                 self.api.client.simple_vm(
@@ -181,15 +146,6 @@ class KubeConnector(BaseConnector):
                 ),
             ),
         )
-
-        # fff = next(iter(settings.EXTERNAL_TO_INTERNAL_IPS_MAPPING.values()))
-        # ovpn, svc = await self.api.openvpn(
-        #     ns,
-        #     usernet=vpn_user.netinfo,
-        #     static_key=vpn_user.task.static_key,
-        #     external_ips=fff,
-        #     stack=lti.exit_stack,
-        # )
 
     async def _build(self, task_info: DynamicTaskInfoBuilding, lti: LocalTaskInfo) -> str:
         logger.info(f"Got {task_info = } to build")

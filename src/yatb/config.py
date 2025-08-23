@@ -64,6 +64,7 @@ class Settings(BaseSettings):
 
     DYNAMIC_TASKS_ETCD: str | None = None
     DYNAMIC_TASKS_ETCD_PORT: int = 2379
+    ETCD_PREFIX: str = "/yatb"
 
     PRIVATE_SCOREBOARD: bool = False
 
@@ -89,7 +90,7 @@ class Settings(BaseSettings):
                 else ""
             )
         else:
-            self.VERSION += "0.6.4"
+            self.VERSION += "0.7.0"
             if self.COMMIT:
                 self.VERSION += f"-{self.COMMIT[:8]}"
 

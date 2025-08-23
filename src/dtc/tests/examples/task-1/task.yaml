@@ -1,13 +1,12 @@
-name: "Testing task"
-description: "testing task, flag is flag{testing}"
+name: "Testing task - 1"
+description: "testing1 task, flag is kks{testing1}"
 
 author: "Rubikoid"
 category: "web"
 
-flag: "flag{testing}"
+flag: "kks{testing1}"
 
 dynamic_scoring: true
 
 dynamic_features:
-  - BUILDER
-  - SERVICE
+  - service

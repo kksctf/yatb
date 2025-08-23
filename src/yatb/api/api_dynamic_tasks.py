@@ -5,7 +5,7 @@ from uuid import UUID
 
 import humanize
 from fastapi import APIRouter, Depends, HTTPException, status
-from fastapi.responses import HTMLResponse, PlainTextResponse
+from fastapi.responses import HTMLResponse
 from pydantic import BaseModel
 
 from yatb import auth
@@ -13,7 +13,6 @@ from yatb.config import settings
 from yatb.db import TaskDB, UserDB
 from yatb.shared.dtc.client import DynamicTasksEtcdClient, TaskUserPair
 from yatb.shared.dtc.models import DynamicTaskInfo, DynamicTaskInfoReady, DynamicTaskQuery, DynamicTaskState
-from yatb.shared.dtc.models.vpn import is_vpninfo_generated
 from yatb.utils.log_helper import get_logger
 
 from .utils import CURRENT_TASK

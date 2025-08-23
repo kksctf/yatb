@@ -1,5 +1,5 @@
 import asyncio
-from collections.abc import AsyncGenerator, Container, Sequence
+from collections.abc import AsyncGenerator, Container
 from dataclasses import dataclass
 from typing import NamedTuple, Self
 from uuid import UUID
@@ -8,6 +8,7 @@ from aetcd import Client, Event, EventKind
 from loguru import logger
 
 from yatb import schema
+from yatb.config import settings
 
 from .models import (
     DynamicTaskInfo,
@@ -57,7 +58,7 @@ class ExtendedClient(Client):
 
 class _DynamicTasksEtcdClientBase:
     _client: ExtendedClient
-    root_prefix: str = "/dtc"
+    root_prefix: str = f"{settings.ETCD_PREFIX}/dtc"
 
     def __init__(self, base_url: str, port: int) -> None:
         self._client = ExtendedClient(

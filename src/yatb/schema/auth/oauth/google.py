@@ -1,7 +1,7 @@
 from typing import ClassVar, Literal, Self
 
 import aiohttp
-from fastapi import HTTPException, Request, Response, status
+from fastapi import Request, Response
 from pydantic_settings import SettingsConfigDict
 
 from yatb.ebasemodelv2 import Admin, Public

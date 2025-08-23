@@ -1,16 +1,15 @@
 import io
-import shutil
 import subprocess
+from collections.abc import Sequence
 from pathlib import Path
-from typing import Sequence
 from uuid import UUID
 
 from pydantic_yaml import parse_yaml_raw_as
 
 from dtc.config import settings as dtc_settings
+from dtc.connectors.compose import load_compose
 from yatb.schema import DynamicTaskFeatures
 from yatb.schema.task import Task
-from dtc.connectors.compose import load_compose
 from ycli.base import app, c, settings
 from ycli.client import YATB
 from ycli.models import FileTask, State

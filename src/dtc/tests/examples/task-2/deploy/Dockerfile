@@ -1,10 +1,12 @@
-# syntax=docker/dockerfile:1.4
-FROM --platform=$BUILDPLATFORM python:3.10-alpine AS builder
+FROM python:3.12-slim
 
-WORKDIR /python-docker
+WORKDIR /app
 
-RUN pip3 install flask
+COPY requirements.txt ./
 
-COPY . .
+RUN pip install --no-cache-dir -r requirements.txt
 
-CMD [ "python3", "main.py"]
+COPY src src
+
+ENTRYPOINT [ "uvicorn", "src:app" ]
+CMD [ "--host=0.0.0.0", "--port=80" ]

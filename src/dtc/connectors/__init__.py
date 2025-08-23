@@ -114,10 +114,6 @@ class BaseConnector(ABC):
         await self.etcd.__aexit__()
         await self.close()
 
-    # async def passive(self) -> None:
-    #     self._PASSIVE = True
-    #     self.run_workers = False
-
     @abstractmethod
     async def init(self) -> None:
         raise NotImplementedError

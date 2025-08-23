@@ -42,11 +42,12 @@ class ServiceBuild(BaseModel):
 class ResourceRequirements(BaseModel):
     cpu: str
     memory: str
+    # ephemeral_storage: str  # TODO: ...
 
 
 class Resource(BaseModel):
-    requests: ResourceRequirements = ResourceRequirements(cpu="100m", memory="64Mi")
-    limits: ResourceRequirements = ResourceRequirements(cpu="800m", memory="1Gi")
+    requests: ResourceRequirements = ResourceRequirements(cpu="100m", memory="64Mi")  # , ephemeral_storage="50M")
+    limits: ResourceRequirements = ResourceRequirements(cpu="800m", memory="1Gi")  # , ephemeral_storage="500M")
 
 
 class Service(BaseModel):

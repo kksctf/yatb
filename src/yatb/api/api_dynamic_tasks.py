@@ -127,8 +127,11 @@ class DynamicTasksClient(DynamicTasksEtcdClient):
                 detail="Too many tasks...",
             )
 
-        model = await self.setup_task(task=handle.task, user=handle.user)
-        return await self.format_model_info(model)
+        try:
+            model = await self.setup_task(task=handle.task, user=handle.user)
+            return await self.format_model_info(model)
+        except TimeoutError as ex:
+            return f"Timeout error {ex = }"
 
     async def stop(self, handle: UserTaskPair):
         status = await self.query_task(handle.t(), DynamicTaskQuery.STOP)

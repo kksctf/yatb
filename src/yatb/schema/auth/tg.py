@@ -155,24 +155,19 @@ class TelegramAuth(AuthBase):
 
         return """
         (function() {
-            // $('#auth_button_TelegramAuth').css('display', 'none');
-
+            let btn = document.getElementById('auth-TelegramAuth-box');
+            btn.style.display = "none";
+            // this is not a task ;)
             var secretCode = [73, 68, 68, 81, 68];
             var inputSequence = [];
 
-            $(document).keydown(function(e) {
-                // Add the pressed key's code to the sequence
+            document.addEventListener('keydown', function(e) {
                 inputSequence.push(e.which);
-
-                // Keep the sequence length equal to the secret code length
                 if (inputSequence.length > secretCode.length) {
                     inputSequence.shift();
                 }
-
-                // Check if the sequence matches
                 if (JSON.stringify(inputSequence) === JSON.stringify(secretCode)) {
-                    // Remove display: none from all elements with inline style display:none
-                    $('#auth_button_TelegramAuth').css('display', '');
+                    btn.style.display = "";
                     inputSequence = [];
                 }
             });

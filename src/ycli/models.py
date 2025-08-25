@@ -77,13 +77,16 @@ class FileTask(BaseModel):
 
         return flag_model
 
-    def get_dti(self) -> schema.DynamicTaskInfo:
+    def get_dti(self) -> schema.DynamicTaskInfo | None:
+        if not self.dynamic_features:
+            return None
+
         return schema.DynamicTaskInfo(features=self.full_features)
 
     def get_scoring(self) -> schema.ScoringUnion:
         if self.dynamic_scoring:
             return schema.DynamicKKSScoring()
-        return schema.StaticScoring(static_points=1337)
+        return schema.StaticScoring(static_points=50)
 
     def get_description(self) -> str:
         return self.description.strip().strip('"').strip("'")

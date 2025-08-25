@@ -10,7 +10,7 @@ from yatb.app import app
 from yatb.config import settings as yatb_settings
 from yatb.shared.s3.client import MinioEx
 
-from .base import settings
+from .base import c, settings
 from .models import AllTasks, AllUsers
 
 
@@ -30,6 +30,10 @@ class YATB:
             secret_key=dtc_settings.S3_SECRET,
             secure=True,
         )
+
+        c.print(f"[+] Connected to YATB at {settings.UPSTREAM = }")
+        c.print(f"[+] Connected to S3 at {dtc_settings.s3_endpoint = }")
+        c.print(f"[+] Public S3 url: {settings.PUBLIC_FILES_DOMAIN}")
 
     async def setup_s3(self) -> None:
         await self.s3.setup_buckets(

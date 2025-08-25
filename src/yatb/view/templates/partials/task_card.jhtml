@@ -13,6 +13,11 @@
 
   <div class="card-content">
     {{ task.description_html | safe }}
+    
+    {% if curr_user and curr_user.admin_checker() %}
+    <!-- hidden={{ task.hidden }}, visible_for_unauth={{ task.visible_for_user(None) }}, req_tasks={{ task.req_tasks }}  -->
+    {% endif %}
+
     {% if curr_user and task.dti %}
     <hr class="mt-3 mb-2">
     <div id="data-{{ task.task_id }}" class="dynamic_task_info_field content is-small" data-id="{{ task.task_id }}" {# hx-get="{{ url_for('dynamic_task_info', task_id=task.task_id) }}" #} hx-trigger="load, revealed"

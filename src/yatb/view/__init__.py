@@ -17,6 +17,7 @@ from yatb.api import tasks
 from yatb.config import settings
 from yatb.db.task import TaskDB
 from yatb.db.user import UserDB
+from yatb.utils import md
 from yatb.utils.httpx import IS_HTTPX
 from yatb.utils.log_helper import get_logger
 
@@ -180,7 +181,7 @@ async def one_task_page(
 async def scoreboard_page(
     request: Request,
     is_httpx: IS_HTTPX,
-    user: auth.CURR_USER_SAFE,
+    user: auth.CURR_USER_SCOREBOARD,
     tasks: tasks.VISIBLE_TASKS,
 ) -> HTMLResponse:
     scoreboard = await UserDB.get_filtered_projected_scoreboard()

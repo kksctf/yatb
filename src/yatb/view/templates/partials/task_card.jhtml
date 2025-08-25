@@ -12,7 +12,9 @@
   </header>
 
   <div class="card-content">
-    {{ task.description_html | safe }}
+    <div class="content"> 
+      {{ task.description_html | safe }}
+    </div>
     
     {% if curr_user and curr_user.admin_checker() %}
     <!-- hidden={{ task.hidden }}, visible_for_unauth={{ task.visible_for_user(None) }}, req_tasks={{ task.req_tasks }}  -->

@@ -1,7 +1,12 @@
 <div class="card {% if task.is_solved_by(curr_user) %}solved{% endif %}">
   <header class="card-header {% if task.is_solved_by(curr_user) %}has-background-success{% endif %}">
-    <a href="{{ url_for('one_task_page', task_id=task.task_id) }}" class="card-header-title is-size-6">
-      {{ task.task_name}}
+    <a href="{{ url_for('one_task_page', task_id=task.task_id) }}" class="card-header-title">
+      <div class="media">
+        <div class="media-content">
+          <p class="title is-6">{{ task.task_name }}</p>
+          <p class="subtitle mt-1 is-7">{{ task.category|capitalize }}</p>
+        </div>
+      </div>
     </a>
     <span class="tag is-medium">{{ task.scoring.points }}</span>
   </header>
@@ -9,85 +14,69 @@
   <div class="card-content">
     {{ task.description_html | safe }}
     {% if curr_user and task.dti %}
-      <hr class="mt-3 mb-2">
-      <div id="data-{{ task.task_id }}" class="dynamic_task_info_field content is-small" data-id="{{ task.task_id }}"
-           {# hx-get="{{ url_for('dynamic_task_info', task_id=task.task_id) }}" #}
-           hx-trigger="load, revealed"
-           hx-target="#data-{{ task.task_id }}"
-           hx-swap="innerHTML">
-        No info ;(
-      </div>
+    <hr class="mt-3 mb-2">
+    <div id="data-{{ task.task_id }}" class="dynamic_task_info_field content is-small" data-id="{{ task.task_id }}" {# hx-get="{{ url_for('dynamic_task_info', task_id=task.task_id) }}" #} hx-trigger="load, revealed"
+      hx-target="#data-{{ task.task_id }}" hx-swap="innerHTML">
+      No info ;(
+    </div>
 
-      <div class="buttons are-small has-addons">
-        <button class="button dynamic_task_start"
-                data-id="{{ task.task_id }}"
-                hx-get="{{ url_for('api_dynamic_task_start', task_id=task.task_id) }}"
-                hx-target="#data-{{ task.task_id }}"
-                hx-swap="innerHTML">Start</button>
-        <button class="button dynamic_task_restart"
-                data-id="{{ task.task_id }}"
-                hx-get="{{ url_for('api_dynamic_task_restart', task_id=task.task_id) }}"
-                hx-target="#data-{{ task.task_id }}"
-                hx-swap="innerHTML">Restart</button>
-        <button class="button dynamic_task_stop"
-                data-id="{{ task.task_id }}"
-                hx-get="{{ url_for('api_dynamic_task_stop', task_id=task.task_id) }}"
-                hx-target="#data-{{ task.task_id }}"
-                hx-swap="innerHTML">Stop</button>
-        <button class="button dynamic_task_extend"
-                data-id="{{ task.task_id }}"
-                hx-get="{{ url_for('api_dynamic_task_extend', task_id=task.task_id) }}"
-                hx-target="#data-{{ task.task_id }}"
-                hx-swap="innerHTML">Extend</button>
-        <button class="button dynamic_task_info"
-                data-id="{{ task.task_id }}"
-                hx-get="{{ url_for('api_dynamic_task_info', task_id=task.task_id) }}"
-                hx-target="#data-{{ task.task_id }}"
-                hx-swap="innerHTML">
-          <span class="icon is-small">
-            <svg xmlns="http://www.w3.org/2000/svg" width="16" height="16" fill="currentColor" viewBox="0 0 16 16">
-              <path fill-rule="evenodd" d="M8 3a5 5 0 1 0 4.546 2.914.5.5 0 0 1 .908-.417A6 6 0 1 1 8 2z"/>
-              <path d="M8 4.466V.534a.25.25 0 0 1 .41-.192l2.36 1.966c.12.1.12.284 0 .384L8.41 4.658A.25.25 0 0 1 8 4.466"/>
-            </svg>
-          </span>
-        </button>
-      </div>
+    <form class="mt-2" method="get" hx-target="#data-{{ task.task_id }}" hx-swap="innerHTML">
+      <div class="buttons are-small has-addons is-centered">
+        <input type="hidden" name="task_id" value="{{ task.task_id }}">
 
-      {% if FALSE and curr_user and curr_user.admin_checker() %}
-      <div class="buttons are-small has-addons mt-2">
-        <button class="button dynamic_task_build"
-                data-id="{{ task.task_id }}"
-                {# hx-post="{{ url_for('dynamic_task_build', task_id=task.task_id) }}" #}
-                hx-target="#data-{{ task.task_id }}"
-                hx-swap="innerHTML">Build</button>
-        <button class="button dynamic_task_destroy"
-                data-id="{{ task.task_id }}"
-                {# hx-post="{{ url_for('dynamic_task_destroy', task_id=task.task_id) }}" #}
-                hx-target="#data-{{ task.task_id }}"
-                hx-swap="innerHTML">Destroy</button>
+        <button type="submit" class="button dynamic_task_start"
+          formaction="{{ url_for('api_dynamic_task_start', task_id=task.task_id) }}"
+          hx-get="{{ url_for('api_dynamic_task_start', task_id=task.task_id) }}">Start</button>
+
+        <button type="submit" class="button dynamic_task_restart"
+          formaction="{{ url_for('api_dynamic_task_restart', task_id=task.task_id) }}"
+          hx-get="{{ url_for('api_dynamic_task_restart', task_id=task.task_id) }}">Restart</button>
+
+        <button type="submit" class="button dynamic_task_stop"
+          formaction="{{ url_for('api_dynamic_task_stop', task_id=task.task_id) }}"
+          hx-get="{{ url_for('api_dynamic_task_stop', task_id=task.task_id) }}">Stop</button>
+
+        <button type="submit" class="button dynamic_task_extend"
+          formaction="{{ url_for('api_dynamic_task_extend', task_id=task.task_id) }}"
+          hx-get="{{ url_for('api_dynamic_task_extend', task_id=task.task_id) }}">Extend</button>
+
+        <button type="submit" class="button dynamic_task_info"
+          formaction="{{ url_for('api_dynamic_task_info', task_id=task.task_id) }}"
+          hx-get="{{ url_for('api_dynamic_task_info', task_id=task.task_id) }}">Info</button>
       </div>
-      {% endif %}
+    </form>
+
+    {% if FALSE and curr_user and curr_user.admin_checker() %}
+    <div class="buttons are-small has-addons mt-2">
+      <button class="button dynamic_task_build" data-id="{{ task.task_id }}" {#
+        hx-post="{{ url_for('dynamic_task_build', task_id=task.task_id) }}" #} hx-target="#data-{{ task.task_id }}"
+        hx-swap="innerHTML">Build</button>
+      <button class="button dynamic_task_destroy" data-id="{{ task.task_id }}" {#
+        hx-post="{{ url_for('dynamic_task_destroy', task_id=task.task_id) }}" #} hx-target="#data-{{ task.task_id }}"
+        hx-swap="innerHTML">Destroy</button>
+    </div>
+    {% endif %}
     {% endif %}
   </div>
 
   <footer class="card-footer">
 
     {% if task.first_pwned_str() %}
-      {% set first_user, first_time = task.first_pwned_str() %}
-      <span class="card-footer-item is-size-7 is-flex is-flex-direction-column is-align-items-center"
-            style="word-break: break-all;">
-        🥇 <span>{{ uid2name.get(first_user, '??') }}</span>
-        <small>{{ first_time }}</small>
-      </span>
+    {% set first_user, first_time = task.first_pwned_str() %}
+    <span class="card-footer-item is-size-7 is-flex is-flex-direction-column is-align-items-center"
+      style="word-break: break-all;">
+      🥇 <span>{{ uid2name.get(first_user, '??') }}</span>
+      <small>{{ first_time }}</small>
+    </span>
     {% endif %}
 
     {% if task.last_pwned_str() %}
-      {% set last_user, last_time = task.last_pwned_str() %}
-      <span class="card-footer-item is-size-7 is-flex is-flex-direction-column is-align-items-center"
-            style="word-break: break-all;">
-        💥 <span>{{ uid2name.get(last_user, '??') }}</span>
-        <small>{{ last_time }}</small>
-      </span>
+    {% set last_user, last_time = task.last_pwned_str() %}
+    <span class="card-footer-item is-size-7 is-flex is-flex-direction-column is-align-items-center"
+      style="word-break: break-all;">
+      💥 <span>{{ uid2name.get(last_user, '??') }}</span>
+      <small>{{ last_time }}</small>
+    </span>
     {% endif %}
   </footer>
 </div>

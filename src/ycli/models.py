@@ -1,3 +1,4 @@
+import sys
 import uuid
 from collections.abc import AsyncGenerator, Sequence
 from contextlib import asynccontextmanager
@@ -114,9 +115,18 @@ class State(BaseModel):
         return {v: i for i, v in self.task_to_uuid.items()}
 
     @classmethod
+    def fix_macos_path(cls, path: Path) -> Path:
+        # WTF: don't blame me.
+        return Path(str(path).replace("/Users/rubikoid", "/home/rubikoid"))
+
+    @classmethod
     @asynccontextmanager
     async def get(cls, state_path: Path) -> AsyncGenerator[Self]:
         state = cls.model_validate_json(state_path.read_text()) if state_path.exists() else cls()
+
+        if sys.platform != "darwin":
+            state.task_to_uuid = {i: v for i, v in state.task_to_uuid.items()}
+
         try:
             yield state
         finally:

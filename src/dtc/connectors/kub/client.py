@@ -237,7 +237,6 @@ class AsyncClientEx(AsyncClient):
         name: str,
         namespace: str,
         *,
-        ip_in_cluster: str,
         image: str,
         custm: str,
         cpu: int = 1,
@@ -250,9 +249,6 @@ class AsyncClientEx(AsyncClient):
                 namespace=namespace,
                 labels={
                     "kubevirt.io/domain": name,
-                },
-                annotations={
-                    "cni.projectcalico.org/ipAddrs": f'["{ip_in_cluster}"]',
                 },
             ),
             spec=km.VirtualMachineInstanceSpec(

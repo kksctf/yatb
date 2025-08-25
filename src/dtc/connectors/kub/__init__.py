@@ -91,8 +91,6 @@ class KubeConnector(BaseConnector):
         task_info: DynamicTaskInfoBuilding,
         lti: LocalTaskInfo,
     ):
-        raise Exception
-
         logger.info(f"Got {task_info = }, doing work")
 
         name = f"{task_info.encoded_task_id}-{task_info.encoded_user_id}"

@@ -189,6 +189,7 @@ class KubeApiBase:
         dockerfile: Path | str = Path("Dockerfile"),
         skip_build: bool = False,
         kaniko_args: Sequence[str] = [],
+        force_rebuild: bool = False,
     ) -> str:
         assert source.is_absolute()
         assert source.is_dir()
@@ -219,7 +220,7 @@ class KubeApiBase:
             # logger.warning(f"{parsed.tag = }")
             tags_resp = await self.drca.get_tags(parsed)
 
-            if hash_digest in tags_resp.tags["tags"]:
+            if hash_digest in tags_resp.tags["tags"] and not force_rebuild:
                 logger.info(
                     f"{hash_digest} found in {tags_resp.tags = } for {destination = }, not building this anymore",
                 )

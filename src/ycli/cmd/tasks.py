@@ -21,7 +21,6 @@ async def _upload_task(
     *,
     y: YATB,
     state: State,
-    task_to_uuid_copy: dict[Path, UUID] | None,
     tasks_cache: dict[UUID, Task],
     task_src: Path,
     req_tasks: Sequence[UUID] = [],
@@ -32,12 +31,16 @@ async def _upload_task(
         c.print(f"ERROR!!! {task_src = } has bad yaml: {ex!r}")
         return
 
-    if task_src not in state.task_to_uuid or state.task_to_uuid[task_src] not in tasks_cache:
-        # WTF: что тут происходит......
-        if task_to_uuid_copy and task_src in task_to_uuid_copy:
-            old_task_uuid = task_to_uuid_copy[task_src]
-        elif task_src in state.task_to_uuid and state.task_to_uuid[task_src] not in tasks_cache:
-            old_task_uuid = state.task_to_uuid[task_src]
+    # хотим получить ID таска
+    # если таска нет в локальном стейте (значит мы его ещё не заливали - а если и заливали, то никак не сможем его найти)
+    # ИЛИ
+    # таска нет на проде
+    if not (task_id := state.find_task_by_path(task_src)) or task_id not in tasks_cache:
+        # если таск есть в локальном стейте, но отсутствует на проде
+        # значит мы удалили его оттуда
+        # значит надо перезалить с тем же юидом
+        if task_id and task_id not in tasks_cache:  # noqa: SIM108
+            old_task_uuid = task_id
         else:
             old_task_uuid = None
 
@@ -48,10 +51,10 @@ async def _upload_task(
             ),
         )
         tasks_cache[created_task.task_id] = created_task
-        state.task_to_uuid[task_src] = created_task.task_id
+        state.set_task_uuid(task_src, created_task.task_id)
         c.print(f"Created task: {created_task}\n")
 
-    created_task = tasks_cache[state.task_to_uuid[task_src]]
+    created_task = tasks_cache[state.find_task_by_path(task_src)]  # type: ignore # TODO: handle properly
     c.print(f"Found task: {created_task.task_name!r}")
 
     created_task.task_name = task_info.name
@@ -158,35 +161,34 @@ async def _upload_task(
     return created_task
 
 
-@app.command()
-async def upload_task(
-    task_dir: Path,
-    *,
-    drop: bool = False,
-    state_path: Path = Path() / "yatb_state.json",
-) -> None:
-    task_dir = task_dir.expanduser().resolve()
+# @app.command()
+# async def upload_task(
+#     task_dir: Path,
+#     *,
+#     drop: bool = False,
+#     state_path: Path = Path() / "yatb_state.json",
+# ) -> None:
+#     task_dir = task_dir.expanduser().resolve()
 
-    async with State.get(state_path) as state, YATB() as y:
-        y.set_admin_token()
+#     async with State.get(state_path) as state, YATB() as y:
+#         y.set_admin_token()
 
-        task_to_uuid_copy = {}
-        if drop:
-            await y.detele_everything()
+#         task_to_uuid_copy = {}
+#         if drop:
+#             await y.detele_everything()
 
-            task_to_uuid_copy = state.task_to_uuid.copy()
-            state.task_to_uuid.clear()
+#             task_to_uuid_copy = state.task_to_uuid.copy()
+#             state.task_to_uuid.clear()
 
-        tasks_cache: dict[UUID, Task] = await y.get_all_tasks()
-        c.print(f"Found {len(tasks_cache)} tasks on live instance")
+#         tasks_cache: dict[UUID, Task] = await y.get_all_tasks()
+#         c.print(f"Found {len(tasks_cache)} tasks on live instance")
 
-        await _upload_task(
-            y=y,
-            state=state,
-            task_to_uuid_copy=task_to_uuid_copy,
-            tasks_cache=tasks_cache,
-            task_src=task_dir,
-        )
+#         await _upload_task(
+#             y=y,
+#             state=state,
+#             tasks_cache=tasks_cache,
+#             task_src=task_dir,
+#         )
 
 
 @app.command()
@@ -200,15 +202,10 @@ async def upload_tasks(
     main_tasks_dir = main_tasks_dir.expanduser().resolve()
 
     async with State.get(state_path, main_tasks_dir) as state, YATB() as y:
-        task_to_uuid_copy: dict[Path, UUID] | None = None
-
         y.set_admin_token()
 
         if drop:
             await y.detele_everything()
-
-            task_to_uuid_copy = state.task_to_uuid.copy()
-            state.task_to_uuid.clear()
 
         tasks_cache: dict[UUID, Task] = await y.get_all_tasks()
         c.print(f"Running in live mode, found {len(tasks_cache)} tasks")
@@ -227,7 +224,6 @@ async def upload_tasks(
                     await _upload_task(
                         y=y,
                         state=state,
-                        task_to_uuid_copy=task_to_uuid_copy,
                         tasks_cache=tasks_cache,
                         task_src=task_src,
                         req_tasks=[],

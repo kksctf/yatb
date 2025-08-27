@@ -114,7 +114,19 @@ class State(BaseModel):
     task_to_uuid: dict[Path, uuid.UUID] = {}
     source_path: Path | None = None
 
-    def find_task_by_path(self, src: Path) -> uuid.UUID | None: ...
+    def find_task_by_path(self, src: Path) -> uuid.UUID | None:
+        if not self.source_path:
+            raise Exception
+
+        path_in_config = src.relative_to(self.source_path)
+        return self.task_to_uuid.get(path_in_config)
+
+    def set_task_uuid(self, src: Path, id: uuid.UUID) -> None:
+        if not self.source_path:
+            raise Exception
+
+        self.task_to_uuid[src.relative_to(self.source_path)] = id
+
     def find_path_by_uuid(self, src: uuid.UUID) -> Path | None: ...
 
     @classmethod
@@ -122,6 +134,8 @@ class State(BaseModel):
     async def get(cls, state_path: Path, source_path: Path) -> AsyncGenerator[Self]:
         state = cls.model_validate_json(state_path.read_text()) if state_path.exists() else cls()
         state.source_path = source_path
+
+        # state.task_to_uuid = {i.relative_to(source_path): v for i, v in state.task_to_uuid.items()}
 
         try:
             yield state

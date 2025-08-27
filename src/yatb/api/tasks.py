@@ -40,7 +40,7 @@ async def api_task_get(task: CURRENT_TASK) -> schema.Task.public_model:
 
 @router.post("/submit_flag")
 async def api_task_submit_flag(flag: Annotated[schema.FlagForm, Form()], user: auth.CURR_USER) -> uuid.UUID:
-    if datetime.now(tz=UTC) < settings.EVENT_START_TIME:
+    if not user.is_admin and datetime.now(tz=UTC) < settings.EVENT_START_TIME:
         raise HTTPException(
             status_code=status.HTTP_425_TOO_EARLY,
             detail="CTF has not started yet",

@@ -112,23 +112,16 @@ class FileTask(BaseModel):
 
 class State(BaseModel):
     task_to_uuid: dict[Path, uuid.UUID] = {}
+    source_path: Path | None = None
 
-    @property
-    def uuid_to_task(self) -> dict[uuid.UUID, Path]:
-        return {v: i for i, v in self.task_to_uuid.items()}
-
-    @classmethod
-    def fix_macos_path(cls, path: Path) -> Path:
-        # WTF: don't blame me.
-        return Path(str(path).replace("/Users/rubikoid", "/home/rubikoid"))
+    def find_task_by_path(self, src: Path) -> uuid.UUID | None: ...
+    def find_path_by_uuid(self, src: uuid.UUID) -> Path | None: ...
 
     @classmethod
     @asynccontextmanager
-    async def get(cls, state_path: Path) -> AsyncGenerator[Self]:
+    async def get(cls, state_path: Path, source_path: Path) -> AsyncGenerator[Self]:
         state = cls.model_validate_json(state_path.read_text()) if state_path.exists() else cls()
-
-        if sys.platform != "darwin":
-            state.task_to_uuid = {i: v for i, v in state.task_to_uuid.items()}
+        state.source_path = source_path
 
         try:
             yield state

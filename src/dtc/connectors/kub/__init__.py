@@ -113,13 +113,13 @@ class KubeConnector(BaseConnector):
                 dest,
             )
 
-        customize = await self.api.build(
-            f"{name}-customize",
-            src,
-            kaniko_args=[
-                f"--build-arg=FLAG={task_info.flag}",
-            ],
-        )
+        # customize = await self.api.build(
+        #     f"{name}-customize",
+        #     src,
+        #     kaniko_args=[
+        #         f"--build-arg=FLAG={task_info.flag}",
+        #     ],
+        # )
 
         ns_name, ns = await lti.exit_stack.enter_async_context(
             self.api.run_in_ns(
@@ -138,8 +138,8 @@ class KubeConnector(BaseConnector):
                     namespace=ns_name,
                     # ip_in_cluster=vpn_user.netinfo.task_net_task.compressed,
                     image=self.api.fix_image_name(vm_image),
-                    custm=self.api.fix_image_name(customize),
-                    cpu=6 if not task_info.user_admin else 12,
+                    # custm=self.api.fix_image_name(customize),
+                    cpu=1 if not task_info.user_admin else 2,
                     memory="2.5Gi" if not task_info.user_admin else "4Gi",
                 ),
             ),

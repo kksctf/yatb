@@ -199,7 +199,7 @@ async def upload_tasks(
 ):
     main_tasks_dir = main_tasks_dir.expanduser().resolve()
 
-    async with State.get(state_path) as state, YATB() as y:
+    async with State.get(state_path, main_tasks_dir) as state, YATB() as y:
         task_to_uuid_copy: dict[Path, UUID] | None = None
 
         y.set_admin_token()
@@ -232,6 +232,53 @@ async def upload_tasks(
                         task_src=task_src,
                         req_tasks=[],
                     )
+                except Exception as ex:
+                    c.print(f"Got error {ex = } uploading {task_src = }")
+                    raise
+
+
+@app.command()
+async def test_paths(
+    main_tasks_dir: Path,
+    *,
+    drop: bool = False,
+    sanity_check: Path = Path("misc/sanity"),
+    # live: bool = True,
+    state_path: Path = Path() / "yatb_state.json",
+):
+    main_tasks_dir = main_tasks_dir.expanduser().resolve()
+
+    async with State.get(state_path, main_tasks_dir) as state, YATB() as y:
+        task_to_uuid_copy: dict[Path, UUID] | None = None
+
+        y.set_admin_token()
+
+        tasks_cache: dict[UUID, Task] = await y.get_all_tasks()
+        c.print(f"Running in live mode, found {len(tasks_cache)} tasks")
+
+        sanity_check_path = main_tasks_dir / sanity_check
+        if not sanity_check_path.exists():
+            c.print("Sanity check don't exists")
+            return
+
+        for category_src in main_tasks_dir.iterdir():
+            if not category_src.is_dir():
+                continue
+
+            for task_src in category_src.iterdir():
+                if not task_src.is_dir():
+                    continue
+
+                if not (task_src / "task.yaml").exists():
+                    continue
+
+                if task_src == sanity_check_path:
+                    continue
+
+                c.print(f"{task_src.relative_to(main_tasks_dir) = }")
+
+                try:
+                    pass
                 except Exception as ex:
                     c.print(f"Got error {ex = } uploading {task_src = }")
                     raise

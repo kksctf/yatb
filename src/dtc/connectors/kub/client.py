@@ -238,7 +238,7 @@ class AsyncClientEx(AsyncClient):
         namespace: str,
         *,
         image: str,
-        custm: str,
+        # custm: str,
         cpu: int = 1,
         memory: str = "1.5Gi",
     ) -> VirtualMachineInstance:
@@ -262,10 +262,10 @@ class AsyncClientEx(AsyncClient):
                                 disk=km.DiskTarget(bus="sata"),
                                 bootOrder=10,
                             ),
-                            km.Disk(
-                                name="custm",
-                                cdrom=km.CDRomTarget(bus="sata"),
-                            ),
+                            # km.Disk(
+                            #     name="custm",
+                            #     cdrom=km.CDRomTarget(bus="sata"),
+                            # ),
                         ],
                     ),
                 ),
@@ -288,11 +288,11 @@ class AsyncClientEx(AsyncClient):
                     #     name="virtio-drivers",
                     #     containerDisk=km.ContainerDiskSource(image="quay.io/kubevirt/virtio-container-disk"),
                     # ),
-                    km.Volume(
-                        name="custm",
-                        # containerDisk=km.ContainerDiskSource(image="registry.local/drive/windows-1-custm:latest"),
-                        containerDisk=km.ContainerDiskSource(image=custm),
-                    ),
+                    # km.Volume(
+                    #     name="custm",
+                    #     # containerDisk=km.ContainerDiskSource(image="registry.local/drive/windows-1-custm:latest"),
+                    #     containerDisk=km.ContainerDiskSource(image=custm),
+                    # ),
                 ],
             ),
         )

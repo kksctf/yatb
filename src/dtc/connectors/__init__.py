@@ -156,6 +156,9 @@ class BaseConnector(ABC):
         # if not (is_taskinfo_ready(task_info) or is_taskinfo_deleting(task_info)):
         #     raise GenericConnectorError("Task is not initialized yet or not deleting")
 
+        if is_taskinfo_ready(task_info):
+            logger.error(f"WTF task info ready?? {task_info = }")
+
         if is_taskinfo_ready(task_info) or is_taskinfo_deleting(task_info):
             try:
                 expiration_stack_info = await self.expiration_controller.get(task_info.expiration_id)
@@ -166,16 +169,17 @@ class BaseConnector(ABC):
                 await self.expiration_controller.kill(expiration_stack_info)
             except KeyError as ex:
                 logger.error(f"No expiration container for {task_info = }")
-        elif is_taskinfo_building(task_info):
+        else:  # elif is_taskinfo_building(task_info):
             try:
                 lti = await self.get_lti(task_info)
                 await lti.exit_stack.aclose()
             except InstanceNotFoundError:
                 logger.warning(f"No lti for {task_info = } on deleting, but seems ok???")
-            await self.etcd.delete_task(task_info)  # type: ignore # FIXME: shit
 
-        if is_taskinfo_deleting(task_info):
-            await self.etcd.delete_task(task_info)
+        try:
+            await self.etcd.delete_task(task_info)  # type: ignore # FIXME: shit
+        except Exception as ex:
+            logger.exception(f"{task_info = } double del maybe")
 
     async def _restart(self, task_info: DynamicTaskInfo):
         await self._stop(task_info)
@@ -277,8 +281,12 @@ class BaseConnector(ABC):
         del self.ltis[k]
 
     async def start(self, task_info: DynamicTaskInfoBase) -> DynamicTaskInfoReady:
+        async def _x():
+            await self.etcd.delete_task(task_info)  # pyright: ignore[reportArgumentType]
+
         lti = await self.init_lti(task_info)
         lti.exit_stack.callback(lambda: self.free_lti(task_info))
+        lti.exit_stack.push_async_callback(_x)  # WTF: :thonk:
 
         task_info = await self.etcd.make_task_building(task_info)
 
@@ -312,7 +320,7 @@ class BaseConnector(ABC):
         try:
             task_info = await self.etcd.make_task_deleting(task_info)
         except Exception as ex:
-            logger.exception(f"{task_info = }")
+            logger.warning(f"unable to make deleting task from {task_info = }, {ex = }")
 
         await self._stop(task_info)
 

@@ -1,4 +1,5 @@
 import asyncio
+import datetime
 import gettext
 import uuid
 from collections.abc import Mapping
@@ -106,6 +107,9 @@ templates.env.globals["enumerate"] = enumerate
 templates.env.globals["DEBUG"] = settings.DEBUG
 templates.env.globals["FLAG_BASE"] = settings.FLAG_BASE
 templates.env.globals["CTF_NAME"] = settings.CTF_NAME
+templates.env.globals["EVENT_START_TIME"] = settings.EVENT_START_TIME
+templates.env.globals["EVENT_END_TIME"] = settings.EVENT_END_TIME
+templates.env.globals["NOW"] = lambda: datetime.datetime.now(datetime.UTC)
 
 templates.env.globals["_"] = _
 

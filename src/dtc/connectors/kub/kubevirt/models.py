@@ -80,6 +80,62 @@ class Disk(DictMixin):
     tag: Optional[str] = None
 
 
+# https://kubevirt.io/api-reference/main/definitions.html#_v1_port
+@dataclass
+class Port(DictMixin):
+    port: int
+    """ Number of port to expose for the virtual machine. This must be a valid port number, 0 < x < 65536.
+        Default : 0
+    """
+
+    name: Optional[str] = None
+    """ If specified, this must be an IANA_SVC_NAME and unique within the pod.
+        Each named port in a pod must have a unique name. Name for the port that can be referred to by services.
+    """
+
+    protocol: Optional[str] = None
+    """ Protocol for port. Must be UDP or TCP. Defaults to "TCP".
+    """
+
+
+# https://kubevirt.io/api-reference/main/definitions.html#_v1_interface
+@dataclass
+class Interface(DictMixin):
+    name: str = ""
+    """ Logical name of the interface as well as a reference to the associated networks. 
+        Must match the Name of a Network.
+    """
+
+    # acpiIndex
+    # binding
+    # bootOrder
+    # bridge
+    # dhcpOptions
+    # macAddress
+    # macvtap
+
+    masquerade: Optional[dict] = None
+    """ ???
+        https://kubevirt.io/api-reference/main/definitions.html#_v1_interfacemasquerade
+    """
+
+    model: Optional[str] = None
+    """ Interface model. One of: e1000, e1000e, igb, ne2k_pci, pcnet, rtl8139, virtio. Defaults to virtio.
+    """
+
+    # passt
+    # pciAddress
+
+    ports: Optional[list[Port]] = None
+    """ List of ports to be forwarded to the virtual machine.
+    """
+
+    # slirp
+    # sriov
+    # state
+    # tag
+
+
 # https://kubevirt.io/api-reference/main/definitions.html#_v1_devices
 @dataclass
 class Devices(DictMixin):
@@ -98,7 +154,9 @@ class Devices(DictMixin):
     # gpus
     # hostDevices
     # inputs
-    # interfaces
+
+    interfaces: Optional[list[Interface]] = None
+
     # logSerialConsole
     # networkInterfaceMultiqueue
     # rng
@@ -167,6 +225,29 @@ class HostDisk(DictMixin):
     """
 
 
+# https://kubevirt.io/api-reference/main/definitions.html#_v1_cloudinitnocloudsource
+@dataclass
+class CloudInitNoCloudSource(DictMixin):
+    networkData: Optional[str] = None
+    """ NetworkData contains NoCloud inline cloud-init networkdata.
+    """
+
+    networkDataBase64: Optional[str] = None
+    """ NetworkDataBase64 contains NoCloud cloud-init networkdata as a base64 encoded string.
+    """
+
+    # networkDataSecretRef
+    # secretRef
+
+    userData: Optional[str] = None
+    """ UserData contains NoCloud inline cloud-init userdata.
+    """
+
+    userDataBase64: Optional[str] = None
+    """ UserDataBase64 contains NoCloud cloud-init userdata as a base64 encoded string.
+    """
+
+
 # https://kubevirt.io/api-reference/main/definitions.html#_v1_volume
 @dataclass
 class Volume(DictMixin):
@@ -177,7 +258,14 @@ class Volume(DictMixin):
     """
 
     # cloudInitConfigDrive
-    # cloudInitNoCloud
+
+    cloudInitNoCloud: Optional[CloudInitNoCloudSource] = None
+    """ CloudInitNoCloud represents a cloud-init NoCloud user-data source.
+        The NoCloud data will be added as a disk to the vmi.
+        A proper cloud-init installation is required inside the guest.
+        More info: http://cloudinit.readthedocs.io/en/latest/topics/datasources/nocloud.html
+    """
+
     # configMap
     containerDisk: Optional[ContainerDiskSource] = None
     """ ContainerDisk references a docker image,
@@ -238,6 +326,28 @@ class DomainSpec(DictMixin):
 #     status: Optional[ VirtualMachineStatus] = None
 
 
+# https://kubevirt.io/api-reference/main/definitions.html#_v1_podnetwork
+@dataclass
+class PodNetwork(DictMixin):
+    vmIPv6NetworkCIDR: Optional[str] = None
+    """ IPv6 CIDR for the vm network. Defaults to fd10:0:2::/120 if not specified.
+    """
+
+    vmNetworkCIDR: Optional[str] = None
+    """ CIDR for vm network. Default 10.0.2.0/24 if not specified.
+    """
+
+
+# https://kubevirt.io/api-reference/main/definitions.html#_v1_network
+@dataclass
+class Network(DictMixin):
+    name: str = ""
+
+    # multus
+
+    pod: Optional[PodNetwork] = None
+
+
 # https://kubevirt.io/api-reference/main/definitions.html#_v1_virtualmachineinstancespec
 @dataclass
 class VirtualMachineInstanceSpec(DictMixin):
@@ -247,7 +357,9 @@ class VirtualMachineInstanceSpec(DictMixin):
     evictionStrategy: Optional[str] = None
     hostname: Optional[str] = None
     # livenessProbe
-    # networks
+
+    networks: Optional[list[Network]] = None
+
     # nodeSelector
     priorityClassName: Optional[str] = None
     # readinessProbe

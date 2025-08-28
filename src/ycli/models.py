@@ -47,6 +47,8 @@ class FileTask(BaseModel):
 
     dynamic_features: list[DynamicTaskFeatures] = []
 
+    vm_ports: list[int] = []
+
     hidden: bool = True
 
     @property
@@ -81,7 +83,7 @@ class FileTask(BaseModel):
         if not self.dynamic_features:
             return None
 
-        return schema.DynamicTaskInfo(features=self.full_features)
+        return schema.DynamicTaskInfo(features=self.full_features, vm_ports=self.vm_ports)
 
     def get_scoring(self) -> schema.ScoringUnion:
         if self.dynamic_scoring:

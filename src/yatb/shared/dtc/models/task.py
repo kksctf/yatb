@@ -61,6 +61,9 @@ class DynamicTaskInfoBase(BaseETCDModel):
     service_info: tuple[str, str] | None = None
     builder_info: tuple[str, str] | None = None
     s3_link: str | None
+    vm_ports: list[int] = []
+
+    force_rebuild: bool = False
 
     @classmethod
     def build(cls, task: "schema.Task", user: "schema.User") -> Self:
@@ -77,6 +80,7 @@ class DynamicTaskInfoBase(BaseETCDModel):
             service_info=task.dti.service_info,
             builder_info=task.dti.builder_info,
             s3_link=task.dti.s3_url,
+            vm_ports=task.dti.vm_ports,
         )
 
     @property

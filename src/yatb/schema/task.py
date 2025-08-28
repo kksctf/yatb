@@ -50,6 +50,7 @@ class DynamicTaskInfo(EBaseModelV2):
     service_info: Admin[tuple[str, str] | None] = None
     builder_info: Admin[tuple[str, str] | None] = None
     s3_url: Admin[str | None] = None
+    vm_ports: Admin[list[int]] = []
 
 
 class Task(EBaseModelV2):

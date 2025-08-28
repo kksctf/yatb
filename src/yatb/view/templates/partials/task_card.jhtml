@@ -50,6 +50,12 @@
         <button type="submit" class="button dynamic_task_info"
           formaction="{{ url_for('api_dynamic_task_info', task_id=task.task_id) }}"
           hx-get="{{ url_for('api_dynamic_task_info', task_id=task.task_id) }}">Info</button>
+
+        {% if curr_user.admin_checker() %}
+        <button type="submit" class="button dynamic_task_start_rebuild"
+          formaction="{{ url_for('api_dynamic_task_start', task_id=task.task_id) }}?force_rebuild=1"
+          hx-get="{{ url_for('api_dynamic_task_start', task_id=task.task_id) }}?force_rebuild=1">Start with rebuild</button>
+        {% endif %}
       </div>
     </form>
 

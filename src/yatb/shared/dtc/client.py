@@ -163,8 +163,10 @@ class _DynamicTasksEtcdClientTasks(_DynamicTasksEtcdClientBase):
         finally:
             await self._client._watcher.cancel(watcher_callback.watch_id)  # pyright: ignore[reportArgumentType]
 
-    async def setup_task(self, task: schema.Task, user: schema.User) -> DynamicTaskInfo:
+    async def setup_task(self, task: schema.Task, user: schema.User, *, force_rebuild: bool = False) -> DynamicTaskInfo:
         model = DynamicTaskInfoBase.build(task=task, user=user)
+        model.force_rebuild = force_rebuild
+
         key = self._full_task_key_h(TaskUserPair(task.task_id, user.user_id))
 
         watcher_ready = asyncio.Event()

@@ -4,7 +4,7 @@ from typing import Annotated, NamedTuple
 from uuid import UUID
 
 import humanize
-from fastapi import APIRouter, Depends, HTTPException, status
+from fastapi import APIRouter, Depends, HTTPException, Query, status
 from fastapi.responses import HTMLResponse
 from pydantic import BaseModel
 
@@ -119,7 +119,7 @@ class DynamicTasksClient(DynamicTasksEtcdClient):
             case extra:
                 return f"Status: {extra!r} FIXME PLEASE"
 
-    async def start(self, handle: UserTaskPair) -> str:
+    async def start(self, handle: UserTaskPair, *, force_rebuild: bool = False) -> str:
         models = await self.get_task_multi_info(handle.user)
         if len(models) != 0 and not handle.user.is_admin:
             raise HTTPException(
@@ -127,8 +127,14 @@ class DynamicTasksClient(DynamicTasksEtcdClient):
                 detail="Too many tasks...",
             )
 
+        if force_rebuild and not handle.user.is_admin:
+            raise HTTPException(
+                status_code=status.HTTP_403_FORBIDDEN,
+                detail="No no no mister fish!",
+            )
+
         try:
-            model = await self.setup_task(task=handle.task, user=handle.user)
+            model = await self.setup_task(task=handle.task, user=handle.user, force_rebuild=force_rebuild)
             return await self.format_model_info(model)
         except TimeoutError as ex:
             return f"Timeout error {ex = }"
@@ -184,8 +190,13 @@ CURRENT_DYNAMIC_TASK = Annotated[TaskDB, Depends(get_dynamic_task)]
 
 
 @router.get("/start/{task_id}")
-async def api_dynamic_task_start(user: auth.CURR_USER, task: CURRENT_DYNAMIC_TASK, client: CLIENT) -> HTMLResponse:
-    info = await client.start(UserTaskPair(task=task, user=user))
+async def api_dynamic_task_start(
+    user: auth.CURR_USER,
+    task: CURRENT_DYNAMIC_TASK,
+    client: CLIENT,
+    force_rebuild: Annotated[bool, Query()] = False,  # noqa: FBT002
+) -> HTMLResponse:
+    info = await client.start(UserTaskPair(task=task, user=user), force_rebuild=force_rebuild)
     return HTMLResponse(info)
 
 

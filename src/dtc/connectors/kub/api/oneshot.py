@@ -61,7 +61,7 @@ class KubeApiOneshot(KubeApiBase):
 
         uploader_image = await self.build(
             "uploader",
-            source=_base_path.parent.parent / "extra",
+            source=_base_path.parent.parent / "extra" / "builder",
         )
 
         # suffix = "kaqtk3fybk6exc4j"
@@ -167,7 +167,7 @@ class KubeApiOneshot(KubeApiBase):
                                 ),
                                 EnvVar(
                                     "S3_PORT",
-                                    f"{settings.S3_PORT}",
+                                    f"{settings.S3_PORT_KANIKO}",
                                 ),
                                 EnvVar(
                                     "S3_ACCESS",
@@ -194,11 +194,14 @@ class KubeApiOneshot(KubeApiBase):
                 if not check_meta(job_pod.metadata):
                     raise ImpossibleError
 
+                full_log: str = ""
+
                 async for log in self.client.log(
                     job_pod.metadata.name,
                     namespace=job_pod.metadata.namespace,
                     newlines=False,
                 ):
+                    full_log += log
                     if log.endswith("uploaded"):
                         frm = log.index("'")
                         to = log.index("'", frm + 1)
@@ -207,6 +210,6 @@ class KubeApiOneshot(KubeApiBase):
                         logger.info(f"{log = } -> {parsed_log = }, {frm = }, {to = }")
                         break  # TODO: make this better
                 else:
-                    raise Exception("error building shit")
+                    raise Exception("error building shit", full_log)
 
         return f"{parsed_log}"

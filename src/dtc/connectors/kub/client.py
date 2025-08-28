@@ -360,17 +360,18 @@ class AsyncClientEx(AsyncClient):
         job: Job,
         *,
         timeout: float = 240,
-    ):
+        logs_is_not_an_option: bool = False,
+    ) -> None:
         if not check_meta(job.metadata):
             raise ImpossibleError
 
-        logger.info(f"Wait for job '{job.metadata.namespace}.{job.metadata.name}' ready")
+        logger.info(f"Wait for job '{job.metadata.namespace}.{job.metadata.name}' ready / succeeded")
         async with asyncio.timeout(timeout):
             await self.wait_ex(
                 Job,
                 job.metadata.name,
                 namespace=job.metadata.namespace,
-                cb=lambda x: x.get("ready", 0) == 1,
+                cb=lambda x: x.get("ready", 0) == 1 or (logs_is_not_an_option and x.get("succeeded", 0) == 1),
             )
 
         job_pod = await self.find_pod(job)
@@ -379,7 +380,10 @@ class AsyncClientEx(AsyncClient):
             raise ImpossibleError
 
         pod_info = f"'{job_pod.metadata.namespace}.{job_pod.metadata.name}'"
-        logger.info(f"Waiting for job's pod {pod_info} be ready")
+        logger.info(f"Waiting for job's pod {pod_info} be ready ({logs_is_not_an_option = })")
+        if logs_is_not_an_option:
+            return
+
         job_pod = await self.wait(
             Pod,
             job_pod.metadata.name,

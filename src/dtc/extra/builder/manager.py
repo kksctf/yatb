@@ -13,8 +13,8 @@ from pydantic_settings import BaseSettings
 
 class Settings(BaseSettings):
     FLAG: str
-    BACKEND_URL: str
     RANDOM_STRING_SEQ: str
+    
     EXPORT_PATH: Path
 
     S3_HOST: str
@@ -32,7 +32,7 @@ class Settings(BaseSettings):
 settings = Settings()  # type: ignore
 
 app = App(
-    "Task building manager",
+    name="Task building manager",
     config=Env(""),
 )
 c = rich.console.Console()

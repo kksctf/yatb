@@ -93,9 +93,9 @@ class KubeConnector(BaseConnector):
     ):
         logger.info(f"Got {task_info = }, doing work")
 
-        name = f"{task_info.encoded_task_id}-{task_info.encoded_user_id}"
+        # name = f"{task_info.encoded_task_id}-{task_info.encoded_user_id}"
 
-        src = await self.unpack_data(task_info, lti, service=False)
+        # src = await self.unpack_data(task_info, lti, service=False)
 
         # extra_env = {
         #     "FLAG": task_info.flag,
@@ -104,6 +104,20 @@ class KubeConnector(BaseConnector):
 
         with TemporaryDirectory(prefix=f"yatb-build-vm.docker.{task_info.task_id!s}.") as dest:
             dest = Path(dest)
+
+            # logger.info(f"Extracting {task_info.task_id}/image.qcow2")
+
+            # image = dest / "image.qcow2"
+            # object = await self.api.s3.get_object(
+            #     settings.TASKS_BUCKET_NAME,
+            #     object_name=f"{task_info.task_id}/image.qcow2",
+            #     session=None,
+            # )
+            # with image.open("wb") as f:
+            #     async for data, _ in object.content.iter_chunks():
+            #         f.write(data)
+            # os.utime(image, (0, 0))
+
             docker = dest / "Dockerfile"
             docker.write_text(f"FROM scratch\nADD  --chown=107:107 {task_info.s3_link} /disk/drive.qcow2")
             os.utime(docker, (0, 0))
@@ -111,6 +125,7 @@ class KubeConnector(BaseConnector):
             vm_image = await self.api.build(
                 f"{task_info.encoded_task_id}-image",
                 dest,
+                force_rebuild=task_info.force_rebuild,  # WTF: ... ;(
             )
 
         # customize = await self.api.build(
@@ -131,6 +146,44 @@ class KubeConnector(BaseConnector):
             )
         )
 
+        ports = task_info.vm_ports
+        for port in ports:
+            public_hp = await lti.ports_env.get_port()
+            service = self.api.client.ctx(
+                self.api.client.simple_service(
+                    f"vm",
+                    ns_name,
+                    public_hp.port,
+                    port,
+                    settings.EXTERNAL_TO_INTERNAL_IPS_MAPPING[public_hp.host],
+                    name_suffix=f"-p{port}-public",
+                    # selector="vm.kubevirt.io/name",
+                    selector="kubevirt.io/domain",
+                ),
+            )
+            service = await lti.exit_stack.enter_async_context(service)
+
+        user_data: dict = {
+            "write_files": [
+                {
+                    "content": task_info.flag,
+                    "path": "/flag",
+                    "owner": "root:root",
+                    "permissions": "0400",
+                },
+            ],
+        }
+        if task_info.user_admin:
+            user_data["users"] = [
+                {
+                    "name": "root",
+                    "lock_passwd": False,
+                    # 1
+                    "hashed_passwd": "$6$rounds=4096$rS3t4SotwWPRb6J7$8nzYAf8ZHTZi60MUIFikUoKLmQWDfTxUGjZWXfbTNk42sCFcF2JmZWjLriBN0AFLACggCVFprgQyaKj1Mw1oW1",
+                    "ssh_authorized_keys": [],
+                },
+            ]
+
         vm = await lti.exit_stack.enter_async_context(
             self.api.client.ctx(
                 self.api.client.simple_vm(
@@ -139,8 +192,9 @@ class KubeConnector(BaseConnector):
                     # ip_in_cluster=vpn_user.netinfo.task_net_task.compressed,
                     image=self.api.fix_image_name(vm_image),
                     # custm=self.api.fix_image_name(customize),
-                    cpu=1 if not task_info.user_admin else 2,
+                    cpu=2 if not task_info.user_admin else 4,
                     memory="2.5Gi" if not task_info.user_admin else "4Gi",
+                    user_data_raw=user_data,
                 ),
             ),
         )
@@ -152,15 +206,18 @@ class KubeConnector(BaseConnector):
         # src = src.resolve().parent / "dev"
         src = await self.unpack_data(task_info, lti, service=False)
 
-        # TODO: WTF
-        hp = lti.ports_env.tracking_ports[0]
-
         extra_env = {
             "FLAG": task_info.flag,
-            "BACKEND_HOST": hp.host,
-            "BACKEND_PORT": str(hp.port),
             "RANDOM_STRING_SEQ": lti.devire_static_random_seq(task_info.flag),
         }
+
+        if lti.ports_env.tracking_ports:
+            # TODO: WTF
+            hp = lti.ports_env.tracking_ports[0]
+            extra_env |= {
+                "BACKEND_HOST": hp.host,
+                "BACKEND_PORT": str(hp.port),
+            }
 
         path = await self.api.oneshot(
             task_info.name,

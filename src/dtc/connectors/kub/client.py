@@ -1,4 +1,6 @@
 import asyncio
+import json
+import textwrap
 from collections.abc import AsyncGenerator, Callable, Mapping
 from contextlib import asynccontextmanager
 from typing import TypeGuard, TypeVar, overload
@@ -241,8 +243,13 @@ class AsyncClientEx(AsyncClient):
         # custm: str,
         cpu: int = 1,
         memory: str = "1.5Gi",
+        user_data_raw: dict = {},
+        ports: dict[str, int] = {},
     ) -> VirtualMachineInstance:
-        #
+        user_data = f"""\
+        #cloud-config
+        {json.dumps(user_data_raw, indent=None)}
+        """
         return VirtualMachineInstance(
             metadata=ObjectMeta(
                 name=name,
@@ -256,11 +263,18 @@ class AsyncClientEx(AsyncClient):
                     cpu=km.CPU(cores=cpu),
                     memory=km.Memory(guest=memory),
                     devices=km.Devices(
+                        interfaces=[
+                            km.Interface(
+                                name="default",
+                                masquerade={},
+                                ports=[km.Port(name=i, port=v) for i, v in ports.items()],
+                            ),
+                        ],
                         disks=[
                             km.Disk(
                                 name="disk",
-                                disk=km.DiskTarget(bus="sata"),
-                                bootOrder=10,
+                                disk=km.DiskTarget(bus="virtio"),
+                                bootOrder=1,
                             ),
                             # km.Disk(
                             #     name="custm",
@@ -269,6 +283,9 @@ class AsyncClientEx(AsyncClient):
                         ],
                     ),
                 ),
+                networks=[
+                    km.Network(name="default", pod=km.PodNetwork()),
+                ],
                 volumes=[
                     km.Volume(
                         name="disk",
@@ -283,6 +300,12 @@ class AsyncClientEx(AsyncClient):
                         #     path="/debian.qcow2",
                         #     type="Disk",
                         # ),
+                    ),
+                    km.Volume(
+                        name="cloudinitvolume",
+                        cloudInitNoCloud=km.CloudInitNoCloudSource(
+                            userData=textwrap.dedent(user_data),
+                        ),
                     ),
                     # km.Volume(
                     #     name="virtio-drivers",

@@ -26,7 +26,6 @@ class TaskDB(DocumentEx[Task], Task):
                     "task_id",
                     "description_html",
                     "scoring",
-                    "flag",
                     "pwned_by",
                 },
             ),

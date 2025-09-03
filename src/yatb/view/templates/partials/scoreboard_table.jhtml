@@ -1,3 +1,18 @@
+{#
+  Also update the header order when the body refreshes.
+  This <tr> will be swapped out-of-band into #scoreboard-head by htmx.
+ #}
+<tr id="scoreboard-head" class="sb-tasks-head" hx-swap-oob="innerHTML:#scoreboard-head">
+  <th></th>
+  <th>{{ _("User", request) }}</th>
+  <th>{{ _("Score", request) }}</th>
+  {% for task in all_tasks | sort(attribute='category') | sort(attribute='scoring.points') %}
+    <th class="sb-rot-th">
+      <a class="sb-rot" href="/tasks/{{ task.task_id }}"><span>{{ task.points }} | {{ task.task_name }}</span></a>
+    </th>
+  {% endfor %}
+</tr>
+
 {% for pos, user in enumerate(scoreboard, start=1) %}
   {# build lookup helpers once per user #}
   {% set last_task_id, last_time = user.get_last_solve_time() if user.solved_tasks else (None, None) %}

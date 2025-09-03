@@ -66,7 +66,7 @@
 
 <table id="scoreboard-table" class="table is-fullwidth">
   <thead>
-    <tr class="sb-tasks-head">
+    <tr id="scoreboard-head" class="sb-tasks-head">
       <th></th>
       <th>{{ _("User", request) }}</th>
       <th>{{ _("Score", request) }}</th>

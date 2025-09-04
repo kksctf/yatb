@@ -1,7 +1,6 @@
 import asyncio
 import datetime
 import gettext
-import uuid
 from collections.abc import Mapping
 from pathlib import Path
 
@@ -171,12 +170,16 @@ async def one_task_page(
     task: tasks.CURRENT_TASK,
     user: auth.CURR_USER_SAFE,
 ) -> HTMLResponse:
+    users = await UserDB.get_all_projected(UserDB.ScoreboardProjection)
+    uid2name = {uuid: user.username for uuid, user in users.items()}
+
     return await response_generator(
         req,
         "task.jhtml",
         {
             "curr_user": user,
             "selected_task": task,
+            "uid2name": uid2name,
         },
     )
 

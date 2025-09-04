@@ -100,6 +100,26 @@
     </div>
     {% endif %}
   </footer>
+  
+  <footer class="card-footer">
+    {% if selected_task.first_pwned_str() %}
+    {% set first_user, first_time = selected_task.first_pwned_str() %}
+    <span class="card-footer-item is-size-7 is-flex is-flex-direction-column is-align-items-center"
+      style="word-break: break-all;">
+      🥇 <span>{{ uid2name.get(first_user, '??') }}</span>
+      <small>{{ first_time }}</small>
+    </span>
+    {% endif %}
+
+    {% if selected_task.last_pwned_str() %}
+    {% set last_user, last_time = selected_task.last_pwned_str() %}
+    <span class="card-footer-item is-size-7 is-flex is-flex-direction-column is-align-items-center"
+      style="word-break: break-all;">
+      💥 <span>{{ uid2name.get(last_user, '??') }}</span>
+      <small>{{ last_time }}</small>
+    </span>
+    {% endif %}
+  </footer>
 </div>
 
 {% endblock %}

@@ -1,13 +1,14 @@
 import datetime
-import uuid
 from typing import Literal, Self
 
-from pydantic import Field, model_validator
+from pydantic import model_validator
 
-from ..ebasemodelv2 import Admin, EBaseModelV2, Public
-from ..utils.log_helper import get_logger
+from yatb.ebasemodelv2 import Admin, EBaseModelV2, Public
+from yatb.utils.log_helper import get_logger
+
 from .auth import ANNOTATED_TYPING_AUTH
 from .auth.base import AuthBase
+from .ids import ModelUserID, TaskID, UserIDField
 
 logger = get_logger("schema.user")
 
@@ -19,13 +20,13 @@ class ExtraInfo(EBaseModelV2):
 
 
 class User(EBaseModelV2):
-    user_id: Public[uuid.UUID] = Field(default_factory=uuid.uuid4)
+    user_id: Public[ModelUserID] = UserIDField
 
     username: Public[str] = "unknown"
 
     score: Public[int] = 0
 
-    solved_tasks: Public[dict[uuid.UUID, datetime.datetime]] = {}  # noqa: RUF012
+    solved_tasks: Public[dict[TaskID, datetime.datetime]] = {}  # noqa: RUF012
 
     is_admin: Admin[bool] = False
 
@@ -48,7 +49,7 @@ class User(EBaseModelV2):
     def admin_checker(self) -> bool:
         return self.au_s.is_admin()
 
-    def get_last_solve_time(self) -> tuple[uuid.UUID, datetime.datetime] | tuple[Literal[""], datetime.datetime]:
+    def get_last_solve_time(self) -> tuple[TaskID, datetime.datetime] | tuple[Literal[""], datetime.datetime]:
         if len(self.solved_tasks) > 0:
             return max(self.solved_tasks.items(), key=lambda x: x[1])
 

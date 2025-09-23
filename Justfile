@@ -9,7 +9,7 @@ yatb:
 yatb-reload:
     uv run uvicorn yatb.app:app --reload
 
-debug_yatb:
+debug-yatb:
     uv run debugpy --listen 5678 --wait-for-client -m uvicorn yatb.app:app
 
 cli *args:
@@ -46,3 +46,18 @@ reset-rights-x:
     # | xargs -I{} git restore --staged -- "{}"
     # | xargs -I{} git restore --staged -- "{}"
     # | xargs -I{} git checkout HEAD -- "{}"
+
+# git cringe workflow
+
+git-main branch="improvements":
+    git stash push -a -u -m "just-fast-switch"
+    git checkout "{{ branch }}"
+    git stash apply "stash@{0}"
+    @echo "Ready to commit"
+
+git-back dst src="improvements":
+    git stash push -a -u -m "just-fast-switch"
+    git checkout "{{ dst }}"
+    git merge "{{ src }}"
+    git stash apply "stash@{0}"
+    @echo "Ready to commit"

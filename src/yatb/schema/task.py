@@ -1,6 +1,3 @@
-# import pdb
-# pdb.set_trace()
-
 import datetime
 import uuid
 from collections.abc import Sequence
@@ -12,11 +9,12 @@ from pydantic import BaseModel, Field, computed_field
 from yatb import config
 from yatb.config import settings
 from yatb.ebasemodelv2 import Admin, EBaseModelV2, Public
+from yatb.shared.dtc.models import DynamicTaskFeatures
 from yatb.utils import md
 from yatb.utils.log_helper import get_logger
 
-from ..shared.dtc.models import DynamicTaskFeatures
 from .flags import DynamicKKSFlag, StaticFlag
+from .ids import ModelTaskID, TaskID, TaskIDField, UserID
 from .scoring import DynamicKKSScoring, StaticScoring
 from .user import User
 
@@ -54,7 +52,7 @@ class DynamicTaskInfo(EBaseModelV2):
 
 
 class Task(EBaseModelV2):
-    task_id: Public[uuid.UUID] = Field(default_factory=uuid.uuid4)
+    task_id: Public[ModelTaskID] = TaskIDField
 
     task_name: Public[str]
     category: Public[str]
@@ -66,7 +64,7 @@ class Task(EBaseModelV2):
 
     flag: Admin[FlagUnion]
 
-    pwned_by: Public[dict[uuid.UUID, datetime.datetime]] = {}  # noqa: RUF012
+    pwned_by: Public[dict[UserID, datetime.datetime]] = {}  # noqa: RUF012
 
     hidden: Admin[bool] = True
 
@@ -74,7 +72,7 @@ class Task(EBaseModelV2):
 
     dti: Admin[DynamicTaskInfo | None] = None
 
-    req_tasks: Admin[list[uuid.UUID]] = Field(default_factory=list)
+    req_tasks: Admin[list[TaskID]] = Field(default_factory=list)
 
     @computed_field
     @property
@@ -185,7 +183,7 @@ class Task(EBaseModelV2):
 
 
 class TaskForm(BaseModel):
-    task_id: uuid.UUID | None = None
+    task_id: TaskID | None = None
 
     task_name: str
     category: str
@@ -196,7 +194,7 @@ class TaskForm(BaseModel):
 
     dti: DynamicTaskInfo | None = None
 
-    req_tasks: Sequence[uuid.UUID] = []
+    req_tasks: Sequence[TaskID] = []
 
     def to_task[T: Task](self, cls: type[T], author: User) -> T:
         str_author = self.author if self.author != "" else f"@{author.username}"

@@ -3,10 +3,7 @@ from fastapi import APIRouter
 from yatb.utils.log_helper import get_logger
 
 logger = get_logger("api")
-router = APIRouter(
-    prefix="/api",
-    tags=["api"],
-)
+router = APIRouter(prefix="/api")
 
 from . import auth  # noqa
 from . import admin  # noqa

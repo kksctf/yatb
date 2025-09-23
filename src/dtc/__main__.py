@@ -65,7 +65,6 @@ async def build_all(
     tag: str = "latest",
     registry: str = f"{settings.EXTERNAL_DOCKER_REGISTRY}/rubikoid",
 ) -> None:
-
     async with AsyncExitStack() as exit_stack:
         x = await exit_stack.enter_async_context(KubeConnector(run_workers=False))
 
@@ -341,7 +340,8 @@ async def cat(image: str, cmd: str) -> None:
 @app.command()
 async def test():
     async with KubeConnector() as x:
-        await x.test()
+        pass
+        # await x.test()
 
 
 if __name__ == "__main__":

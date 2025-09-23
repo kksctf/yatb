@@ -1,5 +1,4 @@
 version = 1
-revision = 2
 requires-python = "==3.12.*"
 
 [[package]]
@@ -495,6 +494,18 @@ wheels = [
     { url = "https://files.pythonhosted.org/packages/52/ca/c0d767082e39dccb7985c73ab4cf1d23ce8613387149e9978c70c3bf3b07/grpcio-1.71.0-cp312-cp312-musllinux_1_1_x86_64.whl", hash = "sha256:469f42a0b410883185eab4689060a20488a1a0a00f8bbb3cbc1061197b4c5a79", size = 6186143 },
     { url = "https://files.pythonhosted.org/packages/00/61/7b2c8ec13303f8fe36832c13d91ad4d4ba57204b1c723ada709c346b2271/grpcio-1.71.0-cp312-cp312-win32.whl", hash = "sha256:ad9f30838550695b5eb302add33f21f7301b882937460dd24f24b3cc5a95067a", size = 3604083 },
     { url = "https://files.pythonhosted.org/packages/fd/7c/1e429c5fb26122055d10ff9a1d754790fb067d83c633ff69eddcf8e3614b/grpcio-1.71.0-cp312-cp312-win_amd64.whl", hash = "sha256:652350609332de6dac4ece254e5d7e1ff834e203d6afb769601f286886f6f3a8", size = 4272191 },
+]
+
+[[package]]
+name = "gunicorn"
+version = "23.0.0"
+source = { registry = "https://pypi.org/simple" }
+dependencies = [
+    { name = "packaging" },
+]
+sdist = { url = "https://files.pythonhosted.org/packages/34/72/9614c465dc206155d93eff0ca20d42e1e35afc533971379482de953521a4/gunicorn-23.0.0.tar.gz", hash = "sha256:f014447a0101dc57e294f6c18ca6b40227a4c90e9bdb586042628030cba004ec", size = 375031 }
+wheels = [
+    { url = "https://files.pythonhosted.org/packages/cb/7d/6dac2a6e1eba33ee43f318edbed4ff29151a49b5d37f080aad1e6469bca4/gunicorn-23.0.0-py3-none-any.whl", hash = "sha256:ec400d38950de4dfd418cff8328b2c8faed0edb0d517d3394e457c317908ca4d", size = 85029 },
 ]
 
 [[package]]
@@ -1454,6 +1465,9 @@ dynamic = [
     { name = "miniopy-async" },
     { name = "ruamel-yaml" },
 ]
+prod = [
+    { name = "gunicorn" },
+]
 profiling = [
     { name = "pyinstrument" },
 ]
@@ -1480,6 +1494,7 @@ requires-dist = [
     { name = "docker-registry-client-async", marker = "extra == 'dynamic'", specifier = "~=0.2.11" },
     { name = "fastapi", specifier = "~=0.115.13" },
     { name = "fastui", specifier = "~=0.7.0" },
+    { name = "gunicorn", marker = "extra == 'prod'", specifier = "~=23.0.0" },
     { name = "hatch-babel", specifier = "~=0.1.2" },
     { name = "httpx", specifier = "~=0.28.0" },
     { name = "humanize", specifier = "~=4.10.0" },
@@ -1503,7 +1518,6 @@ requires-dist = [
     { name = "uvicorn", specifier = "~=0.30.6" },
     { name = "websockets", specifier = "~=12.0" },
 ]
-provides-extras = ["cli", "profiling", "dynamic"]
 
 [package.metadata.requires-dev]
 dev = [

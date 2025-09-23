@@ -130,7 +130,10 @@ class TelegramAuth(AuthBase):
         ADMIN_USERNAMES: list[str] = []
         ADMIN_UIDS: list[int] = []
 
-        model_config = SettingsConfigDict(AuthBase.AuthSettings.model_config, env_prefix="AUTH_TG_")
+        model_config = SettingsConfigDict(
+            AuthBase.AuthSettings.model_config,
+            env_prefix="AUTH_TG_",
+        )
 
     auth_settings: ClassVar[AuthSettings] = AuthSettings()
     router_params: ClassVar = {

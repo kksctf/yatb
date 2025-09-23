@@ -63,7 +63,7 @@ class BaseConnector(ABC):
     ports_controller: PortsController
 
     run_workers: bool = True
-    jobs: asyncio.PriorityQueue[typing.Coroutine]
+    jobs: asyncio.PriorityQueue[tuple[int, typing.Coroutine]]
     workers: list[asyncio.Task[None]]
 
     watcher_task: asyncio.Task[None]
@@ -188,7 +188,7 @@ class BaseConnector(ABC):
     async def worker(self) -> None:
         while True:
             try:
-                job = await self.jobs.get()
+                _, job = await self.jobs.get()
             except asyncio.CancelledError as ex:
                 logger.info(f"{ex = }")
                 break
@@ -202,20 +202,20 @@ class BaseConnector(ABC):
     async def handle_event(self, event: TaskWatchEvent) -> None:
         match event.model.state:
             case DynamicTaskState.PREPARED:
-                await self.jobs.put(self.start(event.model))
+                await self.jobs.put((0, self.start(event.model)))
 
     async def handle_rpc_event(self, event: TaskRPCEvent) -> None:
         match event.rpc_action:
             case DynamicTaskQuery.EXTEND:
                 if not is_taskinfo_ready(event.model):
                     return
-                await self.jobs.put(self.extend(event.model))
+                await self.jobs.put((0, self.extend(event.model)))
             case DynamicTaskQuery.RESTART:
                 if not is_taskinfo_ready(event.model):
                     return
-                await self.jobs.put(self.restart(event.model))
+                await self.jobs.put((0, self.restart(event.model)))
             case DynamicTaskQuery.STOP:
-                await self.jobs.put(self.stop(event.model))  # type: ignore # FIXME: shit
+                await self.jobs.put((0, self.stop(event.model)))  # pyright: ignore[reportArgumentType] # FIXME: shit
 
         # TODO: hmmm возможно надо делать не тут
         await self.etcd.ack_query_task(event)

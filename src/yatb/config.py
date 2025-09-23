@@ -112,8 +112,8 @@ class Settings(BaseSettings):
 
 settings = Settings()
 
-logger.warning(f"{settings.EVENT_START_TIME!s} -> {settings.EVENT_END_TIME!s}")
-logger.warning(f"{settings.EVENT_START_TIME!r} -> {settings.EVENT_END_TIME!r}")
+logger.warning(f"Event time: {settings.EVENT_START_TIME!s} -> {settings.EVENT_END_TIME!s}")
+logger.warning(f"Event time: {settings.EVENT_START_TIME!r} -> {settings.EVENT_END_TIME!r}")
 
 # ==== CLASSES FOR MD RENDERER ====
 MD_CLASSES_TASKS = {

@@ -1,0 +1,48 @@
+version: "3"
+
+services:
+  yatb:
+    build:
+      context: ./
+      dockerfile: contrib/docker/Dockerfile.production
+    env_file:
+      - path: ./yatb.env
+        required: true
+    environment:
+      DEBUG: "false"
+      PROFILING: "false"
+      MONGO: "mongodb://ferretdb:27017"
+    volumes:
+      - "./logs:/app/logs"
+    links:
+      - ferretdb
+    restart: unless-stopped
+
+  ferretdb:
+    # last version of ferretdb with sqlite support ;(
+    image: ghcr.io/ferretdb/ferretdb:1.24.2
+    expose:
+      - "27017"
+    environment:
+      FERRETDB_HANDLER: "sqlite"
+      FERRETDB_TELEMETRY: "disable"
+    volumes:
+      - ./state:/state
+    restart: unless-stopped
+
+  caddy:
+    image: caddy:2.10.2-alpine
+    ports:
+      - "127.0.0.1:8080:80"
+    volumes:
+      - "./contrib/docker/Caddyfile:/etc/caddy/Caddyfile:ro"
+      - "./src/yatb/view/static:/static:ro"
+      - "caddy_data:/data"
+      - "caddy_config:/config"
+    links:
+      - yatb
+    restart: unless-stopped
+
+volumes:
+  caddy_data:
+  caddy_config:

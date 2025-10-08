@@ -4,7 +4,7 @@ import pymongo
 from beanie import BulkWriter
 from beanie.operators import Set
 
-from yatb.schema import FlagCheckResult, Task, TaskForm, TaskID, User, UserID
+from yatb.schema import FlagCheckResult, Task, TaskForm, TaskID, User
 from yatb.utils.log_helper import get_logger
 
 from .base import DocumentEx

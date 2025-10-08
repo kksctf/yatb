@@ -1,21 +1,10 @@
 import datetime
-import io
-import subprocess
-from collections.abc import Sequence
-from pathlib import Path
 from uuid import UUID
 
-from pydantic_yaml import parse_yaml_raw_as
-
-from dtc.config import settings as dtc_settings
-from dtc.connectors.compose import load_compose
 from yatb.api.api_dynamic_tasks import DynamicTasksClient
-from yatb.schema import DynamicTaskFeatures
-from yatb.schema.task import Task
 from yatb.shared.dtc.models.task import is_taskinfo_ready
-from ycli.base import app, c, settings
+from ycli.base import app, c
 from ycli.client import YATB
-from ycli.models import FileTask, State
 
 
 @app.command

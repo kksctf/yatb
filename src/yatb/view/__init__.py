@@ -2,9 +2,11 @@ import asyncio
 import datetime
 import gettext
 from collections.abc import Mapping
+from dataclasses import dataclass
 from pathlib import Path
+from typing import Annotated, TypeAlias
 
-from fastapi import BackgroundTasks, Query, Request, Response
+from fastapi import BackgroundTasks, Depends, Query, Request, Response
 from fastapi.responses import HTMLResponse
 from fastapi.routing import APIRoute as _APIRoute
 from fastapi.routing import APIRouter
@@ -117,6 +119,21 @@ from . import admin  # noqa
 router.include_router(admin.router)
 
 
+@dataclass
+class _Cache:
+    user_id_to_username: dict[schema.UserID, str]
+
+
+async def get_cache(request: Request) -> _Cache:
+    users = await UserDB.get_all_projected(UserDB.ScoreboardProjection)
+    uid2name = {uuid: user.username for uuid, user in users.items()}
+
+    return _Cache(user_id_to_username=uid2name)
+
+
+Cache: TypeAlias = Annotated[_Cache, Depends(get_cache)]
+
+
 @router.get("/")
 @router.get("/index")
 async def index(request: Request, user: auth.CURR_USER_SAFE) -> HTMLResponse:
@@ -127,14 +144,13 @@ async def index(request: Request, user: auth.CURR_USER_SAFE) -> HTMLResponse:
 async def tasks_page(
     req: Request,
     is_httpx: IS_HTTPX,
+    cache: Cache,
     user: auth.CURR_USER_SAFE,
     tasks: tasks.VISIBLE_TASKS,
     show_solved: bool | None = Query(default=None),
     category: list[str] | None = Query(None),
 ) -> HTMLResponse:
-    users = await UserDB.get_all_projected(UserDB.ScoreboardProjection)
-    uid2name = {uuid: user.username for uuid, user in users.items()}
-    categories = set(t.category for t in tasks)
+    categories = {t.category for t in tasks}
 
     if not is_httpx:
         return await response_generator(
@@ -144,7 +160,7 @@ async def tasks_page(
                 "curr_user": user,
                 "tasks": tasks,
                 "categories": categories,
-                "uid2name": uid2name,
+                "uid2name": cache.user_id_to_username,
             },
         )
 
@@ -159,7 +175,7 @@ async def tasks_page(
         {
             "curr_user": user,
             "tasks": tasks,
-            "uid2name": uid2name,
+            "uid2name": cache.user_id_to_username,
         },
     )
 
@@ -167,19 +183,17 @@ async def tasks_page(
 @router.get("/tasks/{task_id}")
 async def one_task_page(
     req: Request,
+    cache: Cache,
     task: tasks.CURRENT_TASK,
     user: auth.CURR_USER_SAFE,
 ) -> HTMLResponse:
-    users = await UserDB.get_all_projected(UserDB.ScoreboardProjection)
-    uid2name = {uuid: user.username for uuid, user in users.items()}
-
     return await response_generator(
         req,
         "task.jhtml",
         {
             "curr_user": user,
             "selected_task": task,
-            "uid2name": uid2name,
+            "uid2name": cache.user_id_to_username,
         },
     )
 

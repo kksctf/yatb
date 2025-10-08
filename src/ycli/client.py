@@ -88,8 +88,13 @@ class YATB:
         resp = await self.s.delete(app.url_path_for("api_detele_everything_but_tasks"))
         resp.raise_for_status()
 
-    async def detele_everything(self):
-        resp = await self.s.delete(app.url_path_for("api_detele_everything"))
+    async def detele_everything(self, *, force: bool = False):
+        resp = await self.s.delete(
+            app.url_path_for("api_detele_everything"),
+            params={
+                "force": force,
+            },
+        )
         resp.raise_for_status()
 
     async def find_user_by_name(self, username: str) -> schema.User | None:

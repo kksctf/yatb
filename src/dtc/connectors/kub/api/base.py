@@ -25,7 +25,7 @@ from lightkube.types import CascadeType
 from loguru import logger
 
 from dtc.config import settings
-from yatb.shared.s3.client import MinioEx
+from s3_srv.client import MinioEx
 
 from ..client import AsyncClientEx, ImpossibleError, check_meta
 
@@ -45,12 +45,8 @@ class KubeApiBase:
         self.client = AsyncClientEx(config, field_manager="dtc")
 
         # setup s3
-        self.s3 = MinioEx(
-            endpoint=settings.s3_endpoint,
-            access_key=settings.S3_ACCESS,
-            secret_key=settings.S3_SECRET,
-            secure=False,  # http for False, https for True
-        )
+        # FIXME: shit.
+        self.s3 = MinioEx()
 
         DockerRegistryClientAsync.DEFAULT_PROTOCOL = "http"  # FIXME: tmp
         self.drca = DockerRegistryClientAsync()
@@ -91,13 +87,7 @@ class KubeApiBase:
         pass
 
     async def setup_s3(self) -> None:
-        await self.s3.setup_buckets(
-            [
-                settings.STATIC_BUCKET_NAME,
-                settings.TASKS_BUCKET_NAME,
-                settings.BUILD_RESULT_BUCKET_NAME,
-            ],
-        )
+        await self.s3.setup_buckets()
 
     @classmethod
     def generate_name(cls, alphabet: str = string.digits + string.ascii_lowercase, n: int = 16) -> str:

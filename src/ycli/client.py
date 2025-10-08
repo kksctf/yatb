@@ -4,11 +4,10 @@ from types import TracebackType
 
 import httpx
 
-from dtc.config import settings as dtc_settings
+from s3_srv.client import MinioEx
 from yatb import auth, schema
 from yatb.app import app
 from yatb.config import settings as yatb_settings
-from yatb.shared.s3.client import MinioEx
 
 from .base import c, settings
 from .models import AllTasks, AllUsers
@@ -24,25 +23,20 @@ class YATB:
         if set_default_token:
             self.set_admin_token(yatb_settings.API_TOKEN)
 
-        self.s3 = MinioEx(
-            endpoint=dtc_settings.s3_endpoint,
-            access_key=dtc_settings.S3_ACCESS,
-            secret_key=dtc_settings.S3_SECRET,
-            secure=True,
-        )
+        # TODO: shit
+        self.s3 = MinioEx()
 
         c.print(f"[+] Connected to YATB at {settings.UPSTREAM = }")
-        c.print(f"[+] Connected to S3 at {dtc_settings.s3_endpoint = }")
+        c.print(f"[+] Connected to S3 at {self.s3._base_url = }")
         c.print(f"[+] Public S3 url: {settings.PUBLIC_FILES_DOMAIN}")
 
     async def setup_s3(self) -> None:
-        await self.s3.setup_buckets(
-            [
-                dtc_settings.STATIC_BUCKET_NAME,
-                dtc_settings.TASKS_BUCKET_NAME,
-                dtc_settings.BUILD_RESULT_BUCKET_NAME,
-            ],
-        )
+        try:
+            await self.s3.setup_buckets()
+        except Exception as ex:
+            if not yatb_settings.DEBUG:
+                raise
+            c.print(f"{ex = }")
 
     def set_admin_token(self, token: str = yatb_settings.API_TOKEN) -> None:
         self.s.headers["X-Token"] = token

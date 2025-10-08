@@ -18,6 +18,11 @@ services:
       - ferretdb
     restart: unless-stopped
 
+  s3-srv:
+    build:
+      context: ./
+      dockerfile: contrib/docker/Dockerfile.production
+
   ferretdb:
     # last version of ferretdb with sqlite support ;(
     image: ghcr.io/ferretdb/ferretdb:1.24.2

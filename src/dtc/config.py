@@ -20,11 +20,6 @@ class Settings(BaseSettings):
 
     KUBE_CONFIG_PATH: Path | None = None
 
-    S3_HOST: str
-    S3_PORT: int = 80
-    S3_ACCESS: str
-    S3_SECRET: str
-
     S3_HOST_KANIKO: str
     S3_PORT_KANIKO: int
 
@@ -37,10 +32,6 @@ class Settings(BaseSettings):
 
     PORT_START: int = 20000
     PORT_END: int = 40000
-
-    STATIC_BUCKET_NAME: str = "static-files"
-    TASKS_BUCKET_NAME: str = "dynamic-tasks-build-source"
-    BUILD_RESULT_BUCKET_NAME: str = "dynamic-tasks-build-results"
 
     S3_PROXY_HOST: str = ""
 
@@ -70,13 +61,6 @@ class Settings(BaseSettings):
             return None
 
         return str(self.KUBE_CONFIG_PATH.expanduser().resolve())
-
-    @property
-    def s3_endpoint(self) -> str:
-        if self.S3_HOST.count(":") > 1:
-            return f"[{self.S3_HOST}]:{self.S3_PORT}"
-
-        return f"{self.S3_HOST}:{self.S3_PORT}"
 
     @model_validator(mode="after")
     def check_non_default_tokens(self) -> Self:

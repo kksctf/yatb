@@ -6,10 +6,9 @@ from uuid import UUID
 
 from pydantic_yaml import parse_yaml_raw_as
 
-from dtc.config import settings as dtc_settings
 from dtc.connectors.compose import load_compose
-from yatb.schema import DynamicTaskFeatures
-from yatb.schema.task import Task
+from s3_srv.config import settings as s3_settings
+from yatb.schema import DynamicTaskFeatures, Task, TaskID
 from ycli.base import app, c, settings
 from ycli.client import YATB
 from ycli.models import FileTask, State

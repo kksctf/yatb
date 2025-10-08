@@ -6,22 +6,15 @@ from fastapi import FastAPI, HTTPException, status
 from fastapi.responses import StreamingResponse
 from loguru import logger
 
-from yatb.shared.s3.client import MinioEx
-
+from .client import MinioEx
 from .config import settings
 
-s3 = MinioEx(
-    endpoint=settings.s3_endpoint,
-    access_key=settings.S3_ACCESS,
-    secret_key=settings.S3_SECRET,
-    secure=False,  # http for False, https for True
-)
+s3 = MinioEx()
 
 
 @asynccontextmanager
 async def lifespan(app: FastAPI):
-    if not await s3.bucket_exists(settings.BUILD_RESULT_BUCKET_NAME):
-        await s3.make_bucket(settings.BUILD_RESULT_BUCKET_NAME)
+    await s3.setup_buckets()
 
     try:
         yield
@@ -29,10 +22,7 @@ async def lifespan(app: FastAPI):
         pass
 
 
-app = FastAPI(
-    lifespan=lifespan,
-    #     middleware=[process_exception],
-)
+app = FastAPI(lifespan=lifespan)
 
 
 @app.get("/shared/{task_key}/{file_name}")

@@ -1,14 +1,19 @@
-<div class="card {% if task.is_solved_by(curr_user) %}solved{% endif %}">
+<div class="card {% if task.is_solved_by(curr_user) %}solved{% endif %} {% if task.hidden %}task-hidden{% endif %}">
   <header class="card-header {% if task.is_solved_by(curr_user) %}has-background-success{% endif %}">
     <a href="{{ url_for('one_task_page', task_id=task.task_id) }}" class="card-header-title">
       <div class="media">
         <div class="media-content">
-          <p class="title is-6">{{ task.task_name }}</p>
+          <p class="title is-6">{% if task.hidden %}<i class="fa-solid fa-eye-slash" title="Task is hidden"></i> {% endif %}{{ task.task_name }}</p>
           <p class="subtitle mt-1 is-7">{{ task.category|capitalize }}</p>
         </div>
       </div>
     </a>
-    <span class="tag is-medium">{{ task.scoring.points }}</span>
+    <div>
+      <div class="tags has-addons">
+        <span class="tag {% if task.is_solved_by(curr_user) %}is-success{% endif %}">{{ task.scoring.points }}</span>
+        <span class="tag is-dark"><i class="fa-solid fa-check-double"></i>{{ task.solves }}</span>
+      </div>
+    </div>
   </header>
 
   <div class="card-content">
@@ -73,7 +78,6 @@
   </div>
 
   <footer class="card-footer">
-
     {% if task.first_pwned_str() %}
     {% set first_user, first_time = task.first_pwned_str() %}
     <span class="card-footer-item is-size-7 is-flex is-flex-direction-column is-align-items-center"

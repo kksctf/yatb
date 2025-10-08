@@ -1,0 +1,135 @@
+/* Theme variables and light/dark styling
+   - Defaults to system preference via @media (no JS)
+   - JS toggle sets `data-theme` on <html> and persists to localStorage
+*/
+
+/* Base light palette (will be overridden below when appropriate) */
+:root {
+  color-scheme: light dark;
+  --bg: #ffffff;
+  --text: #111111;
+  --muted: #6b7280;
+  /* gray-500 */
+  --surface: #ffffff;
+  --border: #e5e7eb;
+  /* gray-200 */
+  --navbar-bg: #ffffff;
+  --navbar-text: #111111;
+}
+
+/* If user prefers dark and no override exists */
+@media (prefers-color-scheme: dark) {
+  :root {
+    --bg: #0b1020;
+    --text: #e5e7eb;
+    --muted: #9ca3af;
+    --surface: #11162a;
+    --border: #1f2937;
+    --navbar-bg: #0b1020;
+    --navbar-text: #e5e7eb;
+  }
+}
+
+/* Explicit overrides when JS sets data-theme */
+:root[data-theme='light'] {
+  --bg: #ffffff;
+  --text: #111111;
+  --muted: #6b7280;
+  --surface: #ffffff;
+  --border: #e5e7eb;
+  --navbar-bg: #ffffff;
+  --navbar-text: #111111;
+}
+
+:root[data-theme='dark'] {
+  --bg: #0b1020;
+  --text: #e5e7eb;
+  --muted: #9ca3af;
+  --surface: #11162a;
+  --border: #1f2937;
+  --navbar-bg: #0b1020;
+  --navbar-text: #e5e7eb;
+}
+
+/* Apply variables */
+html,
+body {
+  background-color: var(--bg);
+  color: var(--text);
+}
+
+/* Navbar */
+.navbar {
+  background-color: var(--navbar-bg);
+}
+
+.navbar .navbar-item,
+.navbar a.navbar-item {
+  color: var(--navbar-text);
+}
+
+.navbar .navbar-item:hover,
+.navbar a.navbar-item:hover {
+  background-color: transparent;
+  opacity: 0.8;
+}
+
+/* Cards and containers */
+.card {
+  background-color: var(--surface);
+  border: 1px solid var(--border);
+}
+
+.card .card-content,
+.card .content {
+  color: var(--text);
+}
+
+/* Footer */
+.footer {
+  background-color: var(--surface);
+  border-top: 1px solid var(--border);
+  color: var(--muted);
+}
+
+/* Form controls */
+.input,
+.textarea,
+.select select {
+  background-color: var(--surface);
+  color: var(--text);
+  border-color: var(--border);
+}
+
+.input::placeholder,
+.textarea::placeholder {
+  color: var(--muted);
+}
+
+/* Tables (e.g., scoreboard) */
+table.table {
+  background-color: var(--surface);
+  color: var(--text);
+}
+
+table.table td,
+table.table th {
+  border-color: var(--border) !important;
+}
+
+/* Links */
+a {
+  color: inherit;
+}
+
+/* Hidden tasks (visible to admins) */
+.card.task-hidden {
+  background-color: var(--border);
+  background-image: none;
+}
+
+.card.task-hidden .card-content,
+.card.task-hidden .card-footer,
+.card.task-hidden .card-header .card-header-title {
+  opacity: 0.7;
+}

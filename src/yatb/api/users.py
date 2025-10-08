@@ -1,4 +1,3 @@
-import uuid
 from collections.abc import Sequence
 
 from fastapi import (
@@ -13,9 +12,10 @@ from fastapi import (
     status,
 )
 
-from yatb import auth, schema
+from yatb import auth
 from yatb.config import settings
 from yatb.db import TaskDB, UserDB
+from yatb.schema import User, UserID
 
 from . import logger
 from .utils import get_tasks
@@ -28,7 +28,7 @@ router = APIRouter(
 
 
 @router.get("/scoreboard")
-async def api_scoreboard_get(user: auth.CURR_USER_SCOREBOARD) -> Sequence[schema.User.public_model]:
+async def api_scoreboard_get(user: auth.CURR_USER_SCOREBOARD) -> Sequence[User.public_model]:
     return await UserDB.get_filtered_scoreboard()
 
 
@@ -78,7 +78,7 @@ async def api_task_get_ctftime_scoreboard(*, fullScoreboard: bool = False):  # n
 
 
 @router.get("/me")
-async def api_users_me(user: auth.CURR_USER) -> schema.User.public_model:
+async def api_users_me(user: auth.CURR_USER) -> User.public_model:
     return user
 
 
@@ -91,7 +91,7 @@ async def api_users_logout(req: Request, resp: Response, user: auth.CURR_USER) -
 
 
 @router.get("/{user_id}")
-async def api_users_get(user_id: uuid.UUID, user: auth.CURR_USER) -> schema.User.public_model:
+async def api_users_get(user_id: UserID, user: auth.CURR_USER) -> User.public_model:
     req_user = await UserDB.find_by_user_uuid(user_id)
     if not req_user:
         raise HTTPException(
@@ -103,7 +103,7 @@ async def api_users_get(user_id: uuid.UUID, user: auth.CURR_USER) -> schema.User
 
 
 @router.get("/{user_id}/username")
-async def api_users_get_username(user_id: uuid.UUID, user: auth.CURR_USER_SCOREBOARD) -> str:
+async def api_users_get_username(user_id: UserID, user: auth.CURR_USER_SCOREBOARD) -> str:
     target_user = await UserDB.find_by_user_uuid(user_id)
     if not target_user:
         raise HTTPException(

@@ -1,13 +1,13 @@
-import uuid
 from datetime import UTC, datetime
 from typing import Annotated
 
 from fastapi import APIRouter, Form, HTTPException, status
 from pydantic import BaseModel
 
-from yatb import auth, schema
+from yatb import auth
 from yatb.config import settings
 from yatb.db import TaskDB
+from yatb.schema import FlagForm, Task, TaskID
 from yatb.utils import metrics, tg
 from yatb.ws import ws_manager
 
@@ -29,17 +29,17 @@ class BRMessage(BaseModel):
 
 
 @router.get("/")
-async def api_tasks_get(tasks: VISIBLE_TASKS) -> list[schema.Task.public_model]:
+async def api_tasks_get(tasks: VISIBLE_TASKS) -> list[Task.public_model]:
     return tasks
 
 
 @router.get("/{task_id}")
-async def api_task_get(task: CURRENT_TASK) -> schema.Task.public_model:
+async def api_task_get(task: CURRENT_TASK) -> Task.public_model:
     return task
 
 
 @router.post("/submit_flag")
-async def api_task_submit_flag(flag: Annotated[schema.FlagForm, Form()], user: auth.CURR_USER) -> uuid.UUID:
+async def api_task_submit_flag(flag: Annotated[FlagForm, Form()], user: auth.CURR_USER) -> TaskID:
     if not user.is_admin and datetime.now(tz=UTC) < settings.EVENT_START_TIME:
         raise HTTPException(
             status_code=status.HTTP_425_TOO_EARLY,

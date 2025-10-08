@@ -72,7 +72,7 @@ class Task(EBaseModelV2):
 
     dti: Admin[DynamicTaskInfo | None] = None
 
-    req_tasks: Admin[list[TaskID]] = Field(default_factory=list)
+    req_tasks: Admin[list[TaskID]] = []
 
     @computed_field
     @property

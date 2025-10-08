@@ -1,4 +1,3 @@
-import uuid
 from collections.abc import Mapping
 from typing import Annotated
 
@@ -6,16 +5,15 @@ from beanie import BulkWriter
 from beanie.operators import Set
 from fastapi import Depends, HTTPException, status
 
-from yatb import schema
 from yatb.auth import CURR_ADMIN
 from yatb.config import settings
 from yatb.db import TaskDB, UserDB
-from yatb.schema.flags import FlagCheckResult
+from yatb.schema import FlagCheckResult, Task, TaskForm, TaskID
 
 from . import logger, router
 
 
-async def get_task(task_id: uuid.UUID) -> TaskDB:
+async def get_task(task_id: TaskID) -> TaskDB:
     task = await TaskDB.find_by_task_uuid(task_id)
     if not task:
         raise HTTPException(
@@ -40,7 +38,7 @@ CURR_TASK = Annotated[TaskDB, Depends(get_task)]
 
 
 @router.get("/tasks")
-async def api_admin_tasks(user: CURR_ADMIN) -> Mapping[uuid.UUID, schema.Task.admin_model]:
+async def api_admin_tasks(user: CURR_ADMIN) -> Mapping[TaskID, Task.admin_model]:
     all_tasks = await TaskDB.get_all()
     return all_tasks
 
@@ -82,14 +80,14 @@ async def api_admin_unsolve_tasks(user: CURR_ADMIN) -> str:
 
 
 @router.get("/unsolve_task/{task_id}")
-async def api_admin_task_unsolve(task: CURR_TASK, user: CURR_ADMIN) -> schema.Task.admin_model:
+async def api_admin_task_unsolve(task: CURR_TASK, user: CURR_ADMIN) -> Task.admin_model:
     logger.warning(f"Unsolving task: {task.short_desc()} by {user.short_desc()}")
     # return await db.unsolve_task(task)
     raise NotImplementedError
 
 
 @router.post("/task")
-async def api_admin_task_create(new_task: schema.TaskForm, user: CURR_ADMIN) -> schema.Task.admin_model:
+async def api_admin_task_create(new_task: TaskForm, user: CURR_ADMIN) -> Task.admin_model:
     task = await TaskDB.populate(new_task, user)
     logger.debug(f"New task: {new_task}, result={task}")
     return task
@@ -111,7 +109,7 @@ async def api_admin_task_delete_all(user: CURR_ADMIN):
 
 
 @router.get("/task/delete/{task_id}")
-async def api_admin_task_delete(task: CURR_TASK, user: CURR_ADMIN) -> schema.Task.admin_model:
+async def api_admin_task_delete(task: CURR_TASK, user: CURR_ADMIN) -> Task.admin_model:
     if len(task.pwned_by):
         raise HTTPException(status_code=500)
 
@@ -125,12 +123,12 @@ async def api_admin_task_delete(task: CURR_TASK, user: CURR_ADMIN) -> schema.Tas
 
 
 @router.get("/task/{task_id}")
-async def api_admin_task_get(task: CURR_TASK, user: CURR_ADMIN) -> schema.Task.admin_model:
+async def api_admin_task_get(task: CURR_TASK, user: CURR_ADMIN) -> Task.admin_model:
     return task
 
 
 @router.post("/task/{task_id}")
-async def api_admin_task_edit(new_task: schema.Task, task: CURR_TASK, user: CURR_ADMIN) -> schema.Task.admin_model:
+async def api_admin_task_edit(new_task: Task, task: CURR_TASK, user: CURR_ADMIN) -> Task.admin_model:
     task = await task.update_entry(new_task)  # TODO: remove bullshit.
     return task
 

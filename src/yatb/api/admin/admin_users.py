@@ -5,19 +5,19 @@ from typing import Annotated
 from fastapi import Depends, HTTPException, status
 from pydantic import BaseModel
 
-from yatb import schema
 from yatb.auth import CURR_ADMIN
 from yatb.db import UserDB
+from yatb.schema import User, UserID, auth
 
 from . import router
 
 
-async def api_admin_users_internal() -> Mapping[uuid.UUID, schema.User]:
+async def api_admin_users_internal() -> Mapping[UserID, User]:
     all_users = await UserDB.get_all()
     return all_users
 
 
-async def get_user(user_id: uuid.UUID) -> UserDB:
+async def get_user(user_id: UserID) -> UserDB:
     user = await UserDB.find_by_user_uuid(user_id)
     if not user:
         raise HTTPException(
@@ -36,12 +36,12 @@ class PasswordChangeForm(BaseModel):
 
 
 @router.get("/user/{user_id}")
-async def api_admin_user(admin: CURR_ADMIN, user: CURR_USER) -> schema.User.admin_model:
+async def api_admin_user(admin: CURR_ADMIN, user: CURR_USER) -> User.admin_model:
     return user
 
 
 @router.post("/user/{user_id}")
-async def api_admin_user_edit(new_user: schema.User, user_id: uuid.UUID, admin: CURR_ADMIN) -> schema.User.admin_model:
+async def api_admin_user_edit(new_user: User, user_id: uuid.UUID, admin: CURR_ADMIN) -> User.admin_model:
     # new_user = await db.update_user_admin(user_id, new_user)
     raise Exception
 
@@ -49,12 +49,12 @@ async def api_admin_user_edit(new_user: schema.User, user_id: uuid.UUID, admin: 
 
 
 @router.get("/users/me")
-async def api_admin_users_me(admin: CURR_ADMIN) -> schema.User.admin_model:
+async def api_admin_users_me(admin: CURR_ADMIN) -> User.admin_model:
     return admin
 
 
 @router.get("/users")
-async def api_admin_users(admin: CURR_ADMIN) -> Mapping[uuid.UUID, schema.User.admin_model]:
+async def api_admin_users(admin: CURR_ADMIN) -> Mapping[UserID, User.admin_model]:
     all_users = await api_admin_users_internal()
     return all_users
 
@@ -64,14 +64,14 @@ async def api_admin_user_edit_password(
     new_password: PasswordChangeForm,
     admin: CURR_ADMIN,
     user: CURR_USER,
-) -> schema.User.admin_model:
+) -> User.admin_model:
     au = user.auth_source
-    if not isinstance(au, schema.auth.SimpleAuth.AuthModel):
+    if not isinstance(au, auth.SimpleAuth.AuthModel):
         raise HTTPException(
             status_code=status.HTTP_400_BAD_REQUEST,
             detail="User is not login-passw sourced",
         )
-    au.password_hash = schema.auth.simple.hash_password(new_password.new_password)
+    au.password_hash = auth.simple.hash_password(new_password.new_password)
     return user
 
 
@@ -79,7 +79,7 @@ async def api_admin_user_edit_password(
 async def api_admin_user_recalc_score(
     admin: CURR_ADMIN,
     user: CURR_USER,
-) -> schema.User.admin_model:
+) -> User.admin_model:
     await user.recalc_score_one()
     return user
 

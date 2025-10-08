@@ -1,13 +1,12 @@
-import uuid
 from typing import Annotated
 
 from fastapi import Depends, HTTPException, status
 
-from yatb import auth
+from yatb import auth, schema
 from yatb.db import TaskDB
 
 
-async def get_task(task_id: uuid.UUID, user: auth.CURR_USER_SAFE) -> TaskDB:
+async def get_task(task_id: schema.TaskID, user: auth.CURR_USER_SAFE) -> TaskDB:
     task = await TaskDB.find_by_task_uuid(task_id)
     if not task or not task.visible_for_user(user):
         raise HTTPException(

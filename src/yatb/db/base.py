@@ -20,3 +20,5 @@ class DocumentEx[T: EBaseModelV2](Document):
     @staticmethod
     def sanitize_dict(d: dict[uuid.UUID, datetime.datetime]) -> dict[str, datetime.datetime]:
         return {str(i): v for i, v in d.items()}
+
+    async def update_entry(self, new: T) -> Self: ...

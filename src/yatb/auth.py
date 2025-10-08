@@ -75,7 +75,7 @@ async def get_current_user(token: Annotated[str, Depends(token_puller)]) -> User
     except JWTError as ex:
         raise credentials_exception from ex
 
-    user = await UserDB.find_by_user_uuid(uuid.UUID(user_id))
+    user = await UserDB.find_by_user_uuid(schema.UserID(uuid.UUID(user_id)))
     if user is None:
         raise credentials_exception
 

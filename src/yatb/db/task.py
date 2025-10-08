@@ -1,11 +1,10 @@
-import uuid
 from typing import ClassVar, Self
 
 import pymongo
 from beanie import BulkWriter
 from beanie.operators import Set
 
-from yatb.schema import FlagCheckResult, Task, TaskForm, User
+from yatb.schema import FlagCheckResult, Task, TaskForm, TaskID, User, UserID
 from yatb.utils.log_helper import get_logger
 
 from .base import DocumentEx
@@ -14,14 +13,12 @@ logger = get_logger("db.task")
 
 
 class TaskDB(DocumentEx[Task], Task):
-    # pwned_by: dict[Annotated[uuid.UUID, SER_UUID], datetime.datetime] = {}
-
-    async def update_entry(self, new_task: Task) -> Self:
-        logger.debug(f"Update task {self} to {new_task}")
+    async def update_entry(self, new: Task) -> Self:
+        logger.debug(f"Update task {self} to {new}")
 
         # WTF: концептуально, но не уверен, что можно лучше.
         self.update_entry_raw(
-            new_task.model_dump(
+            new.model_dump(
                 exclude={
                     "task_id",
                     "description_html",
@@ -48,11 +45,11 @@ class TaskDB(DocumentEx[Task], Task):
         return task
 
     @classmethod
-    async def find_by_task_uuid(cls: type[Self], task_id: uuid.UUID) -> Self | None:
+    async def find_by_task_uuid(cls: type[Self], task_id: TaskID) -> Self | None:
         return await cls.find_one(cls.task_id == task_id)
 
     @classmethod
-    async def get_all(cls: type[Self]) -> dict[uuid.UUID, Self]:
+    async def get_all(cls: type[Self]) -> dict[TaskID, Self]:
         return {i.task_id: i for i in await cls.find_all().to_list()}
 
     @classmethod

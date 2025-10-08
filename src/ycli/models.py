@@ -1,5 +1,4 @@
 import sys
-import uuid
 from collections.abc import AsyncGenerator, Sequence
 from contextlib import asynccontextmanager
 from enum import StrEnum
@@ -96,8 +95,8 @@ class FileTask(BaseModel):
     def get_form(
         self,
         *,
-        old_task_uuid: uuid.UUID | None = None,
-        req_tasks: Sequence[uuid.UUID] = [],
+        old_task_uuid: schema.TaskID | None = None,
+        req_tasks: Sequence[schema.TaskID] = [],
     ) -> schema.TaskForm:
         return schema.TaskForm(
             task_id=old_task_uuid,
@@ -113,23 +112,23 @@ class FileTask(BaseModel):
 
 
 class State(BaseModel):
-    task_to_uuid: dict[Path, uuid.UUID] = {}
+    task_to_uuid: dict[Path, schema.TaskID] = {}
     source_path: Path | None = None
 
-    def find_task_by_path(self, src: Path) -> uuid.UUID | None:
+    def find_task_by_path(self, src: Path) -> schema.TaskID | None:
         if not self.source_path:
             raise Exception
 
         path_in_config = src.relative_to(self.source_path)
         return self.task_to_uuid.get(path_in_config)
 
-    def set_task_uuid(self, src: Path, id: uuid.UUID) -> None:
+    def set_task_uuid(self, src: Path, id: schema.TaskID) -> None:
         if not self.source_path:
             raise Exception
 
         self.task_to_uuid[src.relative_to(self.source_path)] = id
 
-    def find_path_by_uuid(self, src: uuid.UUID) -> Path | None: ...
+    def find_path_by_uuid(self, src: schema.TaskID) -> Path | None: ...
 
     @classmethod
     @asynccontextmanager
@@ -145,5 +144,5 @@ class State(BaseModel):
             state_path.write_text(state.model_dump_json(indent=4))
 
 
-AllUsers = RootModel[dict[uuid.UUID, schema.User.admin_model]]
-AllTasks = RootModel[dict[uuid.UUID, schema.Task.admin_model]]
+AllUsers = RootModel[dict[schema.UserID, schema.User.admin_model]]
+AllTasks = RootModel[dict[schema.TaskID, schema.Task.admin_model]]

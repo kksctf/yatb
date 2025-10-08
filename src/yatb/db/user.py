@@ -1,5 +1,4 @@
 import datetime
-import uuid
 from collections.abc import Hashable, Iterable, Mapping, Sequence
 from typing import ClassVar, Literal, Self
 
@@ -10,7 +9,7 @@ from beanie.operators import Set
 from pydantic import BaseModel
 
 from yatb.config import settings
-from yatb.schema import Task, User, auth
+from yatb.schema import Task, TaskID, User, UserID, auth
 from yatb.utils.log_helper import get_logger
 
 from .base import DocumentEx
@@ -21,13 +20,13 @@ logger = get_logger("db.task")
 
 class UserDB(DocumentEx[User], User):
     class ScoreboardProjection(BaseModel):
-        user_id: uuid.UUID
+        user_id: UserID
         username: str
         score: int
-        solved_tasks: dict[uuid.UUID, datetime.datetime]
+        solved_tasks: dict[TaskID, datetime.datetime]
         is_admin: bool  # TODO: wtf with rights and fields
 
-        def get_last_solve_time(self) -> tuple[uuid.UUID, datetime.datetime] | tuple[Literal[""], datetime.datetime]:
+        def get_last_solve_time(self) -> tuple[TaskID, datetime.datetime] | tuple[Literal[""], datetime.datetime]:
             if len(self.solved_tasks) > 0:
                 return max(self.solved_tasks.items(), key=lambda x: x[1])
 
@@ -51,7 +50,7 @@ class UserDB(DocumentEx[User], User):
         return user
 
     @classmethod
-    async def find_by_user_uuid(cls: type[Self], user_id: uuid.UUID) -> Self | None:
+    async def find_by_user_uuid(cls: type[Self], user_id: UserID) -> Self | None:
         return await cls.find_one(cls.user_id == user_id)
 
     @classmethod
@@ -59,11 +58,11 @@ class UserDB(DocumentEx[User], User):
         return await cls.find_one(cls.username == username)
 
     @classmethod
-    async def get_all(cls: type[Self]) -> dict[uuid.UUID, Self]:
+    async def get_all(cls: type[Self]) -> dict[UserID, Self]:
         return {i.user_id: i for i in await cls.find_all().to_list()}
 
     @classmethod
-    async def get_all_projected[T: BaseModel](cls: type[Self], projection: type[T]) -> dict[uuid.UUID, T]:
+    async def get_all_projected[T: BaseModel](cls: type[Self], projection: type[T]) -> dict[UserID, T]:
         return {i.user_id: i for i in await cls.find_all().project(projection).to_list()}  # type: ignore # FIXME: fix.
 
     @classmethod
@@ -116,7 +115,7 @@ class UserDB(DocumentEx[User], User):
             await self.recalc_score(task_cache, bw=bw)
             logger.info(bw.operations)
 
-    async def recalc_score(self, _task_cache: Mapping[uuid.UUID, Task | None], bw: BulkWriter) -> None:
+    async def recalc_score(self, _task_cache: Mapping[TaskID, Task | None], bw: BulkWriter) -> None:
         # WTF: db_lock?
 
         old_score = self.score
@@ -140,14 +139,14 @@ class UserDB(DocumentEx[User], User):
             # update score, if it changed
             await self.update(Set({UserDB.score: self.score}), bulk_writer=bw)
 
-    async def solve_task_bw(self, task: TaskDB) -> uuid.UUID:
+    async def solve_task_bw(self, task: TaskDB) -> TaskID:
         async with BulkWriter() as bw:
             ret = await self.solve_task(task, bw=bw)
             logger.info(bw.operations)
 
         return ret
 
-    async def solve_task(self, task: TaskDB, bw: BulkWriter) -> uuid.UUID:
+    async def solve_task(self, task: TaskDB, bw: BulkWriter) -> TaskID:
         # if you admin - you can check flag parsing/task search, but do not affect scoreboard.
         if self.is_admin and not settings.DEBUG:
             return task.task_id

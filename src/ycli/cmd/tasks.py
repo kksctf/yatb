@@ -2,7 +2,6 @@ import io
 import subprocess
 from collections.abc import Sequence
 from pathlib import Path
-from uuid import UUID
 
 from pydantic_yaml import parse_yaml_raw_as
 
@@ -20,9 +19,9 @@ async def _upload_task(
     *,
     y: YATB,
     state: State,
-    tasks_cache: dict[UUID, Task],
+    tasks_cache: dict[TaskID, Task],
     task_src: Path,
-    req_tasks: Sequence[UUID] = [],
+    req_tasks: Sequence[TaskID] = [],
 ) -> Task | None:
     try:
         task_info: FileTask = parse_yaml_raw_as(FileTask, (task_src / "task.yaml").read_text())
@@ -77,7 +76,7 @@ async def _upload_task(
             path = f"{created_task.task_id}/deploy.tar.gz"
             hash_digest = await y.s3.upload_directory(
                 deploy_dir,
-                dtc_settings.TASKS_BUCKET_NAME,
+                s3_settings.TASKS_BUCKET_NAME,
                 path,
             )
             created_task.dti.service_info = (path, hash_digest)
@@ -89,7 +88,7 @@ async def _upload_task(
             path = f"{created_task.task_id}/dev.tar.gz"
             hash_digest = await y.s3.upload_directory(
                 dev_dir,
-                dtc_settings.TASKS_BUCKET_NAME,
+                s3_settings.TASKS_BUCKET_NAME,
                 path,
             )
             created_task.dti.builder_info = (path, hash_digest)
@@ -119,7 +118,7 @@ async def _upload_task(
             )
             await y.s3.upload_directory(
                 public_dir,
-                dtc_settings.STATIC_BUCKET_NAME,
+                s3_settings.STATIC_BUCKET_NAME,
                 f"{created_task.task_id}/{archive_name}",
                 ignore_cache=False,
             )
@@ -133,7 +132,7 @@ async def _upload_task(
                 )
                 with file.open("rb") as f:
                     await y.s3.put_object(
-                        dtc_settings.STATIC_BUCKET_NAME,
+                        s3_settings.STATIC_BUCKET_NAME,
                         f"{created_task.task_id}/{file.name}",
                         f,
                         length=file.stat().st_size,
@@ -141,7 +140,7 @@ async def _upload_task(
                 c.print(f"[+] '{created_task.task_name}': uploaded file {file}")
 
         await y.s3.put_object(
-            dtc_settings.STATIC_BUCKET_NAME,
+            s3_settings.STATIC_BUCKET_NAME,
             f"{created_task.task_id}/.sha256",
             io.BytesIO(files_hash),
             length=len(files_hash),
@@ -206,7 +205,7 @@ async def upload_tasks(
         if drop:
             await y.detele_everything()
 
-        tasks_cache: dict[UUID, Task] = await y.get_all_tasks()
+        tasks_cache: dict[TaskID, Task] = await y.get_all_tasks()
         c.print(f"Running in live mode, found {len(tasks_cache)} tasks")
 
         for category_src in main_tasks_dir.iterdir():
@@ -227,53 +226,6 @@ async def upload_tasks(
                         task_src=task_src,
                         req_tasks=[],
                     )
-                except Exception as ex:
-                    c.print(f"Got error {ex = } uploading {task_src = }")
-                    raise
-
-
-@app.command()
-async def test_paths(
-    main_tasks_dir: Path,
-    *,
-    drop: bool = False,
-    sanity_check: Path = Path("misc/sanity"),
-    # live: bool = True,
-    state_path: Path = Path() / "yatb_state.json",
-):
-    main_tasks_dir = main_tasks_dir.expanduser().resolve()
-
-    async with State.get(state_path, main_tasks_dir) as state, YATB() as y:
-        task_to_uuid_copy: dict[Path, UUID] | None = None
-
-        y.set_admin_token()
-
-        tasks_cache: dict[UUID, Task] = await y.get_all_tasks()
-        c.print(f"Running in live mode, found {len(tasks_cache)} tasks")
-
-        sanity_check_path = main_tasks_dir / sanity_check
-        if not sanity_check_path.exists():
-            c.print("Sanity check don't exists")
-            return
-
-        for category_src in main_tasks_dir.iterdir():
-            if not category_src.is_dir():
-                continue
-
-            for task_src in category_src.iterdir():
-                if not task_src.is_dir():
-                    continue
-
-                if not (task_src / "task.yaml").exists():
-                    continue
-
-                if task_src == sanity_check_path:
-                    continue
-
-                c.print(f"{task_src.relative_to(main_tasks_dir) = }")
-
-                try:
-                    pass
                 except Exception as ex:
                     c.print(f"Got error {ex = } uploading {task_src = }")
                     raise

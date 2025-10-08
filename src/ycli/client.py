@@ -62,11 +62,11 @@ class YATB:
     async def get_self(self) -> schema.User:
         return schema.User.public_model.model_validate((await self.s.get(app.url_path_for("api_users_me"))).json())
 
-    async def get_all_tasks(self) -> dict[uuid.UUID, schema.Task]:
+    async def get_all_tasks(self) -> dict[schema.TaskID, schema.Task]:
         resp = AllTasks.model_validate((await self.s.get(app.url_path_for("api_admin_tasks"))).json())
         return resp.root
 
-    async def get_all_users(self) -> dict[uuid.UUID, schema.User]:
+    async def get_all_users(self) -> dict[schema.UserID, schema.User]:
         resp = AllUsers.model_validate((await self.s.get(app.url_path_for("api_admin_users"))).json())
         return resp.root
 

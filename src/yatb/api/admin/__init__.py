@@ -14,11 +14,6 @@ router = APIRouter(
     tags=["admin"],
 )
 
-# @router.get("/save_db")
-# async def save_db(user: CURR_ADMIN):
-#     await db.shutdown_event()
-#     logger.warning(f"DB saved by {user.short_desc()}")
-
 
 @router.delete("/db_users")
 async def api_detele_everything_but_tasks(admin: CURR_ADMIN) -> None:
@@ -50,6 +45,7 @@ async def api_detele_everything(admin: CURR_ADMIN, *, force: bool = False) -> No
     for user in (await UserDB.get_all()).values():
         if user.is_admin:
             continue
+
         if len(user.solved_tasks) and not force:
             continue
 

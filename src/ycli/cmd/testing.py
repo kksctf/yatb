@@ -57,4 +57,6 @@ async def testing_tasks():
     async with YATB() as y:
         for task in tasks_to_create:
             new_task = await y.create_task(task.get_form())
+            new_task.hidden = False
+            new_task = await y.update_task(new_task)
             c.log(f"Task created: {new_task = }")

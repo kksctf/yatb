@@ -1,5 +1,5 @@
 from collections.abc import Mapping
-from typing import Any
+from typing import Annotated, Any
 
 from fastapi import (
     Request,
@@ -9,7 +9,7 @@ from fastapi.routing import APIRouter
 from fastui import AnyComponent, FastUI, prebuilt_html
 from fastui import components as c
 from fastui.components.display import DisplayLookup
-from fastui.events import BackEvent, GoToEvent
+from fastui.events import BackEvent, GoToEvent, PageEvent
 from fastui.forms import SelectSearchResponse, Textarea, fastui_form
 from pydantic import BaseModel, Field, field_validator
 
@@ -20,6 +20,7 @@ from yatb.auth import CURR_ADMIN
 from yatb.utils.log_helper import get_logger
 
 c.Link.model_rebuild()
+c.ModelForm.model_rebuild()
 
 logger = get_logger("view")
 
@@ -45,6 +46,10 @@ def base_page(req: Request, *components: AnyComponent, title: str | None = None)
             title="YATB Admin",
             title_event=GoToEvent(url=url_gen(req, "")),
             start_links=[
+                c.Link(
+                    components=[c.Text(text="Back to board")],
+                    on_click=GoToEvent(url=str(req.url_for("index"))),
+                ),
                 c.Link(
                     components=[c.Text(text="Tasks")],
                     on_click=GoToEvent(url=url_gen(req, "tasks")),
@@ -121,7 +126,7 @@ async def admin_ng_task(req: Request, admin: CURR_ADMIN, raw_task: api_admin_tas
 
 @api_rotuer.get("/users", response_model=FastUI, response_model_exclude_none=True)
 async def admin_ng_users(req: Request, admin: CURR_ADMIN) -> list[AnyComponent]:
-    users = await api_admin_users.api_admin_users(admin)
+    users: Mapping[schema.UserID, schema.User] = await api_admin_users.api_admin_users(admin)
 
     return base_page(
         req,

@@ -59,5 +59,6 @@ git-back dst src="improvements":
     git stash push -a -u -m "just-fast-switch"
     git checkout "{{ dst }}"
     git merge "{{ src }}"
-    git stash apply "stash@{0}"
+    git stash pop "stash@{1}"
+    git stash pop "stash@{0}"
     @echo "Ready to commit"

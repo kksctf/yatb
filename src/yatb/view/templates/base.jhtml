@@ -17,7 +17,7 @@
         })();
     </script>
     <link rel="stylesheet" href="{{ url_for('static', path='layout.css') }}">
-    <link rel="stylesheet" href="{{ url_for('static', path='style.css') }}">
+    {# <link rel="stylesheet" href="{{ url_for('static', path='style.css') }}"> #}
     <!-- Bulma & HTMX from CDNs -->
     <link rel="stylesheet" href="https://cdn.jsdelivr.net/npm/bulma@1.0.1/css/bulma.min.css">
     <script src="https://cdn.jsdelivr.net/npm/bulma-toast@2.4.2/dist/bulma-toast.min.js"></script>
@@ -66,11 +66,11 @@
                 </form>
                 <a class="navbar-item" href="{{ url_for('profile_page') }}">{{ curr_user.username }}</a>
                 {% if curr_user.is_admin %}
-                <a class="navbar-item" href="{{ url_for('admin_index') }}">Admin area</a>
+                <a class="navbar-item" href="{{ url_for('admin_ng_html_landing', paht='') }}">{{ _("Admin area", request) }}</a>
                 <!-- before_start = {{ EVENT_START_TIME - NOW() }}, before_end = {{ EVENT_END_TIME - NOW() }} -->
                 {% endif %}
                 <a class="navbar-item" href="{{ url_for('api_users_logout') }}">
-                    {{ _("Logout", request)}}
+                    {{ _("Logout", request) }}
                 </a>
                 {% else %}
                 <a class="navbar-item" href="{{ url_for('login_page') }}">{{ _("Login", request) }}</a>
@@ -91,7 +91,7 @@
 
     {% if curr_user %}
     <script>
-        const evt = new EventSource("/events");
+        // const evt = new EventSource("/events");
         evt.addEventListener("toast", (e) => {
             const msg = JSON.parse(e.data);
             bulmaToast.toast({

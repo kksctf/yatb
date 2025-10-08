@@ -1,3 +1,6 @@
+from collections.abc import Mapping
+from typing import Any
+
 from fastapi import (
     Request,
 )
@@ -7,13 +10,14 @@ from fastui import AnyComponent, FastUI, prebuilt_html
 from fastui import components as c
 from fastui.components.display import DisplayLookup
 from fastui.events import BackEvent, GoToEvent
+from fastui.forms import SelectSearchResponse, Textarea, fastui_form
+from pydantic import BaseModel, Field, field_validator
 
-from ... import schema
-from ...api.admin import CURR_ADMIN
-from ...api.admin import admin_tasks as api_admin_tasks
-from ...api.admin import admin_users as api_admin_users
-from ...auth import CURR_ADMIN
-from ...utils.log_helper import get_logger
+from yatb import schema
+from yatb.api.admin import admin_tasks as api_admin_tasks
+from yatb.api.admin import admin_users as api_admin_users
+from yatb.auth import CURR_ADMIN
+from yatb.utils.log_helper import get_logger
 
 c.Link.model_rebuild()
 
@@ -159,4 +163,4 @@ async def admin_ng_user(req: Request, admin: CURR_ADMIN, raw_user: api_admin_use
 
 @base_router.get("/{path:path}")
 async def admin_ng_html_landing() -> HTMLResponse:
-    return HTMLResponse(prebuilt_html(title="YATB admin.."))
+    return HTMLResponse(prebuilt_html(title="YATB NG admin"))

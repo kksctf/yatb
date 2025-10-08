@@ -50,13 +50,13 @@ reset-rights-x:
 # git cringe workflow
 
 git-main branch="improvements":
-    git stash push -a -u -m "just-fast-switch"
+    git stash push -a -u -m "just-fast-switch-to-main"
     git checkout "{{ branch }}"
     git stash apply "stash@{0}"
     @echo "Ready to commit"
 
 git-back dst src="improvements":
-    git stash push -a -u -m "just-fast-switch"
+    git stash push -a -u -m "just-fast-switch-to-back"
     git checkout "{{ dst }}"
     git merge "{{ src }}"
     git stash pop "stash@{1}"

@@ -27,8 +27,18 @@ services:
       FERRETDB_HANDLER: "sqlite"
       FERRETDB_TELEMETRY: "disable"
     volumes:
-      - ./state:/state
+      - ./state/db:/state
     restart: unless-stopped
+
+  garage:
+    build:
+      context: ./contrib/docker/garage
+    expose:
+      - 9000
+    volumes:
+      - ./contrib/docker/garage/garage.toml:/etc/garage.toml:ro
+      - ./state/static:/var/lib/garage
+      - ./state/garage_shared:/garage_shared
 
   caddy:
     image: caddy:2.10.2-alpine

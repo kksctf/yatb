@@ -1,0 +1,42 @@
+replication_factor = 1
+consistency_mode = "consistent"
+
+metadata_dir = "/var/lib/garage/meta"
+data_dir = "/var/lib/garage/data"
+
+# т.к. у нас одна нода без серьезной нагрузки, сознательно берем вместо lmdb - sqlite
+# нет минусов с портабельностью и вообще sqlite - better than handmade db
+db_engine = "sqlite"
+
+# посмотрим. будет тормозить - уберем)0
+# не будет тормозить - поднимем. Хотя бы нули будем сжимать так.
+compression_level = 3
+
+# openssl rand -hex 32
+# useless, one node
+rpc_secret = "6b428b20be3b06f01569c50e51545d59704b8004557c8f819fd441b06341cb94"
+
+rpc_bind_addr = "[::1]:3901"
+rpc_public_addr = "[::1]:3901"
+
+bootstrap_peers = []
+allow_world_readable_secrets = false # idk
+allow_punycode = false
+
+[s3_api]
+s3_region = "garage" # yay fire in random places))0
+api_bind_addr = "[::]:3900"
+root_domain = "localhost"
+
+
+# [s3_web]
+# bind_addr = "[::]:3902"
+# root_domain = "localhost"
+# index = "index.html"
+
+# [k2v_api]
+# api_bind_addr = "[::]:3904"
+
+# [admin]
+# api_bind_addr = "0.0.0.0:3903"
+# admin_token = "472070e320469b2f048f77dcad4149e0c608ef01ecf0ac863c416287a1127a9e"

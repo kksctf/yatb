@@ -1,0 +1,4 @@
+state
+logs
+*.env
+.ruff_cache

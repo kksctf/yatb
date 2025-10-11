@@ -9,7 +9,7 @@ RUN --mount=type=cache,target=/root/.cache/uv \
     --mount=type=bind,source=pyproject.toml,target=pyproject.toml \
     uv sync --locked --no-install-project --no-editable --extra prod
 
-ADD LICENSE README.md /app
+ADD LICENSE README.md /app/
 ADD src /app/src
 
 RUN --mount=type=cache,target=/root/.cache/uv \
@@ -23,4 +23,4 @@ FROM python:3.12-slim
 COPY --from=builder --chown=app:app /app/.venv /app/.venv
 
 ENTRYPOINT ["/app/.venv/bin/python3", "-m", "gunicorn", "yatb.app:app", "--worker-class=uvicorn.workers.UvicornWorker"]
-CMD ["--workers=1", "--log-level=warning", "--bind=0.0.0.0:80"]
+CMD ["--workers=1", "--log-level=warning", "--bind=0.0.0.0:80", "--forwarded-allow-ips=*"]

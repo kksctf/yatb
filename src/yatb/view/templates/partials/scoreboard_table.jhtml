@@ -8,7 +8,7 @@
   <th>{{ _("Score", request) }}</th>
   {% for task in all_tasks | sort(attribute='category') | sort(attribute='scoring.points') %}
     <th class="sb-rot-th">
-      <a class="sb-rot" href="/tasks/{{ task.task_id }}"><span>{{ task.points }} | {{ task.task_name }}</span></a>
+      <a class="sb-rot" href="{{ url_for('one_task_page', task_id=task.task_id) }}"><span>{{ task.points }} | {{ task.task_name }}</span></a>
     </th>
   {% endfor %}
 </tr>
@@ -29,7 +29,7 @@
           {% set tooltip = tooltip ~ ' | ' ~ template_format_time(user.solved_tasks[task.task_id]) %}
         {% endif %}
 
-        <a href="/tasks/{{ task.task_id }}" class="sb-link">
+        <a href="{{ url_for('one_task_page', task_id=task.task_id) }}" class="sb-link">
           <div class="sb-indicator
                       {% if task.task_id in user.solved_tasks %}
                           {% if user.user_id == task.first_pwned_str()[0] %}

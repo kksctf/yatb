@@ -236,6 +236,6 @@ async def login_page(req: Request, user: auth.CURR_USER_SAFE) -> HTMLResponse:
         "login.jhtml",
         {
             "curr_user": user,
-            "auth_ways": schema.auth.ENABLED_AUTH_WAYS,
+            "auth_ways": [i for i in schema.auth.ENABLED_AUTH_WAYS if not i.FAKE],
         },
     )

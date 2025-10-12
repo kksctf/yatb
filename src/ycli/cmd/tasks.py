@@ -3,8 +3,6 @@ import subprocess
 from collections.abc import Sequence
 from pathlib import Path
 
-from pydantic_yaml import parse_yaml_raw_as
-
 from dtc.connectors.compose import load_compose
 from s3_srv.config import settings as s3_settings
 from yatb.schema import DynamicTaskFeatures, Task, TaskID
@@ -24,7 +22,7 @@ async def _upload_task(
     req_tasks: Sequence[TaskID] = [],
 ) -> Task | None:
     try:
-        task_info: FileTask = parse_yaml_raw_as(FileTask, (task_src / "task.yaml").read_text())
+        task_info: FileTask = FileTask.load_yaml(task_src / "task.yaml")
     except Exception as ex:
         c.print(f"ERROR!!! {task_src = } has bad yaml: {ex!r}")
         return
@@ -33,26 +31,18 @@ async def _upload_task(
     # если таска нет в локальном стейте (значит мы его ещё не заливали - а если и заливали, то никак не сможем его найти)
     # ИЛИ
     # таска нет на проде
-    if not (task_id := state.find_task_by_path(task_src)) or task_id not in tasks_cache:
-        # если таск есть в локальном стейте, но отсутствует на проде
-        # значит мы удалили его оттуда
-        # значит надо перезалить с тем же юидом
-        if task_id and task_id not in tasks_cache:  # noqa: SIM108
-            old_task_uuid = task_id
-        else:
-            old_task_uuid = None
-
+    if not (task_id := task_info.id) or task_id not in tasks_cache:
         created_task = await y.create_task_full_form(
-            task_info.get_form(
-                old_task_uuid=old_task_uuid,
-                req_tasks=req_tasks,
-            ),
+            task_info.get_form(req_tasks=req_tasks),
         )
         tasks_cache[created_task.task_id] = created_task
-        state.set_task_uuid(task_src, created_task.task_id)
+
+        task_info.id = created_task.task_id
+        task_info.save_yaml_to_file()
+
         c.print(f"Created task: {created_task}\n")
 
-    created_task = tasks_cache[state.find_task_by_path(task_src)]  # type: ignore # TODO: handle properly
+    created_task = tasks_cache[task_info.id]
     c.print(f"Found task: {created_task.task_name!r}")
 
     created_task.task_name = task_info.name
@@ -155,6 +145,9 @@ async def _upload_task(
         created_task.description = created_task.description.strip() + "</div>"
 
     created_task = await y.update_task(task=created_task)
+
+    task_info.save_yaml_to_file()
+
     c.print(f"Updated task: {created_task.task_name!r}")
     return created_task
 
@@ -189,6 +182,37 @@ async def _upload_task(
 #         )
 
 
+async def sync_tasks(
+    y: YATB,
+    state: State,
+    main_tasks_dir: Path,
+):
+    tasks_cache: dict[TaskID, Task] = await y.get_all_tasks()
+    c.print(f"Running in live mode, found {len(tasks_cache)} tasks")
+
+    for category_src in main_tasks_dir.iterdir():
+        if not category_src.is_dir():
+            continue
+
+        for task_src in category_src.iterdir():
+            if not task_src.is_dir():
+                continue
+
+            if not (task_src / "task.yaml").exists():
+                continue
+            try:
+                await _upload_task(
+                    y=y,
+                    state=state,
+                    tasks_cache=tasks_cache,
+                    task_src=task_src,
+                    req_tasks=[],
+                )
+            except Exception as ex:
+                c.print(f"Got error {ex = } uploading {task_src = }")
+                raise
+
+
 @app.command()
 async def upload_tasks(
     main_tasks_dir: Path,
@@ -204,28 +228,3 @@ async def upload_tasks(
 
         if drop:
             await y.detele_everything()
-
-        tasks_cache: dict[TaskID, Task] = await y.get_all_tasks()
-        c.print(f"Running in live mode, found {len(tasks_cache)} tasks")
-
-        for category_src in main_tasks_dir.iterdir():
-            if not category_src.is_dir():
-                continue
-
-            for task_src in category_src.iterdir():
-                if not task_src.is_dir():
-                    continue
-
-                if not (task_src / "task.yaml").exists():
-                    continue
-                try:
-                    await _upload_task(
-                        y=y,
-                        state=state,
-                        tasks_cache=tasks_cache,
-                        task_src=task_src,
-                        req_tasks=[],
-                    )
-                except Exception as ex:
-                    c.print(f"Got error {ex = } uploading {task_src = }")
-                    raise

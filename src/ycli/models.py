@@ -9,6 +9,8 @@ from pydantic import BaseModel, RootModel
 from yatb import schema
 from yatb.config import settings as yatb_settings
 
+from .yaml import YAMLModel
+
 
 class DynamicTaskFeatures(StrEnum):
     SERVICE = "service"
@@ -32,7 +34,9 @@ if len(DynamicTaskFeatures) != len(schema.DynamicTaskFeatures):
     raise Exception(f"{len(DynamicTaskFeatures) = } { len(schema.DynamicTaskFeatures) = } ???")  # noqa: TRY002
 
 
-class FileTask(BaseModel):
+class FileTask(YAMLModel):
+    id: schema.TaskID | None = None
+
     name: str
     description: str
 
@@ -94,11 +98,10 @@ class FileTask(BaseModel):
     def get_form(
         self,
         *,
-        old_task_uuid: schema.TaskID | None = None,
         req_tasks: Sequence[schema.TaskID] = [],
     ) -> schema.TaskForm:
         return schema.TaskForm(
-            task_id=old_task_uuid,
+            task_id=self.id,
             task_name=self.name,
             category=self.category,
             scoring=self.get_scoring(),
@@ -115,6 +118,8 @@ class State(BaseModel):
     source_path: Path | None = None
 
     def find_task_by_path(self, src: Path) -> schema.TaskID | None:
+        raise Exception
+
         if not self.source_path:
             raise Exception
 
@@ -122,6 +127,8 @@ class State(BaseModel):
         return self.task_to_uuid.get(path_in_config)
 
     def set_task_uuid(self, src: Path, id: schema.TaskID) -> None:
+        raise Exception
+
         if not self.source_path:
             raise Exception
 

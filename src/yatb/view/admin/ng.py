@@ -9,8 +9,8 @@ from fastapi.routing import APIRouter
 from fastui import AnyComponent, FastUI, prebuilt_html
 from fastui import components as c
 from fastui.components.display import DisplayLookup
-from fastui.events import BackEvent, GoToEvent, PageEvent
-from fastui.forms import SelectSearchResponse, Textarea, fastui_form
+from fastui.events import BackEvent, GoToEvent
+from fastui.forms import SelectSearchResponse, fastui_form
 from pydantic import BaseModel, Field, field_validator
 
 from yatb import schema

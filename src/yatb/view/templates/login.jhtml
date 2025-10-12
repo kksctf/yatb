@@ -37,7 +37,7 @@
     {% endif %}
     {# ───────────────  debug helpers (optional)  ─────────────── #}
     {% if DEBUG %}
-      <details class="box my-4">
+      <details class="box my-4" open>
         <summary class="has-text-weight-semibold">Debug helpers</summary>
 
         <div class="mt-3">

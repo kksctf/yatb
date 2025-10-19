@@ -96,11 +96,11 @@ async def get_current_user_or_redirect_login(request: Request) -> UserDB | None:
     user = None
     try:
         user = await get_current_user(await token_puller(request))
-    except HTTPException:
+    except HTTPException as ex:
         raise HTTPException(
             status_code=status.HTTP_302_FOUND,
-            headers={"Location": "/login"},
-        )
+            headers={"Location": str(request.url_for("login_page"))},
+        ) from ex
 
     return user
 

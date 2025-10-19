@@ -53,6 +53,8 @@ class FileTask(YAMLModel):
 
     hidden: bool = True
 
+    dynamic_scoring_decay: int = 50
+
     @property
     def full_features(self) -> schema.DynamicTaskFeatures:
         ret: schema.DynamicTaskFeatures = schema.DynamicTaskFeatures.NONE
@@ -89,7 +91,9 @@ class FileTask(YAMLModel):
 
     def get_scoring(self) -> schema.ScoringUnion:
         if self.dynamic_scoring:
-            return schema.DynamicKKSScoring()
+            return schema.DynamicKKSScoring(
+                decay=self.dynamic_scoring_decay,
+            )
         return schema.StaticScoring(static_points=50)
 
     def get_description(self) -> str:

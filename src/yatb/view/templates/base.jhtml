@@ -23,6 +23,7 @@
     <script src="https://cdn.jsdelivr.net/npm/bulma-toast@2.4.2/dist/bulma-toast.min.js"></script>
     <script src="https://unpkg.com/htmx.org@2.0.4"></script>
     <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/7.0.0/css/all.min.css" integrity="sha512-DxV+EoADOkOygM4IR9yXP8Sb2qwgidEmeqAEmDKIOfPRQZOWbXCzLC6vjbZyy0vPisbH2SyW27+ddLVCN+OMzQ==" crossorigin="anonymous" referrerpolicy="no-referrer" />
+    <link rel="icon" type="image/png" href="{{ url_for('static', path='kksctf_logo_32.png') }}" />
     {# optional per-page extra tags #}
     {% block extra_head %}{% endblock %}
 </head>
@@ -92,7 +93,7 @@
     {% if curr_user %}
     <script>
         // const evt = new EventSource("/events");
-        evt.addEventListener("toast", (e) => {
+        /* evt.addEventListener("toast", (e) => {
             const msg = JSON.parse(e.data);
             bulmaToast.toast({
                 message: msg.text,
@@ -101,7 +102,7 @@
                 dismissible: true,
                 duration: 5000,
             });
-        });
+        }); */
     </script>
     {% endif %}
     <script>

@@ -58,7 +58,7 @@ def generic_handler_generator(cls: type[schema.auth.AuthBase]) -> Callable:
             # if users exists: check and promote to admin. conceptual shit.
             logger.warning(f"Promoting old {user} to admin")
             user.is_admin = True
-            await user.save()  # type: ignore # great library
+            await user.save()
 
         metrics.logons_per_user.labels(user_id=user.user_id, username=user.username).inc()
 

@@ -142,7 +142,7 @@ class UserDB(DocumentEx[User], User):
     async def solve_task_bw(self, task: TaskDB) -> TaskID:
         async with BulkWriter() as bw:
             ret = await self.solve_task(task, bw=bw)
-            logger.info(bw.operations)
+            # logger.info(bw.operations)
 
         return ret
 

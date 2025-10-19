@@ -130,6 +130,11 @@ class TelegramAuth(AuthBase):
         ADMIN_USERNAMES: list[str] = []
         ADMIN_UIDS: list[int] = []
 
+        @field_validator("ADMIN_USERNAMES", mode="after")
+        @classmethod
+        def fix_admin_usernames(cls: type[Self], usernames: list[str]) -> list[str]:
+            return [username.lower() for username in usernames]
+
         model_config = SettingsConfigDict(
             AuthBase.AuthSettings.model_config,
             env_prefix="AUTH_TG_",

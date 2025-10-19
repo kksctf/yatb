@@ -37,8 +37,15 @@
                 </figure>
                 {{ CTF_NAME }}
             </a>
+
+            <a role="button" class="navbar-burger" aria-label="menu" aria-expanded="false" data-target="yatbNavbar">
+                <span aria-hidden="true"></span>
+                <span aria-hidden="true"></span>
+                <span aria-hidden="true"></span>
+                <span aria-hidden="true"></span>
+            </a>
         </div>
-        <div class="navbar-menu">
+        <div id="yatbNavbar" class="navbar-menu">
             <div class="navbar-start">
                 <a class="navbar-item" href="{{ url_for('tasks_page') }}">{{ _("Challenges", request) }}</a>
                 <a class="navbar-item" href="{{ url_for('scoreboard_page') }}">{{ _("Scoreboard", request) }}</a>
@@ -127,6 +134,14 @@
                     root.dataset.theme = next;
                     try { localStorage.setItem('theme', next); } catch (_) { /* ignore */ }
                     applyIcon(next);
+                });
+
+                var burger = document.querySelector('.navbar-burger');
+                var menu = document.getElementById(burger.dataset.target);
+
+                burger.addEventListener('click', function () {
+                    burger.classList.toggle('is-active');
+                    menu.classList.toggle('is-active');
                 });
             });
         })();

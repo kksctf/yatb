@@ -127,15 +127,13 @@ async def admin_ng_task(req: Request, admin: CURR_ADMIN, raw_task: api_admin_tas
 @api_rotuer.get("/users", response_model=FastUI, response_model_exclude_none=True)
 async def admin_ng_users(req: Request, admin: CURR_ADMIN) -> list[AnyComponent]:
     users: Mapping[schema.UserID, schema.User] = await api_admin_users.api_admin_users(admin)
+    sorted_users = sorted(users.items(), key=lambda iv: iv[1].username)
+    sorted_users = sorted(sorted_users, key=lambda iv: iv[1].is_admin)
 
     return base_page(
         req,
-        # c.ModelForm(submit_url="", model=schema.TaskForm),
         c.Table(
-            data=[
-                schema.User.admin_model.model_validate(v.model_dump())
-                for i, v in sorted(users.items(), key=lambda iv: iv[1].username)
-            ],
+            data=[schema.User.admin_model.model_validate(v.model_dump()) for i, v in sorted_users],
             data_model=schema.User.admin_model,
             columns=[
                 DisplayLookup(field="username", title="Name", on_click=GoToEvent(url=url_gen(req, "user/{user_id}"))),
@@ -146,6 +144,37 @@ async def admin_ng_users(req: Request, admin: CURR_ADMIN) -> list[AnyComponent]:
         ),
         title="Users",
     )
+
+
+@api_rotuer.get("/user/search")
+async def users_search(
+    request: Request,
+    admin: CURR_ADMIN,
+    q: str,
+    *,
+    show_admin: bool = False,
+) -> SelectSearchResponse:
+    users: Mapping[schema.UserID, schema.User] = await api_admin_users.api_admin_users(admin)
+
+    ret = []
+
+    q = q.lower()
+
+    for user in users.values():
+        if q not in user.username.lower():
+            continue
+
+        if not show_admin and user.is_admin:
+            continue
+
+        ret.append(
+            {
+                "value": f"{user.user_id}",
+                "label": user.username,
+            },
+        )
+
+    return SelectSearchResponse(options=ret)
 
 
 @api_rotuer.get("/user/{user_id}", response_model=FastUI, response_model_exclude_none=True)

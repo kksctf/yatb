@@ -3,7 +3,7 @@
   This <tr> will be swapped out-of-band into #scoreboard-head by htmx.
  #}
 <tr id="scoreboard-head" class="sb-tasks-head" hx-swap-oob="innerHTML:#scoreboard-head">
-  <th></th>
+  <th>{{ _("Position", request) }}</th>
   <th>{{ _("User", request) }}</th>
   <th>{{ _("Score", request) }}</th>
   {% for task in all_tasks | sort(attribute='category') | sort(attribute='scoring.points') %}
@@ -47,6 +47,7 @@
 
             {% if task.task_id in user.solved_tasks %}
               <i class="fa-solid fa-check"></i>
+              <span class="visually-hidden">+</span>
 
               {% if user.user_id == task.first_pwned_str()[0] %}
                 <i class="fa-solid fa-droplet sb-star"></i>

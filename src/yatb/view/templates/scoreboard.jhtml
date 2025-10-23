@@ -67,14 +67,7 @@
 <table id="scoreboard-table" class="table is-fullwidth">
   <thead>
     <tr id="scoreboard-head" class="sb-tasks-head">
-      <th></th>
-      <th>{{ _("User", request) }}</th>
-      <th>{{ _("Score", request) }}</th>
-      {% for task in all_tasks | sort(attribute='category') | sort(attribute='scoring.points') %}
-        <th class="sb-rot-th">
-          <a class="sb-rot" href="/tasks/{{ task.task_id }}"><span>{{ task.points }} | {{ task.task_name }}</span></a>
-        </th>
-      {% endfor %}
+    {# to be filled by partial scoreboard load #}
     </tr>
   </thead>
 

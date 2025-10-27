@@ -1,3 +1,30 @@
+{%- macro scoreboard_indicator_classes(user, task, last_task_id) -%}
+  {%- set classes = ['sb-indicator'] -%}
+  {%- if task.task_id in user.solved_tasks -%}
+    {%- if user.user_id == task.first_pwned_str()[0] -%}
+      {%- set classes = classes + ['sb-solved-first'] -%}
+    {%- elif task.task_id == last_task_id -%}
+      {%- set classes = classes + ['sb-solved-last'] -%}
+    {%- else -%}
+      {%- set classes = classes + ['sb-solved'] -%}
+    {%- endif -%}
+  {%- else -%}
+    {%- set classes = classes + ['sb-unsolved'] -%}
+  {%- endif -%}
+  {{- classes | join(' ') -}}
+{%- endmacro -%}
+
+{%- set unsolved_tooltip = _("Task is not solved yet", request) -%}
+
+{%- macro scoreboard_tooltip(user, task, unsolved_text) -%}
+  {%- set base = task.scoring.points ~ ' | ' ~ task.task_name -%}
+  {%- if task.task_id in user.solved_tasks -%}
+    {{ base ~ ' | ' ~ template_format_time(user.solved_tasks[task.task_id]) }}
+  {%- else -%}
+    {{ base ~ ' | ' ~ unsolved_text }}
+  {%- endif -%}
+{%- endmacro -%}
+
 {#
   Also update the header order when the body refreshes.
   This <tr> will be swapped out-of-band into #scoreboard-head by htmx.
@@ -6,61 +33,45 @@
   <th>{{ _("Position", request) }}</th>
   <th>{{ _("User", request) }}</th>
   <th>{{ _("Score", request) }}</th>
-  {% for task in all_tasks | sort(attribute='category') | sort(attribute='scoring.points') %}
-    <th class="sb-rot-th">
-      <a class="sb-rot" href="{{ url_for('one_task_page', task_id=task.task_id) }}"><span>{{ task.points }} | {{ task.task_name }}</span></a>
-    </th>
-  {% endfor %}
+  {%- for task in all_tasks | sort(attribute='category') | sort(attribute='scoring.points') -%}
+  <th class="sb-rot-th">
+    <a class="sb-rot" href="{{ url_for('one_task_page', task_id=task.task_id) }}"><span>{{ task.points }} | {{ task.task_name }}</span></a>
+  </th>
+  {%- endfor -%}
 </tr>
 
-{% for pos, user in enumerate(scoreboard, start=1) %}
+{%- for pos, user in enumerate(scoreboard, start=1) -%}
   {# build lookup helpers once per user #}
-  {% set last_task_id, last_time = user.get_last_solve_time() if user.solved_tasks else (None, None) %}
+  {%- set last_task_id, last_time = user.get_last_solve_time() if user.solved_tasks else (None, None) -%}
   <tr>
     <th>{{ pos }}</th>
     <td>{{ user.username }}</td>
     <td>{{ user.score }}</td>
 
-    {% for task in all_tasks | sort(attribute='category') | sort(attribute='scoring.points') %}
+    {%- for task in all_tasks | sort(attribute='category') | sort(attribute='scoring.points') -%}
     <td class="p-0">
       <div class="is-justify-content-center">
-        {% set tooltip = task.scoring.points ~ ' | ' ~ task.task_name %}
-        {% if task.task_id in user.solved_tasks %}
-          {% set tooltip = tooltip ~ ' | ' ~ template_format_time(user.solved_tasks[task.task_id]) %}
-        {% endif %}
+        {%- set tooltip = scoreboard_tooltip(user, task, unsolved_tooltip) -%}
 
         <a href="{{ url_for('one_task_page', task_id=task.task_id) }}" class="sb-link">
-          <div class="sb-indicator
-                      {% if task.task_id in user.solved_tasks %}
-                          {% if user.user_id == task.first_pwned_str()[0] %}
-                            sb-solved-first
-                          {% elif task.task_id == last_task_id %}
-                            sb-solved-last
-                          {% else %}
-                            sb-solved
-                          {% endif %}
-                      {% else %}
-                          sb-unsolved
-                      {% endif %}"
-                title="{{ tooltip }}"
-                style="position:relative;">
+          <div class="{{ scoreboard_indicator_classes(user, task, last_task_id) }}" title="{{ tooltip }}">
 
-            {% if task.task_id in user.solved_tasks %}
+            {%- if task.task_id in user.solved_tasks -%}
               <i class="fa-solid fa-check"></i>
               <span class="visually-hidden">+</span>
 
-              {% if user.user_id == task.first_pwned_str()[0] %}
+              {%- if user.user_id == task.first_pwned_str()[0] -%}
                 <i class="fa-solid fa-droplet sb-star"></i>
-              {% elif task.task_id == last_task_id %}
+              {%- elif task.task_id == last_task_id -%}
                 <i class="fa-solid fa-forward sb-last-dot"></i>
-              {% endif %}
-            {% else %}
+              {%- endif -%}
+            {%- else -%}
               <i class="fa-solid fa-xmark"></i>
-            {% endif %}
+            {%- endif -%}
           </div>
         </a>
       </div>
     </td>
-    {% endfor %}
+    {%- endfor -%}
   </tr>
-{% endfor %}
+{%- endfor -%}

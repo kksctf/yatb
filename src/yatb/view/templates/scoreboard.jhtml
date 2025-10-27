@@ -63,21 +63,23 @@
 {% endblock %}
 
 {% block content %}
-<h1 class="title is-3">{{ _("Scoreboard", request) }}</h1>
+<div class="container is-fluid">
+  <h1 class="title is-3">{{ _("Scoreboard", request) }}</h1>
 
-<table id="scoreboard-table" class="table is-fullwidth">
-  <thead>
-    <tr id="scoreboard-head" class="sb-tasks-head">
-    {# to be filled by partial scoreboard load #}
-    </tr>
-  </thead>
+  <table id="scoreboard-table" class="table is-fullwidth">
+    <thead>
+      <tr id="scoreboard-head" class="sb-tasks-head">
+      {# to be filled by partial scoreboard load #}
+      </tr>
+    </thead>
 
-  <tbody id="scoreboard-body"
-         hx-get="{{ url_for('scoreboard_page') }}"
-         hx-trigger="load, every 30s"
-         hx-target="#scoreboard-body"
-         hx-swap="innerHTML">
-    {% include "partials/scoreboard_table.jhtml" %}
-  </tbody>
-</table>
+    <tbody id="scoreboard-body"
+          hx-get="{{ url_for('scoreboard_page') }}"
+          hx-trigger="load, every 30s"
+          hx-target="#scoreboard-body"
+          hx-swap="innerHTML">
+      {% include "partials/scoreboard_table.jhtml" %}
+    </tbody>
+  </table>
+</div>
 {% endblock %}

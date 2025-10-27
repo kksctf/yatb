@@ -3,6 +3,7 @@
     {{ selected_task.task_name }} – Task
 {% endblock title %}
 {% block content %}
+<div class="container">
     <a class="button mb-4" href="{{ url_for('tasks_page') }}">← Back to tasks</a>
     <div class="card">
         <header class="card-header">
@@ -117,4 +118,5 @@ hx-get="{{ url_for('dynamic_task_info', task_id=selected_task.task_id) }}" #} hx
             {% endif %}
         </footer>
     </div>
+</div>
 {% endblock %}

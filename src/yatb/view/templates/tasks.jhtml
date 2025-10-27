@@ -12,24 +12,26 @@
 {% endblock %}
 
 {% block content %}
-<h1 class="title is-3">{{ _("Challenges", request) }}</h1>
+<div class="container">
+    <h1 class="title is-3">{{ _("Challenges", request) }}</h1>
 
-<div id="task-filters" class="mb-4" hidden>
-    <label class="checkbox mr-3">
-        <input type="checkbox" name="show_solved" hx-get="{{ url_for('tasks_page') }}" hx-target="#tasks-container"
-            hx-select="#tasks-container" hx-swap="outerHTML" hx-include="closest .section" checked>
-        {{ _("Show solved", request) }}
-    </label>
+    <div id="task-filters" class="mb-4" hidden>
+        <label class="checkbox mr-3">
+            <input type="checkbox" name="show_solved" hx-get="{{ url_for('tasks_page') }}" hx-target="#tasks-container"
+                hx-select="#tasks-container" hx-swap="outerHTML" hx-include="closest .section" checked>
+            {{ _("Show solved", request) }}
+        </label>
 
-    {% for cat in categories | sort %}
-    <label class="checkbox mr-2">
-        <input type="checkbox" name="category" value="{{ cat }}" hx-get="{{ url_for('tasks_page') }}"
-            hx-target="#tasks-container" hx-select="#tasks-container" hx-swap="outerHTML" hx-include="closest .section"
-            checked>
-        {{ cat|capitalize }}
-    </label>
-    {% endfor %}
+        {% for cat in categories | sort %}
+        <label class="checkbox mr-2">
+            <input type="checkbox" name="category" value="{{ cat }}" hx-get="{{ url_for('tasks_page') }}"
+                hx-target="#tasks-container" hx-select="#tasks-container" hx-swap="outerHTML" hx-include="closest .section"
+                checked>
+            {{ cat|capitalize }}
+        </label>
+        {% endfor %}
+    </div>
+
+    {% include "partials/task_container.jhtml" %}
 </div>
-
-{% include "partials/task_container.jhtml" %}
 {% endblock %}

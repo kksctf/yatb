@@ -3,37 +3,39 @@
 {% block title %}Welcome – New Front-End Stack{% endblock %}
 
 {% block content %}
-<article class="content">
+<div class="container">
+  <article class="content">
 
-<h1 class="title is-3">🚀 New Lightweight Front-End</h1>
+  <h1 class="title is-3">🚀 New Lightweight Front-End</h1>
 
-<p class="mb-5">
-  We rebuilt the UI around <strong>HTMX</strong> &amp; <strong>Bulma</strong> to keep pages fast, tiny, and easy to hack on.
-</p>
+  <p class="mb-5">
+    We rebuilt the UI around <strong>HTMX</strong> &amp; <strong>Bulma</strong> to keep pages fast, tiny, and easy to hack on.
+  </p>
 
-<h2 class="title is-4">Why switch from Bootstrap + jQuery?</h2>
+  <h2 class="title is-4">Why switch from Bootstrap + jQuery?</h2>
 
-<ul>
-  <li><strong>Zero JavaScript bundles</strong> – HTMX talks HTML over the wire; no 100 kB of jQuery + plugins.</li>
-  <li><strong>Server-render first</strong> – every page works without JS.</li>
-  <li><strong>HTML-driven interactivity</strong> – add <code>hx-get</code>, <code>hx-post</code>, or <code>hx-swap</code> attributes instead of wiring handlers.</li>
-  <li><strong>Bulma CSS only</strong> – drop-in classes, no heavy JS widgets.</li>
-  <li><strong>One mental model</strong> – edit a Jinja partial, refresh, done.</li>
-</ul>
+  <ul>
+    <li><strong>Zero JavaScript bundles</strong> – HTMX talks HTML over the wire; no 100 kB of jQuery + plugins.</li>
+    <li><strong>Server-render first</strong> – every page works without JS.</li>
+    <li><strong>HTML-driven interactivity</strong> – add <code>hx-get</code>, <code>hx-post</code>, or <code>hx-swap</code> attributes instead of wiring handlers.</li>
+    <li><strong>Bulma CSS only</strong> – drop-in classes, no heavy JS widgets.</li>
+    <li><strong>One mental model</strong> – edit a Jinja partial, refresh, done.</li>
+  </ul>
 
-<h2 class="title is-4">Key pages migrated</h2>
-<ul>
-  <li>Tasks list (<code>/tasks</code>) with live filters</li>
-  <li>Task detail page</li>
-  <li>Scoreboard with 30 s auto-refresh</li>
-  <li>Profile (read-only for now)</li>
-  <li>Navbar flag submission form</li>
-</ul>
+  <h2 class="title is-4">Key pages migrated</h2>
+  <ul>
+    <li>Tasks list (<code>/tasks</code>) with live filters</li>
+    <li>Task detail page</li>
+    <li>Scoreboard with 30 s auto-refresh</li>
+    <li>Profile (read-only for now)</li>
+    <li>Navbar flag submission form</li>
+  </ul>
 
-<p class="mt-6">
-  Dive into <a href="https://htmx.org/docs/">htmx.org/docs</a> or open any template in
-  <code>templates/</code> to see how concise things became. Happy hacking!
-</p>
+  <p class="mt-6">
+    Dive into <a href="https://htmx.org/docs/">htmx.org/docs</a> or open any template in
+    <code>templates/</code> to see how concise things became. Happy hacking!
+  </p>
 
-</article>
+  </article>
+</div>
 {% endblock %}

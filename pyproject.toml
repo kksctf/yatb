@@ -62,6 +62,7 @@ dynamic = [
     "cyclopts ~= 3.0",
     "docker-registry-client-async ~= 0.2.11",
 ]
+s3 = ["miniopy-async ~= 1.20.1"]
 
 
 [dependency-groups]

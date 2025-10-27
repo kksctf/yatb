@@ -152,7 +152,7 @@ yatb_prod
 
 # env
 yatb.env
-yatb-production.env
+yatb-*.env
 k3s*.yaml
 src/dtc/wtf
 yatb_state.json

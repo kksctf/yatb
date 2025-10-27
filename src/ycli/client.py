@@ -36,7 +36,7 @@ class YATB:
         except Exception as ex:
             if not yatb_settings.DEBUG:
                 raise
-            c.print(f"{ex = }")
+            c.print_exception()
 
     def set_admin_token(self, token: str = yatb_settings.API_TOKEN) -> None:
         self.s.headers["X-Token"] = token

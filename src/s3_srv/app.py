@@ -9,12 +9,16 @@ from loguru import logger
 from .client import MinioEx
 from .config import settings
 
-s3 = MinioEx()
+s3: MinioEx
 
 
 @asynccontextmanager
 async def lifespan(app: FastAPI):
+    global s3
+    s3 = MinioEx()
     await s3.setup_buckets()
+
+    logger.info("Init ok")
 
     try:
         yield

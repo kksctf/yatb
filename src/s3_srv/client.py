@@ -25,9 +25,9 @@ class MinioEx(Minio):
         ],
     ) -> None:
         for bucket in buckets:
-            if not await self.bucket_exists(bucket):
+            if await self.bucket_exists(bucket):
                 continue
-            await self.make_bucket(bucket)
+            await self.make_bucket(bucket, location=settings.S3_REGION or "us-east-1")
             logger.info(f"Created s3 {bucket = }")
 
     async def upload_directory(

@@ -92,7 +92,7 @@ async def get_current_user_safe(request: Request) -> UserDB | None:
     return user
 
 
-async def get_current_user_or_redirect_login(request: Request) -> UserDB | None:
+async def get_current_user_or_redirect_login(request: Request) -> UserDB:
     user = None
     try:
         user = await get_current_user(await token_puller(request))
@@ -138,6 +138,6 @@ async def admin_checker(
 CURR_USER: TypeAlias = Annotated[UserDB, Depends(get_current_user)]  # noqa: UP040
 CURR_USER_SAFE: TypeAlias = Annotated[UserDB | None, Depends(get_current_user_safe)]  # noqa: UP040
 CURR_USER_SCOREBOARD: TypeAlias = Annotated[UserDB | None, Depends(current_user_for_scoreboard)]  # noqa: UP040
-CURR_USER_OR_REDIRECT_LOGIN: TypeAlias = Annotated[UserDB | None, Depends(get_current_user_or_redirect_login)]  # noqa: UP040
+CURR_USER_OR_REDIRECT_LOGIN: TypeAlias = Annotated[UserDB, Depends(get_current_user_or_redirect_login)]  # noqa: UP040
 
 CURR_ADMIN: TypeAlias = Annotated[schema.User, Depends(admin_checker)]  # noqa: UP040

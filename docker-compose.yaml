@@ -22,6 +22,12 @@ services:
     build:
       context: ./
       dockerfile: contrib/docker/Dockerfile.production
+    entrypoint: /s3_entrypoint.sh
+    volumes:
+      - ./state/garage_shared:/garage_shared:ro
+    links:
+      - garage
+    restart: unless-stopped
 
   ferretdb:
     # last version of ferretdb with sqlite support ;(
@@ -56,6 +62,7 @@ services:
       - "caddy_config:/config"
     links:
       - yatb
+      - s3-srv
     restart: unless-stopped
 
 volumes:

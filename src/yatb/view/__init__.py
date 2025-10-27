@@ -5,6 +5,7 @@ from collections.abc import Mapping
 from dataclasses import dataclass
 from pathlib import Path
 from typing import Annotated, TypeAlias
+from uuid import UUID
 
 from fastapi import BackgroundTasks, Depends, Query, Request, Response
 from fastapi.responses import HTMLResponse
@@ -207,13 +208,82 @@ async def scoreboard_page(
 ) -> HTMLResponse:
     scoreboard = await UserDB.get_filtered_projected_scoreboard()
 
+    sorted_tasks = sorted(tasks, key=lambda t: (t.scoring.points, t.category))
+    task_urls = {task.task_id: request.url_for("one_task_page", task_id=task.task_id) for task in sorted_tasks}
+    unsolved_text = _("Task is not solved yet", request)
+
+    task_first_solver: dict[schema.TaskID, UUID | None] = {}
+    for task in sorted_tasks:
+        first = task.first_pwned_str()
+        task_first_solver[task.task_id] = first[0] if first else None
+
+    task_headers = [
+        {
+            "task_id": task.task_id,
+            "url": task_urls[task.task_id],
+            "label": f"{task.points} | {task.task_name}",
+        }
+        for task in sorted_tasks
+    ]
+
+    scoreboard_rows = []
+    for pos, sb_user in enumerate(scoreboard, start=1):
+        last_task_id = sb_user.get_last_solve_time()[0] if sb_user.solved_tasks else None
+        cells = []
+        for task in sorted_tasks:
+            solved_at = sb_user.solved_tasks.get(task.task_id)
+            solved = solved_at is not None
+
+            classes = ["sb-indicator"]
+            extra_icon_class = None
+
+            if solved:
+                if task_first_solver.get(task.task_id) == sb_user.user_id:
+                    classes.append("sb-solved-first")
+                    extra_icon_class = "fa-solid fa-droplet sb-star"
+                elif task.task_id == last_task_id:
+                    classes.append("sb-solved-last")
+                    extra_icon_class = "fa-solid fa-forward sb-last-dot"
+                else:
+                    classes.append("sb-solved")
+            else:
+                classes.append("sb-unsolved")
+
+            tooltip_parts = [
+                str(task.scoring.points),
+                task.task_name,
+                schema.task.template_format_time(solved_at) if solved else unsolved_text,
+            ]
+
+            cells.append(
+                {
+                    "url": task_urls[task.task_id],
+                    "classes": " ".join(classes),
+                    "tooltip": " | ".join(tooltip_parts),
+                    "icon_class": "fa-solid fa-check" if solved else "fa-solid fa-xmark",
+                    "solved": solved,
+                    "extra_icon_class": extra_icon_class,
+                },
+            )
+
+        scoreboard_rows.append(
+            {
+                "position": pos,
+                "username": sb_user.username,
+                "score": sb_user.score,
+                "cells": cells,
+            },
+        )
+
     return await response_generator(
         request,
         "scoreboard.jhtml" if not is_httpx else "partials/scoreboard_table.jhtml",
         {
             "curr_user": user,
             "scoreboard": scoreboard,
-            "all_tasks": tasks,
+            "sorted_tasks": sorted_tasks,
+            "task_headers": task_headers,
+            "scoreboard_rows": scoreboard_rows,
         },
     )
 

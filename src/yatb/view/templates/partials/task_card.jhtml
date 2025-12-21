@@ -8,9 +8,9 @@
         </div>
       </div>
     </a>
-    <div>
+    <div class="task-card-tags p-0">
       <div class="tags has-addons">
-        <span class="tag {% if task.is_solved_by(curr_user) %}is-success{% endif %}">{{ task.scoring.points }}</span>
+        <span class="tag {% if task.is_solved_by(curr_user) %}is-success{% endif %}"><i class="fa-solid fa-award"></i>{{ task.scoring.points }}</span>
         <span class="tag is-dark"><i class="fa-solid fa-check-double"></i>{{ task.solves }}</span>
       </div>
     </div>
@@ -20,7 +20,7 @@
     <div class="content"> 
       {{ task.description_html | safe }}
     </div>
-    
+
     {% if curr_user and curr_user.admin_checker() %}
     <!-- hidden={{ task.hidden }}, visible_for_unauth={{ task.visible_for_user(None) }}, req_tasks={{ task.req_tasks }}  -->
     {% endif %}

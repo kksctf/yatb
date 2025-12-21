@@ -37,3 +37,17 @@ footer.footer {
 .task-grid .card-content {
     flex-grow: 1;
 }
+
+.task-grid .card-header .card-header-title {
+    min-width: 0;
+}
+
+.task-grid .card-header .task-card-tags {
+    flex: 0 0 auto;
+    margin-left: auto;
+    padding: 0.75rem;
+}
+
+.task-grid .card-header .task-card-tags .tags {
+    flex-wrap: nowrap;
+}

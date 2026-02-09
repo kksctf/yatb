@@ -1,7 +1,7 @@
 import datetime
 from typing import Literal, Self
 
-from pydantic import model_validator
+from pydantic import model_validator, computed_field
 
 from yatb.ebasemodelv2 import Admin, EBaseModelV2, Public
 from yatb.utils.log_helper import get_logger
@@ -35,6 +35,11 @@ class User(EBaseModelV2):
     @property
     def au_s(self) -> AuthBase.AuthModel:  # WTF: dirty hack... ;(
         return self.auth_source
+
+    @computed_field
+    @property
+    def display_name(self) -> Public[str]:
+        return self.username
 
     @model_validator(mode="after")
     def setup_fields(self) -> Self:

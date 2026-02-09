@@ -136,7 +136,18 @@ async def admin_ng_users(req: Request, admin: CURR_ADMIN) -> list[AnyComponent]:
             data=[schema.User.admin_model.model_validate(v.model_dump()) for i, v in sorted_users],
             data_model=schema.User.admin_model,
             columns=[
-                DisplayLookup(field="username", title="Name", on_click=GoToEvent(url=url_gen(req, "user/{user_id}"))),
+                DisplayLookup(
+                    field="username",
+                    title="Name",
+                    on_click=GoToEvent(url=url_gen(req, "user/{user_id}")),
+                ),
+                DisplayLookup(
+                    field="display_name",
+                    title="Display Name",
+                    on_click=GoToEvent(
+                        url=url_gen(req, "user/{user_id}"),
+                    ),
+                ),
                 DisplayLookup(field="is_admin", title="Admin"),
                 # DisplayLookup(field="points", title="Points"),
                 # DisplayLookup(field="solves", title="Solve Count"),
@@ -160,8 +171,28 @@ async def users_search(
 
     q = q.lower()
 
+    def include_user_in_search_result(q: str, user: schema.User) -> bool:
+        if q in user.username.lower():
+            return True
+
+        if q in user.display_name.lower():
+            return True
+
+        if q in str(user.user_id).lower():
+            return True
+
+        if isinstance(au := user.auth_source, schema.TelegramAuth.AuthModel) and (  # noqa: SIM103
+            q in str(au.tg_id)  # ...
+            or q in str(au.tg_username)
+            or q in str(au.tg_first_name)
+            or q in str(au.tg_last_name)
+        ):
+            return True
+
+        return False
+
     for user in users.values():
-        if q not in user.username.lower():
+        if not include_user_in_search_result(q, user):
             continue
 
         if not show_admin and user.is_admin:
@@ -170,7 +201,7 @@ async def users_search(
         ret.append(
             {
                 "value": f"{user.user_id}",
-                "label": user.username,
+                "label": user.display_name,
             },
         )
 
@@ -183,7 +214,7 @@ async def admin_ng_user(req: Request, admin: CURR_ADMIN, raw_user: api_admin_use
 
     return base_page(
         req,
-        c.Heading(text=sanitized_user.username, level=2),
+        c.Heading(text=sanitized_user.display_name, level=2),
         c.Link(components=[c.Text(text="Back")], on_click=BackEvent()),
         c.Details(
             data=sanitized_user,
@@ -191,7 +222,7 @@ async def admin_ng_user(req: Request, admin: CURR_ADMIN, raw_user: api_admin_use
             #     DisplayLookup(field="task_id", title="ID"),
             # ],
         ),
-        title=f"User - {sanitized_user.username}",
+        title=f"User - {sanitized_user.display_name}",
     )
 
 

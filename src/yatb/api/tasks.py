@@ -101,7 +101,7 @@ async def api_task_submit_flag(flag: Annotated[FlagForm, Form()], user: auth.CUR
 
     msg = BRMessage(
         task_name=task.task_name,
-        user_name=user.username,
+        user_name=user.display_name,
         points=task.scoring.points,
         is_fb=len(task.pwned_by) == 1,
     )

@@ -253,7 +253,9 @@ async def scoreboard_page(
             tooltip_parts = [
                 str(task.scoring.points),
                 task.task_name,
-                schema.task.template_format_time(solved_at) if solved else unsolved_text,
+                schema.task.template_format_time(solved_at)  # ty:ignore[invalid-argument-type] # ty is incorrect here
+                if solved
+                else unsolved_text,
             ]
 
             cells.append(
@@ -270,7 +272,7 @@ async def scoreboard_page(
         scoreboard_rows.append(
             {
                 "position": pos,
-                "username": sb_user.username,
+                "display_name": sb_user.display_name,
                 "score": sb_user.score,
                 "cells": cells,
             },

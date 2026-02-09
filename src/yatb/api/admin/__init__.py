@@ -6,6 +6,7 @@ from yatb import auth, schema
 from yatb.auth import CURR_ADMIN
 from yatb.config import settings
 from yatb.db import TaskDB, UserDB
+from yatb.schema.feature_flags import FeatureFlags, active_feature_flags
 from yatb.utils.log_helper import get_logger
 
 logger = get_logger("api.admin")

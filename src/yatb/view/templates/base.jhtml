@@ -72,7 +72,7 @@
                         </p>
                     </div>
                 </form>
-                <a class="navbar-item" href="{{ url_for('profile_page') }}">{{ curr_user.username }}</a>
+                <a class="navbar-item" href="{{ url_for('profile_page') }}">{{ curr_user.display_name }}</a>
                 {% if curr_user.is_admin %}
                 <a class="navbar-item" href="{{ url_for('admin_ng_html_landing', path='') }}">{{ _("Admin area", request) }}</a>
                 <!-- before_start = {{ EVENT_START_TIME - NOW() }}, before_end = {{ EVENT_END_TIME - NOW() }} -->

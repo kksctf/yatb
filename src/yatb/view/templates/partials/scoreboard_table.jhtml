@@ -16,7 +16,7 @@
 {%- for row in scoreboard_rows -%}
   <tr>
     <th>{{ row.position }}</th>
-    <td>{{ row.username }}</td>
+    <td>{{ row.display_name }}</td>
     <td>{{ row.score }}</td>
 
     {%- for cell in row.cells -%}

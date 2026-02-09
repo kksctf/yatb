@@ -20,6 +20,10 @@ logger = get_logger("db.task")
 
 class UserDB(DocumentEx[User], User):
     class ScoreboardProjection(BaseModel):
+        """
+        НЕ ДОЛЖНА ВОЗВРАЩАТЬСЯ В КАКОЙ-ЛИБО АПИ-РУЧКЕ НИ ПРИ КАКИХ ОБСТОЯТЕЛЬСТВАХ.
+        """  # noqa: RUF002
+
         user_id: UserID
         username: str
         score: int
@@ -31,6 +35,10 @@ class UserDB(DocumentEx[User], User):
                 return max(self.solved_tasks.items(), key=lambda x: x[1])
 
             return ("", datetime.datetime.fromtimestamp(0, tz=datetime.UTC))
+
+        @property
+        def display_name(self) -> str:
+            return self.username
 
     @classmethod
     async def recalc_scoreboard(cls: type[Self]) -> None:

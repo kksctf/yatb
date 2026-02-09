@@ -1,6 +1,6 @@
 {% extends "base.jhtml" %}
 
-{% block title %}Profile – {{ curr_user.username }}{% endblock %}
+{% block title %}Profile – {{ curr_user.display_name }}{% endblock %}
 
 {% block content %}
 <div class="container">
@@ -19,6 +19,7 @@
       </figure>
       <div class="media-content">
         <p class="title is-4 mb-0">{{ curr_user.username }}</p>
+        <p class="title is-4 mb-0">{{ curr_user.display_name }}</p>
         {% if curr_user.team %}
           <p class="subtitle is-6">Team: {{ curr_user.team }}</p>
         {% endif %}

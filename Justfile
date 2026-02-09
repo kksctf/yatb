@@ -62,3 +62,6 @@ git-back dst src="improvements":
     git stash pop "stash@{1}"
     git stash pop "stash@{0}"
     @echo "Ready to commit"
+
+k3s *args:
+    docker compose -f docker-compose.k3s.yaml {{ args }}

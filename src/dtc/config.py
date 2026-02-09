@@ -19,6 +19,7 @@ class Settings(BaseSettings):
     TESTING: bool = False
 
     KUBE_CONFIG_PATH: Path | None = None
+    KUBE_CONFIG_SERVER_OVERRIDE: str | None = None
 
     S3_HOST_KANIKO: str
     S3_PORT_KANIKO: int

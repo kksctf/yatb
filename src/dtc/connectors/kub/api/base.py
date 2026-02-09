@@ -42,6 +42,10 @@ class KubeApiBase:
     async def init(self) -> None:
         # setup kube
         config = KubeConfig.from_file(settings.kube_config_path) if settings.kube_config_path else None
+
+        if config and settings.KUBE_CONFIG_SERVER_OVERRIDE:
+            config.clusters["default"].server = settings.KUBE_CONFIG_SERVER_OVERRIDE
+
         self.client = AsyncClientEx(config, field_manager="dtc")
 
         # setup s3

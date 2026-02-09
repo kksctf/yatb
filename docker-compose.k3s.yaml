@@ -1,0 +1,78 @@
+version: "3"
+
+x-anchors:
+  shared_env: &shared_env
+    DEBUG: "false"
+    PROFILING: "false"
+
+# https://github.com/k3s-io/k3s/blob/f061615cb4f1784362a499e323d7040b777dbd54/docker-compose.yml
+services:
+  k3s:
+    image: rancher/k3s:v1.24.10-k3s1
+    command:
+      - server
+      - "--tls-san=k3s"
+    hostname: yatb-k3s-master
+    privileged: true
+    expose:
+      - 6443
+    ports:
+      - "127.0.0.1:6443:6443"
+    tmpfs:
+      - /run
+      - /var/run
+    ulimits:
+      nproc: 65535
+      nofile:
+        soft: 65535
+        hard: 65535
+    environment:
+      - K3S_TOKEN=xxx1337
+      - K3S_KUBECONFIG_OUTPUT=/output/kubeconfig.yaml
+      - K3S_KUBECONFIG_MODE=666
+    volumes:
+      - k3s-server:/var/lib/rancher/k3s
+      - ./state/k3s:/output
+    restart: unless-stopped
+
+  etcd:
+    image: quay.io/coreos/etcd:v3.5.21
+    entrypoint: /usr/local/bin/etcd
+    command:
+      - "--name=etcd"
+      - "--initial-advertise-peer-urls=http://etcd:2380"
+      - "--listen-peer-urls=http://0.0.0.0:2380"
+      - "--listen-client-urls=http://0.0.0.0:2379"
+      - "--advertise-client-urls=http://etcd:2379"
+      - "--heartbeat-interval=250"
+      - "--election-timeout=1250"
+      - "--initial-cluster=etcd=http://etcd:2380"
+      - "--initial-cluster-state=new"
+      - "--initial-cluster-token=xxx1337"
+    volumes:
+      - etcd:/etcd_data
+    expose:
+      - 2379
+
+  dtc:
+    build:
+      context: ./
+      dockerfile: contrib/docker/Dockerfile.dtc.production
+    env_file:
+      - ./yatb.env
+    environment:
+      <<: *shared_env
+      ADMIN_PASSWORD: "x1337"
+      DYNAMIC_TASKS_ETCD: "etcd"
+      KUBE_CONFIG_PATH: "/k3s/kubeconfig.yaml"
+      KUBE_CONFIG_SERVER_OVERRIDE: "https://k3s:6443"
+    volumes:
+      - ./state/k3s:/k3s:ro
+    links:
+      - k3s
+      - etcd
+    restart: unless-stopped
+
+volumes:
+  k3s-server: {}
+  etcd: {}

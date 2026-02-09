@@ -1,0 +1,5 @@
+{% for chip in chips %}
+  <a class="sb-chip {% if chip.solved %}solved{% else %}unsolved{% endif %}{% if chip.is_first %} first-solution{% endif %}{% if chip.is_last %} last-solve{% endif %}"
+     href="{{ chip.url }}"
+     title="{{ chip.title }}"></a>
+{% endfor %}

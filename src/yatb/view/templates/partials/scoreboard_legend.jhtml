@@ -1,0 +1,18 @@
+<div class="sb-legend-filter">
+  <label class="sb-legend-radio">
+    <input type="radio" name="legend_task_filter" value="" checked>
+    <span>No selection</span>
+  </label>
+</div>
+{% for task in task_legend %}
+  <div class="sb-legend-item-wrap">
+    <label class="sb-legend-radio">
+      <input type="radio" name="legend_task_filter" value="{{ task.index }}">
+      <a class="sb-legend-item"
+         href="{{ task.url }}"
+         title="{{ task.points }} | {{ task.category }} | {{ task.name }}">
+        {{ task.points }} | {{ task.category }} | {{ task.name }}
+      </a>
+    </label>
+  </div>
+{% endfor %}

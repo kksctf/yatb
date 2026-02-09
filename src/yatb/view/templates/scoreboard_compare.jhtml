@@ -1,0 +1,130 @@
+{% extends "base.jhtml" %}
+
+{% block title %}Compare Solutions{% endblock %}
+
+{% block extra_head %}
+  <style>
+    .cmp-form {
+      margin-bottom: 1rem;
+      display: flex;
+      gap: 0.75rem;
+      flex-wrap: wrap;
+      align-items: end;
+    }
+
+    .cmp-form .field {
+      margin-bottom: 0;
+      min-width: 16rem;
+    }
+
+    .cmp-legend {
+      margin-bottom: 1rem;
+      display: flex;
+      gap: 0.75rem;
+      flex-wrap: wrap;
+      font-size: 0.9rem;
+    }
+
+    .cmp-item {
+      display: inline-flex;
+      align-items: center;
+      gap: 0.35rem;
+    }
+
+    .cmp-dot {
+      width: 0.8rem;
+      height: 0.8rem;
+      border: 1px solid var(--border);
+      border-radius: 4px;
+      display: inline-block;
+    }
+
+    .cmp-dot.both { background: #22c55e; border-color: #22c55e; }
+    .cmp-dot.only-a { background: #60a5fa; border-color: #60a5fa; }
+    .cmp-dot.only-b { background: #f59e0b; border-color: #f59e0b; }
+    .cmp-dot.none { background: var(--surface); border-color: var(--border); }
+
+    .cmp-grid {
+      border: 1px solid var(--border);
+      border-radius: 8px;
+      padding: 0.75rem;
+      display: flex;
+      gap: 0.25rem;
+      flex-wrap: wrap;
+    }
+
+    .cmp-chip {
+      width: 0.8rem;
+      height: 0.8rem;
+      border: 1px solid var(--border);
+      border-radius: 4px;
+      display: inline-block;
+    }
+
+    .cmp-chip.both { background: #22c55e; border-color: #22c55e; }
+    .cmp-chip.only-a { background: #60a5fa; border-color: #60a5fa; }
+    .cmp-chip.only-b { background: #f59e0b; border-color: #f59e0b; }
+    .cmp-chip.none { background: var(--surface); border-color: var(--border); }
+
+    .cmp-muted {
+      opacity: 0.7;
+      font-size: 0.9rem;
+    }
+  </style>
+{% endblock %}
+
+{% block content %}
+<div class="container is-fluid">
+  <h1 class="title is-3">Compare Solutions</h1>
+
+  <form class="cmp-form" method="get">
+    <div class="field">
+      <label class="label is-small">Player A</label>
+      <div class="control select is-small">
+        <select name="user_a" required>
+          {% for u in users %}
+            <option value="{{ u.user_id }}" {% if u.user_id == selected_a %}selected{% endif %}>{{ u.display_name }} ({{ u.score }})</option>
+          {% endfor %}
+        </select>
+      </div>
+    </div>
+
+    <div class="field">
+      <label class="label is-small">Player B</label>
+      <div class="control select is-small">
+        <select name="user_b" required>
+          {% for u in users %}
+            <option value="{{ u.user_id }}" {% if u.user_id == selected_b %}selected{% endif %}>{{ u.display_name }} ({{ u.score }})</option>
+          {% endfor %}
+        </select>
+      </div>
+    </div>
+
+    <div class="field">
+      <div class="control">
+        <button class="button is-small is-info" type="submit">Compare</button>
+      </div>
+    </div>
+  </form>
+
+  {% if row_a and row_b %}
+    <div class="cmp-legend">
+      <span class="cmp-item"><span class="cmp-dot both"></span> both solved</span>
+      <span class="cmp-item"><span class="cmp-dot only-a"></span> only {{ row_a.display_name }}</span>
+      <span class="cmp-item"><span class="cmp-dot only-b"></span> only {{ row_b.display_name }}</span>
+      <span class="cmp-item"><span class="cmp-dot none"></span> both unsolved</span>
+      <span class="cmp-item cmp-muted">tasks: {{ tasks_total }}</span>
+    </div>
+
+    <div class="cmp-grid">
+      {% for chip in chips %}
+        <a class="cmp-chip {{ chip.state }}"
+           href="{{ chip.url }}"
+           title="{{ chip.title }}"></a>
+      {% endfor %}
+    </div>
+  {% else %}
+    <p class="cmp-muted">Not enough players to compare.</p>
+  {% endif %}
+</div>
+{% endblock %}

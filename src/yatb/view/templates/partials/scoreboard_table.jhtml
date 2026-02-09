@@ -1,11 +1,7 @@
-{#
-  Also update the header order when the body refreshes.
-  This <tr> will be swapped out-of-band into #scoreboard-head by htmx.
- #}
 <tr id="scoreboard-head" class="sb-tasks-head" hx-swap-oob="innerHTML:#scoreboard-head">
-  <th>{{ _("Position", request) }}</th>
-  <th>{{ _("User", request) }}</th>
-  <th>{{ _("Score", request) }}</th>
+  <th class="sb-pos-col sb-pos-sticky">{{ _("Position", request) }}</th>
+  <th class="sb-name-col sb-name-sticky">{{ _("User", request) }}</th>
+  <th class="sb-score-col sb-score-sticky">{{ _("Score", request) }}</th>
   {%- for header in task_headers -%}
   <th class="sb-rot-th">
     <a class="sb-rot" href="{{ header.url }}"><span>{{ header.label }}</span></a>
@@ -15,25 +11,23 @@
 
 {%- for row in scoreboard_rows -%}
   <tr>
-    <th>{{ row.position }}</th>
-    <td>{{ row.display_name }}</td>
-    <td>{{ row.score }}</td>
+    <th class="sb-pos-col sb-pos-sticky">{{ row.position }}</th>
+    <td class="sb-name-col sb-name-sticky sb-name-cell" title="{{ row.display_name }}">{{ row.display_name }}</td>
+    <td class="sb-score-col sb-score-sticky">{{ row.score }}</td>
 
     {%- for cell in row.cells -%}
-    <td class="p-0">
-      <div class="is-justify-content-center">
-        <a href="{{ cell.url }}" class="sb-link">
-          <div class="{{ cell.classes }}" title="{{ cell.tooltip }}">
-            <i class="{{ cell.icon_class }}"></i>
-            {%- if cell.solved -%}
-              <span class="visually-hidden">+</span>
-            {%- endif -%}
-            {%- if cell.extra_icon_class -%}
-              <i class="{{ cell.extra_icon_class }}"></i>
-            {%- endif -%}
-          </div>
-        </a>
-      </div>
+    <td class="sb-matrix-cell">
+      <a href="{{ cell.url }}" class="sb-link">
+        <div class="{{ cell.classes }}" title="{{ cell.tooltip }}">
+          <i class="{{ cell.icon_class }}"></i>
+          {%- if cell.solved -%}
+            <span class="visually-hidden">+</span>
+          {%- endif -%}
+          {%- if cell.extra_icon_class -%}
+            <i class="{{ cell.extra_icon_class }}"></i>
+          {%- endif -%}
+        </div>
+      </a>
     </td>
     {%- endfor -%}
   </tr>

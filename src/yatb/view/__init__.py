@@ -20,6 +20,7 @@ from yatb.api import tasks
 from yatb.config import settings
 from yatb.db.task import TaskDB
 from yatb.db.user import UserDB
+from yatb.schema.feature_flags import active_feature_flags
 from yatb.utils import md
 from yatb.utils.httpx import IS_HTTPX
 from yatb.utils.log_helper import get_logger
@@ -127,7 +128,7 @@ class _Cache:
 
 async def get_cache(request: Request) -> _Cache:
     users = await UserDB.get_all_projected(UserDB.ScoreboardProjection)
-    uid2name = {uuid: user.username for uuid, user in users.items()}
+    uid2name = {uuid: user.display_name for uuid, user in users.items()}
 
     return _Cache(user_id_to_username=uid2name)
 

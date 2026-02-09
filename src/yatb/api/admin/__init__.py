@@ -15,6 +15,18 @@ router = APIRouter(
 )
 
 
+@router.get("/flags")
+async def get_flags(admin: CURR_ADMIN) -> FeatureFlags:
+    return active_feature_flags
+
+
+@router.put("/flags")
+async def put_flags(new: FeatureFlags, admin: CURR_ADMIN) -> FeatureFlags:
+    for flag in new.model_fields_set:
+        setattr(active_feature_flags, flag, getattr(new, flag))
+    return active_feature_flags
+
+
 @router.delete("/db_users")
 async def api_detele_everything_but_tasks(admin: CURR_ADMIN) -> None:
     if not settings.DEBUG and admin != auth._fake_admin_user:

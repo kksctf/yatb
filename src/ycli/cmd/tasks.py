@@ -121,19 +121,17 @@ async def _upload_task(
                     f"rel='noopener noreferrer' target='_blank'>{file.name}</a>\n"
                 )
                 with file.open("rb") as f:
-                    await y.s3.put_object(
+                    await y.s3.intelligent_put_object(
+                        f,
                         s3_settings.STATIC_BUCKET_NAME,
                         f"{created_task.task_id}/{file.name}",
-                        f,
-                        length=file.stat().st_size,
                     )
                 c.print(f"[+] '{created_task.task_name}': uploaded file {file}")
 
-        await y.s3.put_object(
+        await y.s3.intelligent_put_object(
+            io.BytesIO(files_hash),
             s3_settings.STATIC_BUCKET_NAME,
             f"{created_task.task_id}/.sha256",
-            io.BytesIO(files_hash),
-            length=len(files_hash),
         )
 
         created_task.description += (

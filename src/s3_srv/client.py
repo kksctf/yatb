@@ -4,7 +4,7 @@ import tarfile
 from collections.abc import Sequence
 from gzip import GzipFile
 from pathlib import Path
-from typing import IO, cast
+from typing import IO, BinaryIO, cast
 
 import aiohttp
 from loguru import logger
@@ -67,7 +67,7 @@ class MinioEx(Minio):
                 if (
                     not ignore_cache
                     and info.metadata
-                    and info.metadata["x-amz-meta-dtc-checksum-sha256"] == hash_digest
+                    and info.metadata.get("x-amz-meta-dtc-checksum-sha256", None) == hash_digest
                 ):
                     return hash_digest
             except S3Error as ex:
@@ -86,6 +86,51 @@ class MinioEx(Minio):
                 f"Uploaded archive from {source!r} ({size = }) "
                 f"(hash: {hash_digest}) as 's3://{bucket_name}/{object_name}'",
             )
+
+        return hash_digest
+
+    async def intelligent_put_object(
+        self,
+        data: BinaryIO,
+        bucket_name: str,
+        object_name: str,
+        *,
+        hash_block_size: int = 2**16,
+        ignore_cache: bool = False,
+    ) -> str:
+        hash_obj = hashlib.sha256()
+        while data.readable():
+            block = data.read(hash_block_size)
+            if not block:
+                break
+            hash_obj.update(block)
+        size = data.tell()
+        data.seek(0)
+        hash_digest = hash_obj.hexdigest()
+
+        try:
+            info = await self.stat_object(bucket_name, object_name)
+
+            if (
+                not ignore_cache
+                and info.metadata
+                and info.metadata.get("x-amz-meta-dtc-checksum-sha256", None) == hash_digest
+            ):
+                return hash_digest
+        except S3Error as ex:
+            pass
+
+        await self.put_object(
+            bucket_name,
+            object_name,
+            data,
+            length=size,
+            metadata={"dtc-checksum-sha256": hash_digest},
+        )
+
+        logger.info(
+            f"Uploaded object ({size = }) (hash: {hash_digest}) as 's3://{bucket_name}/{object_name}'",
+        )
 
         return hash_digest
 

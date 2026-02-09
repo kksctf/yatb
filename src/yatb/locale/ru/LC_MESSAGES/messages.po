@@ -7,7 +7,7 @@ msgid ""
 msgstr ""
 "Project-Id-Version: PROJECT VERSION\n"
 "Report-Msgid-Bugs-To: EMAIL@ADDRESS\n"
-"POT-Creation-Date: 2025-10-08 15:31+0300\n"
+"POT-Creation-Date: 2026-02-09 21:54+0300\n"
 "PO-Revision-Date: 2025-05-30 17:05+0300\n"
 "Last-Translator: FULL NAME <EMAIL@ADDRESS>\n"
 "Language: ru\n"
@@ -19,44 +19,54 @@ msgstr ""
 "Content-Transfer-Encoding: 8bit\n"
 "Generated-By: Babel 2.17.0\n"
 
-#: src/yatb/view/templates/base.jhtml:32 src/yatb/view/templates/tasks.jhtml:3
-#: src/yatb/view/templates/tasks.jhtml:15
+#: src/yatb/view/__init__.py:214
+msgid "Task is not solved yet"
+msgstr "Таск ещё не решён"
+
+#: src/yatb/view/templates/base.jhtml:50 src/yatb/view/templates/tasks.jhtml:3
+#: src/yatb/view/templates/tasks.jhtml:16
 msgid "Challenges"
 msgstr "Задания"
 
-#: src/yatb/view/templates/base.jhtml:33
+#: src/yatb/view/templates/base.jhtml:51
 #: src/yatb/view/templates/scoreboard.jhtml:3
-#: src/yatb/view/templates/scoreboard.jhtml:65
+#: src/yatb/view/templates/scoreboard.jhtml:67
 msgid "Scoreboard"
 msgstr "Рейтинг"
 
-#: src/yatb/view/templates/base.jhtml:53
+#: src/yatb/view/templates/base.jhtml:71
 msgid "Submit"
 msgstr "Сдать"
 
-#: src/yatb/view/templates/base.jhtml:63
+#: src/yatb/view/templates/base.jhtml:77
+msgid "Admin area"
+msgstr "Админка"
+
+#: src/yatb/view/templates/base.jhtml:81
 msgid "Logout"
 msgstr "Выйти"
 
-#: src/yatb/view/templates/base.jhtml:66
+#: src/yatb/view/templates/base.jhtml:84 src/yatb/view/templates/login.jhtml:3
 msgid "Login"
 msgstr "Войти"
 
-#: src/yatb/view/templates/login.jhtml:8
+#: src/yatb/view/templates/login.jhtml:9
 msgid "Please log in or register"
 msgstr "Войдите или зарегистрируйтесь"
 
+#: src/yatb/view/templates/tasks.jhtml:22
+msgid "Show solved"
+msgstr "Показывать решённые"
+
+#: src/yatb/view/templates/partials/scoreboard_table.jhtml:6
+msgid "Position"
+msgstr "Позиция"
+
 #: src/yatb/view/templates/partials/scoreboard_table.jhtml:7
-#: src/yatb/view/templates/scoreboard.jhtml:71
 msgid "User"
 msgstr "Пользователь"
 
 #: src/yatb/view/templates/partials/scoreboard_table.jhtml:8
-#: src/yatb/view/templates/scoreboard.jhtml:72
 msgid "Score"
 msgstr "Счет"
-
-#: src/yatb/view/templates/tasks.jhtml:21
-msgid "Show solved"
-msgstr "Показывать решённые"
 

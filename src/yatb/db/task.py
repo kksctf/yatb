@@ -28,6 +28,13 @@ class TaskDB(DocumentEx[Task], Task):
             ),
         )
 
+        if type(self.scoring) is not type(new.scoring):
+            logger.warning(
+                f"Updating task scroing, {self.short_desc() = }, {self.scoring = }, {new.scoring = }",
+            )
+            self.scoring = new.scoring
+            new.scoring.set_solves(len(self.pwned_by))
+
         # task.scoring = new_task.scoring  # fix for json-ing scoring on edit
         # task.flag = new_task.flag  # fix for json-ing flag on edit
 

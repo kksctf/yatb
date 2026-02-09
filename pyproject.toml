@@ -149,7 +149,7 @@ ignore = [
 ### PYTEST
 
 [tool.pytest.ini_options]
-addopts = "--cov=./yatb --cov-report=xml:coverage.xml -cov-config=.coveragerc"
+addopts = "--cov=./src --cov-report=xml:coverage.xml -cov-config=.coveragerc"
 env = ["DEBUG=0", "ENABLE_METRICS=0", "TESTING=1", "DB_NAME=yatb_unittesting"]
 filterwarnings = ["ignore::DeprecationWarning"]
 testpaths = ["tests"]

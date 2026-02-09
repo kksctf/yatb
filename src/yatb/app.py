@@ -28,7 +28,7 @@ app = FastAPI(
     openapi_url=settings.FASTAPI_OPENAPI_URL,
     lifespan=lifespan,
 )
-app.add_middleware(i18n.LocaleMiddleware)
+app.add_middleware(i18n.LocaleMiddleware)  # ty:ignore[invalid-argument-type]
 
 _base_path = Path(__file__).resolve().parent
 app.mount("/static", StaticFiles(directory=_base_path / "view" / "static"), name="static")

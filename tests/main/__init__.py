@@ -2,6 +2,7 @@ import typing
 from contextlib import contextmanager
 
 import pytest
+from fastapi import status
 from fastapi.testclient import TestClient
 from httpx import Response
 
@@ -9,8 +10,10 @@ from yatb import schema
 from yatb.app import app
 from yatb.config import settings
 from yatb.db import db
+from yatb.schema.feature_flags import active_feature_flags
 
 settings.DB_NAME = "yatb_testing"
+active_feature_flags.force_rename = False
 
 LoginForm = schema.SimpleAuth.Form
 
@@ -24,14 +27,19 @@ class ClientExRaw(TestClient):
     def simple_register_raw(self, username: str, password: str) -> Response:
         return self.post(
             app.url_path_for("api_auth_simple_register"),
-            json=LoginForm(username=username, password=password).model_dump(mode="json"),
+            data=LoginForm(username=username, password=password).model_dump(mode="json"),
         )
 
     def simple_login_raw(self, username: str, password: str) -> Response:
         return self.post(
             app.url_path_for("api_auth_simple_login"),
-            json=LoginForm(username=username, password=password).model_dump(mode="json"),
+            data=LoginForm(username=username, password=password).model_dump(mode="json"),
         )
+
+    def check_page_after_login(self, username: str, resp: Response) -> None:
+        assert resp.status_code == status.HTTP_200_OK, resp.text
+        assert "sampl3_fl4g" in resp.text, resp.text
+        assert f"""<a class="navbar-item" href="http://testserver/profile">{username}</a>""" in resp.text, resp.text
 
     def create_task_raw(
         self,
@@ -61,7 +69,7 @@ class ClientExRaw(TestClient):
     def solve_task_raw(self, flag: str) -> Response:
         return self.post(
             app.url_path_for("api_task_submit_flag"),
-            json=schema.FlagForm(flag=flag).model_dump(mode="json"),
+            data=schema.FlagForm(flag=flag).model_dump(mode="json"),
         )
 
     def get_me_raw(self) -> Response:

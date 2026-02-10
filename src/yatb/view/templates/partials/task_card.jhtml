@@ -1,4 +1,4 @@
-<div class="card {% if task.is_solved_by(curr_user) %}solved{% endif %} {% if task.hidden %}task-hidden{% endif %}">
+<div class="card {% if task.is_solved_by(curr_user) %}solved{% endif %} {% if task.hidden %}task-hidden{% endif %}" data-task-id="{{ task.task_id }}">
   <header class="card-header {% if task.is_solved_by(curr_user) %}has-background-success{% endif %}">
     <a href="{{ url_for('one_task_page', task_id=task.task_id) }}" class="card-header-title">
       <div class="media">

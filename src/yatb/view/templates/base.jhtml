@@ -20,7 +20,6 @@
     <link rel="stylesheet" href="{{ url_for('static', path='style.css') }}">
     <!-- Bulma & HTMX from CDNs -->
     <link rel="stylesheet" href="https://cdn.jsdelivr.net/npm/bulma@1.0.1/css/bulma.min.css">
-    <script src="https://cdn.jsdelivr.net/npm/bulma-toast@2.4.2/dist/bulma-toast.min.js"></script>
     <script src="https://unpkg.com/htmx.org@2.0.4"></script>
     <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/7.0.0/css/all.min.css" integrity="sha512-DxV+EoADOkOygM4IR9yXP8Sb2qwgidEmeqAEmDKIOfPRQZOWbXCzLC6vjbZyy0vPisbH2SyW27+ddLVCN+OMzQ==" crossorigin="anonymous" referrerpolicy="no-referrer" />
     <link rel="icon" type="image/png" href="{{ url_for('static', path='kksctf_logo_32.png') }}" />
@@ -52,17 +51,14 @@
             </div>
             <div class="navbar-end">
                 {% if curr_user %}
-                <!-- response placeholder -->
-                <div id="flag-submit-result" class="navbar-item"></div>
-                <form class="navbar-item" method="post" action="{{ url_for('api_task_submit_flag') }}"
-                    hx-post="{{ url_for('api_task_submit_flag') }}" hx-target="#flag-submit-result" hx-swap="innerHTML"
-                    hx-on::after-request="if (event.detail && event.detail.successful) window.location.reload()">
+                <form id="flag-submit-form" class="navbar-item" method="post" action="{{ url_for('api_task_submit_flag') }}"
+                    hx-post="{{ url_for('api_task_submit_flag') }}" hx-swap="none">
                     <div class="field has-addons">
                         <p class="control">
                             <span class="button is-static">{{ FLAG_BASE }}{</span>
                         </p>
                         <p class="control is-expanded">
-                            <input class="input" name="flag" placeholder="sampl3_fl4g" required>
+                            <input id="flag-submit-input" class="input" name="flag" placeholder="sampl3_fl4g" required>
                         </p>
                         <p class="control">
                             <span class="button is-static">}</span>
@@ -97,6 +93,128 @@
 
     {% if curr_user %}
     <script>
+        (function () {
+            const form = document.getElementById("flag-submit-form");
+            if (!form) return;
+
+            let toastStack = null;
+
+            function ensureToastStack() {
+                if (toastStack) return toastStack;
+                toastStack = document.createElement("div");
+                toastStack.className = "app-toast-stack";
+                toastStack.setAttribute("aria-live", "polite");
+                toastStack.setAttribute("aria-atomic", "true");
+                document.body.appendChild(toastStack);
+                return toastStack;
+            }
+
+            function parsePayload(xhr) {
+                const text = (xhr && xhr.responseText) || "";
+                if (!text) return null;
+                try {
+                    return JSON.parse(text);
+                } catch (_) {
+                    return text;
+                }
+            }
+
+            function readMessage(xhr, isSuccess) {
+                const payload = parsePayload(xhr);
+                if (payload && typeof payload === "object" && payload.detail) return String(payload.detail);
+                if (typeof payload === "string" && payload.trim()) {
+                    return isSuccess ? "Flag accepted" : payload;
+                }
+                if (typeof payload === "number" || typeof payload === "boolean") return String(payload);
+                return isSuccess ? "Flag accepted" : "Flag rejected";
+            }
+
+            function extractTaskId(xhr) {
+                const payload = parsePayload(xhr);
+                if (typeof payload === "string" && payload.trim()) return payload.trim();
+                if (payload && typeof payload === "object" && typeof payload.task_id === "string") return payload.task_id.trim();
+                return "";
+            }
+
+            function markTaskSolved(taskId) {
+                if (!taskId) return;
+                document.querySelectorAll('[data-task-id="' + taskId + '"]').forEach(function (card) {
+                    card.classList.add("solved");
+                    const header = card.querySelector(".card-header");
+                    if (header) header.classList.add("has-background-success");
+                    const pointsTag = card.querySelector(".task-card-tags .tag");
+                    if (pointsTag) pointsTag.classList.add("is-success");
+                });
+            }
+
+            function showFlagToast(isSuccess, message) {
+                const stack = ensureToastStack();
+                const toast = document.createElement("div");
+                toast.className = "notification app-toast " + (isSuccess ? "is-success" : "is-danger");
+                toast.setAttribute("role", "status");
+
+                const content = document.createElement("div");
+                content.className = "app-toast-message";
+                content.textContent = message;
+
+                const closeButton = document.createElement("button");
+                closeButton.className = "delete";
+                closeButton.type = "button";
+                closeButton.setAttribute("aria-label", "Close");
+
+                toast.appendChild(closeButton);
+                toast.appendChild(content);
+                stack.appendChild(toast);
+
+                let hideTimer = null;
+                let endAt = Date.now() + 4500;
+
+                function closeToast() {
+                    if (!toast.isConnected) return;
+                    toast.classList.remove("is-visible");
+                    toast.classList.add("is-leaving");
+                    setTimeout(function () {
+                        if (toast.isConnected) toast.remove();
+                    }, 180);
+                }
+
+                function scheduleHide(delay) {
+                    if (hideTimer) clearTimeout(hideTimer);
+                    hideTimer = setTimeout(closeToast, Math.max(0, delay));
+                }
+
+                requestAnimationFrame(function () {
+                    toast.classList.add("is-visible");
+                });
+
+                scheduleHide(4500);
+
+                toast.addEventListener("mouseenter", function () {
+                    if (hideTimer) clearTimeout(hideTimer);
+                });
+                toast.addEventListener("mouseleave", function () {
+                    scheduleHide(endAt - Date.now());
+                });
+                closeButton.addEventListener("click", closeToast);
+            }
+
+            document.body.addEventListener("htmx:afterRequest", function (event) {
+                if (event.target !== form || !event.detail || !event.detail.xhr) return;
+
+                const xhr = event.detail.xhr;
+                const isSuccess = xhr.status === 200;
+                const message = readMessage(xhr, isSuccess);
+
+                showFlagToast(isSuccess, message);
+
+                if (isSuccess) {
+                    const input = document.getElementById("flag-submit-input");
+                    if (input) input.value = "";
+                    markTaskSolved(extractTaskId(xhr));
+                }
+            });
+        })();
+
         // const evt = new EventSource("/events");
         /* evt.addEventListener("toast", (e) => {
             const msg = JSON.parse(e.data);

@@ -16,7 +16,7 @@
                     </div>
                 </div>
             </div>
-            <span class="tag is-medium ml-2">{{ selected_task.scoring.points }} pts</span>
+            <span class="tag is-medium ml-2">{{ selected_task.scoring.points }} pts · {{ selected_task.solves }} solves</span>
         </header>
         <div class="card-content">
             {# Long description – add rich HTML in the DB or markdown-render beforehand #}

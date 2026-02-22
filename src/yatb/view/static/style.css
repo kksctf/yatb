@@ -15,6 +15,11 @@
   /* gray-200 */
   --navbar-bg: #ffffff;
   --navbar-text: #111111;
+  --solved-header-bg: #48c78e;
+  --solved-header-title: #ffffff;
+  --solved-header-subtitle: rgba(255, 255, 255, 0.85);
+  --solved-points-bg: #2aa772;
+  --solved-points-title: #f6fffb;
 }
 
 /* If user prefers dark and no override exists */
@@ -27,6 +32,11 @@
     --border: #1f2937;
     --navbar-bg: #0b1020;
     --navbar-text: #e5e7eb;
+    --solved-header-bg: #13795b;
+    --solved-header-title: #f3fff9;
+    --solved-header-subtitle: #c5f5e1;
+    --solved-points-bg: #1f9d6a;
+    --solved-points-title: #ffffff;
   }
 }
 
@@ -39,6 +49,11 @@
   --border: #e5e7eb;
   --navbar-bg: #ffffff;
   --navbar-text: #111111;
+  --solved-header-bg: #48c78e;
+  --solved-header-title: #ffffff;
+  --solved-header-subtitle: rgba(255, 255, 255, 0.85);
+  --solved-points-bg: #2aa772;
+  --solved-points-title: #f6fffb;
 }
 
 :root[data-theme='dark'] {
@@ -49,6 +64,11 @@
   --border: #1f2937;
   --navbar-bg: #0b1020;
   --navbar-text: #e5e7eb;
+  --solved-header-bg: #13795b;
+  --solved-header-title: #f3fff9;
+  --solved-header-subtitle: #c5f5e1;
+  --solved-points-bg: #1f9d6a;
+  --solved-points-title: #ffffff;
 }
 
 /* Apply variables */
@@ -83,6 +103,27 @@ body {
 .card .card-content,
 .card .content {
   color: var(--text);
+}
+
+/* Keep solved card header readable in both themes (especially dark). */
+.card.solved .card-header {
+  background-color: var(--solved-header-bg) !important;
+}
+
+.card.solved .card-header .card-header-title,
+.card.solved .card-header .title,
+.card.solved .card-header .tag,
+.card.solved .card-header i {
+  color: var(--solved-header-title) !important;
+}
+
+.card.solved .card-header .subtitle {
+  color: var(--solved-header-subtitle) !important;
+}
+
+.card.solved .card-header .task-card-tags .tag.is-success {
+  background-color: var(--solved-points-bg) !important;
+  color: var(--solved-points-title) !important;
 }
 
 /* Footer */

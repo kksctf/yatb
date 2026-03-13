@@ -4,13 +4,13 @@ sync:
     uv sync --all-extras --all-groups --all-packages
 
 yatb:
-    uv run uvicorn yatb.app:app
+    AUTH_SIMPLE_DEBUG_USERNAME="Debug" DEBUG=1 uv run uvicorn yatb.app:app
 
 yatb-reload:
-    uv run uvicorn yatb.app:app --reload
+    AUTH_SIMPLE_DEBUG_USERNAME="Debug" DEBUG=1 uv run uvicorn yatb.app:app --reload
 
 debug-yatb:
-    uv run debugpy --listen 5678 --wait-for-client -m uvicorn yatb.app:app
+    AUTH_SIMPLE_DEBUG_USERNAME="Debug" DEBUG=1 uv run debugpy --listen 5678 --wait-for-client -m uvicorn yatb.app:app
 
 cli *args:
     uv run -m ycli {{ args }}

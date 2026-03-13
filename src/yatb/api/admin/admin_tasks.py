@@ -113,8 +113,7 @@ async def api_admin_task_delete(task: CURR_TASK, user: CURR_ADMIN) -> Task.admin
     if len(task.pwned_by):
         raise HTTPException(status_code=500)
 
-    await task.delete()  # type: ignore # WTF: great library
-
+    await task.delete()
     return task
 
     # await db.remove_task(task)

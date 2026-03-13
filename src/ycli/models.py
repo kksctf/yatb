@@ -45,7 +45,7 @@ class FileTask(YAMLModel):
 
     flag: str
 
-    dynamic_scoring: bool = False
+    dynamic_scoring: bool = True
 
     dynamic_features: list[DynamicTaskFeatures] = []
 

@@ -1,4 +1,6 @@
+import dataclasses
 from collections.abc import Mapping
+from dataclasses import dataclass
 from typing import Annotated
 
 from fastapi import HTTPException, Query, Request, status
@@ -8,6 +10,7 @@ from fastapi.routing import APIRouter
 from yatb import auth, schema
 from yatb.api import tasks
 from yatb.db.user import UserDB
+from yatb.schema.ids import UserID
 from yatb.utils.log_helper import get_logger
 
 from .util import response_generator
@@ -20,6 +23,44 @@ router = APIRouter(
 )
 
 
+@dataclass(frozen=True, kw_only=True, slots=True)
+class TaskRow:
+    idx: int
+
+    name: str
+    url: str
+
+    points: int
+    time: str
+
+    fb: UserID | None
+
+
+@dataclass(frozen=True, kw_only=True, slots=True)
+class ScoreboardRow:
+    user_id: UserID
+    display_name: str
+
+    position: int
+    score: int
+    solved_count: int
+    fb_count: int
+    fb_tasks: list[TaskRow]
+
+    last_task: TaskRow | None
+
+    solutions_url: str
+
+    solved_indexes_csv: str
+
+
+@dataclass(frozen=True, kw_only=True, slots=True)
+class ScoreboardContext:
+    compact_rows: list[ScoreboardRow]
+    users_total: int
+    tasks_total: int
+
+
 def _build_scoreboard_context(
     request: Request,
     scoreboard: list[UserDB.ScoreboardProjection],
@@ -27,59 +68,73 @@ def _build_scoreboard_context(
     *,
     solution_route_name: str = "scoreboard_solutions_page",
     solution_route_params: Mapping[str, object] | None = None,
-) -> dict[str, object]:
+) -> ScoreboardContext:
     # NEUROSLOP
+    # (but a little less now...)
 
     sorted_tasks = sorted(tasks_list, key=lambda t: (t.scoring.points, t.category))
-    task_index: dict[schema.TaskID, int] = {}
-    task_name: dict[schema.TaskID, str] = {}
-    task_url: dict[schema.TaskID, str] = {}
-    task_points: dict[schema.TaskID, int] = {}
+    task_index: dict[schema.TaskID, TaskRow] = {}
 
     for idx, task in enumerate(sorted_tasks, start=1):
-        task_index[task.task_id] = idx
-        task_name[task.task_id] = task.task_name
-        task_url[task.task_id] = str(request.url_for("one_task_page", task_id=task.task_id))
-        task_points[task.task_id] = task.points
+        first_pwn = task.first_pwned_str()
+        task_index[task.task_id] = TaskRow(
+            idx=idx,
+            name=task.task_name,
+            url=str(request.url_for("one_task_page", task_id=task.task_id)),
+            points=task.points,
+            time="",
+            fb=first_pwn[0] if first_pwn else None,
+        )
 
-    compact_rows = []
+    first_bloods_by_user: dict[schema.UserID, int] = {}
+    first_blood_tasks_by_user: dict[schema.UserID, list[schema.TaskID]] = {}
+    for task in sorted_tasks:
+        if not task.pwned_by:
+            continue
+
+        first_solver_id = min(task.pwned_by.items(), key=lambda x: x[1])[0]
+        first_bloods_by_user[first_solver_id] = first_bloods_by_user.get(first_solver_id, 0) + 1
+        first_blood_tasks_by_user.setdefault(first_solver_id, []).append(task.task_id)
+
+    compact_rows: list[ScoreboardRow] = []
     for idx, sb_user in enumerate(scoreboard):
         position = idx + 1
 
-        last_task = None
+        last_task: TaskRow | None = None
         if sb_user.solved_tasks:
             last_task_id, last_solve_time = sb_user.get_last_solve_time()
             if last_task_id and last_task_id in task_index:
-                last_task = {
-                    "index": task_index[last_task_id],
-                    "name": task_name[last_task_id],
-                    "url": task_url[last_task_id],
-                    "points": task_points[last_task_id],
-                    "time": schema.task.template_format_time(last_solve_time),
-                }
+                last_task = dataclasses.replace(
+                    task_index[last_task_id],
+                    time=schema.task.template_format_time(last_solve_time),
+                )
 
         route_params = dict(solution_route_params or {})
         route_params["user_id"] = sb_user.user_id
-        solved_indexes = sorted(task_index[task_id] for task_id in sb_user.solved_tasks if task_id in task_index)
+        solved_indexes = sorted(task_index[task_id].idx for task_id in sb_user.solved_tasks if task_id in task_index)
+        fb_count = sum(1 for task in task_index.values() if task.fb == sb_user.user_id)
+        fb_tasks = [task_index[task_id] for task_id in first_blood_tasks_by_user.get(sb_user.user_id, [])]
 
         compact_rows.append(
-            {
-                "position": position,
-                "display_name": sb_user.display_name,
-                "score": sb_user.score,
-                "user_id": str(sb_user.user_id),
-                "solved_count": len(sb_user.solved_tasks),
-                "last_task": last_task,
-                "solutions_url": str(request.url_for(solution_route_name, **route_params)),
-                "solved_indexes_csv": ",".join(str(i) for i in solved_indexes),
-            },
+            ScoreboardRow(
+                user_id=sb_user.user_id,
+                display_name=sb_user.display_name,
+                position=position,
+                score=sb_user.score,
+                solved_count=len(sb_user.solved_tasks),
+                fb_count=fb_count,
+                fb_tasks=fb_tasks,
+                last_task=last_task,
+                solutions_url=str(request.url_for(solution_route_name, **route_params)),
+                solved_indexes_csv=",".join(str(i) for i in solved_indexes),
+            ),
         )
 
-    return {
-        "compact_rows": compact_rows,
-        "users_total": len(scoreboard),
-        "tasks_total": len(sorted_tasks),
-    }
+    return ScoreboardContext(
+        compact_rows=compact_rows,
+        users_total=len(scoreboard),
+        tasks_total=len(sorted_tasks),
+    )
 
 
 def _build_compare_context(
@@ -209,7 +264,7 @@ async def scoreboard_page(
             "curr_user": user,
             "legend_url": str(request.url_for("scoreboard_legend_page")),
             "compare_url": str(request.url_for("scoreboard_compare_page")),
-            **context,
+            "ctx": context,
         },
     )
 

@@ -141,13 +141,13 @@ async def admin_ng_users(req: Request, admin: CURR_ADMIN) -> list[AnyComponent]:
                     title="Name",
                     on_click=GoToEvent(url=url_gen(req, "user/{user_id}")),
                 ),
-                DisplayLookup(
-                    field="display_name",
-                    title="Display Name",
-                    on_click=GoToEvent(
-                        url=url_gen(req, "user/{user_id}"),
-                    ),
-                ),
+                # DisplayLookup(
+                #     field="display_name",
+                #     title="Display Name",
+                #     on_click=GoToEvent(
+                #         url=url_gen(req, "user/{user_id}"),
+                #     ),
+                # ),
                 DisplayLookup(field="is_admin", title="Admin"),
                 # DisplayLookup(field="points", title="Points"),
                 # DisplayLookup(field="solves", title="Solve Count"),

@@ -91,7 +91,7 @@ class Settings(BaseSettings):
                 else ""
             )
         else:
-            self.VERSION += "0.7.0"
+            self.VERSION += "0.7.1"
             if self.COMMIT:
                 self.VERSION += f"-{self.COMMIT[:8]}"
 

@@ -158,7 +158,7 @@ class Task(EBaseModelV2):
             return f"{dt.second} second{'' if dt.second == 1 else 's'}"
         return ""
 
-    def last_pwned_str(self) -> tuple[uuid.UUID, str] | None:
+    def last_pwned_str(self) -> tuple[UserID, str] | None:
         if not self.pwned_by:
             return None
 
@@ -169,7 +169,7 @@ class Task(EBaseModelV2):
 
         return last_pwn[0], result_time
 
-    def first_pwned_str(self) -> tuple[uuid.UUID, str] | None:
+    def first_pwned_str(self) -> tuple[UserID, str] | None:
         if not self.pwned_by:
             return None
 

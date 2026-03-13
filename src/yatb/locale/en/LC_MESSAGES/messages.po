@@ -7,7 +7,7 @@ msgid ""
 msgstr ""
 "Project-Id-Version: PROJECT VERSION\n"
 "Report-Msgid-Bugs-To: EMAIL@ADDRESS\n"
-"POT-Creation-Date: 2026-02-09 21:54+0300\n"
+"POT-Creation-Date: 2026-03-13 03:24+0300\n"
 "PO-Revision-Date: 2025-05-30 17:06+0300\n"
 "Last-Translator: FULL NAME <EMAIL@ADDRESS>\n"
 "Language: en\n"
@@ -18,34 +18,28 @@ msgstr ""
 "Content-Transfer-Encoding: 8bit\n"
 "Generated-By: Babel 2.17.0\n"
 
-#: src/yatb/view/__init__.py:214
-msgid "Task is not solved yet"
-msgstr ""
-
-#: src/yatb/view/templates/base.jhtml:50 src/yatb/view/templates/tasks.jhtml:3
+#: src/yatb/view/templates/base.jhtml:49 src/yatb/view/templates/tasks.jhtml:3
 #: src/yatb/view/templates/tasks.jhtml:16
 msgid "Challenges"
 msgstr ""
 
-#: src/yatb/view/templates/base.jhtml:51
-#: src/yatb/view/templates/scoreboard.jhtml:3
-#: src/yatb/view/templates/scoreboard.jhtml:67
+#: src/yatb/view/templates/base.jhtml:50
 msgid "Scoreboard"
 msgstr ""
 
-#: src/yatb/view/templates/base.jhtml:71
+#: src/yatb/view/templates/base.jhtml:67
 msgid "Submit"
 msgstr ""
 
-#: src/yatb/view/templates/base.jhtml:77
+#: src/yatb/view/templates/base.jhtml:73
 msgid "Admin area"
 msgstr ""
 
-#: src/yatb/view/templates/base.jhtml:81
+#: src/yatb/view/templates/base.jhtml:77
 msgid "Logout"
 msgstr ""
 
-#: src/yatb/view/templates/base.jhtml:84 src/yatb/view/templates/login.jhtml:3
+#: src/yatb/view/templates/base.jhtml:80 src/yatb/view/templates/login.jhtml:3
 msgid "Login"
 msgstr ""
 
@@ -57,15 +51,15 @@ msgstr ""
 msgid "Show solved"
 msgstr ""
 
-#: src/yatb/view/templates/partials/scoreboard_table.jhtml:6
+#: src/yatb/view/templates/partials/scoreboard_table.jhtml:2
 msgid "Position"
 msgstr ""
 
-#: src/yatb/view/templates/partials/scoreboard_table.jhtml:7
+#: src/yatb/view/templates/partials/scoreboard_table.jhtml:3
 msgid "User"
 msgstr ""
 
-#: src/yatb/view/templates/partials/scoreboard_table.jhtml:8
+#: src/yatb/view/templates/partials/scoreboard_table.jhtml:4
 msgid "Score"
 msgstr ""
 

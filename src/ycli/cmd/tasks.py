@@ -25,7 +25,7 @@ async def _upload_task(
         task_info: FileTask = FileTask.load_yaml(task_src / "task.yaml")
     except Exception as ex:
         c.print(f"ERROR!!! {task_src = } has bad yaml: {ex!r}")
-        return
+        return None
 
     # хотим получить ID таска
     # если таска нет в локальном стейте (значит мы его ещё не заливали - а если и заливали, то никак не сможем его найти)
@@ -184,31 +184,41 @@ async def sync_tasks(
     y: YATB,
     state: State,
     main_tasks_dir: Path,
+    *,
+    delete_orphane: bool = True,
 ):
     tasks_cache: dict[TaskID, Task] = await y.get_all_tasks()
     c.print(f"Running in live mode, found {len(tasks_cache)} tasks")
 
-    for category_src in main_tasks_dir.iterdir():
-        if not category_src.is_dir():
+    touched_tasks: set[TaskID] = set()
+    for task_yaml in main_tasks_dir.rglob("task.yaml"):
+        if task_yaml.is_dir() or task_yaml.parent.name.startswith("."):
+            c.print(f"Werid {task_yaml = }")
             continue
 
-        for task_src in category_src.iterdir():
-            if not task_src.is_dir():
-                continue
+        task_src = task_yaml.parent
 
-            if not (task_src / "task.yaml").exists():
-                continue
-            try:
-                await _upload_task(
-                    y=y,
-                    state=state,
-                    tasks_cache=tasks_cache,
-                    task_src=task_src,
-                    req_tasks=[],
-                )
-            except Exception as ex:
-                c.print(f"Got error {ex = } uploading {task_src = }")
-                raise
+        try:
+            task = await _upload_task(
+                y=y,
+                state=state,
+                tasks_cache=tasks_cache,
+                task_src=task_src,
+                req_tasks=[],
+            )
+            touched_tasks.add(task.task_id)
+        except Exception as ex:
+            c.print(f"Got error {ex = } uploading {task_src = }")
+            raise
+
+    for tid in set(tasks_cache.keys()) - touched_tasks:
+        task = tasks_cache[tid]
+        c.print(
+            f"Found orphaned task: {tid} -> "  # ...
+            f"{task.task_name = }, {task.pwned_by = }",
+        )
+        if delete_orphane:
+            await y.delete_task(tid)
 
 
 @app.command()

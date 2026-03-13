@@ -27,6 +27,7 @@ app = FastAPI(
     redoc_url=settings.FASTAPI_REDOC_URL,
     openapi_url=settings.FASTAPI_OPENAPI_URL,
     lifespan=lifespan,
+    version=settings.VERSION,
 )
 app.add_middleware(i18n.LocaleMiddleware)  # ty:ignore[invalid-argument-type]
 

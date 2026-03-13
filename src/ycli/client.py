@@ -131,6 +131,14 @@ class YATB:
         ).json()
         return schema.Task.model_validate(new_task)
 
+    async def delete_task(self, task_id: schema.TaskID) -> schema.Task:
+        new_task = (
+            await self.s.get(
+                app.url_path_for("api_admin_task_delete", task_id=task_id),
+            )
+        ).json()
+        return schema.Task.model_validate(new_task)
+
     async def admin_recalc_scoreboard(self) -> None:
         resp = await self.s.get(app.url_path_for("api_admin_recalc_scoreboard"))
         resp.raise_for_status()

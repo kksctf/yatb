@@ -161,3 +161,7 @@ state/
 
 *.qcow
 *.qcow2
+
+state/
+
+backups/

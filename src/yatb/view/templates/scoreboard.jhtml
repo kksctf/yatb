@@ -1,9 +1,9 @@
 {% extends "base.jhtml" %}
-
-{% block title %}{{ _("Scoreboard", request) }}{% endblock %}
-
+{% block title %}
+    {{ _("Scoreboard", request) }}
+{% endblock title %}
 {% block extra_head %}
-  <style>
+    <style>
     .sb-meta {
       margin-bottom: 0.75rem;
       display: flex;
@@ -169,8 +169,8 @@
     }
 
     .sb-chip.solved.first-solution {
-      background: #f59e0b;
-      border-color: #f59e0b;
+      background: var(--first-solution-color);
+      border-color: var(--first-solution-color);
     }
 
     .sb-chip.solved.first-solution::after {
@@ -244,10 +244,8 @@
     .sb-row-hit th {
       background: color-mix(in oklab, var(--bulma-success) 18%, transparent) !important;
     }
-
-  </style>
-{% endblock %}
-
+    </style>
+{% endblock extra_head %}
 {% block content %}
 <div class="container is-fluid">
   <div class="is-flex is-justify-content-space-between is-align-items-center mb-3">
@@ -319,23 +317,74 @@
                 <span class="sb-muted">Not available without JS</span>
               </div>
             </details>
-          </td>
-          {% if curr_user %}
-            <td>
-              {% if row.user_id != str(curr_user.user_id) %}
-                <a href="{{ compare_url }}?user_a={{ curr_user.user_id }}&user_b={{ row.user_id }}">vs me</a>
-              {% else %}
-                -
-              {% endif %}
-            </td>
-          {% endif %}
-        </tr>
-        {% endfor %}
-      </tbody>
-    </table>
-  </div>
-</div>
-<script>
+        </div>
+        <div class="sb-table-wrap">
+            <table class="table is-fullwidth sb-table">
+                <thead>
+                    <tr>
+                        <th>{{ _("Position", request) }}</th>
+                        <th>{{ _("User", request) }}</th>
+                        <th>{{ _("Score", request) }}</th>
+                        <th>{{ _("Solved", request) }} ({{ _("FB", request) }})</th>
+                        <th>{{ _("Last Solve", request) }}</th>
+                        <th class="sb-solutions-col">{{ _("Solutions", request) }}</th>
+                        {% if curr_user %}<th>{{ _("Compare", request) }}</th>{% endif %}
+                    </tr>
+                </thead>
+                <tbody>
+                    {% for row in ctx.compact_rows %}
+                        <tr data-solved="{{ row.solved_indexes_csv }}">
+                            <th>{{ row.position }}</th>
+                            <td class="sb-name" title="{{ row.display_name }}">{{ row.display_name }}</td>
+                            <td>{{ row.score }}</td>
+                            <td>
+                                {{ row.solved_count }}/{{ ctx.tasks_total }} <span class="first-solution-outer">(🩸 <span>{{ row.fb_count }}</span>)</span>
+                            </td>
+                            <td>
+                                {% if row.last_task %}
+                                    <span class="sb-last-task">
+                                        <span>
+                                            <a class="sb-last-task-name"
+                                               href="{{ row.last_task.url }}"
+                                               title="{{ row.last_task.name }}">{{ row.last_task.name }}</a>
+                                            <small class="sb-last-task-time">{{ row.last_task.time }}</small>
+                                        </span>
+                                        <span class="sb-last-task-points" title="{{ row.last_task.points }} points">{{ row.last_task.points }}</span>
+                                    </span>
+                                {% else %}
+                                    -
+                                {% endif %}
+                            </td>
+                            <td class="sb-solutions-col">
+                                <details class="sb-tasks-details">
+                                    <summary>
+                                        <span class="sb-expand-btn">{{ _("Show", request) }}</span>
+                                    </summary>
+                                    <div class="sb-task-list"
+                                         hx-get="{{ row.solutions_url }}"
+                                         hx-trigger="toggle once from:closest details"
+                                         hx-target="this"
+                                         hx-swap="innerHTML">
+                                        <span class="sb-muted">{{ _("Not available without JS", request) }}</span>
+                                    </div>
+                                </details>
+                            </td>
+                            {% if curr_user %}
+                                <td>
+                                    {% if row.user_id != str(curr_user.user_id) %}
+                                        <a href="{{ compare_url }}?user_a={{ curr_user.user_id }}&user_b={{ row.user_id }}">vs me</a>
+                                    {% else %}
+                                        -
+                                    {% endif %}
+                                </td>
+                            {% endif %}
+                        </tr>
+                    {% endfor %}
+                </tbody>
+            </table>
+        </div>
+    </div>
+    <script>
   (function () {
     function applyLegendFilter(val) {
       const rows = document.querySelectorAll('.sb-table tbody tr[data-solved]');
@@ -354,5 +403,5 @@
       applyLegendFilter(target.value);
     });
   })();
-</script>
-{% endblock %}
+    </script>
+{% endblock content %}

@@ -99,7 +99,16 @@ async def _upload_task(
         created_task.description += "\n\n---\n\n"
         created_task.description += '<div class="card-text row d-flex justify-content-between">'
 
+        _do_archive = False
         if len(files) > _TASKS_ARHIVE_LIMIT:
+            _do_archive = True
+
+        for file in files:
+            if file.is_dir():
+                _do_archive = True
+                break
+
+        if _do_archive:
             archive_name = "files.tar.gz"
             created_task.description += (
                 "<a class='btn btn-outline-primary btn-sm col-auto m-1 flex-fill' "
@@ -206,7 +215,7 @@ async def sync_tasks(
                 task_src=task_src,
                 req_tasks=[],
             )
-            touched_tasks.add(task.task_id)
+            touched_tasks.add(task.task_id)  # pyright: ignore[reportOptionalMemberAccess] # TODO: WTF
         except Exception as ex:
             c.print(f"Got error {ex = } uploading {task_src = }")
             raise

@@ -247,75 +247,25 @@
     </style>
 {% endblock extra_head %}
 {% block content %}
-<div class="container is-fluid">
-  <div class="is-flex is-justify-content-space-between is-align-items-center mb-3">
-    <h1 class="title is-3 mb-0">{{ _("Scoreboard", request) }}</h1>
-    <a class="button is-small" href="{{ compare_url }}">Compare</a>
-  </div>
-
-  <div class="sb-meta">
-    <div>{{ _("Users", request) }}: {{ users_total }}</div>
-    <div>{{ _("Tasks", request) }}: {{ tasks_total }}</div>
-  </div>
-
-  <div class="sb-panel">
-    <details class="sb-legend"
-             hx-get="{{ legend_url }}"
-             hx-trigger="toggle once"
-             hx-target="#task-legend-content"
-             hx-swap="innerHTML">
-      <summary>Task Legend</summary>
-      <div id="task-legend-content" class="sb-legend-grid">
-        <span class="sb-muted">Not available without JS</span>
-      </div>
-    </details>
-  </div>
-
-  <div class="sb-table-wrap">
-    <table class="table is-fullwidth sb-table">
-      <thead>
-        <tr>
-          <th>{{ _("Position", request) }}</th>
-          <th>{{ _("User", request) }}</th>
-          <th>{{ _("Score", request) }}</th>
-          <th>Solved</th>
-          <th>Last Solve</th>
-          <th class="sb-solutions-col">Solutions</th>
-          {% if curr_user %}
-            <th>Compare</th>
-          {% endif %}
-        </tr>
-      </thead>
-      <tbody>
-        {% for row in compact_rows %}
-        <tr data-solved="{{ row.solved_indexes_csv }}">
-          <th>{{ row.position }}</th>
-          <td class="sb-name" title="{{ row.display_name }}">{{ row.display_name }}</td>
-          <td>{{ row.score }}</td>
-          <td>{{ row.solved_count }}/{{ tasks_total }}</td>
-          <td>
-            {% if row.last_task %}
-              <span class="sb-last-task">
-                <span>
-                  <a class="sb-last-task-name" href="{{ row.last_task.url }}" title="{{ row.last_task.name }}">{{ row.last_task.name }}</a>
-                  <small class="sb-last-task-time">{{ row.last_task.time }}</small>
-                </span>
-                <span class="sb-last-task-points" title="{{ row.last_task.points }} points">{{ row.last_task.points }}</span>
-              </span>
-            {% else %}
-              -
-            {% endif %}
-          </td>
-          <td class="sb-solutions-col">
-            <details class="sb-tasks-details">
-              <summary><span class="sb-expand-btn">Show</span></summary>
-              <div class="sb-task-list"
-                   hx-get="{{ row.solutions_url }}"
-                   hx-trigger="toggle once from:closest details"
-                   hx-target="this"
-                   hx-swap="innerHTML">
-                <span class="sb-muted">Not available without JS</span>
-              </div>
+    <div class="container is-fluid">
+        <div class="is-flex is-justify-content-space-between is-align-items-center mb-3">
+            <h1 class="title is-3 mb-0">{{ _("Scoreboard", request) }}</h1>
+            <a class="button is-small" href="{{ compare_url }}">Compare</a>
+        </div>
+        <div class="sb-meta">
+            <div>{{ _("Users", request) }}: {{ ctx.users_total }}</div>
+            <div>{{ _("Tasks", request) }}: {{ ctx.tasks_total }}</div>
+        </div>
+        <div class="sb-panel">
+            <details class="sb-legend"
+                     hx-get="{{ legend_url }}"
+                     hx-trigger="toggle once"
+                     hx-target="#task-legend-content"
+                     hx-swap="innerHTML">
+                <summary>Task Legend</summary>
+                <div id="task-legend-content" class="sb-legend-grid">
+                    <span class="sb-muted">Not available without JS</span>
+                </div>
             </details>
         </div>
         <div class="sb-table-wrap">
@@ -325,10 +275,11 @@
                         <th>{{ _("Position", request) }}</th>
                         <th>{{ _("User", request) }}</th>
                         <th>{{ _("Score", request) }}</th>
-                        <th>{{ _("Solved", request) }} ({{ _("FB", request) }})</th>
-                        <th>{{ _("Last Solve", request) }}</th>
-                        <th class="sb-solutions-col">{{ _("Solutions", request) }}</th>
-                        {% if curr_user %}<th>{{ _("Compare", request) }}</th>{% endif %}
+                        <th>Solved</th>
+                        <th>FBs</th>
+                        <th>Last Solve</th>
+                        <th class="sb-solutions-col">Solutions</th>
+                        {% if curr_user %}<th>Compare</th>{% endif %}
                     </tr>
                 </thead>
                 <tbody>
@@ -337,8 +288,20 @@
                             <th>{{ row.position }}</th>
                             <td class="sb-name" title="{{ row.display_name }}">{{ row.display_name }}</td>
                             <td>{{ row.score }}</td>
+                            <td>{{ row.solved_count }}/{{ ctx.tasks_total }}</td>
                             <td>
-                                {{ row.solved_count }}/{{ ctx.tasks_total }} <span class="first-solution-outer">(🩸 <span>{{ row.fb_count }}</span>)</span>
+                                {% if row.fb_count > 0 %}
+                                    <span class="sb-fb-chips" title="First bloods">
+                                        {% for fb_task in row.fb_tasks %}
+                                            <a class="sb-fb-chip-link"
+                                               href="{{ fb_task.url }}"
+                                               title="{{ fb_task.title }}">
+                                                <span class="sb-chip solved first-solution sb-fb-chip"></span>
+                                            </a>
+                                        {% endfor %}
+                                    </span>
+                                {% else %}
+                                {% endif %}
                             </td>
                             <td>
                                 {% if row.last_task %}
@@ -358,14 +321,14 @@
                             <td class="sb-solutions-col">
                                 <details class="sb-tasks-details">
                                     <summary>
-                                        <span class="sb-expand-btn">{{ _("Show", request) }}</span>
+                                        <span class="sb-expand-btn">Show</span>
                                     </summary>
                                     <div class="sb-task-list"
                                          hx-get="{{ row.solutions_url }}"
                                          hx-trigger="toggle once from:closest details"
                                          hx-target="this"
                                          hx-swap="innerHTML">
-                                        <span class="sb-muted">{{ _("Not available without JS", request) }}</span>
+                                        <span class="sb-muted">Not available without JS</span>
                                     </div>
                                 </details>
                             </td>

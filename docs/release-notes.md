@@ -3,19 +3,65 @@
 ## Latest version
 
 - Added:
-  - FastUI PoC
-  - Dynamic Tasks microservice and it's integration into yatb
+  - A
 - Changed:
-  - Migrated from my beanie fork back to upstream.
-  - Gigantic refactoring all over the codebase
+  - B
 - Depricated:
   - C
 - Deleted:
-  - Old admin panel
+  - E
 - Fixed:
-  - Many tests. They now work on DEBUG=False build of code, because running tests in debug mode is something strange.
+  - F
 - Security:
   - G
+
+## 0.7.2
+
+- Added:
+  - FastUI PoC
+  - Dynamic Tasks microservice (DTC) and its integration into yatb: container building, static tasks builder manager, service runner for TCP services from generic docker-composes, `builder_and_service` task type, kubevirt VM spec (WIP)
+  - S3 base infra for super-simple docker-compose deploy (garage s3 server); s3 serve moved to a separate python package
+  - Dockerized minimal yatb installation
+  - htmx + bulma frontend MVP
+  - i18n/l10n PoC (babel)
+  - Google OAuth
+  - Feature flags PoC
+  - Nix support for dev environment
+  - `TaskID`/`UserID` newtype ids instead of raw `uuid.UUID`
+  - `YAMLModel` that preserves yaml file structure between loading and dumping
+  - `display_name` user field (backported)
+  - `PRIVATE_SCOREBOARD` feature
+  - Navbar burger
+  - Scoreboard with task names
+  - `api_admin_task_delete`, `api_admin_find_flag_owner` endpoints
+  - `user_search` to ng-admin
+  - Force rebuild option for task building
+  - Archive generation for tasks
+  - IPv6 support
+- Changed:
+  - Migrated from my beanie fork back to upstream
+  - Gigantic refactoring all over the codebase
+  - Migrated from PDM to UV
+  - Migrated from tons of requirements.txt to a single pyproject.toml
+  - Migrated from requests to httpx
+  - Migrated to lifespan
+  - Complete rework of EBaseModel/EBaseModelV2 meta system
+  - Restructured project: `app` -> `yatb` -> `src/yatb`, `cli` -> `src/cli`, `dynamic_tasks_app` -> `src/dtc`
+  - Improved scoreboard: UX, scalability, fluid layout and faster renderer
+  - Better (dynamic) flags check
+  - Better task sync, now allows changing scoring
+  - Improved CLI
+  - Normalize admin usernames in TG_AUTH
+- Deleted:
+  - Old admin panel
+  - Old useless DB code
+  - `flag_sign_key`
+- Fixed:
+  - Many tests. They now work on DEBUG=False build of code, because running tests in debug mode is something strange.
+  - DTC race condition in start task
+  - Scoreboard rendering and stability
+  - Many UI fixes: table header, task header contrast, flag submit form, pill wrapping, task filters, sticky footer, navbar
+  - Docker and Nix build problems
 
 ## 0.6.3a0
 
@@ -105,7 +151,7 @@
 
 <!---
 
-## Template
+## Latest version
 
 - Added:
   - A

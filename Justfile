@@ -50,18 +50,33 @@ reset-rights-x:
 # git cringe workflow
 
 git-main branch="improvements":
-    git stash push -a -u -m "just-fast-switch-to-main"
+    #!/usr/bin/env bash
+    set -eu
+    STASH_MSG="just-fast-switch-to-main-$(date +%Y-%m-%d-%H-%M-%S)"
+    git stash push -a -u -m "$STASH_MSG" || true
     git checkout "{{ branch }}"
-    git stash apply "stash@{0}"
-    @echo "Ready to commit"
+    STASH_REF=$(git stash list | grep -m1 -F ": $STASH_MSG" | cut -d: -f1 || true)
+    if [ -n "$STASH_REF" ]; then
+        git stash apply "$STASH_REF"
+    fi
+    echo "Ready to commit"
 
 git-back dst src="improvements":
-    git stash push -a -u -m "just-fast-switch-to-back"
+    #!/usr/bin/env bash
+    set -eu
+    STASH_BACK="just-fast-switch-to-back-$(date +%Y-%m-%d-%H-%M-%S)"
+    git stash push -a -u -m "$STASH_BACK" || true
     git checkout "{{ dst }}"
     git merge "{{ src }}"
-    git stash pop "stash@{1}"
-    git stash pop "stash@{0}"
-    @echo "Ready to commit"
+    MAIN_REF=$(git stash list | grep -m1 -F ": just-fast-switch-to-main" | cut -d: -f1 || true)
+    if [ -n "$MAIN_REF" ]; then
+        git stash pop "$MAIN_REF"
+    fi
+    BACK_REF=$(git stash list | grep -m1 -F ": $STASH_BACK" | cut -d: -f1 || true)
+    if [ -n "$BACK_REF" ]; then
+        git stash pop "$BACK_REF"
+    fi
+    echo "Ready to commit"
 
 k3s *args:
     docker compose -f docker-compose.k3s.yaml {{ args }}

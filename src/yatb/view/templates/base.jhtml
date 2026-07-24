@@ -1,5 +1,5 @@
 <!DOCTYPE html>
-<html lang="en">
+<html lang="{{ request.state.lang }}">
 
 <head>
     <meta charset="utf-8">
@@ -46,8 +46,8 @@
         </div>
         <div id="yatbNavbar" class="navbar-menu">
             <div class="navbar-start">
-                <a class="navbar-item" href="{{ url_for('tasks_page') }}">{{ _("Challenges", request) }}</a>
-                <a class="navbar-item" href="{{ url_for('scoreboard_page') }}">{{ _("Scoreboard", request) }}</a>
+                <a class="navbar-item" href="{{ url_for('tasks_page') }}">{{ _("Challenges") }}</a>
+                <a class="navbar-item" href="{{ url_for('scoreboard_page') }}">{{ _("Scoreboard") }}</a>
             </div>
             <div class="navbar-end">
                 {% if curr_user %}
@@ -64,23 +64,35 @@
                             <span class="button is-static">}</span>
                         </p>
                         <p class="control">
-                            <button class="button is-info">{{ _("Submit", request) }}</button>
+                            <button class="button is-info">{{ _("Submit") }}</button>
                         </p>
                     </div>
                 </form>
                 <a class="navbar-item" href="{{ url_for('profile_page') }}">{{ curr_user.display_name }}</a>
                 {% if curr_user.is_admin %}
-                <a class="navbar-item" href="{{ url_for('admin_ng_html_landing', path='') }}">{{ _("Admin area", request) }}</a>
+                <a class="navbar-item" href="{{ url_for('admin_ng_html_landing', path='') }}">{{ _("Admin area") }}</a>
                 <!-- before_start = {{ EVENT_START_TIME - NOW() }}, before_end = {{ EVENT_END_TIME - NOW() }} -->
                 {% endif %}
                 <a class="navbar-item" href="{{ url_for('api_users_logout') }}">
-                    {{ _("Logout", request) }}
+                    {{ _("Logout") }}
                 </a>
                 {% else %}
-                <a class="navbar-item" href="{{ url_for('login_page') }}">{{ _("Login", request) }}</a>
+                <a class="navbar-item" href="{{ url_for('login_page') }}">{{ _("Login") }}</a>
                 {% endif %}
+                <div class="navbar-item has-dropdown is-hoverable">
+                    <a class="navbar-link">
+                        <span class="icon"><i class="fa-solid fa-language"></i></span>
+                        <span>{{ request.state.lang | upper }}</span>
+                    </a>
+                    <div class="navbar-dropdown is-right">
+                        <a class="navbar-item {% if request.state.lang == 'en' %}is-active{% endif %}"
+                            href="{{ request.url.replace_query_params(lang='en') }}">English</a>
+                        <a class="navbar-item {% if request.state.lang == 'ru' %}is-active{% endif %}"
+                            href="{{ request.url.replace_query_params(lang='ru') }}">Русский</a>
+                    </div>
+                </div>
                 <div class="navbar-item">
-                    <button id="theme-toggle" class="button is-light" title="Toggle theme" aria-label="Toggle theme">
+                    <button id="theme-toggle" class="button is-light" title="{{ _('Toggle theme') }}" aria-label="{{ _('Toggle theme') }}">
                         <span class="icon"><i class="fa-solid fa-moon"></i></span>
                     </button>
                 </div>
@@ -269,7 +281,7 @@
     <nav class="level is-mobile" aria-label="Footer navigation">
       <div class="level-left">
         <div class="level-item">
-          <span class="is-size-7 has-text-grey">&copy; 2025 kksctf</span>
+          <span class="is-size-7 has-text-grey">&copy; 2026 kksctf</span>
         </div>
       </div>
 

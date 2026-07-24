@@ -1,17 +1,14 @@
-# Russian translations for PROJECT.
-# Copyright (C) 2025 ORGANIZATION
-# This file is distributed under the same license as the PROJECT project.
-# FIRST AUTHOR <EMAIL@ADDRESS>, 2025.
+# Russian translations for yatb.
+# Copyright (C) 2026 kksctf
+# This file is distributed under the same license as the yatb project.
+# Maksim Anfinogenov <m.anfinogenov@cypol.dev>, 2026.
 #
 msgid ""
 msgstr ""
-"Project-Id-Version: PROJECT VERSION\n"
-"Report-Msgid-Bugs-To: EMAIL@ADDRESS\n"
-"POT-Creation-Date: 2026-03-13 03:24+0300\n"
+"POT-Creation-Date: 2026-07-24 10:55+0300\n"
 "PO-Revision-Date: 2025-05-30 17:05+0300\n"
-"Last-Translator: FULL NAME <EMAIL@ADDRESS>\n"
+"Last-Translator: Maksim Anfinogenov <m.anfinogenov@cypol.dev>\n"
 "Language: ru\n"
-"Language-Team: ru <LL@li.org>\n"
 "Plural-Forms: nplurals=3; plural=(n%10==1 && n%100!=11 ? 0 : n%10>=2 && "
 "n%10<=4 && (n%100<10 || n%100>=20) ? 1 : 2);\n"
 "MIME-Version: 1.0\n"
@@ -25,6 +22,8 @@ msgid "Challenges"
 msgstr "Задания"
 
 #: src/yatb/view/templates/base.jhtml:50
+#: src/yatb/view/templates/scoreboard.jhtml:3
+#: src/yatb/view/templates/scoreboard.jhtml:252
 msgid "Scoreboard"
 msgstr "Рейтинг"
 
@@ -44,24 +43,240 @@ msgstr "Выйти"
 msgid "Login"
 msgstr "Войти"
 
+#: src/yatb/view/templates/base.jhtml:95
+msgid "Toggle theme"
+msgstr "Переключить тему"
+
 #: src/yatb/view/templates/login.jhtml:9
 msgid "Please log in or register"
 msgstr "Войдите или зарегистрируйтесь"
 
-#: src/yatb/view/templates/tasks.jhtml:22
-#, fuzzy
-msgid "Show solved"
-msgstr "Решения"
+#: src/yatb/view/templates/login.jhtml:26
+msgid "Auth using:"
+msgstr "Вход через:"
+
+#: src/yatb/view/templates/messages.jhtml:2
+msgid "Messages"
+msgstr "Сообщения"
+
+#: src/yatb/view/templates/messages.jhtml:4
+msgid "Recent messages"
+msgstr "Последние сообщения"
+
+#: src/yatb/view/templates/messages.jhtml:9
+msgid "No messages yet."
+msgstr "Пока нет сообщений."
+
+#: src/yatb/view/templates/profile.jhtml:3
+#: src/yatb/view/templates/profile.jhtml:7
+msgid "Profile"
+msgstr "Профиль"
+
+#: src/yatb/view/templates/profile.jhtml:24
+msgid "Team:"
+msgstr "Команда:"
+
+#: src/yatb/view/templates/profile.jhtml:33
+msgid "Email"
+msgstr "Эл. почта"
+
+#: src/yatb/view/templates/partials/scoreboard_table.jhtml:4
+#: src/yatb/view/templates/profile.jhtml:37
+#: src/yatb/view/templates/scoreboard.jhtml:277
+msgid "Score"
+msgstr "Счёт"
+
+#: src/yatb/view/templates/profile.jhtml:45
+msgid "⚙️ Editing coming soon…"
+msgstr "⚙️ Редактирование скоро появится…"
+
+#: src/yatb/view/templates/scoreboard.jhtml:253
+#: src/yatb/view/templates/scoreboard.jhtml:282
+#: src/yatb/view/templates/scoreboard_compare.jhtml:105
+msgid "Compare"
+msgstr "Сравнить"
+
+#: src/yatb/view/templates/scoreboard.jhtml:256
+msgid "Users"
+msgstr "Пользователи"
+
+#: src/yatb/view/templates/scoreboard.jhtml:257
+msgid "Tasks"
+msgstr "Задания"
+
+#: src/yatb/view/templates/scoreboard.jhtml:265
+msgid "Task Legend"
+msgstr "Выбор задания"
+
+#: src/yatb/view/templates/scoreboard.jhtml:267
+#: src/yatb/view/templates/scoreboard.jhtml:331
+msgid "Loading..."
+msgstr "Загрузка..."
 
 #: src/yatb/view/templates/partials/scoreboard_table.jhtml:2
+#: src/yatb/view/templates/scoreboard.jhtml:275
 msgid "Position"
 msgstr "Позиция"
 
 #: src/yatb/view/templates/partials/scoreboard_table.jhtml:3
+#: src/yatb/view/templates/scoreboard.jhtml:276
 msgid "User"
 msgstr "Пользователь"
 
-#: src/yatb/view/templates/partials/scoreboard_table.jhtml:4
-msgid "Score"
-msgstr "Счет"
+#: src/yatb/view/templates/scoreboard.jhtml:278
+msgid "Solved"
+msgstr "Решено"
+
+#: src/yatb/view/templates/scoreboard.jhtml:279
+msgid "FBs"
+msgstr "ФБ"
+
+#: src/yatb/view/templates/scoreboard.jhtml:280
+msgid "Last Solve"
+msgstr "Последнее решение"
+
+#: src/yatb/view/templates/scoreboard.jhtml:281
+msgid "Solutions"
+msgstr "Решения"
+
+#: src/yatb/view/templates/scoreboard.jhtml:294
+msgid "First bloods"
+msgstr "Первая кровь"
+
+#: src/yatb/view/templates/scoreboard.jhtml:315
+msgid "points"
+msgstr "очков"
+
+#: src/yatb/view/templates/scoreboard.jhtml:324
+msgid "Show"
+msgstr "Показать"
+
+#: src/yatb/view/templates/scoreboard.jhtml:338
+msgid "vs me"
+msgstr "против меня"
+
+#: src/yatb/view/templates/scoreboard_compare.jhtml:3
+#: src/yatb/view/templates/scoreboard_compare.jhtml:78
+msgid "Compare Solutions"
+msgstr "Сравнение решений"
+
+#: src/yatb/view/templates/scoreboard_compare.jhtml:82
+msgid "Player A"
+msgstr "Игрок A"
+
+#: src/yatb/view/templates/scoreboard_compare.jhtml:93
+msgid "Player B"
+msgstr "Игрок B"
+
+#: src/yatb/view/templates/scoreboard_compare.jhtml:112
+msgid "both solved"
+msgstr "оба решили"
+
+#: src/yatb/view/templates/scoreboard_compare.jhtml:113
+#: src/yatb/view/templates/scoreboard_compare.jhtml:114
+#, python-format
+msgid "only %(name)s"
+msgstr "только %(name)s"
+
+#: src/yatb/view/templates/scoreboard_compare.jhtml:115
+msgid "both unsolved"
+msgstr "оба не решили"
+
+#: src/yatb/view/templates/scoreboard_compare.jhtml:116
+msgid "tasks:"
+msgstr "заданий:"
+
+#: src/yatb/view/templates/scoreboard_compare.jhtml:127
+msgid "Not enough players to compare."
+msgstr "Недостаточно игроков для сравнения."
+
+#: src/yatb/view/templates/task.jhtml:3
+msgid "Task"
+msgstr "Задание"
+
+#: src/yatb/view/templates/task.jhtml:7
+msgid "← Back to tasks"
+msgstr "← Назад к заданиям"
+
+#: src/yatb/view/templates/task.jhtml:14
+msgid "Author:"
+msgstr "Автор:"
+
+#: src/yatb/view/templates/task.jhtml:15
+msgid "Category:"
+msgstr "Категория:"
+
+#: src/yatb/view/templates/task.jhtml:19
+msgid "pts"
+msgstr "очк."
+
+#: src/yatb/view/templates/task.jhtml:19
+msgid "solves"
+msgstr "решений"
+
+#: src/yatb/view/templates/task.jhtml:26
+msgid "✅ You have already solved this challenge. Great job!"
+msgstr "✅ Вы уже решили это задание. Отличная работа!"
+
+#: src/yatb/view/templates/partials/task_card.jhtml:41
+#: src/yatb/view/templates/task.jhtml:47
+msgid "Start"
+msgstr "Запустить"
+
+#: src/yatb/view/templates/partials/task_card.jhtml:45
+#: src/yatb/view/templates/task.jhtml:56
+msgid "Restart"
+msgstr "Перезапустить"
+
+#: src/yatb/view/templates/partials/task_card.jhtml:49
+#: src/yatb/view/templates/task.jhtml:64
+msgid "Stop"
+msgstr "Остановить"
+
+#: src/yatb/view/templates/partials/task_card.jhtml:53
+#: src/yatb/view/templates/task.jhtml:72
+msgid "Extend"
+msgstr "Продлить"
+
+#: src/yatb/view/templates/partials/task_card.jhtml:57
+#: src/yatb/view/templates/task.jhtml:80
+msgid "Info"
+msgstr "Инфо"
+
+#: src/yatb/view/templates/partials/task_card.jhtml:62
+#: src/yatb/view/templates/task.jhtml:89
+msgid "Start with rebuild"
+msgstr "Запустить с пересборкой"
+
+#: src/yatb/view/templates/task.jhtml:98
+msgid "No dynamic task info yet"
+msgstr "Пока нет информации о динамическом задании"
+
+#: src/yatb/view/templates/tasks.jhtml:22
+msgid "Show solved"
+msgstr "Показать решённые"
+
+#: src/yatb/view/templates/admin/base.jhtml:11
+msgid "Back to board"
+msgstr "Назад к доске"
+
+#: src/yatb/view/templates/admin/base.jhtml:44
+msgid "Toggle navigation"
+msgstr "Переключить навигацию"
+
+#: src/yatb/view/templates/partials/scoreboard_legend.jhtml:4
+msgid "No selection"
+msgstr "Ничего не выбрано"
+
+#: src/yatb/view/templates/partials/task_card.jhtml:6
+msgid "Task is hidden"
+msgstr "Задание скрыто"
+
+#: src/yatb/view/templates/partials/task_card.jhtml:32
+msgid "No info ;("
+msgstr "Нет информации ;("
+
+#: src/yatb/view/templates/partials/task_container.jhtml:5
+msgid "No tasks match your filters."
+msgstr "Нет заданий, подходящих под фильтры."
 

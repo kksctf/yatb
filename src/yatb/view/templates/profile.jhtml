@@ -1,10 +1,10 @@
 {% extends "base.jhtml" %}
 
-{% block title %}Profile – {{ curr_user.display_name }}{% endblock %}
+{% block title %}{{ _("Profile") }} – {{ curr_user.display_name }}{% endblock %}
 
 {% block content %}
 <div class="container">
-  <h1 class="title is-3">Profile</h1>
+  <h1 class="title is-3">{{ _("Profile") }}</h1>
 
   <div class="box">
 
@@ -21,7 +21,7 @@
         <p class="title is-4 mb-0">{{ curr_user.username }}</p>
         <p class="title is-4 mb-0">{{ curr_user.display_name }}</p>
         {% if curr_user.team %}
-          <p class="subtitle is-6">Team: {{ curr_user.team }}</p>
+          <p class="subtitle is-6">{{ _("Team:") }} {{ curr_user.team }}</p>
         {% endif %}
       </div>
     </div>
@@ -30,11 +30,11 @@
     <table class="table is-fullwidth">
       <tbody>
         <tr>
-          <th>Email</th>
+          <th>{{ _("Email") }}</th>
           <td>{{ curr_user.email or "—" }}</td>
         </tr>
         <tr>
-          <th>Score</th>
+          <th>{{ _("Score") }}</th>
           <td>{{ curr_user.score }}</td>
         </tr>
       </tbody>
@@ -42,7 +42,7 @@
 
     <!-- Placeholder for future edit form -->
     <p class="has-text-grey-light">
-      ⚙️ Editing coming soon…
+      {{ _("⚙️ Editing coming soon…") }}
     </p>
   </div>
 </div>

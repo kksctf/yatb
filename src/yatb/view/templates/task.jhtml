@@ -1,29 +1,29 @@
 {% extends "base.jhtml" %}
 {% block title %}
-    {{ selected_task.task_name }} – Task
+    {{ selected_task.task_name }} – {{ _("Task") }}
 {% endblock title %}
 {% block content %}
 <div class="container">
-    <a class="button mb-4" href="{{ url_for('tasks_page') }}">← Back to tasks</a>
+    <a class="button mb-4" href="{{ url_for('tasks_page') }}">{{ _("← Back to tasks") }}</a>
     <div class="card">
         <header class="card-header">
             <div class="card-header-title is-size-4">
                 <div class="media">
                     <div class="media-content">
                         <p class="title is-4">{{ selected_task.task_name }}</p>
-                        <a class="subtitle is-6" href="tg://resolve?{{ selected_task.author }}">Author: {{ selected_task.author }}</a>
-                        <p class="subtitle is-6">Category: {{ selected_task.category|capitalize }}</p>
+                        <a class="subtitle is-6" href="tg://resolve?{{ selected_task.author }}">{{ _("Author:") }} {{ selected_task.author }}</a>
+                        <p class="subtitle is-6">{{ _("Category:") }} {{ selected_task.category|capitalize }}</p>
                     </div>
                 </div>
             </div>
-            <span class="tag is-medium ml-2">{{ selected_task.scoring.points }} pts · {{ selected_task.solves }} solves</span>
+            <span class="tag is-medium ml-2">{{ selected_task.scoring.points }} {{ _("pts") }} · {{ selected_task.solves }} {{ _("solves") }}</span>
         </header>
         <div class="card-content">
             {# Long description – add rich HTML in the DB or markdown-render beforehand #}
             <div class="content">{{ selected_task.description_html | safe }}</div>
             {% if selected_task.is_solved_by(curr_user) %}
                 <article class="message is-success">
-                    <div class="message-body">✅ You have already solved this challenge. Great job!</div>
+                    <div class="message-body">{{ _("✅ You have already solved this challenge. Great job!") }}</div>
                 </article>
             {% endif %}
         </div>
@@ -44,7 +44,7 @@
                                 class="button dynamic_task_start"
                                 formaction="{{ url_for('api_dynamic_task_start', task_id=selected_task.task_id) }}"
                                 hx-get="{{ url_for('api_dynamic_task_start', task_id=selected_task.task_id) }}">
-                            Start
+                            {{ _("Start") }}
                         </button>
                     </p>
                     <input type="hidden" name="task_id" value="{{ selected_task.task_id }}">
@@ -53,7 +53,7 @@
                                 class="button dynamic_task_restart"
                                 formaction="{{ url_for('api_dynamic_task_restart', task_id=selected_task.task_id) }}"
                                 hx-get="{{ url_for('api_dynamic_task_restart', task_id=selected_task.task_id) }}">
-                            Restart
+                            {{ _("Restart") }}
                         </button>
                     </p>
                     <p class="control">
@@ -61,7 +61,7 @@
                                 class="button dynamic_task_stop"
                                 formaction="{{ url_for('api_dynamic_task_stop', task_id=selected_task.task_id) }}"
                                 hx-get="{{ url_for('api_dynamic_task_stop', task_id=selected_task.task_id) }}">
-                            Stop
+                            {{ _("Stop") }}
                         </button>
                     </p>
                     <p class="control">
@@ -69,7 +69,7 @@
                                 class="button dynamic_task_extend"
                                 formaction="{{ url_for('api_dynamic_task_extend', task_id=selected_task.task_id) }}"
                                 hx-get="{{ url_for('api_dynamic_task_extend', task_id=selected_task.task_id) }}">
-                            Extend
+                            {{ _("Extend") }}
                         </button>
                     </p>
                     <p class="control">
@@ -77,7 +77,7 @@
                                 class="button dynamic_task_info"
                                 formaction="{{ url_for('api_dynamic_task_info', task_id=selected_task.task_id) }}"
                                 hx-get="{{ url_for('api_dynamic_task_info', task_id=selected_task.task_id) }}">
-                            Info
+                            {{ _("Info") }}
                         </button>
                     </p>
                     {% if curr_user.admin_checker() %}
@@ -86,7 +86,7 @@
                                     class="button dynamic_task_start_rebuild"
                                     formaction="{{ url_for('api_dynamic_task_start', task_id=selected_task.task_id) }}?force_rebuild=1"
                                     hx-get="{{ url_for('api_dynamic_task_start', task_id=selected_task.task_id) }}?force_rebuild=1">
-                                Start with rebuild
+                                {{ _("Start with rebuild") }}
                             </button>
                         </p>
                     {% endif %}
@@ -95,7 +95,7 @@
                     data-id="{{ selected_task.task_id }}" {#
 hx-get="{{ url_for('dynamic_task_info', task_id=selected_task.task_id) }}" #} hx-trigger="load, revealed"
                     hx-target="#data-{{ selected_task.task_id }}" hx-swap="innerHTML">
-                    No dynamic task info yet
+                    {{ _("No dynamic task info yet") }}
                 </div>
             {% endif %}
         </footer>

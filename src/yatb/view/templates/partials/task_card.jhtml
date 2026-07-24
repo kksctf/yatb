@@ -3,7 +3,7 @@
     <a href="{{ url_for('one_task_page', task_id=task.task_id) }}" class="card-header-title">
       <div class="media">
         <div class="media-content">
-          <p class="title is-6">{% if task.hidden %}<i class="fa-solid fa-eye-slash" title="Task is hidden"></i> {% endif %}{{ task.task_name }}</p>
+          <p class="title is-6">{% if task.hidden %}<i class="fa-solid fa-eye-slash" title="{{ _('Task is hidden') }}"></i> {% endif %}{{ task.task_name }}</p>
           <p class="subtitle mt-1 is-7">{{ task.category|capitalize }}</p>
         </div>
       </div>
@@ -29,7 +29,7 @@
     <hr class="mt-3 mb-2">
     <div id="data-{{ task.task_id }}" class="dynamic_task_info_field content is-small" data-id="{{ task.task_id }}" {# hx-get="{{ url_for('dynamic_task_info', task_id=task.task_id) }}" #} hx-trigger="load, revealed"
       hx-target="#data-{{ task.task_id }}" hx-swap="innerHTML">
-      No info ;(
+      {{ _("No info ;(") }}
     </div>
 
     <form class="mt-2" method="get" hx-target="#data-{{ task.task_id }}" hx-swap="innerHTML">
@@ -38,28 +38,28 @@
 
         <button type="submit" class="button dynamic_task_start"
           formaction="{{ url_for('api_dynamic_task_start', task_id=task.task_id) }}"
-          hx-get="{{ url_for('api_dynamic_task_start', task_id=task.task_id) }}">Start</button>
+          hx-get="{{ url_for('api_dynamic_task_start', task_id=task.task_id) }}">{{ _("Start") }}</button>
 
         <button type="submit" class="button dynamic_task_restart"
           formaction="{{ url_for('api_dynamic_task_restart', task_id=task.task_id) }}"
-          hx-get="{{ url_for('api_dynamic_task_restart', task_id=task.task_id) }}">Restart</button>
+          hx-get="{{ url_for('api_dynamic_task_restart', task_id=task.task_id) }}">{{ _("Restart") }}</button>
 
         <button type="submit" class="button dynamic_task_stop"
           formaction="{{ url_for('api_dynamic_task_stop', task_id=task.task_id) }}"
-          hx-get="{{ url_for('api_dynamic_task_stop', task_id=task.task_id) }}">Stop</button>
+          hx-get="{{ url_for('api_dynamic_task_stop', task_id=task.task_id) }}">{{ _("Stop") }}</button>
 
         <button type="submit" class="button dynamic_task_extend"
           formaction="{{ url_for('api_dynamic_task_extend', task_id=task.task_id) }}"
-          hx-get="{{ url_for('api_dynamic_task_extend', task_id=task.task_id) }}">Extend</button>
+          hx-get="{{ url_for('api_dynamic_task_extend', task_id=task.task_id) }}">{{ _("Extend") }}</button>
 
         <button type="submit" class="button dynamic_task_info"
           formaction="{{ url_for('api_dynamic_task_info', task_id=task.task_id) }}"
-          hx-get="{{ url_for('api_dynamic_task_info', task_id=task.task_id) }}">Info</button>
+          hx-get="{{ url_for('api_dynamic_task_info', task_id=task.task_id) }}">{{ _("Info") }}</button>
 
         {% if curr_user.admin_checker() %}
         <button type="submit" class="button dynamic_task_start_rebuild"
           formaction="{{ url_for('api_dynamic_task_start', task_id=task.task_id) }}?force_rebuild=1"
-          hx-get="{{ url_for('api_dynamic_task_start', task_id=task.task_id) }}?force_rebuild=1">Start with rebuild</button>
+          hx-get="{{ url_for('api_dynamic_task_start', task_id=task.task_id) }}?force_rebuild=1">{{ _("Start with rebuild") }}</button>
         {% endif %}
       </div>
     </form>

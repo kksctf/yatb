@@ -2,6 +2,6 @@
     {% for task in tasks | sort(attribute='task_name') | sort(attribute='scoring.points') %}
         {% include "partials/task_card.jhtml" %}
     {% else %}
-        <p>No tasks match your filters.</p>
+        <p>{{ _("No tasks match your filters.") }}</p>
     {% endfor %}
 </div>

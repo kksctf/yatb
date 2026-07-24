@@ -11,7 +11,7 @@ from yatb.db.user import UserDB
 from yatb.utils.httpx import IS_HTTPX
 from yatb.utils.log_helper import get_logger
 
-from .util import _, response_generator
+from .util import response_generator
 
 logger = get_logger("view")
 

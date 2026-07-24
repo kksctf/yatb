@@ -1,7 +1,7 @@
 <div class="sb-legend-filter">
   <label class="sb-legend-radio">
     <input type="radio" name="legend_task_filter" value="" checked>
-    <span>No selection</span>
+    <span>{{ _("No selection") }}</span>
   </label>
 </div>
 {% for task in task_legend %}

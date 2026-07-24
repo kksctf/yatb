@@ -1,9 +1,9 @@
 import asyncio
 import datetime
-import gettext
 from collections.abc import Mapping
 from pathlib import Path
 
+import markupsafe
 from fastapi import BackgroundTasks, Request
 from fastapi.routing import APIRoute as _APIRoute
 from fastapi.templating import Jinja2Templates
@@ -16,15 +16,18 @@ from yatb.config import settings
 _base_path = Path(__file__).resolve().parent
 templates = Jinja2Templates(directory=_base_path / "templates")
 
-TRANSLATIONS = {
-    lang: gettext.translation(
-        domain="messages",
-        localedir=Path(__file__).parent.parent / "locale",
-        languages=[lang],
-        fallback=True,
-    )
-    for lang in i18n.SUPPORTED
-}
+templates.env.add_extension("jinja2.ext.i18n")
+# The translation machinery (messages + private chain, current_lang) lives in `i18n`
+# so it is importable from plain Python handlers too. i18n.translate/ntranslate read
+# the language from i18n.current_lang, which response_generator sets inside the
+# executor thread right before rendering.
+templates.env.install_gettext_callables(gettext=i18n.translate, ngettext=i18n.ntranslate, newstyle=True)
+# Private-feature markers: runtime-identical to `_`/`ngettext`, but a distinct extraction
+# keyword so their strings route to the private catalog (see babel-private.cfg). Wrapped in
+# Markup to match newstyle `_` (translated text rendered as-is, not auto-escaped).
+# Markup is safe here: text comes from our own .po catalogs (trusted), mirroring newstyle `_`.
+templates.env.globals["p_"] = lambda message: markupsafe.Markup(i18n.translate(message))  # noqa: S704
+templates.env.globals["np_"] = lambda singular, plural, n: markupsafe.Markup(i18n.ntranslate(singular, plural, n))  # noqa: S704
 
 
 def route_generator(req: Request, base_path: str = "/api", *, ignore_admin: bool = True) -> dict[str, str]:
@@ -59,25 +62,30 @@ async def response_generator(  # noqa: PLR0913 # impossible to fix
         "api_list": route_generator(req, ignore_admin=ignore_admin),
     }
     context_base.update(context)
-    return await asyncio.get_running_loop().run_in_executor(
-        None,
-        lambda: templates.TemplateResponse(
-            name=filename,
-            context=context_base,
-            status_code=status_code,
-            headers=headers,
-            media_type=media_type,
-            background=background,
-        ),
-    )
+
+    lang = getattr(req.state, "lang", i18n.DEFAULT)
+
+    def _render() -> _TemplateResponse:
+        # ContextVar must be set in the executor thread: values set in the async
+        # context (or in BaseHTTPMiddleware) do not propagate here.
+        token = i18n.current_lang.set(lang)
+        try:
+            return templates.TemplateResponse(
+                name=filename,
+                context=context_base,
+                status_code=status_code,
+                headers=headers,
+                media_type=media_type,
+                background=background,
+            )
+        finally:
+            i18n.current_lang.reset(token)
+
+    return await asyncio.get_running_loop().run_in_executor(None, _render)
 
 
 def version_string() -> str:
     return f"kks-tb-{settings.VERSION}"
-
-
-def _(text: str, request: Request) -> str:
-    return TRANSLATIONS[request.state.lang].gettext(text)
 
 
 templates.env.globals["version_string"] = version_string
@@ -94,5 +102,3 @@ templates.env.globals["CTF_NAME"] = settings.CTF_NAME
 templates.env.globals["EVENT_START_TIME"] = settings.EVENT_START_TIME
 templates.env.globals["EVENT_END_TIME"] = settings.EVENT_END_TIME
 templates.env.globals["NOW"] = lambda: datetime.datetime.now(datetime.UTC)
-
-templates.env.globals["_"] = _

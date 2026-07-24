@@ -1,7 +1,7 @@
 <tr id="scoreboard-head" class="sb-tasks-head" hx-swap-oob="innerHTML:#scoreboard-head">
-  <th class="sb-pos-col sb-pos-sticky">{{ _("Position", request) }}</th>
-  <th class="sb-name-col sb-name-sticky">{{ _("User", request) }}</th>
-  <th class="sb-score-col sb-score-sticky">{{ _("Score", request) }}</th>
+  <th class="sb-pos-col sb-pos-sticky">{{ _("Position") }}</th>
+  <th class="sb-name-col sb-name-sticky">{{ _("User") }}</th>
+  <th class="sb-score-col sb-score-sticky">{{ _("Score") }}</th>
   {%- for header in task_headers -%}
   <th class="sb-rot-th">
     <a class="sb-rot" href="{{ header.url }}"><span>{{ header.label }}</span></a>

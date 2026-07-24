@@ -1,12 +1,12 @@
 {% extends "base.jhtml" %}
 
-{% block title %} {{ _("Login", request) }} {% endblock title %}
+{% block title %} {{ _("Login") }} {% endblock title %}
 
 {% block content %}
 <div class="container">
   <section class="section">
     <div class="container is-max-desktop has-text-centered">
-      <h1 class="title is-3">{{ _("Please log in or register", request) }}</h1>
+      <h1 class="title is-3">{{ _("Please log in or register") }}</h1>
 
       {# ───────────────  available auth methods  ──────────────── #}
       {% if len(auth_ways) == 1 %}
@@ -23,7 +23,7 @@
 
               <details class="box my-4" id="auth-{{ aw_type }}-box">
                   <summary class="has-text-weight-semibold">
-                  Auth using: {{ aw_type }}
+                  {{ _("Auth using:") }} {{ aw_type }}
                   </summary>
 
                   <div class="mt-3">
@@ -117,9 +117,6 @@
                   .forEach(el => { el.value = generateToken(); });
         </script>
       {% endif %}
-
-      <!-- footer -->
-      <p class="has-text-grey mt-6 mb-0">&copy; #kksctf 2020–2025</p>
     </div>
   </section>
 </div>

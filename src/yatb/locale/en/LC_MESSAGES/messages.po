@@ -7,7 +7,7 @@ msgid ""
 msgstr ""
 "Project-Id-Version: PROJECT VERSION\n"
 "Report-Msgid-Bugs-To: EMAIL@ADDRESS\n"
-"POT-Creation-Date: 2026-07-24 22:07+0300\n"
+"POT-Creation-Date: 2026-07-25 13:09+0300\n"
 "PO-Revision-Date: 2025-05-30 17:06+0300\n"
 "Last-Translator: Maksim Anfinogenov <m.anfinogenov@cypol.dev>\n"
 "Language: en\n"
@@ -18,39 +18,39 @@ msgstr ""
 "Content-Transfer-Encoding: 8bit\n"
 "Generated-By: Babel 2.17.0\n"
 
-#: src/yatb/view/templates/base.jhtml:42 src/yatb/view/templates/tasks.jhtml:3
+#: src/yatb/view/templates/base.jhtml:39 src/yatb/view/templates/tasks.jhtml:3
 #: src/yatb/view/templates/tasks.jhtml:16
 msgid "Challenges"
 msgstr ""
 
-#: src/yatb/view/templates/base.jhtml:43
+#: src/yatb/view/templates/base.jhtml:40
 #: src/yatb/view/templates/scoreboard.jhtml:3
 #: src/yatb/view/templates/scoreboard.jhtml:252
 msgid "Scoreboard"
 msgstr ""
 
-#: src/yatb/view/templates/base.jhtml:60
+#: src/yatb/view/templates/base.jhtml:57
 msgid "Submit"
 msgstr ""
 
-#: src/yatb/view/templates/base.jhtml:66
+#: src/yatb/view/templates/base.jhtml:63
 msgid "Admin area"
 msgstr ""
 
-#: src/yatb/view/templates/base.jhtml:70
+#: src/yatb/view/templates/base.jhtml:67
 msgid "Logout"
 msgstr ""
 
-#: src/yatb/view/templates/base.jhtml:73 src/yatb/view/templates/login.jhtml:3
+#: src/yatb/view/templates/base.jhtml:70 src/yatb/view/templates/login.jhtml:3
 msgid "Login"
 msgstr ""
 
-#: src/yatb/view/templates/base.jhtml:76 src/yatb/view/templates/base.jhtml:92
+#: src/yatb/view/templates/base.jhtml:73 src/yatb/view/templates/base.jhtml:89
 #: src/yatb/view/templates/profile.jhtml:46
 msgid "Settings"
 msgstr ""
 
-#: src/yatb/view/templates/base.jhtml:93
+#: src/yatb/view/templates/base.jhtml:90
 msgid "Close"
 msgstr ""
 
@@ -244,36 +244,36 @@ msgid "✅ You have already solved this challenge. Great job!"
 msgstr ""
 
 #: src/yatb/view/templates/partials/task_card.jhtml:41
-#: src/yatb/view/templates/task.jhtml:47
+#: src/yatb/view/templates/task.jhtml:53
 msgid "Start"
 msgstr ""
 
 #: src/yatb/view/templates/partials/task_card.jhtml:45
-#: src/yatb/view/templates/task.jhtml:56
+#: src/yatb/view/templates/task.jhtml:62
 msgid "Restart"
 msgstr ""
 
 #: src/yatb/view/templates/partials/task_card.jhtml:49
-#: src/yatb/view/templates/task.jhtml:64
+#: src/yatb/view/templates/task.jhtml:70
 msgid "Stop"
 msgstr ""
 
 #: src/yatb/view/templates/partials/task_card.jhtml:53
-#: src/yatb/view/templates/task.jhtml:72
+#: src/yatb/view/templates/task.jhtml:78
 msgid "Extend"
 msgstr ""
 
 #: src/yatb/view/templates/partials/task_card.jhtml:57
-#: src/yatb/view/templates/task.jhtml:80
+#: src/yatb/view/templates/task.jhtml:86
 msgid "Info"
 msgstr ""
 
 #: src/yatb/view/templates/partials/task_card.jhtml:62
-#: src/yatb/view/templates/task.jhtml:89
+#: src/yatb/view/templates/task.jhtml:95
 msgid "Start with rebuild"
 msgstr ""
 
-#: src/yatb/view/templates/task.jhtml:98
+#: src/yatb/view/templates/task.jhtml:104
 msgid "No dynamic task info yet"
 msgstr ""
 
@@ -324,6 +324,20 @@ msgstr ""
 
 #: src/yatb/view/templates/partials/task_container.jhtml:5
 msgid "No tasks match your filters."
+msgstr ""
+
+#: src/yatb/view/templates/partials/task_debug.jhtml:8
+msgid "Hidden from players"
+msgstr ""
+
+#: src/yatb/view/templates/partials/task_debug.jhtml:13
+msgid "Debug"
+msgstr ""
+
+#: src/yatb/view/templates/partials/task_debug.jhtml:30
+#: src/yatb/view/templates/partials/task_debug.jhtml:33
+#: src/yatb/view/templates/partials/task_debug.jhtml:59
+msgid "Click to reveal"
 msgstr ""
 
 #~ msgid "Toggle theme"

@@ -3,6 +3,7 @@ from typing import ClassVar, Self
 import pymongo
 from beanie import BulkWriter
 from beanie.operators import Set
+from pydantic import BaseModel
 
 from yatb.schema import FlagCheckResult, Task, TaskForm, TaskID, User
 from yatb.utils.log_helper import get_logger
@@ -58,6 +59,15 @@ class TaskDB(DocumentEx[Task], Task):
     @classmethod
     async def get_all(cls: type[Self]) -> dict[TaskID, Self]:
         return {i.task_id: i for i in await cls.find_all().to_list()}
+
+    class NameProjection(BaseModel):
+        task_id: TaskID
+        task_name: str
+
+    @classmethod
+    async def get_all_names(cls: type[Self]) -> dict[TaskID, str]:
+        """task_id -> task_name, to render task references (e.g. `req_tasks`) readably."""
+        return {i.task_id: i.task_name for i in await cls.find_all().project(cls.NameProjection).to_list()}
 
     @classmethod
     async def find_by_flag(cls: type[Self], flag: str, user: User) -> Self | None:

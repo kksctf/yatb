@@ -175,6 +175,25 @@ a {
   opacity: 0.7;
 }
 
+/* Admin debug block: secrets stay blurred until asked for, so the page can be shown
+   from a shared screen. */
+.debug-secret {
+  filter: blur(4px);
+  cursor: pointer;
+  user-select: none;
+}
+
+.debug-secret.revealed {
+  filter: none;
+  cursor: auto;
+  user-select: text;
+}
+
+.task-debug pre {
+  max-height: 20rem;
+  overflow: auto;
+}
+
 .visually-hidden {
   position: absolute;
   width: 1px;

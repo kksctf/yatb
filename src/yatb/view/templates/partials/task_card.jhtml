@@ -21,8 +21,8 @@
       {{ task.description_html | safe }}
     </div>
 
-    {% if curr_user and curr_user.admin_checker() %}
-    <!-- hidden={{ task.hidden }}, visible_for_unauth={{ task.visible_for_user(None) }}, req_tasks={{ task.req_tasks }}  -->
+    {% if curr_user and curr_user.is_admin %}
+    {% include "partials/task_debug.jhtml" %}
     {% endif %}
 
     {% if curr_user and task.dti %}
@@ -56,7 +56,7 @@
           formaction="{{ url_for('api_dynamic_task_info', task_id=task.task_id) }}"
           hx-get="{{ url_for('api_dynamic_task_info', task_id=task.task_id) }}">{{ _("Info") }}</button>
 
-        {% if curr_user.admin_checker() %}
+        {% if curr_user.is_admin %}
         <button type="submit" class="button dynamic_task_start_rebuild"
           formaction="{{ url_for('api_dynamic_task_start', task_id=task.task_id) }}?force_rebuild=1"
           hx-get="{{ url_for('api_dynamic_task_start', task_id=task.task_id) }}?force_rebuild=1">{{ _("Start with rebuild") }}</button>
@@ -64,7 +64,7 @@
       </div>
     </form>
 
-    {% if FALSE and curr_user and curr_user.admin_checker() %}
+    {% if FALSE and curr_user and curr_user.is_admin %}
     <div class="buttons are-small has-addons mt-2">
       <button class="button dynamic_task_build" data-id="{{ task.task_id }}" {#
         hx-post="{{ url_for('dynamic_task_build', task_id=task.task_id) }}" #} hx-target="#data-{{ task.task_id }}"

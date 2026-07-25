@@ -232,6 +232,30 @@
         }); */
     </script>
     {% endif %}
+    {% if curr_user and curr_user.is_admin %}
+    <script>
+        // Reveal blurred secrets in the admin debug block. Delegated on purpose: htmx
+        // replaces #tasks-container wholesale, which would drop per-element handlers.
+        (function () {
+            function reveal(el) {
+                var secret = el.closest ? el.closest('.debug-secret') : null;
+                if (secret) secret.classList.add('revealed');
+            }
+
+            document.addEventListener('click', function (event) {
+                reveal(event.target);
+            });
+
+            document.addEventListener('keydown', function (event) {
+                if (event.key !== 'Enter' && event.key !== ' ') return;
+                var secret = event.target.closest && event.target.closest('.debug-secret');
+                if (!secret || secret.classList.contains('revealed')) return;
+                event.preventDefault();
+                secret.classList.add('revealed');
+            });
+        })();
+    </script>
+    {% endif %}
     <script>
         (function () {
             var root = document.documentElement;

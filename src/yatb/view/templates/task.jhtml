@@ -26,6 +26,12 @@
                     <div class="message-body">{{ _("✅ You have already solved this challenge. Great job!") }}</div>
                 </article>
             {% endif %}
+            {% if curr_user and curr_user.is_admin %}
+                {# the partial speaks `task`, this page speaks `selected_task` #}
+                {% with task = selected_task %}
+                    {% include "partials/task_debug.jhtml" %}
+                {% endwith %}
+            {% endif %}
         </div>
         <footer class="card-footer">
             {% if selected_task.attachments %}
@@ -80,7 +86,7 @@
                             {{ _("Info") }}
                         </button>
                     </p>
-                    {% if curr_user.admin_checker() %}
+                    {% if curr_user.is_admin %}
                         <p class="control">
                             <button type="submit"
                                     class="button dynamic_task_start_rebuild"

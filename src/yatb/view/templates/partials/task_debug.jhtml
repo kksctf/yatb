@@ -1,0 +1,61 @@
+{# Admin-only debug block: how the task is configured and why it is (in)visible.
+   Expects `task` and `tid2name`; the caller is responsible for the is_admin check. #}
+<div class="task-debug mt-3">
+  <div class="tags are-small mb-1">
+    <span class="tag is-info is-light">{{ task.flag.classtype }}</span>
+    <span class="tag is-info is-light">{{ task.scoring.classtype }}</span>
+    {% if not task.visible_for_user(None) %}
+    <span class="tag is-warning">{{ _("Hidden from players") }}</span>
+    {% endif %}
+  </div>
+
+  <details class="content is-small">
+    <summary>{{ _("Debug") }}</summary>
+
+    <p>
+      <code>task_id</code> = {{ task.task_id }}<br>
+      <code>author</code> = {{ task.author }}<br>
+      <code>hidden</code> = {{ task.hidden }}<br>
+      <code>visible_for_user(None)</code> = {{ task.visible_for_user(None) }}<br>
+      <code>req_tasks</code> =
+      {%- if task.req_tasks %}
+      {% for req_id in task.req_tasks %}{{ tid2name.get(req_id, '??') }}{% if not loop.last %}, {% endif %}{% endfor %}
+      {%- else %} [] {%- endif %}
+    </p>
+
+    <p>
+      <code>flag.flag_base</code> = {{ task.flag.flag_base }}<br>
+      {% if task.flag.classtype == "StaticFlag" %}
+      <code>flag.flag</code> =
+      <span class="debug-secret" tabindex="0" title="{{ _('Click to reveal') }}">{{ task.flag.flag }}</span>
+      {% elif task.flag.classtype == "DynamicKKSFlag" %}
+      <code>flag.dynamic_flag_base</code> =
+      <span class="debug-secret" tabindex="0" title="{{ _('Click to reveal') }}">{{ task.flag.dynamic_flag_base }}</span>
+      {% endif %}
+    </p>
+
+    <p>
+      <code>scoring.points</code> = {{ task.scoring.points }}<br>
+      {% if task.scoring.classtype == "StaticScoring" %}
+      <code>scoring.static_points</code> = {{ task.scoring.static_points }}
+      {% elif task.scoring.classtype == "DynamicKKSScoring" %}
+      <code>scoring.solves</code> = {{ task.scoring.solves }},
+      <code>decay</code> = {{ task.scoring.decay }},
+      <code>minimum</code> = {{ task.scoring.minimum }},
+      <code>maximum</code> = {{ task.scoring.maximum }}
+      {% endif %}
+    </p>
+
+    {% if task.dti %}
+    <p>
+      <code>dti.features</code> = {{ task.dti.features }}<br>
+      <code>dti.service_info</code> = {{ task.dti.service_info }}<br>
+      <code>dti.builder_info</code> = {{ task.dti.builder_info }}<br>
+      <code>dti.s3_url</code> = {{ task.dti.s3_url }}<br>
+      <code>dti.vm_ports</code> = {{ task.dti.vm_ports }}
+    </p>
+    {% endif %}
+
+    <pre class="debug-secret" tabindex="0" title="{{ _('Click to reveal') }}">{{ task | admin_dump }}</pre>
+  </details>
+</div>

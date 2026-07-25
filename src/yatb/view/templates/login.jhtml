@@ -100,9 +100,6 @@
                     Register
                   </button>
                 </p>
-                <p class="control">
-                  <span id="debug-auth-status" class="is-size-7"></span>
-                </p>
               </div>
             </form>
 
@@ -112,8 +109,7 @@
         <script>
           (function () {
             var form = document.getElementById("debug-auth-form");
-            var status = document.getElementById("debug-auth-status");
-            if (!form || !status) return;
+            if (!form) return;
 
             function cyrb53(str, seed = 0) {
               let h1 = 0xdeadbeef ^ seed, h2 = 0x41c6ce57 ^ seed;
@@ -137,26 +133,10 @@
               el.addEventListener("click", function () {
                 form.username.value = el.dataset.username || generateToken();
                 form.password.value = el.dataset.password;
-                status.textContent = "";
-                status.className = "is-size-7";
               });
             });
-
-            document.body.addEventListener("htmx:afterRequest", function (event) {
-              // the request is triggered by the clicked button, not by the form itself
-              if (event.target.form !== form && event.target !== form) return;
-              var xhr = event.detail && event.detail.xhr;
-              if (!xhr) return;
-
-              var ok = xhr.status === 200;
-              var msg = "ok";
-              if (!ok) {
-                try { msg = JSON.parse(xhr.responseText).detail; }
-                catch (e) { msg = "HTTP " + xhr.status; }
-              }
-              status.textContent = msg;
-              status.className = "is-size-7 " + (ok ? "has-text-success" : "has-text-danger");
-            });
+            // Failures surface as toasts now — api_auth_simple_login attaches one to its
+            // 401, and toasts.js covers anything that arrives without a header.
           })();
         </script>
       {% endif %}

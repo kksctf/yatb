@@ -39,7 +39,9 @@ class ClientExRaw(TestClient):
     def check_page_after_login(self, username: str, resp: Response) -> None:
         assert resp.status_code == status.HTTP_200_OK, resp.text
         assert "sampl3_fl4g" in resp.text, resp.text
-        assert f"""<a class="navbar-item" href="http://testserver/profile">{username}</a>""" in resp.text, resp.text
+        # The navbar renders the user's own dropdown: their name, and /profile inside it.
+        assert f"<span>{username}</span>" in resp.text, resp.text
+        assert 'href="http://testserver/profile"' in resp.text, resp.text
 
     def create_task_raw(
         self,

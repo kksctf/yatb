@@ -1,12 +1,12 @@
 {#
   Tier-1 settings: needed before authentication, so they work for anonymous visitors too.
   Stored in cookies, and mirrored into User.settings when there is a user.
-  Included twice on /profile (navbar modal + page section) — keep everything class-based,
-  no ids, and let base.jhtml's script keep every copy in sync.
+  Rendered once, as the contents of the navbar settings dropdown; base.jhtml wires the
+  behaviour and keeps the theme buttons in sync.
 #}
-<div class="field">
-    <label class="label">{{ _("Theme") }}</label>
-    <div class="buttons has-addons">
+<div class="settings-group">
+    <p class="mini-label">{{ _("Theme") }}</p>
+    <div class="buttons has-addons are-small settings-options">
         {% for value, label, icon in [
             ("auto", _("Auto"), "fa-circle-half-stroke"),
             ("light", _("Light"), "fa-sun"),
@@ -25,11 +25,13 @@
     </div>
 </div>
 
-<div class="field">
-    <label class="label">{{ _("Language") }}</label>
+<hr class="navbar-divider">
+
+<div class="settings-group">
+    <p class="mini-label">{{ _("Language") }}</p>
     {# No optimistic update here: the language is baked into the HTML, so the server
        answers with HX-Refresh and htmx reloads the page. #}
-    <div class="buttons has-addons">
+    <div class="buttons has-addons are-small settings-options">
         {% for value, label in [("auto", _("Auto")), ("en", "English"), ("ru", "Русский")] %}
         <button type="button"
             class="button js-lang-option {% if request.state.lang_pref == value %}is-primary is-selected{% endif %}"

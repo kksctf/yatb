@@ -3,8 +3,9 @@ from typing import Annotated, Literal, cast
 
 from fastapi import APIRouter, Depends, Form, HTTPException, Request, Response, status
 
-from yatb import auth, schema
+from yatb import auth, schema, toasts
 from yatb.db import UserDB
+from yatb.i18n import translate as _
 from yatb.utils import metrics
 from yatb.utils.httpx import IS_HTTPX
 
@@ -99,6 +100,7 @@ async def api_auth_simple_login(
         raise HTTPException(
             status_code=status.HTTP_401_UNAUTHORIZED,
             detail="Incorrect username or password",
+            headers=toasts.danger(_("Incorrect username or password.")),
         )
 
     auth_source = cast(schema.SimpleAuth.AuthModel, user.auth_source)
@@ -106,6 +108,7 @@ async def api_auth_simple_login(
         raise HTTPException(
             status_code=status.HTTP_401_UNAUTHORIZED,
             detail="Incorrect username or password",
+            headers=toasts.danger(_("Incorrect username or password.")),
         )
 
     metrics.logons_per_user.labels(user_id=user.user_id, username=user.username).inc()
@@ -139,6 +142,7 @@ async def api_auth_simple_register(
         raise HTTPException(
             status_code=status.HTTP_403_FORBIDDEN,
             detail="Team exists",
+            headers=toasts.danger(_("That name is already taken.")),
         )
 
     user = await UserDB.populate(model)

@@ -22,10 +22,11 @@ router = APIRouter(
     tags=["view"],
 )
 
-from . import admin, scoreboard  # noqa
+from . import actions, admin, scoreboard  # noqa
 
 router.include_router(admin.router)
 router.include_router(scoreboard.router)
+router.include_router(actions.router)
 
 
 @dataclass

@@ -6,8 +6,10 @@ from pydantic import BaseModel, field_validator
 
 from yatb import auth, i18n
 from yatb.db import UserDB
+from yatb.i18n import translate as _
 from yatb.schema.ui import LangPref, Theme, UISettings
 from yatb.schema.user import ExtraInfo
+from yatb.toasts import Toast, ToastKind, toast_header
 from yatb.utils.countries import VALID_COUNTRIES
 
 router = APIRouter(
@@ -84,9 +86,12 @@ async def api_settings_ui_set(
         await user.update(Set({UserDB.settings: merged}))
 
     # Language is baked into the rendered HTML, so the page has to come back from the server.
+    # No toast either: HX-Refresh throws the page (and any toast on it) away immediately.
     if patch.lang is not None:
         resp.headers["HX-Refresh"] = "true"
+        return "ok"
 
+    resp.headers.update(toast_header(Toast(kind=ToastKind.SUCCESS, message=_("Settings saved."))))
     return "ok"
 
 

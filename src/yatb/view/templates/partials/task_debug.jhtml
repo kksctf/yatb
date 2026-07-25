@@ -1,9 +1,13 @@
 {# Admin-only debug block: how the task is configured and why it is (in)visible.
    Expects `task` and `tid2name`; the caller is responsible for the is_admin check. #}
 <div class="task-debug mt-3">
-  <div class="tags are-small mb-1">
-    <span class="tag is-info is-light">{{ task.flag.classtype }}</span>
-    <span class="tag is-info is-light">{{ task.scoring.classtype }}</span>
+  {# Plain tags on purpose: these are labels, not an "info" state, and is-info would
+     bring in a hue the rest of the palette does not use. #}
+  {# No `are-small` here: Bulma only defines are-medium/are-large for .tags, so it was
+     doing nothing. The size comes from .task-debug in style.css. #}
+  <div class="tags mb-1">
+    <span class="tag">{{ task.flag.classtype }}</span>
+    <span class="tag">{{ task.scoring.classtype }}</span>
     {% if not task.visible_for_user(None) %}
     <span class="tag is-warning">{{ _("Hidden from players") }}</span>
     {% endif %}

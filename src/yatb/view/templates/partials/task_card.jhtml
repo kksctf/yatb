@@ -1,4 +1,6 @@
-<div class="card {% if task.is_solved_by(curr_user) %}solved{% endif %} {% if task.hidden %}task-hidden{% endif %}" data-task-id="{{ task.task_id }}">
+{# `oob` is set only by the htmx twin in view/actions.py; htmx matches the swap target by
+   `id`, which is why the card carries both that and the `data-task-id` filters use. #}
+<div id="task-{{ task.task_id }}" class="card {% if task.is_solved_by(curr_user) %}solved{% endif %} {% if task.hidden %}task-hidden{% endif %}" data-task-id="{{ task.task_id }}" {% if oob %}hx-swap-oob="true"{% endif %}>
   <header class="card-header {% if task.is_solved_by(curr_user) %}has-background-success{% endif %}">
     <a href="{{ url_for('one_task_page', task_id=task.task_id) }}" class="card-header-title">
       <div class="media">
@@ -33,7 +35,8 @@
     </div>
 
     <form class="mt-2" method="get" hx-target="#data-{{ task.task_id }}" hx-swap="innerHTML">
-      <div class="buttons are-small has-addons is-centered">
+      {# Up to six buttons in a card that can be 260px wide, so they have to wrap. #}
+      <div class="buttons are-small has-addons is-centered is-flex-wrap-wrap">
         <input type="hidden" name="task_id" value="{{ task.task_id }}">
 
         <button type="submit" class="button dynamic_task_start"
@@ -64,16 +67,6 @@
       </div>
     </form>
 
-    {% if FALSE and curr_user and curr_user.is_admin %}
-    <div class="buttons are-small has-addons mt-2">
-      <button class="button dynamic_task_build" data-id="{{ task.task_id }}" {#
-        hx-post="{{ url_for('dynamic_task_build', task_id=task.task_id) }}" #} hx-target="#data-{{ task.task_id }}"
-        hx-swap="innerHTML">Build</button>
-      <button class="button dynamic_task_destroy" data-id="{{ task.task_id }}" {#
-        hx-post="{{ url_for('dynamic_task_destroy', task_id=task.task_id) }}" #} hx-target="#data-{{ task.task_id }}"
-        hx-swap="innerHTML">Destroy</button>
-    </div>
-    {% endif %}
     {% endif %}
   </div>
 

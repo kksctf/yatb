@@ -9,49 +9,43 @@
   <div class="box">
 
     <!-- Avatar & username -->
-    <div class="media mb-4">
+    <div class="media mb-5">
       <figure class="media-left">
-        <p class="image is-96x96 has-background-grey-lighter has-text-weight-bold
-                  is-flex is-justify-content-center is-align-items-center"
-          style="border-radius:50%; font-size:2rem;">
-          {{ curr_user.username[0]|upper }}
-        </p>
+        <p class="user-badge is-large">{{ (curr_user.display_name or curr_user.username)[0]|upper }}</p>
       </figure>
       <div class="media-content">
-        <p class="title is-4 mb-0">{{ curr_user.username }}</p>
-        <p class="title is-4 mb-0">{{ curr_user.display_name }}</p>
+        <p class="title is-4 mb-1">{{ curr_user.display_name }}</p>
+        <p class="subtitle is-6 has-text-weight-normal mb-0">{{ curr_user.username }}</p>
+      </div>
+      <div class="media-right has-text-right">
+        <p class="mini-label">{{ _("Score") }}</p>
+        <p class="title is-4 mb-0">{{ curr_user.score }}</p>
       </div>
     </div>
 
-    <!-- Details table -->
-    <table class="table is-fullwidth">
-      <tbody>
-        <tr>
-          <th>{{ _("Score") }}</th>
-          <td>{{ curr_user.score }}</td>
-        </tr>
-        <tr>
-          <th>{{ _("Affiliation") }}</th>
-          <td>{{ curr_user.extra_info.affiliation or "—" }}</td>
-        </tr>
-        <tr>
-          <th>{{ _("Country") }}</th>
-          <td>{{ country_name(curr_user.extra_info.country) if curr_user.extra_info.country else "—" }}</td>
-        </tr>
-      </tbody>
-    </table>
+    {# Two values, so a definition list reads lighter here than a full table. #}
+    <div class="profile-facts">
+      <div class="profile-fact">
+        <p class="mini-label">{{ _("Affiliation") }}</p>
+        <p>{{ curr_user.extra_info.affiliation or "—" }}</p>
+      </div>
+      <div class="profile-fact">
+        <p class="mini-label">{{ _("Country") }}</p>
+        <p>{{ country_name(curr_user.extra_info.country) if curr_user.extra_info.country else "—" }}</p>
+      </div>
+    </div>
   </div>
 
   <div class="box">
+    {# Tier-1 (theme, language) lives only in the navbar dropdown — it works without an
+       account, so there is no reason to duplicate it here. #}
     <h2 class="title is-5">{{ _("Settings") }}</h2>
 
-    {% include "partials/settings_general.jhtml" %}
-
-    <hr>
-
     {# Tier-2: only meaningful with an account, so unlike tier-1 it is saved explicitly. #}
+    {# The htmx twin of api_settings_profile_set: same save, but it answers with a toast
+       instead of leaving the page to invent its own status text. #}
     <form id="profile-settings-form"
-      hx-post="{{ api_list['api_settings_profile_set'] }}"
+      hx-post="{{ url_for('ui_settings_profile_set') }}"
       hx-swap="none">
       <div class="field">
         <label class="label" for="profile-affiliation">{{ _("Affiliation") }}</label>
@@ -79,29 +73,12 @@
         </div>
       </div>
 
-      <div class="field">
+      <div class="field is-grouped is-align-items-center">
         <div class="control">
           <button class="button is-primary" type="submit">{{ _("Save") }}</button>
-          <span id="profile-settings-status" class="ml-3 is-size-7"></span>
         </div>
       </div>
     </form>
   </div>
 </div>
-
-<script>
-  (function () {
-    var form = document.getElementById("profile-settings-form");
-    var status = document.getElementById("profile-settings-status");
-    if (!form || !status) return;
-
-    document.body.addEventListener("htmx:afterRequest", function (event) {
-      if (event.target !== form || !event.detail || !event.detail.xhr) return;
-
-      var ok = event.detail.xhr.status === 200;
-      status.textContent = ok ? {{ _("Saved") | tojson }} : {{ _("Could not save") | tojson }};
-      status.className = "ml-3 is-size-7 " + (ok ? "has-text-success" : "has-text-danger");
-    });
-  })();
-</script>
 {% endblock %}

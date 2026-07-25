@@ -1,18 +1,12 @@
-from datetime import UTC, datetime
 from typing import Annotated
 
 from fastapi import APIRouter, Form, HTTPException, status
 from pydantic import BaseModel
 
 from yatb import auth
-from yatb.config import settings
-from yatb.db import TaskDB
 from yatb.schema import FlagForm, Task, TaskID
-from yatb.utils import metrics, tg
-from yatb.ws import ws_manager
+from yatb.services.flags import FlagOutcome, submit_flag
 
-from . import logger
-from .api_dynamic_tasks import UserTaskPair, get_client_safe
 from .utils import CURRENT_TASK, VISIBLE_TASKS
 
 router = APIRouter(
@@ -21,11 +15,11 @@ router = APIRouter(
 )
 
 
-class BRMessage(BaseModel):
-    task_name: str
-    user_name: str
-    points: int
-    is_fb: bool
+class SubmitFlagResult(BaseModel):
+    task_id: TaskID
+    # A correct flag for a task you already own is not a failure, so it is a 200 with this
+    # flag set rather than a status code the caller has to interpret.
+    already_solved: bool
 
 
 @router.get("/")
@@ -39,79 +33,32 @@ async def api_task_get(task: CURRENT_TASK) -> Task.public_model:
 
 
 @router.post("/submit_flag")
-async def api_task_submit_flag(flag: Annotated[FlagForm, Form()], user: auth.CURR_USER) -> TaskID:
-    if not user.is_admin and datetime.now(tz=UTC) < settings.EVENT_START_TIME:
-        raise HTTPException(
-            status_code=status.HTTP_425_TOO_EARLY,
-            detail="CTF has not started yet",
-        )
+async def api_task_submit_flag(flag: Annotated[FlagForm, Form()], user: auth.CURR_USER) -> SubmitFlagResult:
+    """Pure JSON API. The htmx-facing twin lives in `view/actions.py`."""
+    result = await submit_flag(user, flag.flag)
 
-    cleaned_flag = flag.flag.strip()
-    task = await TaskDB.find_by_flag(cleaned_flag, user)
-    if task:
-        logger.info(f"{user.short_desc()} state=found task with flag flag={cleaned_flag!r}, task={task.short_desc()}")
-    else:
-        logger.info(f"{user.short_desc()} state=not_found task with flag={cleaned_flag!r}")
-        metrics.bad_solves_per_user.labels(user_id=user.user_id, username=user.username).inc()
+    match result.outcome:
+        case FlagOutcome.OK | FlagOutcome.ALREADY_SOLVED:
+            # task_id is always set on these two outcomes.
+            return SubmitFlagResult(
+                task_id=result.task_id,  # pyright: ignore[reportArgumentType]
+                already_solved=result.outcome is FlagOutcome.ALREADY_SOLVED,
+            )
 
-    if not task or not (visible := task.visible_for_user(user)):
-        if task and not visible:  # pyright: ignore[reportPossiblyUnboundVariable] # boolean things is hard for pylance
-            logger.warning(f"Someone {user.short_desc()} trying to solve hidden task {task}")
+        case FlagOutcome.NOT_STARTED:
+            raise HTTPException(
+                status_code=status.HTTP_425_TOO_EARLY,
+                detail="CTF has not started yet",
+            )
+
+        case FlagOutcome.BAD_FLAG:
             raise HTTPException(
                 status_code=status.HTTP_404_NOT_FOUND,
                 detail="Bad flag",
             )
-        raise HTTPException(
-            status_code=status.HTTP_404_NOT_FOUND,
-            detail="Bad flag",
-        )
 
-    if task.task_id in user.solved_tasks or user.user_id in task.pwned_by:
-        _task_yes_user_not = task.task_id in user.solved_tasks and user.user_id not in task.pwned_by
-        _user_yes_task_not = task.task_id not in user.solved_tasks and user.user_id in task.pwned_by
-        if _task_yes_user_not or _user_yes_task_not:
-            logger.warning(
-                f"Wtf, user and task misreferenced!!! {task} {user} {_task_yes_user_not = } {_user_yes_task_not = }"
-            )
-            if _task_yes_user_not:
-                # user.solved_tasks.remove(task.task_id)
-                pass
-            if _user_yes_task_not:
-                # task.pwned_by.remove(user.solved_tasks)
-                pass
-
-            await user.recalc_score_one()
+        case FlagOutcome.DESYNC:
             raise HTTPException(
                 status_code=status.HTTP_500_INTERNAL_SERVER_ERROR,
-                detail="пятисотОЧКА!!1<br>Попробуйте решить таск ещё раз.",
+                detail="Task and user references are out of sync, please submit the flag again",
             )
-        raise HTTPException(
-            status_code=status.HTTP_202_ACCEPTED,
-            detail="You already solved this task",
-        )
-    else:
-        metrics.solves_per_task.labels(task_id=task.task_id, task_name=task.task_name).inc()
-        metrics.solves_per_user.labels(user_id=user.user_id, username=user.username).inc()
-
-    ret = await user.solve_task_bw(task)
-
-    # TODO: maybe this is counter-UX...
-    if task.dti and (client := get_client_safe()):
-        await client.stop(UserTaskPair(task=task, user=user))
-
-    msg = BRMessage(
-        task_name=task.task_name,
-        user_name=user.display_name,
-        points=task.scoring.points,
-        is_fb=len(task.pwned_by) == 1,
-    )
-
-    await ws_manager.broadcast(msg.model_dump_json())
-
-    if len(task.pwned_by) == 1:
-        try:
-            tg.display_fb_msg(task, user)
-        except Exception as ex:  # noqa: W0703, PIE786
-            logger.error(f"tg_exception exception='{ex}'")
-
-    return ret

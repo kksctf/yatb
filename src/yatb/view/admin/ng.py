@@ -1,5 +1,4 @@
 from collections.abc import Mapping
-from typing import Annotated, Any
 
 from fastapi import (
     Request,
@@ -10,8 +9,7 @@ from fastui import AnyComponent, FastUI, prebuilt_html
 from fastui import components as c
 from fastui.components.display import DisplayLookup
 from fastui.events import BackEvent, GoToEvent
-from fastui.forms import SelectSearchResponse, fastui_form
-from pydantic import BaseModel, Field, field_validator
+from fastui.forms import SelectSearchResponse
 
 from yatb import schema
 from yatb.api.admin import admin_tasks as api_admin_tasks

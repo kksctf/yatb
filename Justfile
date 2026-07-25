@@ -16,15 +16,26 @@ cli *args:
     uv run -m ycli {{ args }}
 
 babel-extract:
-    pybabel extract -F pyproject.toml -o messages.pot .
+    pybabel extract -F pyproject.toml -o messages.pot .        # keywords "_ ngettext" already exclude p_
 
 babel-update:
-    pybabel update -i messages.pot -d src/yatb/locale
+    pybabel update -i messages.pot -d src/yatb/locale -D messages
 
 babel-compile:
-    pybabel compile -d src/yatb/locale
+    pybabel compile -d src/yatb/locale -D messages
+    -pybabel compile -d src/yatb/locale -D private   # no-op if no private.po (open-source build)
 
 babel: babel-extract babel-update babel-compile
+
+# --- private features: run ONLY on the private branch ---
+# Private strings are marked with p_()/np_(); split is by keyword, not by path.
+babel-extract-private:
+    pybabel extract -F babel-private.cfg --no-default-keywords -k p_ -k np_:1,2 -o private.pot .
+
+babel-update-private:
+    pybabel update -i private.pot -d src/yatb/locale -D private
+
+babel-private: babel-extract-private babel-update-private
 
 precom: fix format
 

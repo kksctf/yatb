@@ -10,6 +10,17 @@ from starlette.middleware.base import BaseHTTPMiddleware
 SUPPORTED = ["en", "ru"]
 DEFAULT = "en"
 
+# "auto" means "no explicit choice": language falls back to Accept-Language, theme falls
+# back to the `prefers-color-scheme` media query in style.css. Kept here (and not in
+# schema/) because LocaleMiddleware validates cookies against them, and `i18n` imports
+# nothing from `yatb.*` — so schema/ui.py can import these without a cycle.
+AUTO = "auto"
+SUPPORTED_LANG_PREFS = [AUTO, *SUPPORTED]
+SUPPORTED_THEMES = [AUTO, "light", "dark"]
+DEFAULT_THEME = AUTO
+
+COOKIE_MAX_AGE = 60 * 60 * 24 * 365
+
 # Bridges the per-request language into the synchronous gettext callables used
 # during Jinja rendering. Rendering runs in a thread-pool executor, so the value
 # is also set inside the render function (see view/util.py); it is set here too so
@@ -76,9 +87,19 @@ class LocaleMiddleware(BaseHTTPMiddleware):
         request.state.lang = lang
         set_lang(lang)  # so p_()/translate() in async handlers see the request language
 
+        # The *preference* behind request.state.lang: the settings menu must highlight
+        # "Auto" rather than the language Auto happened to resolve to.
+        lang_pref = query_lang if query_lang in SUPPORTED else request.cookies.get("lang")
+        request.state.lang_pref = lang_pref if lang_pref in SUPPORTED else AUTO
+
+        # Theme is not resolved server-side: "auto" simply omits the data-theme attribute
+        # and lets the prefers-color-scheme block in style.css take over.
+        theme = request.cookies.get("theme")
+        request.state.theme = theme if theme in SUPPORTED_THEMES else DEFAULT_THEME
+
         resp = await call_next(request)
 
         # persist an explicit query choice so it survives navigation
         if query_lang in SUPPORTED:
-            resp.set_cookie("lang", query_lang, max_age=60 * 60 * 24 * 365, samesite="lax")
+            resp.set_cookie("lang", query_lang, max_age=COOKIE_MAX_AGE, samesite="lax")
         return resp

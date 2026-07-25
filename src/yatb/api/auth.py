@@ -9,11 +9,23 @@ from yatb.utils import metrics
 from yatb.utils.httpx import IS_HTTPX
 
 from . import logger
+from .settings import apply_ui_settings_cookies
 
 router = APIRouter(
     prefix="/auth",
     tags=["auth"],
 )
+
+
+def apply_login_response(resp: Response, user: UserDB) -> None:
+    """Issue the session cookie and reconcile tier-1 preferences.
+
+    Login is the single sync point between User.settings and the tier-1 cookies, and the
+    server wins: whatever this browser had picked while logged out is overwritten here.
+    """
+    access_token = auth.create_user_token(user)
+    resp.set_cookie(key="access_token", value=f"Bearer {access_token}", httponly=True)
+    apply_ui_settings_cookies(resp, user.settings)
 
 
 async def check_for_existing_model(
@@ -63,8 +75,7 @@ def generic_handler_generator(cls: type[schema.auth.AuthBase]) -> Callable:
         metrics.logons_per_user.labels(user_id=user.user_id, username=user.username).inc()
 
         # create token for user, and put it in cookie
-        access_token = auth.create_user_token(user)
-        resp.set_cookie(key="access_token", value=f"Bearer {access_token}", httponly=True)
+        apply_login_response(resp, user)
 
         resp.status_code = status.HTTP_303_SEE_OTHER
         resp.headers["Location"] = str(req.url_for("index"))
@@ -99,8 +110,7 @@ async def api_auth_simple_login(
 
     metrics.logons_per_user.labels(user_id=user.user_id, username=user.username).inc()
 
-    access_token = auth.create_user_token(user)
-    resp.set_cookie(key="access_token", value=f"Bearer {access_token}", httponly=True)
+    apply_login_response(resp, user)
 
     if is_httpx:
         resp.headers["HX-Redirect"] = "/tasks"  # or "/"
@@ -134,8 +144,7 @@ async def api_auth_simple_register(
     user = await UserDB.populate(model)
     metrics.users.inc()
 
-    access_token = auth.create_user_token(user)
-    resp.set_cookie(key="access_token", value=f"Bearer {access_token}", httponly=True)
+    apply_login_response(resp, user)
 
     if is_httpx:
         resp.headers["HX-Redirect"] = "/tasks"  # or "/"

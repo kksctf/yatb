@@ -1,0 +1,44 @@
+{#
+  Tier-1 settings: needed before authentication, so they work for anonymous visitors too.
+  Stored in cookies, and mirrored into User.settings when there is a user.
+  Included twice on /profile (navbar modal + page section) — keep everything class-based,
+  no ids, and let base.jhtml's script keep every copy in sync.
+#}
+<div class="field">
+    <label class="label">{{ _("Theme") }}</label>
+    <div class="buttons has-addons">
+        {% for value, label, icon in [
+            ("auto", _("Auto"), "fa-circle-half-stroke"),
+            ("light", _("Light"), "fa-sun"),
+            ("dark", _("Dark"), "fa-moon")
+        ] %}
+        <button type="button"
+            class="button js-theme-option {% if request.state.theme == value %}is-primary is-selected{% endif %}"
+            data-value="{{ value }}"
+            hx-post="{{ api_list['api_settings_ui_set'] }}"
+            hx-vals='{"theme": "{{ value }}"}'
+            hx-swap="none">
+            <span class="icon"><i class="fa-solid {{ icon }}"></i></span>
+            <span>{{ label }}</span>
+        </button>
+        {% endfor %}
+    </div>
+</div>
+
+<div class="field">
+    <label class="label">{{ _("Language") }}</label>
+    {# No optimistic update here: the language is baked into the HTML, so the server
+       answers with HX-Refresh and htmx reloads the page. #}
+    <div class="buttons has-addons">
+        {% for value, label in [("auto", _("Auto")), ("en", "English"), ("ru", "Русский")] %}
+        <button type="button"
+            class="button js-lang-option {% if request.state.lang_pref == value %}is-primary is-selected{% endif %}"
+            data-value="{{ value }}"
+            hx-post="{{ api_list['api_settings_ui_set'] }}"
+            hx-vals='{"lang": "{{ value }}"}'
+            hx-swap="none">
+            <span>{{ label }}</span>
+        </button>
+        {% endfor %}
+    </div>
+</div>

@@ -1,21 +1,11 @@
 <!DOCTYPE html>
-<html lang="{{ request.state.lang }}">
+<html lang="{{ request.state.lang }}" {% if request.state.theme != 'auto' %}data-theme="{{ request.state.theme }}"{% endif %}>
 
 <head>
     <meta charset="utf-8">
     <title>
         {% block title %}{{ CTF_NAME }}{% endblock %}
     </title>
-    <script>
-        // Set initial theme ASAP to reduce flash
-        (function () {
-            try {
-                var saved = localStorage.getItem('theme');
-                var sysDark = window.matchMedia && window.matchMedia('(prefers-color-scheme: dark)').matches;
-                document.documentElement.dataset.theme = saved || (sysDark ? 'dark' : 'light');
-            } catch (_) { /* no-op */ }
-        })();
-    </script>
     <link rel="stylesheet" href="{{ url_for('static', path='layout.css') }}">
     <link rel="stylesheet" href="{{ url_for('static', path='style.css') }}">
     <!-- Bulma & HTMX from CDNs -->
@@ -79,21 +69,9 @@
                 {% else %}
                 <a class="navbar-item" href="{{ url_for('login_page') }}">{{ _("Login") }}</a>
                 {% endif %}
-                <div class="navbar-item has-dropdown is-hoverable">
-                    <a class="navbar-link">
-                        <span class="icon"><i class="fa-solid fa-language"></i></span>
-                        <span>{{ request.state.lang | upper }}</span>
-                    </a>
-                    <div class="navbar-dropdown is-right">
-                        <a class="navbar-item {% if request.state.lang == 'en' %}is-active{% endif %}"
-                            href="{{ request.url.replace_query_params(lang='en') }}">English</a>
-                        <a class="navbar-item {% if request.state.lang == 'ru' %}is-active{% endif %}"
-                            href="{{ request.url.replace_query_params(lang='ru') }}">Русский</a>
-                    </div>
-                </div>
                 <div class="navbar-item">
-                    <button id="theme-toggle" class="button is-light" title="{{ _('Toggle theme') }}" aria-label="{{ _('Toggle theme') }}">
-                        <span class="icon"><i class="fa-solid fa-moon"></i></span>
+                    <button id="settings-open" class="button is-light" title="{{ _('Settings') }}" aria-label="{{ _('Settings') }}">
+                        <span class="icon"><i class="fa-solid fa-gear"></i></span>
                     </button>
                 </div>
             </div>
@@ -102,6 +80,20 @@
     <section class="section">
         {% block content %}{% endblock %}
     </section>
+
+    {# Tier-1 settings, reachable from every page including for anonymous visitors. #}
+    <div id="settings-modal" class="modal">
+        <div class="modal-background" data-settings-close></div>
+        <div class="modal-card">
+            <header class="modal-card-head">
+                <p class="modal-card-title">{{ _("Settings") }}</p>
+                <button class="delete" aria-label="{{ _('Close') }}" data-settings-close></button>
+            </header>
+            <section class="modal-card-body">
+                {% include "partials/settings_general.jhtml" %}
+            </section>
+        </div>
+    </div>
 
     {% if curr_user %}
     <script>
@@ -242,26 +234,47 @@
     {% endif %}
     <script>
         (function () {
-            function applyIcon(theme) {
-                var btn = document.getElementById('theme-toggle');
-                if (!btn) return;
-                btn.classList.remove('is-light', 'is-dark');
-                btn.classList.add(theme === 'dark' ? 'is-dark' : 'is-light');
-                var icon = btn.querySelector('i');
-                if (icon) icon.className = theme === 'dark' ? 'fa-solid fa-sun' : 'fa-solid fa-moon';
+            var root = document.documentElement;
+
+            function markSelected(selector, value) {
+                // /profile renders the settings partial twice (modal + page section),
+                // so every copy has to follow the choice.
+                document.querySelectorAll(selector).forEach(function (btn) {
+                    var active = btn.dataset.value === value;
+                    btn.classList.toggle('is-primary', active);
+                    btn.classList.toggle('is-selected', active);
+                });
             }
 
             document.addEventListener('DOMContentLoaded', function () {
-                var root = document.documentElement;
-                applyIcon(root.dataset.theme === 'dark' ? 'dark' : 'light');
-                var btn = document.getElementById('theme-toggle');
-                if (!btn) return;
-                btn.addEventListener('click', function () {
-                    var current = root.dataset.theme === 'dark' ? 'dark' : 'light';
-                    var next = current === 'dark' ? 'light' : 'dark';
-                    root.dataset.theme = next;
-                    try { localStorage.setItem('theme', next); } catch (_) { /* ignore */ }
-                    applyIcon(next);
+                var modal = document.getElementById('settings-modal');
+                var opener = document.getElementById('settings-open');
+
+                if (modal) {
+                    if (opener) {
+                        opener.addEventListener('click', function () { modal.classList.add('is-active'); });
+                    }
+                    modal.querySelectorAll('[data-settings-close]').forEach(function (el) {
+                        el.addEventListener('click', function () { modal.classList.remove('is-active'); });
+                    });
+                    document.addEventListener('keydown', function (event) {
+                        if (event.key === 'Escape') modal.classList.remove('is-active');
+                    });
+                }
+
+                // The theme is applied optimistically so the switch feels instant; the
+                // POST only persists it. Language has no local equivalent — the server
+                // answers with HX-Refresh and htmx reloads the page.
+                document.querySelectorAll('.js-theme-option').forEach(function (btn) {
+                    btn.addEventListener('click', function () {
+                        var value = btn.dataset.value;
+                        if (value === 'auto') {
+                            delete root.dataset.theme;
+                        } else {
+                            root.dataset.theme = value;
+                        }
+                        markSelected('.js-theme-option', value);
+                    });
                 });
 
                 var burger = document.querySelector('.navbar-burger');

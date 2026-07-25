@@ -20,9 +20,6 @@
       <div class="media-content">
         <p class="title is-4 mb-0">{{ curr_user.username }}</p>
         <p class="title is-4 mb-0">{{ curr_user.display_name }}</p>
-        {% if curr_user.team %}
-          <p class="subtitle is-6">{{ _("Team:") }} {{ curr_user.team }}</p>
-        {% endif %}
       </div>
     </div>
 
@@ -30,20 +27,81 @@
     <table class="table is-fullwidth">
       <tbody>
         <tr>
-          <th>{{ _("Email") }}</th>
-          <td>{{ curr_user.email or "—" }}</td>
-        </tr>
-        <tr>
           <th>{{ _("Score") }}</th>
           <td>{{ curr_user.score }}</td>
         </tr>
+        <tr>
+          <th>{{ _("Affiliation") }}</th>
+          <td>{{ curr_user.extra_info.affiliation or "—" }}</td>
+        </tr>
+        <tr>
+          <th>{{ _("Country") }}</th>
+          <td>{{ country_name(curr_user.extra_info.country) if curr_user.extra_info.country else "—" }}</td>
+        </tr>
       </tbody>
     </table>
+  </div>
 
-    <!-- Placeholder for future edit form -->
-    <p class="has-text-grey-light">
-      {{ _("⚙️ Editing coming soon…") }}
-    </p>
+  <div class="box">
+    <h2 class="title is-5">{{ _("Settings") }}</h2>
+
+    {% include "partials/settings_general.jhtml" %}
+
+    <hr>
+
+    {# Tier-2: only meaningful with an account, so unlike tier-1 it is saved explicitly. #}
+    <form id="profile-settings-form"
+      hx-post="{{ api_list['api_settings_profile_set'] }}"
+      hx-swap="none">
+      <div class="field">
+        <label class="label" for="profile-affiliation">{{ _("Affiliation") }}</label>
+        <div class="control">
+          <input id="profile-affiliation" class="input" name="affiliation" maxlength="128"
+            placeholder="{{ _('University, company, …') }}" value="{{ curr_user.extra_info.affiliation }}">
+        </div>
+      </div>
+
+      <div class="field">
+        <label class="label" for="profile-country">{{ _("Country") }}</label>
+        <div class="control">
+          <div class="select is-fullwidth">
+            <select id="profile-country" name="country">
+              <option value="" {% if not curr_user.extra_info.country %}selected{% endif %}>
+                {{ _("Not specified") }}
+              </option>
+              {% for code, name in countries %}
+              <option value="{{ code }}" {% if curr_user.extra_info.country == code %}selected{% endif %}>
+                {{ name }}
+              </option>
+              {% endfor %}
+            </select>
+          </div>
+        </div>
+      </div>
+
+      <div class="field">
+        <div class="control">
+          <button class="button is-primary" type="submit">{{ _("Save") }}</button>
+          <span id="profile-settings-status" class="ml-3 is-size-7"></span>
+        </div>
+      </div>
+    </form>
   </div>
 </div>
+
+<script>
+  (function () {
+    var form = document.getElementById("profile-settings-form");
+    var status = document.getElementById("profile-settings-status");
+    if (!form || !status) return;
+
+    document.body.addEventListener("htmx:afterRequest", function (event) {
+      if (event.target !== form || !event.detail || !event.detail.xhr) return;
+
+      var ok = event.detail.xhr.status === 200;
+      status.textContent = ok ? {{ _("Saved") | tojson }} : {{ _("Could not save") | tojson }};
+      status.className = "ml-3 is-size-7 " + (ok ? "has-text-success" : "has-text-danger");
+    });
+  })();
+</script>
 {% endblock %}

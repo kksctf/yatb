@@ -5,45 +5,53 @@
 #
 msgid ""
 msgstr ""
-"POT-Creation-Date: 2026-07-24 10:55+0300\n"
+"Project-Id-Version: PROJECT VERSION\n"
+"Report-Msgid-Bugs-To: EMAIL@ADDRESS\n"
+"POT-Creation-Date: 2026-07-24 22:07+0300\n"
 "PO-Revision-Date: 2025-05-30 17:06+0300\n"
 "Last-Translator: Maksim Anfinogenov <m.anfinogenov@cypol.dev>\n"
 "Language: en\n"
+"Language-Team: en <LL@li.org>\n"
 "Plural-Forms: nplurals=2; plural=(n != 1);\n"
 "MIME-Version: 1.0\n"
 "Content-Type: text/plain; charset=utf-8\n"
 "Content-Transfer-Encoding: 8bit\n"
 "Generated-By: Babel 2.17.0\n"
 
-#: src/yatb/view/templates/base.jhtml:49 src/yatb/view/templates/tasks.jhtml:3
+#: src/yatb/view/templates/base.jhtml:42 src/yatb/view/templates/tasks.jhtml:3
 #: src/yatb/view/templates/tasks.jhtml:16
 msgid "Challenges"
 msgstr ""
 
-#: src/yatb/view/templates/base.jhtml:50
+#: src/yatb/view/templates/base.jhtml:43
 #: src/yatb/view/templates/scoreboard.jhtml:3
 #: src/yatb/view/templates/scoreboard.jhtml:252
 msgid "Scoreboard"
 msgstr ""
 
-#: src/yatb/view/templates/base.jhtml:67
+#: src/yatb/view/templates/base.jhtml:60
 msgid "Submit"
 msgstr ""
 
-#: src/yatb/view/templates/base.jhtml:73
+#: src/yatb/view/templates/base.jhtml:66
 msgid "Admin area"
 msgstr ""
 
-#: src/yatb/view/templates/base.jhtml:77
+#: src/yatb/view/templates/base.jhtml:70
 msgid "Logout"
 msgstr ""
 
-#: src/yatb/view/templates/base.jhtml:80 src/yatb/view/templates/login.jhtml:3
+#: src/yatb/view/templates/base.jhtml:73 src/yatb/view/templates/login.jhtml:3
 msgid "Login"
 msgstr ""
 
-#: src/yatb/view/templates/base.jhtml:95
-msgid "Toggle theme"
+#: src/yatb/view/templates/base.jhtml:76 src/yatb/view/templates/base.jhtml:92
+#: src/yatb/view/templates/profile.jhtml:46
+msgid "Settings"
+msgstr ""
+
+#: src/yatb/view/templates/base.jhtml:93
+msgid "Close"
 msgstr ""
 
 #: src/yatb/view/templates/login.jhtml:9
@@ -71,22 +79,40 @@ msgstr ""
 msgid "Profile"
 msgstr ""
 
-#: src/yatb/view/templates/profile.jhtml:24
-msgid "Team:"
-msgstr ""
-
-#: src/yatb/view/templates/profile.jhtml:33
-msgid "Email"
-msgstr ""
-
 #: src/yatb/view/templates/partials/scoreboard_table.jhtml:4
-#: src/yatb/view/templates/profile.jhtml:37
+#: src/yatb/view/templates/profile.jhtml:30
 #: src/yatb/view/templates/scoreboard.jhtml:277
 msgid "Score"
 msgstr ""
 
-#: src/yatb/view/templates/profile.jhtml:45
-msgid "⚙️ Editing coming soon…"
+#: src/yatb/view/templates/profile.jhtml:34
+#: src/yatb/view/templates/profile.jhtml:57
+msgid "Affiliation"
+msgstr ""
+
+#: src/yatb/view/templates/profile.jhtml:38
+#: src/yatb/view/templates/profile.jhtml:65
+msgid "Country"
+msgstr ""
+
+#: src/yatb/view/templates/profile.jhtml:60
+msgid "University, company, …"
+msgstr ""
+
+#: src/yatb/view/templates/profile.jhtml:70
+msgid "Not specified"
+msgstr ""
+
+#: src/yatb/view/templates/profile.jhtml:84
+msgid "Save"
+msgstr ""
+
+#: src/yatb/view/templates/profile.jhtml:102
+msgid "Saved"
+msgstr ""
+
+#: src/yatb/view/templates/profile.jhtml:102
+msgid "Could not save"
 msgstr ""
 
 #: src/yatb/view/templates/scoreboard.jhtml:253
@@ -267,6 +293,27 @@ msgstr ""
 msgid "No selection"
 msgstr ""
 
+#: src/yatb/view/templates/partials/settings_general.jhtml:8
+msgid "Theme"
+msgstr ""
+
+#: src/yatb/view/templates/partials/settings_general.jhtml:11
+#: src/yatb/view/templates/partials/settings_general.jhtml:33
+msgid "Auto"
+msgstr ""
+
+#: src/yatb/view/templates/partials/settings_general.jhtml:12
+msgid "Light"
+msgstr ""
+
+#: src/yatb/view/templates/partials/settings_general.jhtml:13
+msgid "Dark"
+msgstr ""
+
+#: src/yatb/view/templates/partials/settings_general.jhtml:29
+msgid "Language"
+msgstr ""
+
 #: src/yatb/view/templates/partials/task_card.jhtml:6
 msgid "Task is hidden"
 msgstr ""
@@ -278,4 +325,16 @@ msgstr ""
 #: src/yatb/view/templates/partials/task_container.jhtml:5
 msgid "No tasks match your filters."
 msgstr ""
+
+#~ msgid "Toggle theme"
+#~ msgstr ""
+
+#~ msgid "Team:"
+#~ msgstr ""
+
+#~ msgid "Email"
+#~ msgstr ""
+
+#~ msgid "⚙️ Editing coming soon…"
+#~ msgstr ""
 

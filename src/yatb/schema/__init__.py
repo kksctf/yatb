@@ -5,7 +5,8 @@ from .flags import DynamicKKSFlag, Flag, FlagCheckResult, StaticFlag
 from .ids import TaskID, UserID
 from .scoring import DynamicKKSScoring, Scoring, StaticScoring
 from .task import DynamicTaskFeatures, DynamicTaskInfo, FlagUnion, ScoringUnion, Task, TaskForm
-from .user import User
+from .ui import LangPref, Theme, UISettings
+from .user import ExtraInfo, User
 
 
 class FlagForm(BaseModel):

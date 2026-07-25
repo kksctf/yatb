@@ -5,9 +5,10 @@ from fastapi import Depends, Query, Request
 from fastapi.responses import HTMLResponse
 from fastapi.routing import APIRouter
 
-from yatb import auth, schema
+from yatb import auth, i18n, schema
 from yatb.api import tasks
 from yatb.db.user import UserDB
+from yatb.utils import countries
 from yatb.utils.httpx import IS_HTTPX
 from yatb.utils.log_helper import get_logger
 
@@ -106,12 +107,18 @@ async def one_task_page(
 
 
 @router.get("/profile")
-async def profile_page(request: Request, user: auth.CURR_USER_SAFE) -> HTMLResponse:
+async def profile_page(request: Request, user: auth.CURR_USER_OR_REDIRECT_LOGIN) -> HTMLResponse:
+    lang = getattr(request.state, "lang", i18n.DEFAULT)
     return await response_generator(
         request,
         "profile.jhtml",
         {
             "curr_user": user,
+            # Country names are localized, and the render happens in an executor thread
+            # where i18n.current_lang is only set for the template's own gettext calls —
+            # so resolve them here rather than through a Jinja global.
+            "countries": countries.country_list(lang),
+            "country_name": lambda code: countries.country_name(code, lang),
         },
     )
 
@@ -124,5 +131,8 @@ async def login_page(req: Request, user: auth.CURR_USER_SAFE) -> HTMLResponse:
         {
             "curr_user": user,
             "auth_ways": [i for i in schema.auth.ENABLED_AUTH_WAYS if not i.FAKE],
+            # only meaningful for the DEBUG helpers block: this is the username which
+            # gets promoted to admin, see SimpleAuth.AuthModel.is_admin
+            "debug_username": schema.SimpleAuth.auth_settings.DEBUG_USERNAME,
         },
     )

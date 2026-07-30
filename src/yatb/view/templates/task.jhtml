@@ -27,10 +27,8 @@
                 </article>
             {% endif %}
             {% if curr_user and curr_user.is_admin %}
-                {# the partial speaks `task`, this page speaks `selected_task` #}
-                {% with task = selected_task %}
-                    {% include "partials/task_debug.jhtml" %}
-                {% endwith %}
+                <div hx-get="{{ url_for('api_admin_task_debug', task_id=selected_task.task_id) }}"
+                     hx-trigger="revealed" hx-swap="outerHTML"></div>
             {% endif %}
         </div>
         <footer class="card-footer">

@@ -7,7 +7,6 @@ from fastapi.routing import APIRouter
 
 from yatb import auth, i18n, schema
 from yatb.api import tasks
-from yatb.db.task import TaskDB
 from yatb.db.user import UserDB
 from yatb.utils import countries
 from yatb.utils.httpx import IS_HTTPX
@@ -22,28 +21,24 @@ router = APIRouter(
     tags=["view"],
 )
 
-from . import actions, admin, scoreboard  # noqa
+from . import actions, admin, scoreboard, task_debug  # noqa
 
 router.include_router(admin.router)
 router.include_router(scoreboard.router)
 router.include_router(actions.router)
+router.include_router(task_debug.router)
 
 
 @dataclass
 class _Cache:
     user_id_to_username: dict[schema.UserID, str]
-    task_id_to_name: dict[schema.TaskID, str]
 
 
 async def get_cache(request: Request) -> _Cache:
     users = await UserDB.get_all_projected(UserDB.ScoreboardProjection)
     uid2name = {uuid: user.display_name for uuid, user in users.items()}
 
-    # Covers every task, not just the visible ones: `req_tasks` may point at a task the
-    # current filter (or the current user) does not include.
-    tid2name = await TaskDB.get_all_names()
-
-    return _Cache(user_id_to_username=uid2name, task_id_to_name=tid2name)
+    return _Cache(user_id_to_username=uid2name)
 
 
 Cache: TypeAlias = Annotated[_Cache, Depends(get_cache)]
@@ -76,7 +71,6 @@ async def tasks_page(
                 "tasks": tasks,
                 "categories": categories,
                 "uid2name": cache.user_id_to_username,
-                "tid2name": cache.task_id_to_name,
             },
         )
 
@@ -92,7 +86,6 @@ async def tasks_page(
             "curr_user": user,
             "tasks": tasks,
             "uid2name": cache.user_id_to_username,
-            "tid2name": cache.task_id_to_name,
         },
     )
 
@@ -111,7 +104,6 @@ async def one_task_page(
             "curr_user": user,
             "selected_task": task,
             "uid2name": cache.user_id_to_username,
-            "tid2name": cache.task_id_to_name,
         },
     )
 

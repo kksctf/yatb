@@ -1,5 +1,7 @@
 {# Admin-only debug block: how the task is configured and why it is (in)visible.
-   Expects `task` and `tid2name`; the caller is responsible for the is_admin check. #}
+   Rendered only by `api_admin_task_debug`, which is what enforces admin-ness — the
+   `CURR_ADMIN` dependency, not the template that asked for the fragment. Expects
+   `task`, `tid2name` and `admin_json`, all supplied by that handler. #}
 <div class="task-debug mt-3">
   {# Plain tags on purpose: these are labels, not an "info" state, and is-info would
      bring in a hue the rest of the palette does not use. #}
@@ -60,6 +62,6 @@
     </p>
     {% endif %}
 
-    <pre class="debug-secret" tabindex="0" title="{{ _('Click to reveal') }}">{{ task | admin_dump }}</pre>
+    <pre class="debug-secret" tabindex="0" title="{{ _('Click to reveal') }}">{{ admin_json }}</pre>
   </details>
 </div>

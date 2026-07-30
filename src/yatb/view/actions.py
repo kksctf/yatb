@@ -110,8 +110,6 @@ async def ui_task_submit_flag(
             "curr_user": user,
             "task": result.task,
             "uid2name": await _card_names(result.task),
-            # Only the admin-only debug block needs this, so only admins pay for it.
-            "tid2name": await TaskDB.get_all_names() if user.is_admin else {},
             "oob": True,
         },
         headers=headers,

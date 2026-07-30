@@ -88,15 +88,7 @@ def version_string() -> str:
     return f"kks-tb-{settings.VERSION}"
 
 
-def admin_dump(task: schema.Task) -> str:
-    """Admin-level JSON of a task, for the admin-only debug block."""
-    # Goes through `admin_model` like the FastUI admin does, so Private fields and the
-    # beanie bookkeeping of `TaskDB` stay out of the rendered page.
-    return schema.Task.admin_model.model_validate(task.model_dump()).model_dump_json(indent=2)
-
-
 templates.env.globals["version_string"] = version_string
-templates.env.filters["admin_dump"] = admin_dump
 templates.env.globals["len"] = len
 templates.env.globals["template_format_time"] = schema.task.template_format_time
 templates.env.globals["set"] = set

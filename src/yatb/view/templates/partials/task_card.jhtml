@@ -24,7 +24,8 @@
     </div>
 
     {% if curr_user and curr_user.is_admin %}
-    {% include "partials/task_debug.jhtml" %}
+    <div hx-get="{{ url_for('api_admin_task_debug', task_id=task.task_id) }}"
+      hx-trigger="revealed" hx-swap="outerHTML"></div>
     {% endif %}
 
     {% if curr_user and task.dti %}

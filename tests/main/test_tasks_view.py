@@ -26,9 +26,9 @@ def _make_visible_task(client: ClientEx) -> schema.Task:
 
 def test_debug_block_for_admin(client: ClientEx):
     test_auth.test_admin(client)
-    _make_visible_task(client)
+    task = _make_visible_task(client)
 
-    resp = client.get(app.url_path_for("tasks_page"))
+    resp = client.get(app.url_path_for("api_admin_task_debug", task_id=task.task_id))
     assert resp.status_code == status.HTTP_200_OK, resp.text
     assert "task-debug" in resp.text, resp.text
     assert "debug-secret" in resp.text, resp.text
@@ -40,6 +40,10 @@ def test_no_debug_block_for_user(client: ClientEx):
     task = _make_visible_task(client)
 
     client.simple_register_raw(username="Rubikoid_user", password="123456789")
+
+    resp = client.get(app.url_path_for("api_admin_task_debug", task_id=task.task_id))
+    assert resp.status_code == status.HTTP_403_FORBIDDEN, resp.text
+    assert FLAG not in resp.text, resp.text
 
     resp = client.get(app.url_path_for("tasks_page"))
     assert resp.status_code == status.HTTP_200_OK, resp.text

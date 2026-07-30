@@ -1,8 +1,9 @@
+from collections.abc import Sequence
 from typing import ClassVar, Self
 
 import pymongo
 from beanie import BulkWriter
-from beanie.operators import Set
+from beanie.operators import In, Set
 from pydantic import BaseModel
 
 from yatb.schema import FlagCheckResult, Task, TaskForm, TaskID, User
@@ -65,9 +66,17 @@ class TaskDB(DocumentEx[Task], Task):
         task_name: str
 
     @classmethod
-    async def get_all_names(cls: type[Self]) -> dict[TaskID, str]:
-        """task_id -> task_name, to render task references (e.g. `req_tasks`) readably."""
-        return {i.task_id: i.task_name for i in await cls.find_all().project(cls.NameProjection).to_list()}
+    async def get_names_by_ids(cls: type[Self], task_ids: Sequence[TaskID]) -> dict[TaskID, str]:
+        """task_id -> task_name, to render task references (e.g. `req_tasks`) readably.
+
+        Narrowed to the ids actually referenced rather than the whole collection: the
+        debug block is fetched once per card, and `req_tasks` is usually empty.
+        """
+        if not task_ids:
+            return {}
+
+        found = await cls.find(In(cls.task_id, list(task_ids))).project(cls.NameProjection).to_list()
+        return {i.task_id: i.task_name for i in found}
 
     @classmethod
     async def find_by_flag(cls: type[Self], flag: str, user: User) -> Self | None:

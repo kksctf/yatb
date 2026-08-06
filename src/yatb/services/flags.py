@@ -14,7 +14,8 @@ logger = get_logger("services.flags")
 
 
 class FlagOutcome(StrEnum):
-    """Every way a flag submission can end.
+    """
+    Every way a flag submission can end.
 
     This enum is the point of the module: before it, the outcomes lived as five scattered
     `raise HTTPException` calls plus one `return`, so each caller had to re-derive "what
@@ -103,7 +104,8 @@ async def submit_flag(user: UserDB, flag: str) -> FlagResult:
 
 
 async def _resolve_already_solved(user: UserDB, task: TaskDB) -> FlagResult:
-    """Tell an ordinary re-submit apart from a half-written solve.
+    """
+    Tell an ordinary re-submit apart from a half-written solve.
 
     `user.solved_tasks` and `task.pwned_by` are two sides of the same fact, written
     separately. If only one side is set, the score is wrong and needs recomputing — that

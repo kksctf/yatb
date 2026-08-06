@@ -19,7 +19,8 @@ router = APIRouter(
 
 
 def apply_login_response(resp: Response, user: UserDB) -> None:
-    """Issue the session cookie and reconcile tier-1 preferences.
+    """
+    Issue the session cookie and reconcile tier-1 preferences.
 
     Login is the single sync point between User.settings and the tier-1 cookies, and the
     server wins: whatever this browser had picked while logged out is overwritten here.

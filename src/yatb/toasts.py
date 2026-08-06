@@ -1,4 +1,5 @@
-"""Server-authored toast notifications, delivered to htmx via the `HX-Trigger` header.
+"""
+Server-authored toast notifications, delivered to htmx via the `HX-Trigger` header.
 
 The client is deliberately dumb: it never maps status codes to colours, it just renders
 what it is told. That mapping belongs next to the code that knows what happened, which is
@@ -40,7 +41,8 @@ class Toast(BaseModel):
 
 
 def toast_header(toast: Toast, extra: dict[str, object] | None = None) -> dict[str, str]:
-    """Render a toast as an `HX-Trigger` header value.
+    """
+    Render a toast as an `HX-Trigger` header value.
 
     Safe to attach to `HTTPException(headers=...)` as well as to a plain response: htmx
     processes `HX-Trigger` in `handleAjaxResponse` before it decides whether the response

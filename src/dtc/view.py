@@ -74,7 +74,7 @@ class ServiceInfo(BaseModel):
 
 async def get_services() -> list[ServiceInfo]:
     ret: list[ServiceInfo] = []
-    
+
     return ret
 
     for (task_id, user_id), task in connector.ltis.items():

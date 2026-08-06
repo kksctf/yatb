@@ -119,7 +119,8 @@ def test_task_solve(client: ClientEx):
 
 
 def test_task_resolve_is_not_an_error(client: ClientEx):
-    """A flag you already own is a 200, not a failure.
+    """
+    A flag you already own is a 200, not a failure.
 
     It used to be a 202, which the navbar could only read as "not 200" and therefore
     rendered as a red error toast.

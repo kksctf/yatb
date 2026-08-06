@@ -1,4 +1,5 @@
-"""htmx-facing twins of the pure JSON endpoints.
+"""
+htmx-facing twins of the pure JSON endpoints.
 
 These exist so that `api/` stays free of presentation concerns: the JSON API answers with
 status codes and models, this module answers with toasts and out-of-band swaps. Both are
@@ -30,7 +31,8 @@ router = APIRouter(
 
 
 def flag_toast(result: FlagResult) -> Toast:
-    """Describe a flag submission to the user.
+    """
+    Describe a flag submission to the user.
 
     A function rather than a module-level table on purpose: `_()` resolves the language
     from a ContextVar set per request, so a dict built at import time would be frozen in
@@ -73,7 +75,8 @@ def flag_toast(result: FlagResult) -> Toast:
 
 
 async def _card_names(task: TaskDB) -> dict[UserID, str]:
-    """Just the one or two names the card footer shows.
+    """
+    Just the one or two names the card footer shows.
 
     Deliberately not `view.get_cache()`: that scans every user and every task, and flag
     submission is the hottest endpoint of a running CTF.

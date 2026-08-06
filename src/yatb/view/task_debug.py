@@ -1,4 +1,5 @@
-"""The admin-only task debug block, served as its own htmx fragment.
+"""
+The admin-only task debug block, served as its own htmx fragment.
 
 Rendering this inline used to mean the raw `TaskDB` — flag included — sat in the Jinja
 context of every task page, with a single `{% if curr_user.is_admin %}` standing between

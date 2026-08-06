@@ -40,7 +40,7 @@ babel-private: babel-extract-private babel-update-private
 precom: fix format
 
 fix:
-    {{ ruff }} check --select 'I001,F401,UP035' --fix
+    {{ ruff }} check --select 'I001,F401,UP035,D213' --fix
 
 format:
     {{ ruff }} format

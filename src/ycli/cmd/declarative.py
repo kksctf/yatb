@@ -1,8 +1,6 @@
 from pathlib import Path
-from uuid import uuid4
 
-from yatb import schema
-from ycli.base import app, c
+from ycli.base import app
 from ycli.client import YATB
 from ycli.cmd.tasks import sync_tasks
 from ycli.models import State

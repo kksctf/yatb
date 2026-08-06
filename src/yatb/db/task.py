@@ -67,7 +67,8 @@ class TaskDB(DocumentEx[Task], Task):
 
     @classmethod
     async def get_names_by_ids(cls: type[Self], task_ids: Sequence[TaskID]) -> dict[TaskID, str]:
-        """task_id -> task_name, to render task references (e.g. `req_tasks`) readably.
+        """
+        task_id -> task_name, to render task references (e.g. `req_tasks`) readably.
 
         Narrowed to the ids actually referenced rather than the whole collection: the
         debug block is fetched once per card, and `req_tasks` is usually empty.

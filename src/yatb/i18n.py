@@ -64,6 +64,7 @@ def ntranslate(singular: str, plural: str, n: int) -> str:
 # are routed to the private catalog and kept out of the public messages.po.
 p_ = translate
 np_ = ntranslate
+_ = translate
 
 
 def detect_lang(header: str | None) -> str:

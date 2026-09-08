@@ -71,7 +71,7 @@ class ClientExRaw(TestClient):
     def solve_task_raw(self, flag: str) -> Response:
         return self.post(
             app.url_path_for("api_task_submit_flag"),
-            data=schema.FlagForm(flag=flag).model_dump(mode="json"),
+            json=schema.FlagModel(flag=flag).model_dump(mode="json"),
         )
 
     def get_me_raw(self) -> Response:

@@ -3,9 +3,6 @@ from fastapi import status
 from yatb.app import app
 
 from . import ClientEx
-from . import client as client_cl
-
-client = client_cl
 
 UI_URL = app.url_path_for("api_settings_ui_set")
 PROFILE_URL = app.url_path_for("api_settings_profile_set")

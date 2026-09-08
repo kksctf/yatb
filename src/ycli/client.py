@@ -162,7 +162,7 @@ class YATB:
         token = self.make_user_token(user)
         resp = await self.s.post(
             app.url_path_for("api_task_submit_flag"),
-            json=schema.FlagForm(flag=flag).model_dump(mode="json"),
+            json=schema.FlagModel(flag=flag).model_dump(mode="json"),
             headers={"X-Auth-Token": token},
         )
         resp.raise_for_status()

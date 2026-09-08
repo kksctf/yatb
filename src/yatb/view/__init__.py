@@ -133,8 +133,5 @@ async def login_page(req: Request, user: auth.CURR_USER_SAFE) -> HTMLResponse:
         {
             "curr_user": user,
             "auth_ways": [i for i in schema.auth.ENABLED_AUTH_WAYS if not i.FAKE],
-            # only meaningful for the DEBUG helpers block: this is the username which
-            # gets promoted to admin, see SimpleAuth.AuthModel.is_admin
-            "debug_username": schema.SimpleAuth.auth_settings.DEBUG_USERNAME,
         },
     )

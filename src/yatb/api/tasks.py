@@ -4,7 +4,7 @@ from fastapi import APIRouter, Form, HTTPException, status
 from pydantic import BaseModel
 
 from yatb import auth
-from yatb.schema import FlagForm, Task, TaskID
+from yatb.schema import FlagModel, Task, TaskID
 from yatb.services.flags import FlagOutcome, submit_flag
 
 from .utils import CURRENT_TASK, VISIBLE_TASKS
@@ -33,7 +33,7 @@ async def api_task_get(task: CURRENT_TASK) -> Task.public_model:
 
 
 @router.post("/submit_flag")
-async def api_task_submit_flag(flag: Annotated[FlagForm, Form()], user: auth.CURR_USER) -> SubmitFlagResult:
+async def api_task_submit_flag(flag: FlagModel, user: auth.CURR_USER) -> SubmitFlagResult:
     """Pure JSON API. The htmx-facing twin lives in `view/actions.py`."""
     result = await submit_flag(user, flag.flag)
 

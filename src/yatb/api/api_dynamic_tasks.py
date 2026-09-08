@@ -11,7 +11,7 @@ from pydantic import BaseModel
 from yatb import auth, schema, toasts
 from yatb.config import settings
 from yatb.db import TaskDB
-from yatb.i18n import translate as _
+from yatb.i18n import _
 from yatb.shared.dtc.client import DynamicTasksEtcdClient, TaskUserPair
 from yatb.shared.dtc.models import DynamicTaskInfo, DynamicTaskInfoReady, DynamicTaskQuery, DynamicTaskState
 from yatb.utils.log_helper import get_logger

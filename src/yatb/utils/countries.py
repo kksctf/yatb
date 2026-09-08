@@ -12,7 +12,11 @@ _NOT_COUNTRIES = frozenset({"EU", "EZ", "UN", "QO", "XA", "XB", "ZZ"})
 _ALPHA2_LEN = 2
 
 VALID_COUNTRIES: frozenset[str] = (
-    frozenset(code for code in Locale.parse(i18n.DEFAULT).territories if len(code) == _ALPHA2_LEN and code.isalpha())
+    frozenset(
+        code
+        for code in Locale.parse(i18n.DEFAULT).territories
+        if isinstance(code, str) and len(code) == _ALPHA2_LEN and code.isalpha()
+    )
     - _NOT_COUNTRIES
 )
 

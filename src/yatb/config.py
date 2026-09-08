@@ -13,6 +13,10 @@ _DEFAULT_TOKEN = "default_token_CHANGE_ME"  # noqa: S105 # intended
 class DefaultTokenError(ValueError): ...
 
 
+class Limits(BaseSettings):
+    AFFILIATION_MAX_LEN: int = 128
+
+
 class Settings(BaseSettings):
     DEBUG: bool = False
     TESTING: bool = False
@@ -69,6 +73,8 @@ class Settings(BaseSettings):
 
     PRIVATE_SCOREBOARD: bool = False
 
+    LIMITS: Limits = Limits()
+
     @model_validator(mode="after")
     def check_non_default_tokens(self) -> Self:
         if self.DEBUG or self.TESTING:
@@ -107,6 +113,7 @@ class Settings(BaseSettings):
         env_file="yatb.env",
         env_file_encoding="utf-8",
         extra="allow",
+        env_nested_delimiter=".",
     )
 
 

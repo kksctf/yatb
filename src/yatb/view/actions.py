@@ -15,9 +15,9 @@ from starlette.responses import Response
 from yatb import auth
 from yatb.api.settings import ExtraInfoForm, api_settings_profile_set
 from yatb.db import TaskDB, UserDB
+from yatb.i18n import _
 from yatb.i18n import ntranslate as ngettext
-from yatb.i18n import translate as _
-from yatb.schema import FlagForm, UserID
+from yatb.schema import FlagModel, UserID
 from yatb.services.flags import FlagOutcome, FlagResult, submit_flag
 from yatb.toasts import FLAG_ACCEPTED_EVENT, Toast, ToastKind, toast_header
 
@@ -92,7 +92,7 @@ async def _card_names(task: TaskDB) -> dict[UserID, str]:
 @router.post("/tasks/submit_flag")
 async def ui_task_submit_flag(
     req: Request,
-    flag: Annotated[FlagForm, Form()],
+    flag: Annotated[FlagModel, Form()],
     user: auth.CURR_USER,
 ) -> Response:
     result = await submit_flag(user, flag.flag)

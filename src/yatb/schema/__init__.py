@@ -9,7 +9,7 @@ from .ui import LangPref, Theme, UISettings
 from .user import ExtraInfo, User
 
 
-class FlagForm(BaseModel):
+class FlagModel(BaseModel):
     flag: str
 
 

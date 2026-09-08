@@ -5,6 +5,7 @@ from fastapi import APIRouter, Form, Request, Response
 from pydantic import BaseModel, field_validator
 
 from yatb import auth, i18n
+from yatb.config import settings
 from yatb.db import UserDB
 from yatb.i18n import translate as _
 from yatb.schema.ui import LangPref, Theme, UISettings
@@ -16,8 +17,6 @@ router = APIRouter(
     prefix="/settings",
     tags=["settings"],
 )
-
-AFFILIATION_MAX_LEN = 128
 
 
 class UISettingsPatch(BaseModel):
@@ -37,8 +36,8 @@ class ExtraInfoForm(BaseModel):
     @classmethod
     def _trim_affiliation(cls, value: str) -> str:
         value = value.strip()
-        if len(value) > AFFILIATION_MAX_LEN:
-            raise ValueError(f"affiliation is longer than {AFFILIATION_MAX_LEN} characters")
+        if len(value) > settings.LIMITS.AFFILIATION_MAX_LEN:
+            raise ValueError(f"affiliation is longer than {settings.LIMITS.AFFILIATION_MAX_LEN} characters")
         return value
 
     @field_validator("country")

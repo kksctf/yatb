@@ -26,6 +26,7 @@ from ...api import tasks, users
 from ...api.admin import CURR_ADMIN
 from ...api.admin import admin_tasks as api_admin_tasks
 from ...api.admin import admin_users as api_admin_users
+from ...db.task import TaskDB
 from ...utils.log_helper import get_logger
 from ...ws import ws_manager
 from .ng import api_rotuer, base_router
@@ -51,6 +52,19 @@ async def admin_index(req: Request, resp: Response, user: CURR_ADMIN):
             "curr_user": user,
         },
         ignore_admin=False,
+    )
+
+
+@router.get("/task/{task_id}/debug")
+async def api_admin_task_debug(req: Request, task: api_admin_tasks.CURR_TASK, user: CURR_ADMIN) -> HTMLResponse:
+    return await response_generator(
+        req,
+        "partials/task_debug.jhtml",
+        {
+            "task": task,
+            "tid2name": await TaskDB.get_names_by_ids(task.req_tasks),
+            "admin_json": schema.Task.admin_model.model_validate(task.model_dump()).model_dump_json(indent=2),
+        },
     )
 
 

@@ -1,49 +1,84 @@
 {% extends "base.jhtml" %}
 
-{% block title %}Profile – {{ curr_user.display_name }}{% endblock %}
+{% block title %}{{ _("Profile") }} – {{ curr_user.display_name }}{% endblock %}
 
 {% block content %}
 <div class="container">
-  <h1 class="title is-3">Profile</h1>
+  <h1 class="title is-3">{{ _("Profile") }}</h1>
 
   <div class="box">
 
     <!-- Avatar & username -->
-    <div class="media mb-4">
+    <div class="media mb-5">
       <figure class="media-left">
-        <p class="image is-96x96 has-background-grey-lighter has-text-weight-bold
-                  is-flex is-justify-content-center is-align-items-center"
-          style="border-radius:50%; font-size:2rem;">
-          {{ curr_user.username[0]|upper }}
-        </p>
+        <p class="user-badge is-large">{{ (curr_user.display_name or curr_user.username)[0]|upper }}</p>
       </figure>
       <div class="media-content">
-        <p class="title is-4 mb-0">{{ curr_user.username }}</p>
-        <p class="title is-4 mb-0">{{ curr_user.display_name }}</p>
-        {% if curr_user.team %}
-          <p class="subtitle is-6">Team: {{ curr_user.team }}</p>
-        {% endif %}
+        <p class="title is-4 mb-1">{{ curr_user.display_name }}</p>
+        <p class="subtitle is-6 has-text-weight-normal mb-0">{{ curr_user.username }}</p>
+      </div>
+      <div class="media-right has-text-right">
+        <p class="mini-label">{{ _("Score") }}</p>
+        <p class="title is-4 mb-0">{{ curr_user.score }}</p>
       </div>
     </div>
 
-    <!-- Details table -->
-    <table class="table is-fullwidth">
-      <tbody>
-        <tr>
-          <th>Email</th>
-          <td>{{ curr_user.email or "—" }}</td>
-        </tr>
-        <tr>
-          <th>Score</th>
-          <td>{{ curr_user.score }}</td>
-        </tr>
-      </tbody>
-    </table>
+    {# Two values, so a definition list reads lighter here than a full table. #}
+    <div class="profile-facts">
+      <div class="profile-fact">
+        <p class="mini-label">{{ _("Affiliation") }}</p>
+        <p>{{ curr_user.extra_info.affiliation or "—" }}</p>
+      </div>
+      <div class="profile-fact">
+        <p class="mini-label">{{ _("Country") }}</p>
+        <p>{{ country_name(curr_user.extra_info.country) if curr_user.extra_info.country else "—" }}</p>
+      </div>
+    </div>
+  </div>
 
-    <!-- Placeholder for future edit form -->
-    <p class="has-text-grey-light">
-      ⚙️ Editing coming soon…
-    </p>
+  <div class="box">
+    {# Tier-1 (theme, language) lives only in the navbar dropdown — it works without an
+       account, so there is no reason to duplicate it here. #}
+    <h2 class="title is-5">{{ _("Settings") }}</h2>
+
+    {# Tier-2: only meaningful with an account, so unlike tier-1 it is saved explicitly. #}
+    {# The htmx twin of api_settings_profile_set: same save, but it answers with a toast
+       instead of leaving the page to invent its own status text. #}
+    <form id="profile-settings-form"
+      hx-post="{{ url_for('ui_settings_profile_set') }}"
+      hx-swap="none">
+      <div class="field">
+        <label class="label" for="profile-affiliation">{{ _("Affiliation") }}</label>
+        <div class="control">
+          <input id="profile-affiliation" class="input" name="affiliation" maxlength="128"
+            placeholder="{{ _('University, company, …') }}" value="{{ curr_user.extra_info.affiliation }}">
+        </div>
+      </div>
+
+      <div class="field">
+        <label class="label" for="profile-country">{{ _("Country") }}</label>
+        <div class="control">
+          <div class="select is-fullwidth">
+            <select id="profile-country" name="country">
+              <option value="" {% if not curr_user.extra_info.country %}selected{% endif %}>
+                {{ _("Not specified") }}
+              </option>
+              {% for code, name in countries %}
+              <option value="{{ code }}" {% if curr_user.extra_info.country == code %}selected{% endif %}>
+                {{ name }}
+              </option>
+              {% endfor %}
+            </select>
+          </div>
+        </div>
+      </div>
+
+      <div class="field is-grouped is-align-items-center">
+        <div class="control">
+          <button class="button is-primary" type="submit">{{ _("Save") }}</button>
+        </div>
+      </div>
+    </form>
   </div>
 </div>
 {% endblock %}

@@ -14,7 +14,7 @@ from pydantic_settings import BaseSettings
 class Settings(BaseSettings):
     FLAG: str
     RANDOM_STRING_SEQ: str
-    
+
     EXPORT_PATH: Path
 
     S3_HOST: str

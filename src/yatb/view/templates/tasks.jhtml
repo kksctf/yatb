@@ -1,6 +1,6 @@
 {% extends "base.jhtml" %}
 
-{% block title %}{{ _("Challenges", request) }}{% endblock %}
+{% block title %}{{ _("Challenges") }}{% endblock %}
 {% block extra_head %}
 {# do not show filters to non-js users #}
 <script>
@@ -13,13 +13,13 @@
 
 {% block content %}
 <div class="container">
-    <h1 class="title is-3">{{ _("Challenges", request) }}</h1>
+    <h1 class="title is-3">{{ _("Challenges") }}</h1>
 
     <div id="task-filters" class="mb-4" hidden>
         <label class="checkbox mr-3">
             <input type="checkbox" name="show_solved" hx-get="{{ url_for('tasks_page') }}" hx-target="#tasks-container"
                 hx-select="#tasks-container" hx-swap="outerHTML" hx-include="closest .section" checked>
-            {{ _("Show solved", request) }}
+            {{ _("Show solved") }}
         </label>
 
         {% for cat in categories | sort %}

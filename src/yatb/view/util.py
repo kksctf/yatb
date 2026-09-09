@@ -1,6 +1,5 @@
 import asyncio
 import datetime
-import gettext
 from collections.abc import Mapping
 from pathlib import Path
 
@@ -12,19 +11,17 @@ from starlette.templating import _TemplateResponse
 
 from yatb import i18n, schema
 from yatb.config import settings
+from yatb.ui import get_ui_state
 
 _base_path = Path(__file__).resolve().parent
 templates = Jinja2Templates(directory=_base_path / "templates")
 
-TRANSLATIONS = {
-    lang: gettext.translation(
-        domain="messages",
-        localedir=Path(__file__).parent.parent / "locale",
-        languages=[lang],
-        fallback=True,
-    )
-    for lang in i18n.SUPPORTED
-}
+templates.env.add_extension("jinja2.ext.i18n")
+# The translation machinery (private + messages chain, current_lang) lives in `i18n`
+# so it is importable from plain Python handlers too. i18n.translate/ntranslate read
+# the language from i18n.current_lang, which response_generator sets inside the
+# executor thread right before rendering.
+templates.env.install_gettext_callables(gettext=i18n.translate, ngettext=i18n.ntranslate, newstyle=True)
 
 
 def route_generator(req: Request, base_path: str = "/api", *, ignore_admin: bool = True) -> dict[str, str]:
@@ -54,30 +51,35 @@ async def response_generator(  # noqa: PLR0913 # impossible to fix
     *,
     ignore_admin: bool = True,
 ) -> _TemplateResponse:
+    ui = get_ui_state(req)
     context_base = {
         "request": req,
+        "ui": ui,
         "api_list": route_generator(req, ignore_admin=ignore_admin),
     }
     context_base.update(context)
-    return await asyncio.get_running_loop().run_in_executor(
-        None,
-        lambda: templates.TemplateResponse(
-            name=filename,
-            context=context_base,
-            status_code=status_code,
-            headers=headers,
-            media_type=media_type,
-            background=background,
-        ),
-    )
+
+    def _render() -> _TemplateResponse:
+        # ContextVar must be set in the executor thread: values set in the async
+        # context (or in BaseHTTPMiddleware) do not propagate here.
+        token = i18n.set_lang(ui.lang)
+        try:
+            return templates.TemplateResponse(
+                name=filename,
+                context=context_base,
+                status_code=status_code,
+                headers=headers,
+                media_type=media_type,
+                background=background,
+            )
+        finally:
+            i18n.current_lang.reset(token)
+
+    return await asyncio.get_running_loop().run_in_executor(None, _render)
 
 
 def version_string() -> str:
     return f"kks-tb-{settings.VERSION}"
-
-
-def _(text: str, request: Request) -> str:
-    return TRANSLATIONS[request.state.lang].gettext(text)
 
 
 templates.env.globals["version_string"] = version_string
@@ -94,5 +96,3 @@ templates.env.globals["CTF_NAME"] = settings.CTF_NAME
 templates.env.globals["EVENT_START_TIME"] = settings.EVENT_START_TIME
 templates.env.globals["EVENT_END_TIME"] = settings.EVENT_END_TIME
 templates.env.globals["NOW"] = lambda: datetime.datetime.now(datetime.UTC)
-
-templates.env.globals["_"] = _

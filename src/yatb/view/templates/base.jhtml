@@ -1,25 +1,17 @@
 <!DOCTYPE html>
-<html lang="en">
+<html lang="{{ ui.lang }}" {% if ui.theme != 'auto' %}data-theme="{{ ui.theme }}"{% endif %}>
 
 <head>
     <meta charset="utf-8">
     <title>
         {% block title %}{{ CTF_NAME }}{% endblock %}
     </title>
-    <script>
-        // Set initial theme ASAP to reduce flash
-        (function () {
-            try {
-                var saved = localStorage.getItem('theme');
-                var sysDark = window.matchMedia && window.matchMedia('(prefers-color-scheme: dark)').matches;
-                document.documentElement.dataset.theme = saved || (sysDark ? 'dark' : 'light');
-            } catch (_) { /* no-op */ }
-        })();
-    </script>
-    <link rel="stylesheet" href="{{ url_for('static', path='layout.css') }}">
-    <link rel="stylesheet" href="{{ url_for('static', path='style.css') }}">
     <!-- Bulma & HTMX from CDNs -->
     <link rel="stylesheet" href="https://cdn.jsdelivr.net/npm/bulma@1.0.1/css/bulma.min.css">
+    {# Ours load after Bulma on purpose: that is what lets plain selectors in
+       style.css win without `!important`. #}
+    <link rel="stylesheet" href="{{ url_for('static', path='layout.css') }}">
+    <link rel="stylesheet" href="{{ url_for('static', path='style.css') }}">
     <script src="https://unpkg.com/htmx.org@2.0.4"></script>
     <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/7.0.0/css/all.min.css" integrity="sha512-DxV+EoADOkOygM4IR9yXP8Sb2qwgidEmeqAEmDKIOfPRQZOWbXCzLC6vjbZyy0vPisbH2SyW27+ddLVCN+OMzQ==" crossorigin="anonymous" referrerpolicy="no-referrer" />
     <link rel="icon" type="image/png" href="{{ url_for('static', path='kksctf_logo_32.png') }}" />
@@ -46,13 +38,19 @@
         </div>
         <div id="yatbNavbar" class="navbar-menu">
             <div class="navbar-start">
-                <a class="navbar-item" href="{{ url_for('tasks_page') }}">{{ _("Challenges", request) }}</a>
-                <a class="navbar-item" href="{{ url_for('scoreboard_page') }}">{{ _("Scoreboard", request) }}</a>
+                <a class="navbar-item" href="{{ url_for('tasks_page') }}">{{ _("Challenges") }}</a>
+                <a class="navbar-item" href="{{ url_for('scoreboard_page') }}">{{ _("Scoreboard") }}</a>
             </div>
             <div class="navbar-end">
                 {% if curr_user %}
-                <form id="flag-submit-form" class="navbar-item" method="post" action="{{ url_for('api_task_submit_flag') }}"
-                    hx-post="{{ url_for('api_task_submit_flag') }}" hx-swap="none">
+                {# Posts to the htmx twin, not the JSON API: it answers with a toast and an
+                   out-of-band redraw of the task card. `hx-swap="none"` does not block the
+                   OOB swap — htmx applies those before it looks at the swap style.
+                   `yatb:flag-accepted` rides along in the same HX-Trigger header, and only
+                   for an accepted flag, so a wrong one stays in the box to be edited. #}
+                <form id="flag-submit-form" class="navbar-item" method="post" action="{{ url_for('ui_task_submit_flag') }}"
+                    hx-post="{{ url_for('ui_task_submit_flag') }}" hx-swap="none"
+                    hx-on:yatb:flag-accepted="this.reset()">
                     <div class="field has-addons">
                         <p class="control">
                             <span class="button is-static">{{ FLAG_BASE }}{</span>
@@ -64,26 +62,60 @@
                             <span class="button is-static">}</span>
                         </p>
                         <p class="control">
-                            <button class="button is-info">{{ _("Submit", request) }}</button>
+                            <button class="button is-primary">{{ _("Submit") }}</button>
                         </p>
                     </div>
                 </form>
-                <a class="navbar-item" href="{{ url_for('profile_page') }}">{{ curr_user.display_name }}</a>
-                {% if curr_user.is_admin %}
-                <a class="navbar-item" href="{{ url_for('admin_ng_html_landing', path='') }}">{{ _("Admin area", request) }}</a>
-                <!-- before_start = {{ EVENT_START_TIME - NOW() }}, before_end = {{ EVENT_END_TIME - NOW() }} -->
                 {% endif %}
-                <a class="navbar-item" href="{{ url_for('api_users_logout') }}">
-                    {{ _("Logout", request) }}
-                </a>
-                {% else %}
-                <a class="navbar-item" href="{{ url_for('login_page') }}">{{ _("Login", request) }}</a>
-                {% endif %}
-                <div class="navbar-item">
-                    <button id="theme-toggle" class="button is-light" title="Toggle theme" aria-label="Toggle theme">
-                        <span class="icon"><i class="fa-solid fa-moon"></i></span>
-                    </button>
+
+                {# Tier-1 settings, reachable from every page including for anonymous
+                   visitors. On desktop `is-hoverable` opens this on hover or focus; below
+                   1024px Bulma renders the contents inline inside the burger menu. #}
+                <div id="settings-menu" class="navbar-item has-dropdown is-hoverable">
+                    <a class="navbar-link is-arrowless" role="button" tabindex="0" aria-haspopup="true"
+                        title="{{ _('Settings') }}" aria-label="{{ _('Settings') }}">
+                        <span class="icon"><i class="fa-solid fa-gear"></i></span>
+                        {# Inside the burger menu the bare icon has no context, so it gets a
+                           label there and stays icon-only in the desktop bar. #}
+                        <span class="is-hidden-desktop">{{ _("Settings") }}</span>
+                    </a>
+                    {# is-boxed: adds the 1px ring Bulma draws from scheme-invert, which is
+                       what separates the menu from same-toned cards in the dark scheme. #}
+                    <div class="navbar-dropdown is-right is-boxed settings-dropdown">
+                        {% include "partials/settings_menu.jhtml" %}
+                    </div>
                 </div>
+
+                {% if curr_user %}
+                <div class="navbar-item has-dropdown is-hoverable">
+                    <a class="navbar-link" role="button" tabindex="0" aria-haspopup="true">
+                        <span class="user-badge" aria-hidden="true">
+                            {{ (curr_user.display_name or curr_user.username)[0]|upper }}
+                        </span>
+                        <span>{{ curr_user.display_name }}</span>
+                    </a>
+                    <div class="navbar-dropdown is-right is-boxed">
+                        <a class="navbar-item" href="{{ url_for('profile_page') }}">
+                            <span class="icon"><i class="fa-solid fa-user"></i></span>
+                            <span>{{ _("Profile") }}</span>
+                        </a>
+                        {% if curr_user.is_admin %}
+                        <a class="navbar-item" href="{{ url_for('admin_ng_html_landing', path='') }}">
+                            <span class="icon"><i class="fa-solid fa-screwdriver-wrench"></i></span>
+                            <span>{{ _("Admin area") }}</span>
+                        </a>
+                        <!-- before_start = {{ EVENT_START_TIME - NOW() }}, before_end = {{ EVENT_END_TIME - NOW() }} -->
+                        {% endif %}
+                        <hr class="navbar-divider">
+                        <a class="navbar-item" href="{{ url_for('api_users_logout') }}">
+                            <span class="icon"><i class="fa-solid fa-arrow-right-from-bracket"></i></span>
+                            <span>{{ _("Logout") }}</span>
+                        </a>
+                    </div>
+                </div>
+                {% else %}
+                <a class="navbar-item" href="{{ url_for('login_page') }}">{{ _("Login") }}</a>
+                {% endif %}
             </div>
         </div>
     </nav>
@@ -91,174 +123,111 @@
         {% block content %}{% endblock %}
     </section>
 
-    {% if curr_user %}
+    {# Loaded for everyone, not just logged-in users: the login form raises toasts too.
+       The three strings below are the only ones the client ever authors on its own —
+       everything else arrives pre-translated in the HX-Trigger header. #}
+    <script src="{{ url_for('static', path='toasts.js') }}"
+        data-error-message="{{ _('Something went wrong.') }}"
+        data-offline-message="{{ _('Could not reach the server.') }}"
+        data-close-label="{{ _('Close') }}"></script>
+    {% if curr_user and curr_user.is_admin %}
     <script>
+        // Reveal blurred secrets in the admin debug block. Delegated on purpose: htmx
+        // replaces #tasks-container wholesale, which would drop per-element handlers.
         (function () {
-            const form = document.getElementById("flag-submit-form");
-            if (!form) return;
-
-            let toastStack = null;
-
-            function ensureToastStack() {
-                if (toastStack) return toastStack;
-                toastStack = document.createElement("div");
-                toastStack.className = "app-toast-stack";
-                toastStack.setAttribute("aria-live", "polite");
-                toastStack.setAttribute("aria-atomic", "true");
-                document.body.appendChild(toastStack);
-                return toastStack;
+            function reveal(el) {
+                var secret = el.closest ? el.closest('.debug-secret') : null;
+                if (secret) secret.classList.add('revealed');
             }
 
-            function parsePayload(xhr) {
-                const text = (xhr && xhr.responseText) || "";
-                if (!text) return null;
-                try {
-                    return JSON.parse(text);
-                } catch (_) {
-                    return text;
-                }
-            }
+            document.addEventListener('click', function (event) {
+                reveal(event.target);
+            });
 
-            function readMessage(xhr, isSuccess) {
-                const payload = parsePayload(xhr);
-                if (payload && typeof payload === "object" && payload.detail) return String(payload.detail);
-                if (typeof payload === "string" && payload.trim()) {
-                    return isSuccess ? "Flag accepted" : payload;
-                }
-                if (typeof payload === "number" || typeof payload === "boolean") return String(payload);
-                return isSuccess ? "Flag accepted" : "Flag rejected";
-            }
-
-            function extractTaskId(xhr) {
-                const payload = parsePayload(xhr);
-                if (typeof payload === "string" && payload.trim()) return payload.trim();
-                if (payload && typeof payload === "object" && typeof payload.task_id === "string") return payload.task_id.trim();
-                return "";
-            }
-
-            function markTaskSolved(taskId) {
-                if (!taskId) return;
-                document.querySelectorAll('[data-task-id="' + taskId + '"]').forEach(function (card) {
-                    card.classList.add("solved");
-                    const header = card.querySelector(".card-header");
-                    if (header) header.classList.add("has-background-success");
-                    const pointsTag = card.querySelector(".task-card-tags .tag");
-                    if (pointsTag) pointsTag.classList.add("is-success");
-                });
-            }
-
-            function showFlagToast(isSuccess, message) {
-                const stack = ensureToastStack();
-                const toast = document.createElement("div");
-                toast.className = "notification app-toast " + (isSuccess ? "is-success" : "is-danger");
-                toast.setAttribute("role", "status");
-
-                const content = document.createElement("div");
-                content.className = "app-toast-message";
-                content.textContent = message;
-
-                const closeButton = document.createElement("button");
-                closeButton.className = "delete";
-                closeButton.type = "button";
-                closeButton.setAttribute("aria-label", "Close");
-
-                toast.appendChild(closeButton);
-                toast.appendChild(content);
-                stack.appendChild(toast);
-
-                let hideTimer = null;
-                let endAt = Date.now() + 4500;
-
-                function closeToast() {
-                    if (!toast.isConnected) return;
-                    toast.classList.remove("is-visible");
-                    toast.classList.add("is-leaving");
-                    setTimeout(function () {
-                        if (toast.isConnected) toast.remove();
-                    }, 180);
-                }
-
-                function scheduleHide(delay) {
-                    if (hideTimer) clearTimeout(hideTimer);
-                    hideTimer = setTimeout(closeToast, Math.max(0, delay));
-                }
-
-                requestAnimationFrame(function () {
-                    toast.classList.add("is-visible");
-                });
-
-                scheduleHide(4500);
-
-                toast.addEventListener("mouseenter", function () {
-                    if (hideTimer) clearTimeout(hideTimer);
-                });
-                toast.addEventListener("mouseleave", function () {
-                    scheduleHide(endAt - Date.now());
-                });
-                closeButton.addEventListener("click", closeToast);
-            }
-
-            document.body.addEventListener("htmx:afterRequest", function (event) {
-                if (event.target !== form || !event.detail || !event.detail.xhr) return;
-
-                const xhr = event.detail.xhr;
-                const isSuccess = xhr.status === 200;
-                const message = readMessage(xhr, isSuccess);
-
-                showFlagToast(isSuccess, message);
-
-                if (isSuccess) {
-                    const input = document.getElementById("flag-submit-input");
-                    if (input) input.value = "";
-                    markTaskSolved(extractTaskId(xhr));
-                }
+            document.addEventListener('keydown', function (event) {
+                if (event.key !== 'Enter' && event.key !== ' ') return;
+                var secret = event.target.closest && event.target.closest('.debug-secret');
+                if (!secret || secret.classList.contains('revealed')) return;
+                event.preventDefault();
+                secret.classList.add('revealed');
             });
         })();
-
-        // const evt = new EventSource("/events");
-        /* evt.addEventListener("toast", (e) => {
-            const msg = JSON.parse(e.data);
-            bulmaToast.toast({
-                message: msg.text,
-                type: msg.kind === "hint" ? "is-info" : "is-success",
-                position: "top-center",
-                dismissible: true,
-                duration: 5000,
-            });
-        }); */
     </script>
     {% endif %}
     <script>
         (function () {
-            function applyIcon(theme) {
-                var btn = document.getElementById('theme-toggle');
-                if (!btn) return;
-                btn.classList.remove('is-light', 'is-dark');
-                btn.classList.add(theme === 'dark' ? 'is-dark' : 'is-light');
-                var icon = btn.querySelector('i');
-                if (icon) icon.className = theme === 'dark' ? 'fa-solid fa-sun' : 'fa-solid fa-moon';
+            var root = document.documentElement;
+            // Set just before the language POST, which answers with HX-Refresh: without
+            // it the reload would drop the menu and the change would read as "nothing
+            // happened".
+            var REOPEN_KEY = 'yatb:settings-menu-open';
+
+            function markSelected(selector, value) {
+                document.querySelectorAll(selector).forEach(function (btn) {
+                    var active = btn.dataset.value === value;
+                    btn.classList.toggle('is-primary', active);
+                    btn.classList.toggle('is-selected', active);
+                });
             }
 
             document.addEventListener('DOMContentLoaded', function () {
-                var root = document.documentElement;
-                applyIcon(root.dataset.theme === 'dark' ? 'dark' : 'light');
-                var btn = document.getElementById('theme-toggle');
-                if (!btn) return;
-                btn.addEventListener('click', function () {
-                    var current = root.dataset.theme === 'dark' ? 'dark' : 'light';
-                    var next = current === 'dark' ? 'light' : 'dark';
-                    root.dataset.theme = next;
-                    try { localStorage.setItem('theme', next); } catch (_) { /* ignore */ }
-                    applyIcon(next);
+                // The theme is applied optimistically so the switch feels instant; the
+                // POST only persists it.
+                document.querySelectorAll('.js-theme-option').forEach(function (btn) {
+                    btn.addEventListener('click', function () {
+                        var value = btn.dataset.value;
+                        if (value === 'auto') {
+                            delete root.dataset.theme;
+                        } else {
+                            root.dataset.theme = value;
+                        }
+                        markSelected('.js-theme-option', value);
+                    });
                 });
+
+                var settingsMenu = document.getElementById('settings-menu');
+
+                document.querySelectorAll('.js-lang-option').forEach(function (btn) {
+                    btn.addEventListener('click', function () {
+                        try {
+                            sessionStorage.setItem(REOPEN_KEY, '1');
+                        } catch (_) {
+                            // private mode: the menu just closes on reload
+                        }
+                    });
+                });
+
+                if (settingsMenu) {
+                    var reopen = false;
+                    try {
+                        reopen = sessionStorage.getItem(REOPEN_KEY) === '1';
+                        sessionStorage.removeItem(REOPEN_KEY);
+                    } catch (_) { /* see above */ }
+
+                    if (reopen) {
+                        // `.is-active` is Bulma's own way to hold a dropdown open; hovering
+                        // away or clicking elsewhere hands control back to :hover.
+                        settingsMenu.classList.add('is-active');
+                        settingsMenu.addEventListener('mouseleave', function () {
+                            settingsMenu.classList.remove('is-active');
+                        });
+                        document.addEventListener('click', function (event) {
+                            if (!settingsMenu.contains(event.target)) {
+                                settingsMenu.classList.remove('is-active');
+                            }
+                        });
+                    }
+                }
 
                 var burger = document.querySelector('.navbar-burger');
-                var menu = document.getElementById(burger.dataset.target);
+                var menu = burger && document.getElementById(burger.dataset.target);
 
-                burger.addEventListener('click', function () {
-                    burger.classList.toggle('is-active');
-                    menu.classList.toggle('is-active');
-                });
+                if (burger && menu) {
+                    burger.addEventListener('click', function () {
+                        burger.classList.toggle('is-active');
+                        menu.classList.toggle('is-active');
+                    });
+                }
             });
         })();
     </script>
@@ -269,7 +238,7 @@
     <nav class="level is-mobile" aria-label="Footer navigation">
       <div class="level-left">
         <div class="level-item">
-          <span class="is-size-7 has-text-grey">&copy; 2025 kksctf</span>
+          <span class="is-size-7 has-text-grey">&copy; 2026 kksctf</span>
         </div>
       </div>
 

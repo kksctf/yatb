@@ -1,15 +1,15 @@
-# English translations for PROJECT.
-# Copyright (C) 2025 ORGANIZATION
-# This file is distributed under the same license as the PROJECT project.
-# FIRST AUTHOR <EMAIL@ADDRESS>, 2025.
+# English translations for yatb.
+# Copyright (C) 2026 kksctf
+# This file is distributed under the same license as the yatb project.
+# Maksim Anfinogenov <m.anfinogenov@cypol.dev>, 2026.
 #
 msgid ""
 msgstr ""
 "Project-Id-Version: PROJECT VERSION\n"
 "Report-Msgid-Bugs-To: EMAIL@ADDRESS\n"
-"POT-Creation-Date: 2026-03-13 03:24+0300\n"
+"POT-Creation-Date: 2026-07-25 23:13+0300\n"
 "PO-Revision-Date: 2025-05-30 17:06+0300\n"
-"Last-Translator: FULL NAME <EMAIL@ADDRESS>\n"
+"Last-Translator: Maksim Anfinogenov <m.anfinogenov@cypol.dev>\n"
 "Language: en\n"
 "Language-Team: en <LL@li.org>\n"
 "Plural-Forms: nplurals=2; plural=(n != 1);\n"
@@ -18,48 +18,403 @@ msgstr ""
 "Content-Transfer-Encoding: 8bit\n"
 "Generated-By: Babel 2.17.0\n"
 
-#: src/yatb/view/templates/base.jhtml:49 src/yatb/view/templates/tasks.jhtml:3
+#: src/yatb/api/api_dynamic_tasks.py:129
+msgid "You already have a running instance. Stop it first."
+msgstr ""
+
+#: src/yatb/api/api_dynamic_tasks.py:136
+msgid "Not allowed."
+msgstr ""
+
+#: src/yatb/api/api_dynamic_tasks.py:170
+msgid "Dynamic tasks are not available right now."
+msgstr ""
+
+#: src/yatb/api/api_dynamic_tasks.py:188
+msgid "This task has no instance to manage."
+msgstr ""
+
+#: src/yatb/api/auth.py:103 src/yatb/api/auth.py:111
+msgid "Incorrect username or password."
+msgstr ""
+
+#: src/yatb/api/auth.py:145
+msgid "That name is already taken."
+msgstr ""
+
+#: src/yatb/api/settings.py:94
+msgid "Settings saved."
+msgstr ""
+
+#: src/yatb/view/actions.py:44
+msgid "Flag accepted!"
+msgstr ""
+
+#: src/yatb/view/actions.py:45
+#, python-format
+msgid "+%(points)d point"
+msgid_plural "+%(points)d points"
+msgstr[0] ""
+msgstr[1] ""
+
+#: src/yatb/view/actions.py:51
+msgid "You have already solved this task."
+msgstr ""
+
+#: src/yatb/view/actions.py:57
+msgid "Wrong flag."
+msgstr ""
+
+#: src/yatb/view/actions.py:63
+msgid "The CTF has not started yet."
+msgstr ""
+
+#: src/yatb/view/actions.py:71
+msgid "Something went wrong on our side. Please submit the flag again."
+msgstr ""
+
+#: src/yatb/view/actions.py:129
+msgid "Profile saved."
+msgstr ""
+
+#: src/yatb/view/templates/base.jhtml:41 src/yatb/view/templates/tasks.jhtml:3
 #: src/yatb/view/templates/tasks.jhtml:16
 msgid "Challenges"
 msgstr ""
 
-#: src/yatb/view/templates/base.jhtml:50
+#: src/yatb/view/templates/base.jhtml:42
+#: src/yatb/view/templates/scoreboard.jhtml:3
+#: src/yatb/view/templates/scoreboard.jhtml:252
 msgid "Scoreboard"
 msgstr ""
 
-#: src/yatb/view/templates/base.jhtml:67
+#: src/yatb/view/templates/base.jhtml:65
 msgid "Submit"
 msgstr ""
 
-#: src/yatb/view/templates/base.jhtml:73
+#: src/yatb/view/templates/base.jhtml:76 src/yatb/view/templates/base.jhtml:80
+#: src/yatb/view/templates/profile.jhtml:42
+msgid "Settings"
+msgstr ""
+
+#: src/yatb/view/templates/base.jhtml:100
+#: src/yatb/view/templates/profile.jhtml:3
+#: src/yatb/view/templates/profile.jhtml:7
+msgid "Profile"
+msgstr ""
+
+#: src/yatb/view/templates/base.jhtml:105
 msgid "Admin area"
 msgstr ""
 
-#: src/yatb/view/templates/base.jhtml:77
+#: src/yatb/view/templates/base.jhtml:112
 msgid "Logout"
 msgstr ""
 
-#: src/yatb/view/templates/base.jhtml:80 src/yatb/view/templates/login.jhtml:3
+#: src/yatb/view/templates/base.jhtml:117 src/yatb/view/templates/login.jhtml:3
 msgid "Login"
+msgstr ""
+
+#: src/yatb/view/templates/base.jhtml:130
+msgid "Something went wrong."
+msgstr ""
+
+#: src/yatb/view/templates/base.jhtml:131
+msgid "Could not reach the server."
+msgstr ""
+
+#: src/yatb/view/templates/base.jhtml:132
+msgid "Close"
 msgstr ""
 
 #: src/yatb/view/templates/login.jhtml:9
 msgid "Please log in or register"
 msgstr ""
 
-#: src/yatb/view/templates/tasks.jhtml:22
-msgid "Show solved"
+#: src/yatb/view/templates/login.jhtml:26
+msgid "Auth using:"
+msgstr ""
+
+#: src/yatb/view/templates/messages.jhtml:2
+msgid "Messages"
+msgstr ""
+
+#: src/yatb/view/templates/messages.jhtml:4
+msgid "Recent messages"
+msgstr ""
+
+#: src/yatb/view/templates/messages.jhtml:9
+msgid "No messages yet."
+msgstr ""
+
+#: src/yatb/view/templates/partials/scoreboard_table.jhtml:4
+#: src/yatb/view/templates/profile.jhtml:21
+#: src/yatb/view/templates/scoreboard.jhtml:277
+msgid "Score"
+msgstr ""
+
+#: src/yatb/view/templates/profile.jhtml:29
+#: src/yatb/view/templates/profile.jhtml:51
+msgid "Affiliation"
+msgstr ""
+
+#: src/yatb/view/templates/profile.jhtml:33
+#: src/yatb/view/templates/profile.jhtml:59
+msgid "Country"
+msgstr ""
+
+#: src/yatb/view/templates/profile.jhtml:54
+msgid "University, company, …"
+msgstr ""
+
+#: src/yatb/view/templates/profile.jhtml:64
+msgid "Not specified"
+msgstr ""
+
+#: src/yatb/view/templates/profile.jhtml:78
+msgid "Save"
+msgstr ""
+
+#: src/yatb/view/templates/scoreboard.jhtml:253
+#: src/yatb/view/templates/scoreboard.jhtml:282
+#: src/yatb/view/templates/scoreboard_compare.jhtml:105
+msgid "Compare"
+msgstr ""
+
+#: src/yatb/view/templates/scoreboard.jhtml:256
+msgid "Users"
+msgstr ""
+
+#: src/yatb/view/templates/scoreboard.jhtml:257
+msgid "Tasks"
+msgstr ""
+
+#: src/yatb/view/templates/scoreboard.jhtml:265
+msgid "Task Legend"
+msgstr ""
+
+#: src/yatb/view/templates/scoreboard.jhtml:267
+#: src/yatb/view/templates/scoreboard.jhtml:331
+msgid "Loading..."
 msgstr ""
 
 #: src/yatb/view/templates/partials/scoreboard_table.jhtml:2
+#: src/yatb/view/templates/scoreboard.jhtml:275
 msgid "Position"
 msgstr ""
 
 #: src/yatb/view/templates/partials/scoreboard_table.jhtml:3
+#: src/yatb/view/templates/scoreboard.jhtml:276
 msgid "User"
 msgstr ""
 
-#: src/yatb/view/templates/partials/scoreboard_table.jhtml:4
-msgid "Score"
+#: src/yatb/view/templates/scoreboard.jhtml:278
+msgid "Solved"
 msgstr ""
+
+#: src/yatb/view/templates/scoreboard.jhtml:279
+msgid "FBs"
+msgstr ""
+
+#: src/yatb/view/templates/scoreboard.jhtml:280
+msgid "Last Solve"
+msgstr ""
+
+#: src/yatb/view/templates/scoreboard.jhtml:281
+msgid "Solutions"
+msgstr ""
+
+#: src/yatb/view/templates/scoreboard.jhtml:294
+msgid "First bloods"
+msgstr ""
+
+#: src/yatb/view/templates/scoreboard.jhtml:315
+msgid "points"
+msgstr ""
+
+#: src/yatb/view/templates/scoreboard.jhtml:324
+msgid "Show"
+msgstr ""
+
+#: src/yatb/view/templates/scoreboard.jhtml:338
+msgid "vs me"
+msgstr ""
+
+#: src/yatb/view/templates/scoreboard_compare.jhtml:3
+#: src/yatb/view/templates/scoreboard_compare.jhtml:78
+msgid "Compare Solutions"
+msgstr ""
+
+#: src/yatb/view/templates/scoreboard_compare.jhtml:82
+msgid "Player A"
+msgstr ""
+
+#: src/yatb/view/templates/scoreboard_compare.jhtml:93
+msgid "Player B"
+msgstr ""
+
+#: src/yatb/view/templates/scoreboard_compare.jhtml:112
+msgid "both solved"
+msgstr ""
+
+#: src/yatb/view/templates/scoreboard_compare.jhtml:113
+#: src/yatb/view/templates/scoreboard_compare.jhtml:114
+#, python-format
+msgid "only %(name)s"
+msgstr ""
+
+#: src/yatb/view/templates/scoreboard_compare.jhtml:115
+msgid "both unsolved"
+msgstr ""
+
+#: src/yatb/view/templates/scoreboard_compare.jhtml:116
+msgid "tasks:"
+msgstr ""
+
+#: src/yatb/view/templates/scoreboard_compare.jhtml:127
+msgid "Not enough players to compare."
+msgstr ""
+
+#: src/yatb/view/templates/task.jhtml:3
+msgid "Task"
+msgstr ""
+
+#: src/yatb/view/templates/task.jhtml:7
+msgid "← Back to tasks"
+msgstr ""
+
+#: src/yatb/view/templates/task.jhtml:14
+msgid "Author:"
+msgstr ""
+
+#: src/yatb/view/templates/task.jhtml:15
+msgid "Category:"
+msgstr ""
+
+#: src/yatb/view/templates/task.jhtml:19
+msgid "pts"
+msgstr ""
+
+#: src/yatb/view/templates/task.jhtml:19
+msgid "solves"
+msgstr ""
+
+#: src/yatb/view/templates/task.jhtml:26
+msgid "✅ You have already solved this challenge. Great job!"
+msgstr ""
+
+#: src/yatb/view/templates/partials/task_card.jhtml:44
+#: src/yatb/view/templates/task.jhtml:53
+msgid "Start"
+msgstr ""
+
+#: src/yatb/view/templates/partials/task_card.jhtml:48
+#: src/yatb/view/templates/task.jhtml:62
+msgid "Restart"
+msgstr ""
+
+#: src/yatb/view/templates/partials/task_card.jhtml:52
+#: src/yatb/view/templates/task.jhtml:70
+msgid "Stop"
+msgstr ""
+
+#: src/yatb/view/templates/partials/task_card.jhtml:56
+#: src/yatb/view/templates/task.jhtml:78
+msgid "Extend"
+msgstr ""
+
+#: src/yatb/view/templates/partials/task_card.jhtml:60
+#: src/yatb/view/templates/task.jhtml:86
+msgid "Info"
+msgstr ""
+
+#: src/yatb/view/templates/partials/task_card.jhtml:65
+#: src/yatb/view/templates/task.jhtml:95
+msgid "Start with rebuild"
+msgstr ""
+
+#: src/yatb/view/templates/task.jhtml:104
+msgid "No dynamic task info yet"
+msgstr ""
+
+#: src/yatb/view/templates/tasks.jhtml:22
+msgid "Show solved"
+msgstr ""
+
+#: src/yatb/view/templates/admin/base.jhtml:11
+msgid "Back to board"
+msgstr ""
+
+#: src/yatb/view/templates/admin/base.jhtml:44
+msgid "Toggle navigation"
+msgstr ""
+
+#: src/yatb/view/templates/partials/scoreboard_legend.jhtml:4
+msgid "No selection"
+msgstr ""
+
+#: src/yatb/view/templates/partials/settings_menu.jhtml:8
+msgid "Theme"
+msgstr ""
+
+#: src/yatb/view/templates/partials/settings_menu.jhtml:11
+#: src/yatb/view/templates/partials/settings_menu.jhtml:35
+msgid "Auto"
+msgstr ""
+
+#: src/yatb/view/templates/partials/settings_menu.jhtml:12
+msgid "Light"
+msgstr ""
+
+#: src/yatb/view/templates/partials/settings_menu.jhtml:13
+msgid "Dark"
+msgstr ""
+
+#: src/yatb/view/templates/partials/settings_menu.jhtml:31
+msgid "Language"
+msgstr ""
+
+#: src/yatb/view/templates/partials/task_card.jhtml:8
+msgid "Task is hidden"
+msgstr ""
+
+#: src/yatb/view/templates/partials/task_card.jhtml:34
+msgid "No info ;("
+msgstr ""
+
+#: src/yatb/view/templates/partials/task_container.jhtml:5
+msgid "No tasks match your filters."
+msgstr ""
+
+#: src/yatb/view/templates/partials/task_debug.jhtml:12
+msgid "Hidden from players"
+msgstr ""
+
+#: src/yatb/view/templates/partials/task_debug.jhtml:17
+msgid "Debug"
+msgstr ""
+
+#: src/yatb/view/templates/partials/task_debug.jhtml:34
+#: src/yatb/view/templates/partials/task_debug.jhtml:37
+#: src/yatb/view/templates/partials/task_debug.jhtml:63
+msgid "Click to reveal"
+msgstr ""
+
+#~ msgid "Toggle theme"
+#~ msgstr ""
+
+#~ msgid "Team:"
+#~ msgstr ""
+
+#~ msgid "Email"
+#~ msgstr ""
+
+#~ msgid "⚙️ Editing coming soon…"
+#~ msgstr ""
+
+#~ msgid "Saved"
+#~ msgstr ""
+
+#~ msgid "Could not save"
+#~ msgstr ""
 

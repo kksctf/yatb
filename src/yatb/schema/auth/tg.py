@@ -78,7 +78,7 @@ class TelegramAuth(AuthBase):
             return date
 
         @model_validator(mode="after")
-        def check_hash(self) -> Self:  # noqa: E0213, N805
+        def check_hash(self) -> Self:
             bot_sha = hashlib.sha256(TelegramAuth.auth_settings.BOT_TOKEN.encode()).digest()
 
             hash_check_string = "\n".join(

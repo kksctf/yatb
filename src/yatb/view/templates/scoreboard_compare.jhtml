@@ -1,6 +1,6 @@
 {% extends "base.jhtml" %}
 
-{% block title %}Compare Solutions{% endblock %}
+{% block title %}{{ _("Compare Solutions") }}{% endblock %}
 
 {% block extra_head %}
   <style>
@@ -75,11 +75,11 @@
 
 {% block content %}
 <div class="container is-fluid">
-  <h1 class="title is-3">Compare Solutions</h1>
+  <h1 class="title is-3">{{ _("Compare Solutions") }}</h1>
 
   <form class="cmp-form" method="get">
     <div class="field">
-      <label class="label is-small">Player A</label>
+      <label class="label is-small">{{ _("Player A") }}</label>
       <div class="control select is-small">
         <select name="user_a" required>
           {% for u in users %}
@@ -90,7 +90,7 @@
     </div>
 
     <div class="field">
-      <label class="label is-small">Player B</label>
+      <label class="label is-small">{{ _("Player B") }}</label>
       <div class="control select is-small">
         <select name="user_b" required>
           {% for u in users %}
@@ -102,18 +102,18 @@
 
     <div class="field">
       <div class="control">
-        <button class="button is-small is-info" type="submit">Compare</button>
+        <button class="button is-small is-info" type="submit">{{ _("Compare") }}</button>
       </div>
     </div>
   </form>
 
   {% if row_a and row_b %}
     <div class="cmp-legend">
-      <span class="cmp-item"><span class="cmp-dot both"></span> both solved</span>
-      <span class="cmp-item"><span class="cmp-dot only-a"></span> only {{ row_a.display_name }}</span>
-      <span class="cmp-item"><span class="cmp-dot only-b"></span> only {{ row_b.display_name }}</span>
-      <span class="cmp-item"><span class="cmp-dot none"></span> both unsolved</span>
-      <span class="cmp-item cmp-muted">tasks: {{ tasks_total }}</span>
+      <span class="cmp-item"><span class="cmp-dot both"></span> {{ _("both solved") }}</span>
+      <span class="cmp-item"><span class="cmp-dot only-a"></span> {% trans name=row_a.display_name %}only {{ name }}{% endtrans %}</span>
+      <span class="cmp-item"><span class="cmp-dot only-b"></span> {% trans name=row_b.display_name %}only {{ name }}{% endtrans %}</span>
+      <span class="cmp-item"><span class="cmp-dot none"></span> {{ _("both unsolved") }}</span>
+      <span class="cmp-item cmp-muted">{{ _("tasks:") }} {{ tasks_total }}</span>
     </div>
 
     <div class="cmp-grid">
@@ -124,7 +124,7 @@
       {% endfor %}
     </div>
   {% else %}
-    <p class="cmp-muted">Not enough players to compare.</p>
+    <p class="cmp-muted">{{ _("Not enough players to compare.") }}</p>
   {% endif %}
 </div>
 {% endblock %}

@@ -8,10 +8,12 @@ from fastapi.routing import APIRouter
 from yatb import auth, schema
 from yatb.api import tasks
 from yatb.db.user import UserDB
+from yatb.ui import get_ui_state
+from yatb.utils import countries
 from yatb.utils.httpx import IS_HTTPX
 from yatb.utils.log_helper import get_logger
 
-from .util import _, response_generator
+from .util import response_generator
 
 logger = get_logger("view")
 
@@ -20,10 +22,11 @@ router = APIRouter(
     tags=["view"],
 )
 
-from . import admin, scoreboard  # noqa
+from . import actions, admin, scoreboard  # noqa
 
 router.include_router(admin.router)
 router.include_router(scoreboard.router)
+router.include_router(actions.router)
 
 
 @dataclass
@@ -106,12 +109,18 @@ async def one_task_page(
 
 
 @router.get("/profile")
-async def profile_page(request: Request, user: auth.CURR_USER_SAFE) -> HTMLResponse:
+async def profile_page(request: Request, user: auth.CURR_USER_OR_REDIRECT_LOGIN) -> HTMLResponse:
+    lang = get_ui_state(request).lang
     return await response_generator(
         request,
         "profile.jhtml",
         {
             "curr_user": user,
+            # Country names are localized, and the render happens in an executor thread
+            # where i18n.current_lang is only set for the template's own gettext calls —
+            # so resolve them here rather than through a Jinja global.
+            "countries": countries.country_list(lang),
+            "country_name": lambda code: countries.country_name(code, lang),
         },
     )
 

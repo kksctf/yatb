@@ -1,12 +1,12 @@
 {% extends "base.jhtml" %}
 
-{% block title %} {{ _("Login", request) }} {% endblock title %}
+{% block title %} {{ _("Login") }} {% endblock title %}
 
 {% block content %}
 <div class="container">
   <section class="section">
     <div class="container is-max-desktop has-text-centered">
-      <h1 class="title is-3">{{ _("Please log in or register", request) }}</h1>
+      <h1 class="title is-3">{{ _("Please log in or register") }}</h1>
 
       {# ───────────────  available auth methods  ──────────────── #}
       {% if len(auth_ways) == 1 %}
@@ -23,7 +23,7 @@
 
               <details class="box my-4" id="auth-{{ aw_type }}-box">
                   <summary class="has-text-weight-semibold">
-                  Auth using: {{ aw_type }}
+                  {{ _("Auth using:") }} {{ aw_type }}
                   </summary>
 
                   <div class="mt-3">
@@ -36,90 +36,6 @@
               </details>
           {% endfor %}
       {% endif %}
-      {# ───────────────  debug helpers (optional)  ─────────────── #}
-      {% if DEBUG %}
-        <details class="box my-4" open>
-          <summary class="has-text-weight-semibold">Debug helpers</summary>
-
-          <div class="mt-3">
-
-            <form class="debug_register_form mb-2"
-                  action="{{ api_list['api_auth_simple_register'] }}"
-                  method="post"
-                  hx-post="{{ api_list['api_auth_simple_register'] }}"
-                  hx-swap="none">
-              <input type="hidden" name="username" value="Rubikoid">
-              <input type="hidden" name="password" value="123">
-              <button class="button is-warning is-fullwidth">
-                Register as admin
-              </button>
-            </form>
-
-            <form class="debug_login_form mb-2"
-                  action="{{ api_list['api_auth_simple_login'] }}"
-                  method="post"
-                  hx-post="{{ api_list['api_auth_simple_login'] }}"
-                  hx-swap="none">
-              <input type="hidden" name="username" value="Rubikoid">
-              <input type="hidden" name="password" value="123">
-              <button class="button is-warning is-fullwidth">
-                Login as admin
-              </button>
-            </form>
-
-            <!-- Generic per-browser user -->
-            <form class="debug_register_form mb-2"
-                  action="{{ api_list['api_auth_simple_register'] }}"
-                  method="post"
-                  hx-post="{{ api_list['api_auth_simple_register'] }}"
-                  hx-swap="none">
-              <input type="hidden" class="generic_login" name="username" value="no_js_user">
-              <input type="hidden" name="password" value="12321">
-              <button class="button is-success is-fullwidth">
-                Register generic debug user
-              </button>
-            </form>
-
-            <form class="debug_login_form"
-                  action="{{ api_list['api_auth_simple_login'] }}"
-                  method="post"
-                  hx-post="{{ api_list['api_auth_simple_login'] }}"
-                  hx-swap="none">
-              <input type="hidden" class="generic_login" name="username" value="no_js_user">
-              <input type="hidden" name="password" value="12321">
-              <button class="button is-success is-fullwidth">
-                Login generic debug user
-              </button>
-            </form>
-
-          </div>
-        </details>
-
-        <script>
-          function cyrb53(str, seed = 0) {
-            let h1 = 0xdeadbeef ^ seed, h2 = 0x41c6ce57 ^ seed;
-            for (let i = 0, ch; i < str.length; i++) {
-              ch = str.charCodeAt(i);
-              h1 = Math.imul(h1 ^ ch, 2654435761);
-              h2 = Math.imul(h2 ^ ch, 1597334677);
-            }
-            h1 ^= h1 >>> 16; h1 = Math.imul(h1, 2246822507);
-            h1 ^= h1 >>> 13; h1 = Math.imul(h1, 3266489909);
-            h2 ^= h2 >>> 16; h2 = Math.imul(h2, 2246822507);
-            h2 ^= h2 >>> 13; h2 = Math.imul(h2, 3266489909);
-            return 4294967296 * (2097151 & h2) + (h1 >>> 0);
-          }
-          function generateToken() {
-            const data = `${screen.width}.${screen.height}.${navigator.userAgent}`;
-            return `user${cyrb53(data)}`;
-          }
-          document.querySelectorAll('.generic_login')
-                  .forEach(el => { el.value = generateToken(); });
-        </script>
-      {% endif %}
-
-      <!-- footer -->
-      <p class="has-text-grey mt-6 mb-0">&copy; #kksctf 2020–2025</p>
     </div>
   </section>
 </div>

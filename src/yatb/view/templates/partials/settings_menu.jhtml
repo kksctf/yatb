@@ -1,0 +1,46 @@
+{#
+  Tier-1 settings: needed before authentication, so they work for anonymous visitors too.
+  Stored in cookies, and mirrored into User.settings when there is a user.
+  Rendered once, as the contents of the navbar settings dropdown; base.jhtml wires the
+  behaviour and keeps the theme buttons in sync.
+#}
+<div class="settings-group">
+    <p class="mini-label">{{ _("Theme") }}</p>
+    <div class="buttons has-addons are-small settings-options">
+        {% for value, label, icon in [
+            ("auto", _("Auto"), "fa-circle-half-stroke"),
+            ("light", _("Light"), "fa-sun"),
+            ("dark", _("Dark"), "fa-moon")
+        ] %}
+        <button type="button"
+            class="button js-theme-option {% if ui.theme == value %}is-primary is-selected{% endif %}"
+            data-value="{{ value }}"
+            hx-post="{{ api_list['api_settings_ui_set'] }}"
+            hx-vals='{"theme": "{{ value }}"}'
+            hx-swap="none">
+            <span class="icon"><i class="fa-solid {{ icon }}"></i></span>
+            <span>{{ label }}</span>
+        </button>
+        {% endfor %}
+    </div>
+</div>
+
+<hr class="navbar-divider">
+
+<div class="settings-group">
+    <p class="mini-label">{{ _("Language") }}</p>
+    {# No optimistic update here: the language is baked into the HTML, so the server
+       answers with HX-Refresh and htmx reloads the page. #}
+    <div class="buttons has-addons are-small settings-options">
+        {% for value, label in [("auto", _("Auto")), ("en", "English"), ("ru", "Русский")] %}
+        <button type="button"
+            class="button js-lang-option {% if ui.lang_pref == value %}is-primary is-selected{% endif %}"
+            data-value="{{ value }}"
+            hx-post="{{ api_list['api_settings_ui_set'] }}"
+            hx-vals='{"lang": "{{ value }}"}'
+            hx-swap="none">
+            <span>{{ label }}</span>
+        </button>
+        {% endfor %}
+    </div>
+</div>

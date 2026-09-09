@@ -1,8 +1,10 @@
+from collections.abc import Sequence
 from typing import ClassVar, Self
 
 import pymongo
 from beanie import BulkWriter
-from beanie.operators import Set
+from beanie.operators import In, Set
+from pydantic import BaseModel
 
 from yatb.schema import FlagCheckResult, Task, TaskForm, TaskID, User
 from yatb.utils.log_helper import get_logger
@@ -58,6 +60,24 @@ class TaskDB(DocumentEx[Task], Task):
     @classmethod
     async def get_all(cls: type[Self]) -> dict[TaskID, Self]:
         return {i.task_id: i for i in await cls.find_all().to_list()}
+
+    class NameProjection(BaseModel):
+        task_id: TaskID
+        task_name: str
+
+    @classmethod
+    async def get_names_by_ids(cls: type[Self], task_ids: Sequence[TaskID]) -> dict[TaskID, str]:
+        """
+        task_id -> task_name, to render task references (e.g. `req_tasks`) readably.
+
+        Narrowed to the ids actually referenced rather than the whole collection: the
+        debug block is fetched once per card, and `req_tasks` is usually empty.
+        """
+        if not task_ids:
+            return {}
+
+        found = await cls.find(In(cls.task_id, list(task_ids))).project(cls.NameProjection).to_list()
+        return {i.task_id: i.task_name for i in found}
 
     @classmethod
     async def find_by_flag(cls: type[Self], flag: str, user: User) -> Self | None:

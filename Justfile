@@ -16,20 +16,31 @@ cli *args:
     uv run -m ycli {{ args }}
 
 babel-extract:
-    pybabel extract -F pyproject.toml -o messages.pot .
+    uv run pybabel extract -F pyproject.toml --add-location=file -o messages.pot src/yatb
 
 babel-update:
-    pybabel update -i messages.pot -d src/yatb/locale
+    uv run pybabel update -i messages.pot -d src/yatb/locale -D messages
 
 babel-compile:
-    pybabel compile -d src/yatb/locale
+    uv run pybabel compile -d src/yatb/locale -D messages
+    for catalog in src/yatb/locale/*/LC_MESSAGES/private.po; do if [ -f "$catalog" ]; then uv run pybabel compile -i "$catalog" -o "${catalog%.po}.mo" || exit $?; fi; done
 
 babel: babel-extract babel-update babel-compile
+
+# --- private features: run ONLY on the private branch ---
+# Public catalogs arrive through merges; only private.po is updated here.
+babel-extract-private:
+    uv run pybabel extract -F pyproject.toml --add-location=file -o private.pot src/yatb
+
+babel-update-private:
+    uv run python contrib/update_private_catalog.py
+
+babel-private: babel-extract-private babel-update-private babel-compile
 
 precom: fix format
 
 fix:
-    {{ ruff }} check --select 'I001,F401,UP035' --fix
+    {{ ruff }} check --select 'I001,F401,UP035,D213' --fix
 
 format:
     {{ ruff }} format

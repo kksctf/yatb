@@ -1,6 +1,6 @@
 <!DOCTYPE html>
 
-<html lang="ru">
+<html lang="{{ ui.lang }}">
     <head>
 
         {% set head_data = namespace() %}
@@ -8,7 +8,7 @@
 
         {% set head_data.pages = {
             ("NG ADMIN",): url_for('admin_ng_html_landing', path=""),
-            ("Back to board",): url_for('index'),
+            (_("Back to board"),): url_for('index'),
         } %}
 
         {% block head %}
@@ -41,7 +41,7 @@
                     <img src="{{ url_for('static', path='kksctf_logo_32.png') }}" height="30" class="rounded d-inline-block align-top" alt="">
                     {{ header_data.yatb_logo_text }}
                 </a>
-                <button class="navbar-toggler" type="button" data-bs-toggle="collapse" data-bs-target="#navbarNav" aria-controls="navbarText" aria-expanded="false" aria-label="Toggle navigation">
+                <button class="navbar-toggler" type="button" data-bs-toggle="collapse" data-bs-target="#navbarNav" aria-controls="navbarText" aria-expanded="false" aria-label="{{ _('Toggle navigation') }}">
                     <span class="navbar-toggler-icon"></span>
                 </button>
                 <div class="collapse navbar-collapse justify-content-between" id="navbarNav">

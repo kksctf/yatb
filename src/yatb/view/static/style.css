@@ -1,171 +1,148 @@
-/* Theme variables and light/dark styling
-   - Defaults to system preference via @media (no JS)
-   - JS toggle sets `data-theme` on <html> and persists to localStorage
+/* Theme
+   Bulma 1.0 already derives both schemes from a handful of HSL knobs and
+   switches on `prefers-color-scheme` plus the `data-theme` attribute that
+   base.jhtml sets, so we only pick the hue and let it do the rest.
+   Everything below the theme block is what Bulma cannot know about.
+
+   Loaded *after* bulma.min.css — that is what makes plain selectors here win
+   without `!important`.
 */
 
-/* Base light palette (will be overridden below when appropriate) */
 :root {
   color-scheme: light dark;
-  --bg: #ffffff;
-  --text: #111111;
-  --muted: #6b7280;
-  /* gray-500 */
-  --surface: #ffffff;
-  --border: #e5e7eb;
-  /* gray-200 */
-  --navbar-bg: #ffffff;
-  --navbar-text: #111111;
-  --solved-header-bg: #48c78e;
-  --solved-header-title: #ffffff;
-  --solved-header-subtitle: rgba(255, 255, 255, 0.85);
-  --solved-points-bg: #2aa772;
-  --solved-points-title: #f6fffb;
+
+  /* #0b1020, the navy this UI used to hardcode, is hue 226 — close enough to
+     Bulma's own 221 that the dark scheme barely moves. */
+  --bulma-scheme-h: 226;
+  --bulma-scheme-s: 16%;
+
+  /* One accent for the whole app, same hue as the scheme. Red belongs to
+     is-danger (a rejected flag) and to the logo, so it is not used here. */
+  --bulma-primary-h: 226deg;
+  --bulma-primary-s: 62%;
+  --bulma-primary-l: 50%;
+  /* Bulma derives the invert from a step of its generated palette, which for this hue
+     stays dark and put near-black on the primary buttons at 3.8:1 — under AA. Pinning
+     it to white gives 6.3:1. */
+  --bulma-primary-invert-l: 100%;
+
+  /* Links share the accent instead of Bulma's unrelated 233deg. */
+  --bulma-link-h: 226deg;
+  --bulma-link-s: 62%;
+  --bulma-link-l: 55%;
 }
 
-/* If user prefers dark and no override exists */
-@media (prefers-color-scheme: dark) {
-  :root {
-    --bg: #0b1020;
-    --text: #e5e7eb;
-    --muted: #9ca3af;
-    --surface: #11162a;
-    --border: #1f2937;
-    --navbar-bg: #0b1020;
-    --navbar-text: #e5e7eb;
-    --solved-header-bg: #13795b;
-    --solved-header-title: #f3fff9;
-    --solved-header-subtitle: #c5f5e1;
-    --solved-points-bg: #1f9d6a;
-    --solved-points-title: #ffffff;
-  }
+/* The navbar carries the flag form, so it needs to read as its own surface
+   rather than blending into the page. */
+.navbar:not(.is-transparent) {
+  --bulma-navbar-box-shadow-size: 0 1px 0 0;
+  --bulma-navbar-box-shadow-color: var(--bulma-border);
 }
 
-/* Explicit overrides when JS sets data-theme */
-:root[data-theme='light'] {
-  --bg: #ffffff;
-  --text: #111111;
-  --muted: #6b7280;
-  --surface: #ffffff;
-  --border: #e5e7eb;
-  --navbar-bg: #ffffff;
-  --navbar-text: #111111;
-  --solved-header-bg: #48c78e;
-  --solved-header-title: #ffffff;
-  --solved-header-subtitle: rgba(255, 255, 255, 0.85);
-  --solved-points-bg: #2aa772;
-  --solved-points-title: #f6fffb;
+.footer {
+  border-top: 1px solid var(--bulma-border);
 }
 
-:root[data-theme='dark'] {
-  --bg: #0b1020;
-  --text: #e5e7eb;
-  --muted: #9ca3af;
-  --surface: #11162a;
-  --border: #1f2937;
-  --navbar-bg: #0b1020;
-  --navbar-text: #e5e7eb;
-  --solved-header-bg: #13795b;
-  --solved-header-title: #f3fff9;
-  --solved-header-subtitle: #c5f5e1;
-  --solved-points-bg: #1f9d6a;
-  --solved-points-title: #ffffff;
+/* Bulma's boxed shadow is a 10%-opacity ring, which all but disappears where the
+   dropdown sits over cards of the same tone in the dark scheme. */
+.navbar-dropdown.is-boxed {
+  box-shadow:
+    0 0.5rem 1.25rem hsla(var(--bulma-scheme-h), var(--bulma-scheme-s), 0%, 0.35),
+    0 0 0 1px var(--bulma-border);
 }
 
-/* Apply variables */
-html,
-body {
-  background-color: var(--bg);
-  color: var(--text);
+/* Settings dropdown. Wide enough for three segments of either row, so neither
+   control wraps; below 1024px Bulma drops the fixed width and these render as
+   plain rows inside the burger menu. */
+.settings-dropdown {
+  min-width: 19rem;
 }
 
-/* Navbar */
-.navbar {
-  background-color: var(--navbar-bg);
+.settings-group {
+  padding: 0.5rem 1.5rem;
 }
 
-.navbar .navbar-item,
-.navbar a.navbar-item {
-  color: var(--navbar-text);
+/* Small caps label for a value or a control. Bulma 1.0 dropped `.heading`, which
+   used to cover this. */
+.mini-label {
+  margin-bottom: 0.375rem;
+  font-size: 0.75rem;
+  font-weight: 600;
+  letter-spacing: 0.04em;
+  text-transform: uppercase;
+  color: var(--bulma-text-weak);
 }
 
-.navbar .navbar-item:hover,
-.navbar a.navbar-item:hover {
-  background-color: transparent;
-  opacity: 0.8;
+/* One segmented control per row: equal segments, no wrapping, and none of
+   Bulma's bottom margin since the group already spaces things out. */
+.settings-options {
+  flex-wrap: nowrap;
+  margin-bottom: 0;
 }
 
-/* Cards and containers */
-.card {
-  background-color: var(--surface);
-  border: 1px solid var(--border);
+.settings-options .button {
+  flex: 1 1 0;
+  margin-bottom: 0;
 }
 
-.card .card-content,
-.card .content {
-  color: var(--text);
+/* Initial-in-a-circle stand-in for an avatar, in the navbar and on /profile. */
+.user-badge {
+  display: inline-flex;
+  align-items: center;
+  justify-content: center;
+  width: 1.75rem;
+  height: 1.75rem;
+  margin-right: 0.5rem;
+  border-radius: 50%;
+  background-color: var(--bulma-primary);
+  color: var(--bulma-primary-invert);
+  font-size: 0.8rem;
+  font-weight: 700;
+  line-height: 1;
 }
 
-/* Keep solved card header readable in both themes (especially dark). */
+/* Profile facts: label over value, side by side while there is room. */
+.profile-facts {
+  display: grid;
+  grid-template-columns: repeat(auto-fit, minmax(12rem, 1fr));
+  gap: 1rem;
+}
+
+.user-badge.is-large {
+  width: 5rem;
+  height: 5rem;
+  margin-right: 0;
+  font-size: 2rem;
+}
+
+/* Solved cards. Bulma has no "solved" state, but it does expose the derived
+   success shades, so the green follows the theme instead of being frozen. */
 .card.solved .card-header {
-  background-color: var(--solved-header-bg) !important;
+  background-color: var(--bulma-success);
 }
 
+/* Only what sits directly on the green. Tags are left out on purpose: each one
+   brings its own background (is-dark for the solve count), and forcing the
+   success invert onto them puts dark text on a dark pill. Icons live inside
+   either a tag or the title, so they inherit the right colour on their own. */
 .card.solved .card-header .card-header-title,
-.card.solved .card-header .title,
-.card.solved .card-header .tag,
-.card.solved .card-header i {
-  color: var(--solved-header-title) !important;
+.card.solved .card-header .title {
+  color: var(--bulma-success-invert);
 }
 
 .card.solved .card-header .subtitle {
-  color: var(--solved-header-subtitle) !important;
+  color: var(--bulma-success-invert);
+  opacity: 0.85;
 }
 
 .card.solved .card-header .task-card-tags .tag.is-success {
-  background-color: var(--solved-points-bg) !important;
-  color: var(--solved-points-title) !important;
-}
-
-/* Footer */
-.footer {
-  background-color: var(--surface);
-  border-top: 1px solid var(--border);
-  color: var(--muted);
-}
-
-/* Form controls */
-.input,
-.textarea,
-.select select {
-  background-color: var(--surface);
-  color: var(--text);
-  border-color: var(--border);
-}
-
-.input::placeholder,
-.textarea::placeholder {
-  color: var(--muted);
-}
-
-/* Tables (e.g., scoreboard) */
-table.table {
-  background-color: var(--surface);
-  color: var(--text);
-}
-
-table.table td,
-table.table th {
-  border-color: var(--border) !important;
-}
-
-/* Links */
-a {
-  color: inherit;
+  background-color: var(--bulma-success-dark);
+  color: var(--bulma-success-dark-invert);
 }
 
 /* Hidden tasks (visible to admins) */
 .card.task-hidden {
-  background-color: var(--border);
+  background-color: var(--bulma-background);
   background-image: none;
 }
 
@@ -173,6 +150,70 @@ a {
 .card.task-hidden .card-footer,
 .card.task-hidden .card-header .card-header-title {
   opacity: 0.7;
+}
+
+/* Admin debug block: a tool bolted onto a player-facing card, so it gets its
+   own inset surface to stop it reading as part of the task description. */
+/* scheme-main-bis, not --bulma-background: the latter is what a plain .tag uses,
+   and the block is full of tags that would vanish into it. */
+.task-debug {
+  border: 1px solid var(--bulma-border);
+  border-radius: var(--bulma-radius);
+  background-color: var(--bulma-scheme-main-bis);
+  padding: 0.5rem 0.625rem;
+}
+
+/* Compact enough that both classtype labels sit on one line in a 260px card. */
+.task-debug .tag:not(body) {
+  font-size: 0.7rem;
+  height: 1.75em;
+  padding-left: 0.6em;
+  padding-right: 0.6em;
+}
+
+.task-debug .tags {
+  gap: 0.25rem;
+}
+
+.task-debug .tags .tag {
+  margin-bottom: 0;
+}
+
+.task-debug > .tags:last-child {
+  margin-bottom: 0;
+}
+
+.task-debug summary {
+  cursor: pointer;
+  color: var(--bulma-text-weak);
+}
+
+.task-debug details[open] summary {
+  margin-bottom: 0.5rem;
+}
+
+.task-debug code,
+.task-debug pre {
+  font-size: 0.85em;
+}
+
+.task-debug pre {
+  max-height: 20rem;
+  overflow: auto;
+}
+
+/* Secrets stay blurred until asked for, so a task list can be shown from a
+   shared screen. */
+.debug-secret {
+  filter: blur(4px);
+  cursor: pointer;
+  user-select: none;
+}
+
+.debug-secret.revealed {
+  filter: none;
+  cursor: auto;
+  user-select: text;
 }
 
 .visually-hidden {
@@ -218,10 +259,27 @@ a {
   transform: translateY(-8px) scale(0.985);
 }
 
+/* The four kinds ride on Bulma's own .notification.is-* colours, so they follow
+   data-theme without a second palette to keep in sync. */
 .app-toast-message {
   font-size: 1rem;
   line-height: 1.3;
   word-break: break-word;
+  /* Title, message and link are separate nodes so the server never has to send markup
+     for emphasis — see the textContent-only rule in toasts.js. */
+  display: flex;
+  flex-direction: column;
+  gap: 0.15rem;
+}
+
+.app-toast-title {
+  font-size: 1.05rem;
+}
+
+.app-toast-link {
+  align-self: flex-start;
+  font-size: 0.85rem;
+  text-decoration: underline;
 }
 
 @media (max-width: 768px) {
@@ -230,5 +288,17 @@ a {
     right: 0.75rem;
     left: 0.75rem;
     width: auto;
+  }
+}
+
+@media (prefers-reduced-motion: reduce) {
+  .app-toast.notification {
+    transition: none;
+    transform: none;
+  }
+
+  .app-toast.notification.is-visible,
+  .app-toast.notification.is-leaving {
+    transform: none;
   }
 }

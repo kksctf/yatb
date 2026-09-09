@@ -8,9 +8,10 @@ from fastapi import APIRouter, Depends, HTTPException, Query, status
 from fastapi.responses import HTMLResponse
 from pydantic import BaseModel
 
-from yatb import auth, schema
+from yatb import auth, schema, toasts
 from yatb.config import settings
 from yatb.db import TaskDB
+from yatb.i18n import _
 from yatb.shared.dtc.client import DynamicTasksEtcdClient, TaskUserPair
 from yatb.shared.dtc.models import DynamicTaskInfo, DynamicTaskInfoReady, DynamicTaskQuery, DynamicTaskState
 from yatb.utils.log_helper import get_logger
@@ -125,12 +126,14 @@ class DynamicTasksClient(DynamicTasksEtcdClient):
             raise HTTPException(
                 status_code=status.HTTP_409_CONFLICT,
                 detail="Too many tasks...",
+                headers=toasts.warning(_("You already have a running instance. Stop it first.")),
             )
 
         if force_rebuild and not handle.user.is_admin:
             raise HTTPException(
                 status_code=status.HTTP_403_FORBIDDEN,
                 detail="No no no mister fish!",
+                headers=toasts.danger(_("Not allowed.")),
             )
 
         try:
@@ -164,6 +167,7 @@ async def _get_client() -> DynamicTasksClient:
         raise HTTPException(
             status_code=status.HTTP_503_SERVICE_UNAVAILABLE,
             detail="dynamic tasks not enabled",
+            headers=toasts.warning(_("Dynamic tasks are not available right now.")),
         )
 
     return __client
@@ -181,6 +185,7 @@ async def get_dynamic_task(task: CURRENT_TASK) -> TaskDB:
         raise HTTPException(
             status_code=status.HTTP_406_NOT_ACCEPTABLE,
             detail="Bad task",
+            headers=toasts.danger(_("This task has no instance to manage.")),
         )
     return task
 

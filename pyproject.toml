@@ -82,7 +82,8 @@ build-backend = "hatchling.build"
 [tool.hatch.build.targets.wheel]
 packages = ["src/dtc", "src/s3_srv", "src/yatb", "src/ycli"]
 
-[tool.hatch.build.hooks.babel]
+[tool.hatch.build.hooks.custom]
+path = "contrib/hatch_babel.py"
 locale_dir = "src/yatb/locale"
 
 [tool.hatch.metadata]

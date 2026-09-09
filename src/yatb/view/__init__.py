@@ -5,9 +5,10 @@ from fastapi import Depends, Query, Request
 from fastapi.responses import HTMLResponse
 from fastapi.routing import APIRouter
 
-from yatb import auth, i18n, schema
+from yatb import auth, schema
 from yatb.api import tasks
 from yatb.db.user import UserDB
+from yatb.ui import get_ui_state
 from yatb.utils import countries
 from yatb.utils.httpx import IS_HTTPX
 from yatb.utils.log_helper import get_logger
@@ -110,7 +111,7 @@ async def one_task_page(
 
 @router.get("/profile")
 async def profile_page(request: Request, user: auth.CURR_USER_OR_REDIRECT_LOGIN) -> HTMLResponse:
-    lang = getattr(request.state, "lang", i18n.DEFAULT)
+    lang = get_ui_state(request).lang
     return await response_generator(
         request,
         "profile.jhtml",

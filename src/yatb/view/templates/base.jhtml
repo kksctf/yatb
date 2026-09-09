@@ -1,5 +1,5 @@
 <!DOCTYPE html>
-<html lang="{{ request.state.lang }}" {% if request.state.theme != 'auto' %}data-theme="{{ request.state.theme }}"{% endif %}>
+<html lang="{{ ui.lang }}" {% if ui.theme != 'auto' %}data-theme="{{ ui.theme }}"{% endif %}>
 
 <head>
     <meta charset="utf-8">

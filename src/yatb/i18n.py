@@ -1,38 +1,27 @@
-import contextlib
 import contextvars
 import gettext
 from pathlib import Path
+from typing import TypeGuard, get_args
 
 from babel.core import negotiate_locale
-from fastapi import Request
-from starlette.middleware.base import BaseHTTPMiddleware
 
-SUPPORTED = ["en", "ru"]
-DEFAULT = "en"
+from yatb.ui_types import Language
 
-# "auto" means "no explicit choice": language falls back to Accept-Language, theme falls
-# back to the `prefers-color-scheme` media query in style.css. Kept here (and not in
-# schema/) because LocaleMiddleware validates cookies against them, and `i18n` imports
-# nothing from `yatb.*` — so schema/ui.py can import these without a cycle.
-AUTO = "auto"
-SUPPORTED_LANG_PREFS = [AUTO, *SUPPORTED]
-SUPPORTED_THEMES = [AUTO, "light", "dark"]
-DEFAULT_THEME = AUTO
-
-COOKIE_MAX_AGE = 60 * 60 * 24 * 365
+SUPPORTED = get_args(Language)
+DEFAULT: Language = "en"
 
 # Bridges the per-request language into the synchronous gettext callables used
 # during Jinja rendering. Rendering runs in a thread-pool executor, so the value
 # is also set inside the render function (see view/util.py); it is set here too so
-# plain Python request handlers calling p_()/translate() see the request language.
-current_lang: contextvars.ContextVar[str] = contextvars.ContextVar("current_lang", default=DEFAULT)
+# plain Python request handlers calling _() see the request language.
+current_lang: contextvars.ContextVar[Language] = contextvars.ContextVar("current_lang", default=DEFAULT)
 
 
-def get_lang() -> str:
+def get_lang() -> Language:
     return current_lang.get()
 
 
-def set_lang(lang: str) -> contextvars.Token[str]:
+def set_lang(lang: Language) -> contextvars.Token[Language]:
     return current_lang.set(lang)
 
 
@@ -41,11 +30,9 @@ _LOCALE_DIR = Path(__file__).parent / "locale"
 
 def _load_translation(lang: str) -> gettext.NullTranslations:
     base = gettext.translation("messages", localedir=_LOCALE_DIR, languages=[lang], fallback=True)
-    # The `private` domain ships only on the private branch. Additive chain: public string
-    # -> messages, private-only -> private, unknown -> msgid. Absent in open-source builds.
-    with contextlib.suppress(FileNotFoundError):
-        base.add_fallback(gettext.translation("private", localedir=_LOCALE_DIR, languages=[lang]))
-    return base
+    private = gettext.translation("private", localedir=_LOCALE_DIR, languages=[lang], fallback=True)
+    private.add_fallback(base)
+    return private
 
 
 TRANSLATIONS = {lang: _load_translation(lang) for lang in SUPPORTED}
@@ -59,48 +46,17 @@ def ntranslate(singular: str, plural: str, n: int) -> str:
     return TRANSLATIONS.get(get_lang(), TRANSLATIONS[DEFAULT]).ngettext(singular, plural, n)
 
 
-# `p_`/`np_` are runtime-identical to the public `_`/`ngettext` (same messages+private
-# chain). The only difference is the extraction keyword: strings called through p_/np_
-# are routed to the private catalog and kept out of the public messages.po.
-p_ = translate
-np_ = ntranslate
 _ = translate
 
 
-def detect_lang(header: str | None) -> str:
+def is_language(value: str | None) -> TypeGuard[Language]:
+    return value in SUPPORTED
+
+
+def detect_lang(header: str | None) -> Language:
     if header:
         langs = [lang.partition(";")[0].strip() for lang in header.split(",")]
         match = negotiate_locale(langs, SUPPORTED)
-        if match:
+        if is_language(match):
             return match
     return DEFAULT
-
-
-class LocaleMiddleware(BaseHTTPMiddleware):
-    async def dispatch(self, request: Request, call_next):
-        # priority: explicit query override -> cookie -> Accept-Language -> default
-        query_lang = request.query_params.get("lang")
-        lang = query_lang
-        if lang not in SUPPORTED:
-            lang = request.cookies.get("lang")
-        if lang not in SUPPORTED:
-            lang = detect_lang(request.headers.get("accept-language"))
-        request.state.lang = lang
-        set_lang(lang)  # so p_()/translate() in async handlers see the request language
-
-        # The *preference* behind request.state.lang: the settings menu must highlight
-        # "Auto" rather than the language Auto happened to resolve to.
-        lang_pref = query_lang if query_lang in SUPPORTED else request.cookies.get("lang")
-        request.state.lang_pref = lang_pref if lang_pref in SUPPORTED else AUTO
-
-        # Theme is not resolved server-side: "auto" simply omits the data-theme attribute
-        # and lets the prefers-color-scheme block in style.css take over.
-        theme = request.cookies.get("theme")
-        request.state.theme = theme if theme in SUPPORTED_THEMES else DEFAULT_THEME
-
-        resp = await call_next(request)
-
-        # persist an explicit query choice so it survives navigation
-        if query_lang in SUPPORTED:
-            resp.set_cookie("lang", query_lang, max_age=COOKIE_MAX_AGE, samesite="lax")
-        return resp

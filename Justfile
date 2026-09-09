@@ -16,26 +16,26 @@ cli *args:
     uv run -m ycli {{ args }}
 
 babel-extract:
-    pybabel extract -F pyproject.toml -o messages.pot .        # keywords "_ ngettext" already exclude p_
+    uv run pybabel extract -F pyproject.toml --add-location=file -o messages.pot src/yatb
 
 babel-update:
-    pybabel update -i messages.pot -d src/yatb/locale -D messages
+    uv run pybabel update -i messages.pot -d src/yatb/locale -D messages
 
 babel-compile:
-    pybabel compile -d src/yatb/locale -D messages
-    -pybabel compile -d src/yatb/locale -D private   # no-op if no private.po (open-source build)
+    uv run pybabel compile -d src/yatb/locale -D messages
+    for catalog in src/yatb/locale/*/LC_MESSAGES/private.po; do if [ -f "$catalog" ]; then uv run pybabel compile -i "$catalog" -o "${catalog%.po}.mo" || exit $?; fi; done
 
 babel: babel-extract babel-update babel-compile
 
 # --- private features: run ONLY on the private branch ---
-# Private strings are marked with p_()/np_(); split is by keyword, not by path.
+# Public catalogs arrive through merges; only private.po is updated here.
 babel-extract-private:
-    pybabel extract -F babel-private.cfg --no-default-keywords -k p_ -k np_:1,2 -o private.pot .
+    uv run pybabel extract -F pyproject.toml --add-location=file -o private.pot src/yatb
 
 babel-update-private:
-    pybabel update -i private.pot -d src/yatb/locale -D private
+    uv run python contrib/update_private_catalog.py
 
-babel-private: babel-extract-private babel-update-private
+babel-private: babel-extract-private babel-update-private babel-compile
 
 precom: fix format
 

@@ -6,10 +6,11 @@ from fastapi import FastAPI
 from fastapi.staticfiles import StaticFiles
 from prometheus_fastapi_instrumentator import Instrumentator
 
-from . import api, i18n, main, view
+from . import api, main, view
 from .api.api_dynamic_tasks import __client
 from .config import settings
 from .db import db
+from .ui import UISettingsMiddleware
 
 
 @asynccontextmanager
@@ -29,7 +30,7 @@ app = FastAPI(
     lifespan=lifespan,
     version=settings.VERSION,
 )
-app.add_middleware(i18n.LocaleMiddleware)  # ty:ignore[invalid-argument-type]
+app.add_middleware(UISettingsMiddleware)
 
 _base_path = Path(__file__).resolve().parent
 app.mount("/static", StaticFiles(directory=_base_path / "view" / "static"), name="static")

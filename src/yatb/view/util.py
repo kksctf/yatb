@@ -3,7 +3,6 @@ import datetime
 from collections.abc import Mapping
 from pathlib import Path
 
-import markupsafe
 from fastapi import BackgroundTasks, Request
 from fastapi.routing import APIRoute as _APIRoute
 from fastapi.templating import Jinja2Templates
@@ -12,22 +11,17 @@ from starlette.templating import _TemplateResponse
 
 from yatb import i18n, schema
 from yatb.config import settings
+from yatb.ui import get_ui_state
 
 _base_path = Path(__file__).resolve().parent
 templates = Jinja2Templates(directory=_base_path / "templates")
 
 templates.env.add_extension("jinja2.ext.i18n")
-# The translation machinery (messages + private chain, current_lang) lives in `i18n`
+# The translation machinery (private + messages chain, current_lang) lives in `i18n`
 # so it is importable from plain Python handlers too. i18n.translate/ntranslate read
 # the language from i18n.current_lang, which response_generator sets inside the
 # executor thread right before rendering.
 templates.env.install_gettext_callables(gettext=i18n.translate, ngettext=i18n.ntranslate, newstyle=True)
-# Private-feature markers: runtime-identical to `_`/`ngettext`, but a distinct extraction
-# keyword so their strings route to the private catalog (see babel-private.cfg). Wrapped in
-# Markup to match newstyle `_` (translated text rendered as-is, not auto-escaped).
-# Markup is safe here: text comes from our own .po catalogs (trusted), mirroring newstyle `_`.
-templates.env.globals["p_"] = lambda message: markupsafe.Markup(i18n.translate(message))  # noqa: S704
-templates.env.globals["np_"] = lambda singular, plural, n: markupsafe.Markup(i18n.ntranslate(singular, plural, n))  # noqa: S704
 
 
 def route_generator(req: Request, base_path: str = "/api", *, ignore_admin: bool = True) -> dict[str, str]:
@@ -57,18 +51,18 @@ async def response_generator(  # noqa: PLR0913 # impossible to fix
     *,
     ignore_admin: bool = True,
 ) -> _TemplateResponse:
+    ui = get_ui_state(req)
     context_base = {
         "request": req,
+        "ui": ui,
         "api_list": route_generator(req, ignore_admin=ignore_admin),
     }
     context_base.update(context)
 
-    lang = getattr(req.state, "lang", i18n.DEFAULT)
-
     def _render() -> _TemplateResponse:
         # ContextVar must be set in the executor thread: values set in the async
         # context (or in BaseHTTPMiddleware) do not propagate here.
-        token = i18n.current_lang.set(lang)
+        token = i18n.set_lang(ui.lang)
         try:
             return templates.TemplateResponse(
                 name=filename,

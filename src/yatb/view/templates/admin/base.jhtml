@@ -1,6 +1,6 @@
 <!DOCTYPE html>
 
-<html lang="{{ request.state.lang }}">
+<html lang="{{ ui.lang }}">
     <head>
 
         {% set head_data = namespace() %}

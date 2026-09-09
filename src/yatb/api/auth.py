@@ -5,7 +5,7 @@ from fastapi import APIRouter, Depends, Form, HTTPException, Request, Response, 
 
 from yatb import auth, schema, toasts
 from yatb.db import UserDB
-from yatb.i18n import translate as _
+from yatb.i18n import _
 from yatb.utils import metrics
 from yatb.utils.httpx import IS_HTTPX
 

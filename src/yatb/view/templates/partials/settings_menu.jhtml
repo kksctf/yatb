@@ -13,7 +13,7 @@
             ("dark", _("Dark"), "fa-moon")
         ] %}
         <button type="button"
-            class="button js-theme-option {% if request.state.theme == value %}is-primary is-selected{% endif %}"
+            class="button js-theme-option {% if ui.theme == value %}is-primary is-selected{% endif %}"
             data-value="{{ value }}"
             hx-post="{{ api_list['api_settings_ui_set'] }}"
             hx-vals='{"theme": "{{ value }}"}'
@@ -34,7 +34,7 @@
     <div class="buttons has-addons are-small settings-options">
         {% for value, label in [("auto", _("Auto")), ("en", "English"), ("ru", "Русский")] %}
         <button type="button"
-            class="button js-lang-option {% if request.state.lang_pref == value %}is-primary is-selected{% endif %}"
+            class="button js-lang-option {% if ui.lang_pref == value %}is-primary is-selected{% endif %}"
             data-value="{{ value }}"
             hx-post="{{ api_list['api_settings_ui_set'] }}"
             hx-vals='{"lang": "{{ value }}"}'

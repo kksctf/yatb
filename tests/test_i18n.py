@@ -49,9 +49,15 @@ def test_private_catalog_update(tmp_path: Path):
     with (directory / "private.po").open("rb") as stream:
         result = read_po(stream, locale="ru")
     assert result.get("Public") is None
-    assert result.get("New").string == ""
-    assert result.get("Override").string == "Замена"
-    assert result.get("Promoted").string == "Приватное"
+    new = result.get("New")
+    override = result.get("Override")
+    promoted = result.get("Promoted")
+    assert new is not None
+    assert override is not None
+    assert promoted is not None
+    assert new.string == ""
+    assert override.string == "Замена"
+    assert promoted.string == "Приватное"
     assert "Removed" in result.obsolete
 
 
@@ -63,7 +69,9 @@ def test_filter_context_and_plurals():
     extracted.add("Open", context="adjective")
     private.add(("item", "items"))
     result = private_template(extracted, public, private)
-    assert result.get("item").id == ("item", "items")
+    item = result.get("item")
+    assert item is not None
+    assert item.id == ("item", "items")
     assert result.get("Open", "verb") is None
     assert result.get("Open", "adjective") is not None
 

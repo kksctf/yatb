@@ -1,0 +1,48 @@
+name: CI
+
+on:
+  push:
+  pull_request:
+
+permissions:
+  contents: read
+
+jobs:
+  checks:
+    name: Tests, Ruff, Pyright
+    runs-on: ubuntu-latest
+    services:
+      mongodb:
+        image: mongo:7.0
+        ports:
+          - 27017:27017
+        options: >-
+          --health-cmd "mongosh --quiet --eval 'db.runCommand({ ping: 1 }).ok'"
+          --health-interval 10s
+          --health-timeout 5s
+          --health-retries 5
+
+    steps:
+      - name: Checkout
+        uses: actions/checkout@v6
+
+      - name: Install uv and Python
+        uses: astral-sh/setup-uv@v9
+        with:
+          python-version: "3.12"
+          enable-cache: true
+
+      - name: Install dependencies
+        run: uv sync --locked --all-extras --group dev
+
+      - name: Ruff lint
+        run: uv run --no-sync ruff check --select I001,F401,UP035,D213 .
+
+      - name: Ruff format
+        run: uv run --no-sync ruff format --check .
+
+      - name: Pyright
+        run: uv run --no-sync pyright
+
+      - name: Tests
+        run: uv run --no-sync pytest -q

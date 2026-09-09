@@ -1,19 +1,34 @@
 name: Publish docs via GitHub Pages
+
 on:
   push:
     branches:
       - master
+  workflow_dispatch:
+
+permissions:
+  contents: write
+
+concurrency:
+  group: docs
+  cancel-in-progress: false
 
 jobs:
-  build:
+  deploy:
     name: Deploy docs
     runs-on: ubuntu-latest
     steps:
-      - name: Checkout main
-        uses: actions/checkout@v2
+      - name: Checkout
+        uses: actions/checkout@v6
+
+      - name: Install uv and Python
+        uses: astral-sh/setup-uv@v9
+        with:
+          python-version: "3.12"
+          enable-cache: true
+
+      - name: Install docs dependencies
+        run: uv sync --locked --only-group docs
 
       - name: Deploy docs
-        uses: mhausenblas/mkdocs-deploy-gh-pages@1.25
-        env:
-          GITHUB_TOKEN: ${{ secrets.GITHUB_TOKEN }}
-          REQUIREMENTS: requirements-docs.txt
+        run: .venv/bin/mkdocs gh-deploy --strict --force

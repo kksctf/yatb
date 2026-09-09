@@ -75,7 +75,7 @@ async def api_settings_ui_set(
 
     if user:
         user.settings = merged
-        await user.update(Set({UserDB.settings: merged}))
+        await user.update(Set({str(UserDB.settings): merged}))
 
     # Language is baked into the rendered HTML, so the page has to come back from the server.
     # No toast either: HX-Refresh throws the page (and any toast on it) away immediately.
@@ -97,6 +97,6 @@ async def api_settings_profile_set(
     updated = user.extra_info.model_copy(update=form.model_dump())
 
     user.extra_info = updated
-    await user.update(Set({UserDB.extra_info: updated}))
+    await user.update(Set({str(UserDB.extra_info): updated}))
 
     return updated

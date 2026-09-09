@@ -71,8 +71,14 @@ dev = [
     "pytest-cov ~= 5.0.0",
     "pytest-env ~= 1.1.3",
     "ruff ~= 0.11.12",
+    "pyright ~= 1.1.411",
     "debugpy ~= 1.8.14",
     "djlint",
+]
+docs = [
+    "mdx-truly-sane-lists ~= 1.3",
+    "mkdocs ~= 1.6.1",
+    "mkdocs-material ~= 9.7.7",
 ]
 
 [build-system]
@@ -153,6 +159,7 @@ ignore = [
 addopts = "--cov=./src --cov-report=xml:coverage.xml -cov-config=.coveragerc"
 env = ["DEBUG=0", "ENABLE_METRICS=0", "TESTING=1", "DB_NAME=yatb_unittesting"]
 filterwarnings = ["ignore::DeprecationWarning"]
+pythonpath = ["."]
 testpaths = ["tests"]
 
 ### PYRIGHT

@@ -1,6 +1,4 @@
-from typing import Annotated
-
-from fastapi import APIRouter, Form, HTTPException, status
+from fastapi import APIRouter, HTTPException, status
 from pydantic import BaseModel
 
 from yatb import auth

@@ -23,6 +23,11 @@ class Settings(BaseSettings):
 
     S3_HOST_KANIKO: str
     S3_PORT_KANIKO: int
+    S3_ACCESS: str
+    S3_SECRET: str
+
+    TASKS_BUCKET_NAME: str = "dynamic-tasks-build-source"
+    BUILD_RESULT_BUCKET_NAME: str = "dynamic-tasks-build-results"
 
     DOCKER_REGISTRY_HOST: str
     DOCKER_REGISTRY_PORT: int

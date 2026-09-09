@@ -27,7 +27,7 @@ YATB - yet another fast and furious jeopardy-CTF taskboard
    3. `CTF_NAME` - CTF name for frontend
    4. Setup auth ways:
       1. Fill `ENABLED_AUTH_WAYS` list with enabled auth ways, for example, `ENABLED_AUTH_WAYS='["TelegramAuth", "SimpleAuth"]'`
-      2. Fill select auth way settings. For reference, see [more about auth ways configs](config.md#Auth%20ways)
+      2. Fill select auth way settings. For reference, see [more about auth ways configs](config.md#auth-ways)
    5. [More about config](config.md)
 4. Change logos in [app/view/static](https://github.com/kksctf/yatb/tree/master/app/view/static)
 5. `docker-compose up -d --build`

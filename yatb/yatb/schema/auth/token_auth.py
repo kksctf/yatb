@@ -3,7 +3,8 @@ from typing import ClassVar, Literal, Self
 
 from fastapi import Request, Response
 
-from ...ebasemodelv2.types import Admin, Public
+from yatb.base.ebasemodelv2.types import Admin, Public
+
 from ...utils.log_helper import get_logger
 from .base import AuthBase
 

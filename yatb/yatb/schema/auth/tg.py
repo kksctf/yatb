@@ -8,7 +8,8 @@ from fastapi import HTTPException, Query, Request, Response, status
 from pydantic import field_validator, model_validator
 from pydantic_settings import SettingsConfigDict
 
-from ...ebasemodelv2.types import Admin, Public
+from yatb.base.ebasemodelv2.types import Admin, Public
+
 from ...utils.log_helper import get_logger
 from .base import AuthBase
 

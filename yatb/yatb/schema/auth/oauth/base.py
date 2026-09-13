@@ -5,7 +5,7 @@ import aiohttp
 from fastapi import HTTPException, Query, Request, Response, status
 from pydantic_settings import SettingsConfigDict
 
-from yatb.yatb.ebasemodelv2 import Public
+from yatb.base.ebasemodelv2 import Public
 from yatb.yatb.utils.log_helper import get_logger
 
 from ..base import AuthBase

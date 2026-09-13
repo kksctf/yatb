@@ -4,7 +4,7 @@ from typing import Any, Self
 
 from beanie import Document
 
-from yatb.yatb.ebasemodelv2 import EBaseModelV2
+from yatb.base.ebasemodelv2 import EBaseModelV2
 
 
 class DocumentEx[T: EBaseModelV2](Document):

@@ -5,7 +5,7 @@ from fastapi import Request, Response
 from pydantic import BaseModel
 from pydantic_settings import BaseSettings, SettingsConfigDict
 
-from yatb.yatb.ebasemodelv2 import EBaseModelV2, Public
+from yatb.base.ebasemodelv2 import EBaseModelV2, Public
 
 type RouterParams = dict[str, str | object]
 

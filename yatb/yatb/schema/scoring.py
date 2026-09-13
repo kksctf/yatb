@@ -3,7 +3,8 @@ from typing import Literal
 
 from pydantic import computed_field
 
-from ..ebasemodelv2 import Admin, EBaseModelV2, Public
+from yatb.base.ebasemodelv2 import Admin, EBaseModelV2, Public
+
 from ..utils.log_helper import get_logger
 
 logger = get_logger("schema.scoring")

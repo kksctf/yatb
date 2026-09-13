@@ -4,7 +4,8 @@ import aiohttp
 from fastapi import Request, Response
 from pydantic_settings import SettingsConfigDict
 
-from ....ebasemodelv2 import Admin, EBaseModelV2, Public
+from yatb.base.ebasemodelv2 import Admin, EBaseModelV2, Public
+
 from ....utils.log_helper import get_logger
 from ..base import RouterParams
 from .base import OAuth

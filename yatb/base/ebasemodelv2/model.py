@@ -1,4 +1,5 @@
 import dataclasses
+import logging
 import typing
 from types import UnionType
 from typing import (
@@ -18,10 +19,9 @@ from pydantic import create_model
 from pydantic.fields import ComputedFieldInfo, FieldInfo
 from typing_inspection.introspection import AnnotationSource, InspectedAnnotation, inspect_annotation
 
-from ..utils.log_helper import get_logger
 from .level import PresentationLevel
 
-logger = get_logger("schema.v2")
+logger = logging.getLogger("yatb.schema.v2")
 
 
 def origin_is_union(tp: type[Any] | None) -> bool:

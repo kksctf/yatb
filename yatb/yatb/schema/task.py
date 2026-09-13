@@ -5,9 +5,9 @@ from zoneinfo import ZoneInfo
 
 from pydantic import BaseModel, Field, computed_field
 
+from yatb.base.ebasemodelv2 import Admin, EBaseModelV2, Public
 from yatb.yatb import config
 from yatb.yatb.config import settings
-from yatb.yatb.ebasemodelv2 import Admin, EBaseModelV2, Public
 from yatb.yatb.shared.dtc.models import DynamicTaskFeatures
 from yatb.yatb.utils import md
 from yatb.yatb.utils.log_helper import get_logger

@@ -1,6 +1,6 @@
 from typing import Annotated
 
-from yatb.yatb.ebasemodelv2 import EBaseModelV2, PresentationLevel
+from yatb.base.ebasemodelv2 import EBaseModelV2, PresentationLevel
 
 
 class SimpleClass(EBaseModelV2):

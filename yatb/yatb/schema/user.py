@@ -3,7 +3,7 @@ from typing import Literal, Self
 
 from pydantic import Field, computed_field, model_validator
 
-from yatb.yatb.ebasemodelv2 import Admin, EBaseModelV2, Public
+from yatb.base.ebasemodelv2 import Admin, EBaseModelV2, Public
 from yatb.yatb.utils.log_helper import get_logger
 
 from .auth import ANNOTATED_TYPING_AUTH

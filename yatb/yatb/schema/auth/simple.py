@@ -7,8 +7,8 @@ from typing import ClassVar, Literal, Self
 from fastapi import HTTPException, Request, Response, status
 from pydantic_settings import SettingsConfigDict
 
+from yatb.base.ebasemodelv2.types import Admin, Private, Public
 from yatb.yatb.config import settings
-from yatb.yatb.ebasemodelv2.types import Admin, Private, Public
 from yatb.yatb.utils.log_helper import get_logger
 
 from .base import AuthBase

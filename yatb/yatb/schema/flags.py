@@ -3,8 +3,8 @@ import hmac
 from enum import Enum, auto
 from typing import Literal
 
+from yatb.base.ebasemodelv2 import Admin, EBaseModelV2, Public
 from yatb.yatb.config import settings
-from yatb.yatb.ebasemodelv2 import Admin, EBaseModelV2, Public
 
 from .user import User
 

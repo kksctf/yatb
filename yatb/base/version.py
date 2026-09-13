@@ -1,9 +1,11 @@
 import subprocess
+from functools import lru_cache
 from pathlib import Path
 
 __version__ = "0.7.2"
 
 
+@lru_cache
 def get_version(*, debug: bool = False, commit: str | None = None) -> str:
     root = Path(__file__).resolve().parents[2]
     if (root / ".git").exists():

@@ -176,7 +176,7 @@ in
       } // settings.extra;
 
       serviceConfig = {
-        ExecStart = "${cfg.package}/bin/uvicorn yatb.app:app --host '${cfg.http.host}' --port '${toString cfg.http.port}' ${lib.strings.escapeShellArgs cfg.extraArgs}";
+        ExecStart = "${cfg.package}/bin/uvicorn yatb.yatb.app:app --host '${cfg.http.host}' --port '${toString cfg.http.port}' ${lib.strings.escapeShellArgs cfg.extraArgs}";
         Restart = "on-failure";
         KillSignal = "SIGINT";
 

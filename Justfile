@@ -4,33 +4,33 @@ sync:
     uv sync --all-extras --all-groups --all-packages
 
 yatb:
-    AUTH_SIMPLE_DEBUG_USERNAME="Debug" DEBUG=1 uv run uvicorn yatb.app:app
+    AUTH_SIMPLE_DEBUG_USERNAME="Debug" DEBUG=1 uv run uvicorn yatb.yatb.app:app
 
 yatb-reload:
-    AUTH_SIMPLE_DEBUG_USERNAME="Debug" DEBUG=1 uv run uvicorn yatb.app:app --reload
+    AUTH_SIMPLE_DEBUG_USERNAME="Debug" DEBUG=1 uv run uvicorn yatb.yatb.app:app --reload
 
 debug-yatb:
-    AUTH_SIMPLE_DEBUG_USERNAME="Debug" DEBUG=1 uv run debugpy --listen 5678 --wait-for-client -m uvicorn yatb.app:app
+    AUTH_SIMPLE_DEBUG_USERNAME="Debug" DEBUG=1 uv run debugpy --listen 5678 --wait-for-client -m uvicorn yatb.yatb.app:app
 
 cli *args:
-    uv run -m ycli {{ args }}
+    uv run -m yatb.cli {{ args }}
 
 babel-extract:
-    uv run pybabel extract -F pyproject.toml --add-location=file -o messages.pot src/yatb
+    uv run pybabel extract -F pyproject.toml --add-location=file -o messages.pot yatb/yatb
 
 babel-update:
-    uv run pybabel update -i messages.pot -d src/yatb/locale -D messages
+    uv run pybabel update -i messages.pot -d yatb/yatb/locale -D messages
 
 babel-compile:
-    uv run pybabel compile -d src/yatb/locale -D messages
-    for catalog in src/yatb/locale/*/LC_MESSAGES/private.po; do if [ -f "$catalog" ]; then uv run pybabel compile -i "$catalog" -o "${catalog%.po}.mo" || exit $?; fi; done
+    uv run pybabel compile -d yatb/yatb/locale -D messages
+    for catalog in yatb/yatb/locale/*/LC_MESSAGES/private.po; do if [ -f "$catalog" ]; then uv run pybabel compile -i "$catalog" -o "${catalog%.po}.mo" || exit $?; fi; done
 
 babel: babel-extract babel-update babel-compile
 
 # --- private features: run ONLY on the private branch ---
 # Public catalogs arrive through merges; only private.po is updated here.
 babel-extract-private:
-    uv run pybabel extract -F pyproject.toml --add-location=file -o private.pot src/yatb
+    uv run pybabel extract -F pyproject.toml --add-location=file -o private.pot yatb/yatb
 
 babel-update-private:
     uv run python contrib/update_private_catalog.py

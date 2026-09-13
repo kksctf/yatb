@@ -2,7 +2,7 @@ from typing import Annotated
 
 from pydantic import computed_field
 
-from yatb.ebasemodelv2 import EBaseModelV2, PresentationLevel
+from yatb.yatb.ebasemodelv2 import EBaseModelV2, PresentationLevel
 
 
 class SimpleClass(EBaseModelV2):

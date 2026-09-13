@@ -11,7 +11,7 @@ export S3_SECRET=`cat "$SHARED_DIR/secret_key"`
 
 export S3_REGION="garage"
 
-exec /app/.venv/bin/python3 -m gunicorn s3_srv.app:app \
+exec /app/.venv/bin/python3 -m gunicorn yatb.s3.app:app \
     --worker-class=uvicorn.workers.UvicornWorker \
     --workers=2 \
     --log-level=warning \

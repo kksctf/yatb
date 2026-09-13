@@ -1,6 +1,6 @@
 from fastapi import status
 
-from yatb.app import app
+from yatb.yatb.app import app
 
 from . import ClientEx
 from . import client as client_cl
@@ -131,7 +131,7 @@ def test_profile_keeps_profile_pic(client: ClientEx):
 
 
 async def _set_profile_pic(username: str, url: str) -> None:
-    from yatb.db import UserDB
+    from yatb.yatb.db import UserDB
 
     user = await UserDB.find_by_username(username)
     assert user is not None

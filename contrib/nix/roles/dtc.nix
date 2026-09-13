@@ -115,7 +115,7 @@ in
           environment = env;
 
           serviceConfig = {
-            ExecStart = "${cfg.package}/bin/uvicorn dtc.web:app --host '${cfg.http.host}' --port '${toString cfg.http.port}' ${lib.strings.escapeShellArgs cfg.extraArgs}";
+            ExecStart = "${cfg.package}/bin/uvicorn yatb.dtc.web:app --host '${cfg.http.host}' --port '${toString cfg.http.port}' ${lib.strings.escapeShellArgs cfg.extraArgs}";
             Restart = "on-failure";
             KillSignal = "SIGINT";
             # DynamicUser = "yes";

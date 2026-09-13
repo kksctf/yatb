@@ -1,11 +1,11 @@
 # Release notes
 
-## Latest version
+## 0.7.3
 
 - Added:
   - A
 - Changed:
-  - B
+  - Docs
 - Depricated:
   - C
 - Deleted:

@@ -16,8 +16,8 @@ from fastapi.testclient import TestClient
 from jinja2 import DictLoader
 
 from contrib.update_private_catalog import private_template, update_private_catalogs
-from yatb import i18n
-from yatb.ui import UISettingsMiddleware, get_ui_state
+from yatb.yatb import i18n
+from yatb.yatb.ui import UISettingsMiddleware, get_ui_state
 
 
 def test_private_catalog_update(tmp_path: Path):
@@ -165,7 +165,7 @@ def test_initial_private_catalog(tmp_path: Path):
 
 
 def test_ui_state_template_context(monkeypatch: pytest.MonkeyPatch):
-    from yatb.view.util import response_generator, templates
+    from yatb.yatb.view.util import response_generator, templates
 
     for name in templates.env.list_templates():
         templates.env.get_template(name)
@@ -193,7 +193,7 @@ def test_wheel_compiles_private_catalog(tmp_path: Path, mode: str):
     root = Path(__file__).resolve().parents[1]
     for name in ["pyproject.toml", "README.md", "LICENSE"]:
         shutil.copy(root / name, tmp_path / name)
-    for name in ["src", "contrib"]:
+    for name in ["yatb", "contrib"]:
         shutil.copytree(
             root / name,
             tmp_path / name,
@@ -203,7 +203,7 @@ def test_wheel_compiles_private_catalog(tmp_path: Path, mode: str):
     private.add("Shared", "Private")
     if mode == "invalid":
         private.add("Hello %(name)s", "Hello %(wrong)s", flags=["python-format"])
-    path = tmp_path / "src/yatb/locale/en/LC_MESSAGES/private.po"
+    path = tmp_path / "yatb/yatb/locale/en/LC_MESSAGES/private.po"
     if mode != "public":
         with path.open("wb") as stream:
             write_po(stream, private)
@@ -221,9 +221,9 @@ def test_wheel_compiles_private_catalog(tmp_path: Path, mode: str):
     assert result.returncode == 0, result.stdout + result.stderr
     wheel = next((tmp_path / "dist").glob("*.whl"))
     with ZipFile(wheel) as archive:
-        assert "yatb/locale/en/LC_MESSAGES/messages.mo" in archive.namelist()
+        assert "yatb/yatb/locale/en/LC_MESSAGES/messages.mo" in archive.namelist()
         if mode == "public":
-            assert "yatb/locale/en/LC_MESSAGES/private.mo" not in archive.namelist()
+            assert "yatb/yatb/locale/en/LC_MESSAGES/private.mo" not in archive.namelist()
             return
-        translation = gettext.GNUTranslations(BytesIO(archive.read("yatb/locale/en/LC_MESSAGES/private.mo")))
+        translation = gettext.GNUTranslations(BytesIO(archive.read("yatb/yatb/locale/en/LC_MESSAGES/private.mo")))
     assert translation.gettext("Shared") == "Private"

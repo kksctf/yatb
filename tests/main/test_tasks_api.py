@@ -4,7 +4,7 @@ import json
 
 from fastapi import status
 
-from yatb import schema
+from yatb.yatb import schema
 
 from . import ClientEx, app, test_auth
 from . import client as client_cl

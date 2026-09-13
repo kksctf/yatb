@@ -41,4 +41,4 @@ def update_private_catalogs(template_path: Path, locale_dir: Path) -> None:
 
 
 if __name__ == "__main__":
-    update_private_catalogs(Path("private.pot"), Path("src/yatb/locale"))
+    update_private_catalogs(Path("private.pot"), Path("yatb/yatb/locale"))

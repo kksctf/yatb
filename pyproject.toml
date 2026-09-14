@@ -185,3 +185,27 @@ pattern = "**/templates/**.jhtml"
 encoding = "utf-8"
 extensions = "jinja2.ext.i18n"
 keywords = "_ ngettext:1,2"
+
+### DJLINT
+
+[tool.djlint]
+profile = "jinja"
+
+max_attribute_length = 80
+max_blank_lines = 4
+max_line_length = 120
+
+close_void_tags = true
+single_attribute_per_line = true
+preserve_blank_lines = true
+no_indent_inner_html = true
+keep_br_inline = false
+no_function_formatting = false
+
+blank_line_before_tag = "block"
+blank_line_after_tag = "endblock,extends"
+
+format_css = true
+# format_js = true
+
+ignore = "H006,H013,H021,H023,H030,H031"

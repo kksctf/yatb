@@ -1,13 +1,11 @@
 {% extends "base.jhtml" %}
 
-{% block title %}{{ "Welcome - YATB" }}{% endblock %}
+{% block title %}
+  {{ "Welcome - YATB" }}
+{% endblock title %}
 
 {% block content %}
-<div class="container">
-  <article class="content">
-
-  <h1 class="title is-3"> 🚀 </h1>
-
-  </article>
-</div>
-{% endblock %}
+  <div class="container">
+    <article class="content"></article>
+  </div>
+{% endblock content %}

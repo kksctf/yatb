@@ -1,139 +1,143 @@
 <!DOCTYPE html>
-<html lang="{{ ui.lang }}" {% if ui.theme != 'auto' %}data-theme="{{ ui.theme }}"{% endif %}>
-
-<head>
-    <meta charset="utf-8">
+<html lang="{{ ui.lang }}"
+      {% if ui.theme != 'auto' %}data-theme="{{ ui.theme }}"{% endif %}>
+  <head>
+    <meta charset="utf-8" />
     <title>
-        {% block title %}{{ CTF_NAME }}{% endblock %}
+
+      {% block title %}
+        {{ CTF_NAME }}
+      {% endblock title %}
+
     </title>
-    <!-- Bulma & HTMX from CDNs -->
-    <link rel="stylesheet" href="https://cdn.jsdelivr.net/npm/bulma@1.0.1/css/bulma.min.css">
-    {# Ours load after Bulma on purpose: that is what lets plain selectors in
-       style.css win without `!important`. #}
-    <link rel="stylesheet" href="{{ url_for('static', path='layout.css') }}">
-    <link rel="stylesheet" href="{{ url_for('static', path='style.css') }}">
+    <link rel="stylesheet"
+          href="https://cdn.jsdelivr.net/npm/bulma@1.0.1/css/bulma.min.css" />
+    <link rel="stylesheet" href="{{ url_for('static', path='layout.css') }}" />
+    <link rel="stylesheet" href="{{ url_for('static', path='style.css') }}" />
     <script src="https://unpkg.com/htmx.org@2.0.4"></script>
-    <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/7.0.0/css/all.min.css" integrity="sha512-DxV+EoADOkOygM4IR9yXP8Sb2qwgidEmeqAEmDKIOfPRQZOWbXCzLC6vjbZyy0vPisbH2SyW27+ddLVCN+OMzQ==" crossorigin="anonymous" referrerpolicy="no-referrer" />
-    <link rel="icon" type="image/png" href="{{ url_for('static', path='kksctf_logo_32.png') }}" />
+    <link rel="stylesheet"
+          href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/7.0.0/css/all.min.css"
+          integrity="sha512-DxV+EoADOkOygM4IR9yXP8Sb2qwgidEmeqAEmDKIOfPRQZOWbXCzLC6vjbZyy0vPisbH2SyW27+ddLVCN+OMzQ=="
+          crossorigin="anonymous"
+          referrerpolicy="no-referrer" />
+    <link rel="icon"
+          type="image/png"
+          href="{{ url_for('static', path='kksctf_logo_32.png') }}" />
     {# optional per-page extra tags #}
-    {% block extra_head %}{% endblock %}
-</head>
 
-<body>
+    {% block extra_head %}
+    {% endblock extra_head %}
+
+  </head>
+  <body>
     <nav class="navbar" role="navigation" aria-label="main navigation">
-        <div class="navbar-brand">
-            <a class="navbar-item" href="{{ url_for('index') }}">
-                <figure class="image is-24x24">
-                    <img src="{{ url_for('static', path='logo.png') }}" />
-                </figure>
-                {{ CTF_NAME }}
-            </a>
-
-            <a role="button" class="navbar-burger" aria-label="menu" aria-expanded="false" data-target="yatbNavbar">
-                <span aria-hidden="true"></span>
-                <span aria-hidden="true"></span>
-                <span aria-hidden="true"></span>
-                <span aria-hidden="true"></span>
-            </a>
+      <div class="navbar-brand">
+        <a class="navbar-item" href="{{ url_for('index') }}">
+          <figure class="image is-24x24">
+            <img src="{{ url_for('static', path='logo.png') }}" />
+          </figure>
+          {{ CTF_NAME }}
+        </a>
+        <a role="button"
+           class="navbar-burger"
+           aria-label="menu"
+           aria-expanded="false"
+           data-target="yatbNavbar">
+          <span aria-hidden="true"></span>
+          <span aria-hidden="true"></span>
+          <span aria-hidden="true"></span>
+          <span aria-hidden="true"></span>
+        </a>
+      </div>
+      <div id="yatbNavbar" class="navbar-menu">
+        <div class="navbar-start">
+          <a class="navbar-item" href="{{ url_for('tasks_page') }}">{{ _("Challenges") }}</a>
+          <a class="navbar-item" href="{{ url_for('scoreboard_page') }}">{{ _("Scoreboard") }}</a>
         </div>
-        <div id="yatbNavbar" class="navbar-menu">
-            <div class="navbar-start">
-                <a class="navbar-item" href="{{ url_for('tasks_page') }}">{{ _("Challenges") }}</a>
-                <a class="navbar-item" href="{{ url_for('scoreboard_page') }}">{{ _("Scoreboard") }}</a>
-            </div>
-            <div class="navbar-end">
-                {% if curr_user %}
-                {# Posts to the htmx twin, not the JSON API: it answers with a toast and an
-                   out-of-band redraw of the task card. `hx-swap="none"` does not block the
-                   OOB swap — htmx applies those before it looks at the swap style.
-                   `yatb:flag-accepted` rides along in the same HX-Trigger header, and only
-                   for an accepted flag, so a wrong one stays in the box to be edited. #}
-                <form id="flag-submit-form" class="navbar-item" method="post" action="{{ url_for('ui_task_submit_flag') }}"
-                    hx-post="{{ url_for('ui_task_submit_flag') }}" hx-swap="none"
-                    hx-on:yatb:flag-accepted="this.reset()">
-                    <div class="field has-addons">
-                        <p class="control">
-                            <span class="button is-static">{{ FLAG_BASE }}{</span>
-                        </p>
-                        <p class="control is-expanded">
-                            <input id="flag-submit-input" class="input" name="flag" placeholder="sampl3_fl4g" required>
-                        </p>
-                        <p class="control">
-                            <span class="button is-static">}</span>
-                        </p>
-                        <p class="control">
-                            <button class="button is-primary">{{ _("Submit") }}</button>
-                        </p>
-                    </div>
-                </form>
+        <div class="navbar-end">
+          {% if curr_user %}
+            <form id="flag-submit-form"
+                  class="navbar-item"
+                  method="post"
+                  action="{{ url_for('ui_task_submit_flag') }}"
+                  hx-post="{{ url_for('ui_task_submit_flag') }}"
+                  hx-swap="none"
+                  hx-on:yatb:flag-accepted="this.reset()">
+              <div class="field has-addons">
+                <p class="control">
+                  <span class="button is-static">{{ FLAG_BASE }}{</span>
+                </p>
+                <p class="control is-expanded">
+                  <input id="flag-submit-input"
+                         class="input"
+                         name="flag"
+                         placeholder="sampl3_fl4g"
+                         required />
+                </p>
+                <p class="control">
+                  <span class="button is-static">}</span>
+                </p>
+                <p class="control">
+                  <button class="button is-primary">{{ _("Submit") }}</button>
+                </p>
+              </div>
+            </form>
+          {% endif %}
+          <div id="settings-menu" class="navbar-item has-dropdown is-hoverable">
+            <a class="navbar-link is-arrowless"
+               role="button"
+               tabindex="0"
+               aria-haspopup="true"
+               title="{{ _('Settings') }}"
+               aria-label="{{ _('Settings') }}">
+              <span class="icon"><i class="fa-solid fa-gear"></i></span>
+              <span class="is-hidden-desktop">{{ _('Settings') }}</span>
+            </a>
+            <div class="navbar-dropdown is-right is-boxed settings-dropdown">{% include "partials/settings_menu.jhtml" %}</div>
+          </div>
+          {% if curr_user %}
+            <div class="navbar-item has-dropdown is-hoverable">
+              <a class="navbar-link" role="button" tabindex="0" aria-haspopup="true">
+                <span class="user-badge" aria-hidden="true">{{ (curr_user.display_name or curr_user.username)[0]|upper }}</span>
+                <span>{{ curr_user.display_name }}</span>
+              </a>
+              <div class="navbar-dropdown is-right is-boxed">
+                <a class="navbar-item" href="{{ url_for('profile_page') }}">
+                  <span class="icon"><i class="fa-solid fa-user"></i></span>
+                  <span>{{ _("Profile") }}</span>
+                </a>
+                {% if curr_user.is_admin %}
+                  <a class="navbar-item" href="{{ url_for('admin_ng_html_landing', path='') }}">
+                    <span class="icon"><i class="fa-solid fa-screwdriver-wrench"></i></span>
+                    <span>{{ _("Admin area") }}</span>
+                  </a>
+                  <!-- before_start = {{ EVENT_START_TIME - NOW() }}, before_end = {{ EVENT_END_TIME - NOW() }} -->
                 {% endif %}
-
-                {# Tier-1 settings, reachable from every page including for anonymous
-                   visitors. On desktop `is-hoverable` opens this on hover or focus; below
-                   1024px Bulma renders the contents inline inside the burger menu. #}
-                <div id="settings-menu" class="navbar-item has-dropdown is-hoverable">
-                    <a class="navbar-link is-arrowless" role="button" tabindex="0" aria-haspopup="true"
-                        title="{{ _('Settings') }}" aria-label="{{ _('Settings') }}">
-                        <span class="icon"><i class="fa-solid fa-gear"></i></span>
-                        {# Inside the burger menu the bare icon has no context, so it gets a
-                           label there and stays icon-only in the desktop bar. #}
-                        <span class="is-hidden-desktop">{{ _("Settings") }}</span>
-                    </a>
-                    {# is-boxed: adds the 1px ring Bulma draws from scheme-invert, which is
-                       what separates the menu from same-toned cards in the dark scheme. #}
-                    <div class="navbar-dropdown is-right is-boxed settings-dropdown">
-                        {% include "partials/settings_menu.jhtml" %}
-                    </div>
-                </div>
-
-                {% if curr_user %}
-                <div class="navbar-item has-dropdown is-hoverable">
-                    <a class="navbar-link" role="button" tabindex="0" aria-haspopup="true">
-                        <span class="user-badge" aria-hidden="true">
-                            {{ (curr_user.display_name or curr_user.username)[0]|upper }}
-                        </span>
-                        <span>{{ curr_user.display_name }}</span>
-                    </a>
-                    <div class="navbar-dropdown is-right is-boxed">
-                        <a class="navbar-item" href="{{ url_for('profile_page') }}">
-                            <span class="icon"><i class="fa-solid fa-user"></i></span>
-                            <span>{{ _("Profile") }}</span>
-                        </a>
-                        {% if curr_user.is_admin %}
-                        <a class="navbar-item" href="{{ url_for('admin_ng_html_landing', path='') }}">
-                            <span class="icon"><i class="fa-solid fa-screwdriver-wrench"></i></span>
-                            <span>{{ _("Admin area") }}</span>
-                        </a>
-                        <!-- before_start = {{ EVENT_START_TIME - NOW() }}, before_end = {{ EVENT_END_TIME - NOW() }} -->
-                        {% endif %}
-                        <hr class="navbar-divider">
-                        <a class="navbar-item" href="{{ url_for('api_users_logout') }}">
-                            <span class="icon"><i class="fa-solid fa-arrow-right-from-bracket"></i></span>
-                            <span>{{ _("Logout") }}</span>
-                        </a>
-                    </div>
-                </div>
-                {% else %}
-                <a class="navbar-item" href="{{ url_for('login_page') }}">{{ _("Login") }}</a>
-                {% endif %}
+                <hr class="navbar-divider" />
+                <a class="navbar-item" href="{{ url_for('api_users_logout') }}">
+                  <span class="icon"><i class="fa-solid fa-arrow-right-from-bracket"></i></span>
+                  <span>{{ _("Logout") }}</span>
+                </a>
+              </div>
             </div>
+          {% else %}
+            <a class="navbar-item" href="{{ url_for('login_page') }}">{{ _("Login") }}</a>
+          {% endif %}
         </div>
+      </div>
     </nav>
     <section class="section">
-        {% block content %}{% endblock %}
-    </section>
 
-    {# Loaded for everyone, not just logged-in users: the login form raises toasts too.
-       The three strings below are the only ones the client ever authors on its own —
-       everything else arrives pre-translated in the HX-Trigger header. #}
+      {% block content %}
+      {% endblock content %}
+
+    </section>
     <script src="{{ url_for('static', path='toasts.js') }}"
-        data-error-message="{{ _('Something went wrong.') }}"
-        data-offline-message="{{ _('Could not reach the server.') }}"
-        data-close-label="{{ _('Close') }}"></script>
+            data-error-message="{{ _('Something went wrong.') }}"
+            data-offline-message="{{ _('Could not reach the server.') }}"
+            data-close-label="{{ _('Close') }}"></script>
     {% if curr_user and curr_user.is_admin %}
-    <script>
-        // Reveal blurred secrets in the admin debug block. Delegated on purpose: htmx
-        // replaces #tasks-container wholesale, which would drop per-element handlers.
+      <script>
         (function () {
             function reveal(el) {
                 var secret = el.closest ? el.closest('.debug-secret') : null;
@@ -152,14 +156,11 @@
                 secret.classList.add('revealed');
             });
         })();
-    </script>
+      </script>
     {% endif %}
     <script>
         (function () {
             var root = document.documentElement;
-            // Set just before the language POST, which answers with HX-Refresh: without
-            // it the reload would drop the menu and the change would read as "nothing
-            // happened".
             var REOPEN_KEY = 'yatb:settings-menu-open';
 
             function markSelected(selector, value) {
@@ -171,8 +172,6 @@
             }
 
             document.addEventListener('DOMContentLoaded', function () {
-                // The theme is applied optimistically so the switch feels instant; the
-                // POST only persists it.
                 document.querySelectorAll('.js-theme-option').forEach(function (btn) {
                     btn.addEventListener('click', function () {
                         var value = btn.dataset.value;
@@ -205,8 +204,6 @@
                     } catch (_) { /* see above */ }
 
                     if (reopen) {
-                        // `.is-active` is Bulma's own way to hold a dropdown open; hovering
-                        // away or clicking elsewhere hands control back to :hover.
                         settingsMenu.classList.add('is-active');
                         settingsMenu.addEventListener('mouseleave', function () {
                             settingsMenu.classList.remove('is-active');
@@ -232,34 +229,36 @@
         })();
     </script>
 
-{% block footer %}
-<footer class="footer" role="contentinfo" aria-label="Site footer">
-  <div class="container">
-    <nav class="level is-mobile" aria-label="Footer navigation">
-      <div class="level-left">
-        <div class="level-item">
-          <span class="is-size-7 has-text-grey">&copy; 2026 kksctf</span>
+    {% block footer %}
+      <footer class="footer" role="contentinfo" aria-label="Site footer">
+        <div class="container">
+          <nav class="level is-mobile" aria-label="Footer navigation">
+            <div class="level-left">
+              <div class="level-item">
+                <span class="is-size-7 has-text-grey">&copy; 2026 kksctf</span>
+              </div>
+            </div>
+            <div class="level-item has-text-centered">
+              <span class="is-size-7">{{ version_string() }}</span>
+            </div>
+            <div class="level-right">
+              <div class="level-item">
+                <a href="https://github.com/kksctf/yatb"
+                   class="is-size-7"
+                   target="_blank"
+                   rel="noopener"
+                   aria-label="Open project on GitHub">
+                  <span class="icon is-small" aria-hidden="true" style="vertical-align:-2px;">
+                    <i class="fa-brands fa-github"></i>
+                  </span>
+                  <span>GitHub</span>
+                </a>
+              </div>
+            </div>
+          </nav>
         </div>
-      </div>
+      </footer>
+    {% endblock footer %}
 
-      <div class="level-item has-text-centered">
-        <span class="is-size-7">{{ version_string() }}</span>
-      </div>
-
-      <div class="level-right">
-        <div class="level-item">
-          <a href="https://github.com/kksctf/yatb" class="is-size-7" target="_blank" rel="noopener" aria-label="Open project on GitHub">
-            <span class="icon is-small" aria-hidden="true" style="vertical-align:-2px;">
-              <i class="fa-brands fa-github"></i>
-            </span>
-            <span>GitHub</span>
-          </a>
-        </div>
-      </div>
-    </nav>
-  </div>
-</footer>
-{% endblock %}
-</body>
-
+  </body>
 </html>

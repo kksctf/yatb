@@ -1,353 +1,355 @@
 {% extends "base.jhtml" %}
+
 {% block title %}
-    {{ _("Scoreboard") }}
+  {{ _("Scoreboard") }}
 {% endblock title %}
+
 {% block extra_head %}
-    <style>
-    .sb-meta {
-      margin-bottom: 0.75rem;
-      display: flex;
-      flex-wrap: wrap;
-      gap: 0.75rem;
-      font-size: 0.9rem;
-    }
+  <style>
+      .sb-meta {
+          margin-bottom: 0.75rem;
+          display: flex;
+          flex-wrap: wrap;
+          gap: 0.75rem;
+          font-size: 0.9rem;
+      }
 
-    .sb-muted {
-      opacity: 0.7;
-      font-size: 0.9rem;
-    }
+      .sb-muted {
+          opacity: 0.7;
+          font-size: 0.9rem;
+      }
 
-    .sb-panel {
-      margin-bottom: 1rem;
-      padding: 0.75rem;
-      border: 1px solid var(--border);
-      border-radius: 8px;
-    }
+      .sb-panel {
+          margin-bottom: 1rem;
+          padding: 0.75rem;
+          border: 1px solid var(--border);
+          border-radius: 8px;
+      }
 
-    .sb-legend {
-      margin: 0;
-    }
+      .sb-legend {
+          margin: 0;
+      }
 
-    .sb-legend summary {
-      cursor: pointer;
-      font-weight: 600;
-    }
+      .sb-legend summary {
+          cursor: pointer;
+          font-weight: 600;
+      }
 
-    .sb-legend-grid {
-      margin-top: 0.5rem;
-      columns: 18rem;
-      column-gap: 0.8rem;
-      font-size: 0.85rem;
-    }
+      .sb-legend-grid {
+          margin-top: 0.5rem;
+          columns: 18rem;
+          column-gap: 0.8rem;
+          font-size: 0.85rem;
+      }
 
-    .sb-legend-col {
-      display: flex;
-      flex-direction: column;
-      gap: 0.35rem;
-      min-width: 0;
-    }
+      .sb-legend-col {
+          display: flex;
+          flex-direction: column;
+          gap: 0.35rem;
+          min-width: 0;
+      }
 
-    .sb-legend-item {
-      white-space: nowrap;
-      overflow: hidden;
-      text-overflow: ellipsis;
-    }
+      .sb-legend-item {
+          white-space: nowrap;
+          overflow: hidden;
+          text-overflow: ellipsis;
+      }
 
-    .sb-legend-filter {
-      grid-column: 1 / -1;
-      margin-bottom: 0.35rem;
-    }
+      .sb-legend-filter {
+          grid-column: 1 / -1;
+          margin-bottom: 0.35rem;
+      }
 
-    .sb-legend-item-wrap {
-      display: flex;
-      align-items: center;
-      justify-content: flex-start;
-      gap: 0.5rem;
-      min-width: 0;
-      break-inside: avoid;
-      margin-bottom: 0.35rem;
-    }
+      .sb-legend-item-wrap {
+          display: flex;
+          align-items: center;
+          justify-content: flex-start;
+          gap: 0.5rem;
+          min-width: 0;
+          break-inside: avoid;
+          margin-bottom: 0.35rem;
+      }
 
-    .sb-legend-radio {
-      display: flex;
-      align-items: center;
-      gap: 0.35rem;
-      min-width: 0;
-      width: 100%;
-    }
+      .sb-legend-radio {
+          display: flex;
+          align-items: center;
+          gap: 0.35rem;
+          min-width: 0;
+          width: 100%;
+      }
 
-    .sb-legend-radio input {
-      flex: 0 0 auto;
-      margin: 0;
-    }
+      .sb-legend-radio input {
+          flex: 0 0 auto;
+          margin: 0;
+      }
 
-    .sb-legend-radio .sb-legend-item {
-      flex: 1 1 auto;
-      min-width: 0;
-      white-space: nowrap;
-      overflow: hidden;
-      text-overflow: ellipsis;
-    }
+      .sb-legend-radio .sb-legend-item {
+          flex: 1 1 auto;
+          min-width: 0;
+          white-space: nowrap;
+          overflow: hidden;
+          text-overflow: ellipsis;
+      }
 
-    .sb-table-wrap {
-      overflow: auto;
-      border: 1px solid var(--border);
-      border-radius: 8px;
-    }
+      .sb-table-wrap {
+          overflow: auto;
+          border: 1px solid var(--border);
+          border-radius: 8px;
+      }
 
-    .sb-table {
-      margin: 0;
-      min-width: 62rem;
-    }
+      .sb-table {
+          margin: 0;
+          min-width: 62rem;
+      }
 
-    .sb-name {
-      white-space: nowrap;
-      overflow: hidden;
-      text-overflow: ellipsis;
-      max-width: 20rem;
-    }
+      .sb-name {
+          white-space: nowrap;
+          overflow: hidden;
+          text-overflow: ellipsis;
+          max-width: 20rem;
+      }
 
-    .sb-tasks-details summary {
-      cursor: pointer;
-      list-style-position: inside;
-    }
+      .sb-tasks-details summary {
+          cursor: pointer;
+          list-style-position: inside;
+      }
 
-    .sb-expand-btn {
-      display: inline-block;
-      border: 1px solid var(--border);
-      border-radius: 6px;
-      padding: 0.15rem 0.55rem;
-      font-size: 0.82rem;
-      font-weight: 600;
-      line-height: 1.2;
-      user-select: none;
-    }
-
-    .sb-task-list {
-      margin-top: 0.35rem;
-      display: flex;
-      flex-wrap: wrap;
-      gap: 0.25rem;
-      min-width: 10.5rem;
-      max-width: 38rem;
-    }
-
-    .sb-solutions-col {
-      min-width: 18rem;
-      width: 18rem;
-    }
-
-    @media (max-width: 768px) {
-      .sb-solutions-col {
-        min-width: 11rem;
-        width: 11rem;
+      .sb-expand-btn {
+          display: inline-block;
+          border: 1px solid var(--border);
+          border-radius: 6px;
+          padding: 0.15rem 0.55rem;
+          font-size: 0.82rem;
+          font-weight: 600;
+          line-height: 1.2;
+          user-select: none;
       }
 
       .sb-task-list {
-        min-width: 10.5rem;
-        max-width: 11rem;
+          margin-top: 0.35rem;
+          display: flex;
+          flex-wrap: wrap;
+          gap: 0.25rem;
+          min-width: 10.5rem;
+          max-width: 38rem;
       }
-    }
 
-    .sb-chip {
-      display: inline-block;
-      border: 1px solid var(--border);
-      border-radius: 4px;
-      width: 0.8rem;
-      height: 0.8rem;
-      padding: 0;
-      line-height: 0;
-      color: inherit;
-      background: transparent;
-      position: relative;
-    }
+      .sb-solutions-col {
+          min-width: 18rem;
+          width: 18rem;
+      }
 
-    .sb-chip.solved {
-      background: var(--bulma-success);
-      border-color: var(--bulma-success);
-      color: #1f2937;
-    }
+      @media (max-width: 768px) {
+          .sb-solutions-col {
+              min-width: 11rem;
+              width: 11rem;
+          }
 
-    .sb-chip.solved.first-solution {
-      background: var(--first-solution-color);
-      border-color: var(--first-solution-color);
-    }
+          .sb-task-list {
+              min-width: 10.5rem;
+              max-width: 11rem;
+          }
+      }
 
-    .sb-chip.solved.first-solution::after {
-      content: "";
-      position: absolute;
-      top: -0.12rem;
-      right: -0.12rem;
-      width: 0.34rem;
-      height: 0.34rem;
-      background: #dc2626;
-      border-radius: 50% 50% 50% 0;
-      transform: rotate(-45deg);
-      box-shadow: 0 0 0 1px rgba(0, 0, 0, 0.35);
-      pointer-events: none;
-    }
+      .sb-chip {
+          display: inline-block;
+          border: 1px solid var(--border);
+          border-radius: 4px;
+          width: 0.8rem;
+          height: 0.8rem;
+          padding: 0;
+          line-height: 0;
+          color: inherit;
+          background: transparent;
+          position: relative;
+      }
 
-    .sb-chip.solved.last-solve {
-      background: #3b82f6;
-      border-color: #3b82f6;
-    }
+      .sb-chip.solved {
+          background: var(--bulma-success);
+          border-color: var(--bulma-success);
+          color: #1f2937;
+      }
 
-    .sb-chip.solved.first-solution.last-solve {
-      background: #8b5cf6;
-      border-color: #8b5cf6;
-    }
+      .sb-chip.solved.first-solution {
+          background: var(--first-solution-color);
+          border-color: var(--first-solution-color);
+      }
 
-    .sb-chip.unsolved {
-      background: var(--surface);
-      border-color: var(--border);
-    }
+      .sb-chip.solved.first-solution::after {
+          content: "";
+          position: absolute;
+          top: -0.12rem;
+          right: -0.12rem;
+          width: 0.34rem;
+          height: 0.34rem;
+          background: #dc2626;
+          border-radius: 50% 50% 50% 0;
+          transform: rotate(-45deg);
+          box-shadow: 0 0 0 1px rgba(0, 0, 0, 0.35);
+          pointer-events: none;
+      }
 
-    .sb-last-task {
-      display: inline-flex;
-      align-items: center;
-      gap: 0.4rem;
-      min-width: 0;
-    }
+      .sb-chip.solved.last-solve {
+          background: #3b82f6;
+          border-color: #3b82f6;
+      }
 
-    .sb-last-task-name {
-      white-space: nowrap;
-      overflow: hidden;
-      text-overflow: ellipsis;
-      max-width: 16rem;
-    }
+      .sb-chip.solved.first-solution.last-solve {
+          background: #8b5cf6;
+          border-color: #8b5cf6;
+      }
 
-    .sb-last-task-time {
-      display: block;
-      font-size: 0.75rem;
-      line-height: 1.1;
-      opacity: 0.75;
-      margin-top: 0.12rem;
-      white-space: nowrap;
-      overflow: hidden;
-      text-overflow: ellipsis;
-      max-width: 16rem;
-    }
+      .sb-chip.unsolved {
+          background: var(--surface);
+          border-color: var(--border);
+      }
 
-    .sb-last-task-points {
-      display: inline-flex;
-      align-items: center;
-      gap: 0.2rem;
-      border: 1px solid var(--border);
-      border-radius: 999px;
-      padding: 0.05rem 0.4rem;
-      font-size: 0.75rem;
-      line-height: 1;
-      white-space: nowrap;
-    }
+      .sb-last-task {
+          display: inline-flex;
+          align-items: center;
+          gap: 0.4rem;
+          min-width: 0;
+      }
 
-    .sb-row-hit td,
-    .sb-row-hit th {
-      background: color-mix(in oklab, var(--bulma-success) 18%, transparent) !important;
-    }
-    </style>
+      .sb-last-task-name {
+          white-space: nowrap;
+          overflow: hidden;
+          text-overflow: ellipsis;
+          max-width: 16rem;
+      }
+
+      .sb-last-task-time {
+          display: block;
+          font-size: 0.75rem;
+          line-height: 1.1;
+          opacity: 0.75;
+          margin-top: 0.12rem;
+          white-space: nowrap;
+          overflow: hidden;
+          text-overflow: ellipsis;
+          max-width: 16rem;
+      }
+
+      .sb-last-task-points {
+          display: inline-flex;
+          align-items: center;
+          gap: 0.2rem;
+          border: 1px solid var(--border);
+          border-radius: 999px;
+          padding: 0.05rem 0.4rem;
+          font-size: 0.75rem;
+          line-height: 1;
+          white-space: nowrap;
+      }
+
+      .sb-row-hit td,
+      .sb-row-hit th {
+          background: color-mix(in oklab, var(--bulma-success) 18%, transparent) !important;
+      }
+  </style>
 {% endblock extra_head %}
+
 {% block content %}
-    <div class="container is-fluid">
-        <div class="is-flex is-justify-content-space-between is-align-items-center mb-3">
-            <h1 class="title is-3 mb-0">{{ _("Scoreboard") }}</h1>
-            <a class="button is-small" href="{{ compare_url }}">{{ _("Compare") }}</a>
-        </div>
-        <div class="sb-meta">
-            <div>{{ _("Users") }}: {{ ctx.users_total }}</div>
-            <div>{{ _("Tasks") }}: {{ ctx.tasks_total }}</div>
-        </div>
-        <div class="sb-panel">
-            <details class="sb-legend"
-                     hx-get="{{ legend_url }}"
-                     hx-trigger="toggle once"
-                     hx-target="#task-legend-content"
-                     hx-swap="innerHTML">
-                <summary>{{ _("Task Legend") }}</summary>
-                <div id="task-legend-content" class="sb-legend-grid">
-                    <span class="sb-muted">{{ _("Loading...") }}</span>
-                </div>
-            </details>
-        </div>
-        <div class="sb-table-wrap">
-            <table class="table is-fullwidth sb-table">
-                <thead>
-                    <tr>
-                        <th>{{ _("Position") }}</th>
-                        <th>{{ _("User") }}</th>
-                        <th>{{ _("Score") }}</th>
-                        <th>{{ _("Solved") }}</th>
-                        <th>{{ _("FBs") }}</th>
-                        <th>{{ _("Last Solve") }}</th>
-                        <th class="sb-solutions-col">{{ _("Solutions") }}</th>
-                        {% if curr_user %}<th>{{ _("Compare") }}</th>{% endif %}
-                    </tr>
-                </thead>
-                <tbody>
-                    {% for row in ctx.compact_rows %}
-                        <tr data-solved="{{ row.solved_indexes_csv }}">
-                            <th>{{ row.position }}</th>
-                            <td class="sb-name" title="{{ row.display_name }}">{{ row.display_name }}</td>
-                            <td>{{ row.score }}</td>
-                            <td>{{ row.solved_count }}/{{ ctx.tasks_total }}</td>
-                            <td>
-                                {% if row.fb_count > 0 %}
-                                    <span class="sb-fb-chips" title="{{ _('First bloods') }}">
-                                        {% for fb_task in row.fb_tasks %}
-                                            <a class="sb-fb-chip-link"
-                                               href="{{ fb_task.url }}"
-                                               title="{{ fb_task.title }}">
-                                                <span class="sb-chip solved first-solution sb-fb-chip"></span>
-                                            </a>
-                                        {% endfor %}
-                                    </span>
-                                {% else %}
-                                {% endif %}
-                            </td>
-                            <td>
-                                {% if row.last_task %}
-                                    <span class="sb-last-task">
-                                        <span>
-                                            <a class="sb-last-task-name"
-                                               href="{{ row.last_task.url }}"
-                                               title="{{ row.last_task.name }}">{{ row.last_task.name }}</a>
-                                            <small class="sb-last-task-time">{{ row.last_task.time }}</small>
-                                        </span>
-                                        <span class="sb-last-task-points" title="{{ row.last_task.points }} {{ _('points') }}">{{ row.last_task.points }}</span>
-                                    </span>
-                                {% else %}
-                                    -
-                                {% endif %}
-                            </td>
-                            <td class="sb-solutions-col">
-                                <details class="sb-tasks-details">
-                                    <summary>
-                                        <span class="sb-expand-btn">{{ _("Show") }}</span>
-                                    </summary>
-                                    <div class="sb-task-list"
-                                         hx-get="{{ row.solutions_url }}"
-                                         hx-trigger="toggle once from:closest details"
-                                         hx-target="this"
-                                         hx-swap="innerHTML">
-                                        <span class="sb-muted">{{ _("Loading...") }}</span>
-                                    </div>
-                                </details>
-                            </td>
-                            {% if curr_user %}
-                                <td>
-                                    {% if row.user_id != str(curr_user.user_id) %}
-                                        <a href="{{ compare_url }}?user_a={{ curr_user.user_id }}&user_b={{ row.user_id }}">{{ _("vs me") }}</a>
-                                    {% else %}
-                                        -
-                                    {% endif %}
-                                </td>
-                            {% endif %}
-                        </tr>
-                    {% endfor %}
-                </tbody>
-            </table>
-        </div>
+  <div class="container is-fluid">
+    <div class="is-flex is-justify-content-space-between is-align-items-center mb-3">
+      <h1 class="title is-3 mb-0">{{ _("Scoreboard") }}</h1>
+      <a class="button is-small" href="{{ compare_url }}">{{ _("Compare") }}</a>
     </div>
-    <script>
+    <div class="sb-meta">
+      <div>{{ _("Users") }}: {{ ctx.users_total }}</div>
+      <div>{{ _("Tasks") }}: {{ ctx.tasks_total }}</div>
+    </div>
+    <div class="sb-panel">
+      <details class="sb-legend"
+               hx-get="{{ legend_url }}"
+               hx-trigger="toggle once"
+               hx-target="#task-legend-content"
+               hx-swap="innerHTML">
+        <summary>{{ _("Task Legend") }}</summary>
+        <div id="task-legend-content" class="sb-legend-grid">
+          <span class="sb-muted">{{ _("Loading...") }}</span>
+        </div>
+      </details>
+    </div>
+    <div class="sb-table-wrap">
+      <table class="table is-fullwidth sb-table">
+        <thead>
+          <tr>
+            <th>{{ _("Position") }}</th>
+            <th>{{ _("User") }}</th>
+            <th>{{ _("Score") }}</th>
+            <th>{{ _("Solved") }}</th>
+            <th>{{ _("FBs") }}</th>
+            <th>{{ _("Last Solve") }}</th>
+            <th class="sb-solutions-col">{{ _("Solutions") }}</th>
+            {% if curr_user %}<th>{{ _("Compare") }}</th>{% endif %}
+          </tr>
+        </thead>
+        <tbody>
+          {% for row in ctx.compact_rows %}
+            <tr data-solved="{{ row.solved_indexes_csv }}">
+              <th>{{ row.position }}</th>
+              <td class="sb-name" title="{{ row.display_name }}">{{ row.display_name }}</td>
+              <td>{{ row.score }}</td>
+              <td>{{ row.solved_count }}/{{ ctx.tasks_total }}</td>
+              <td>
+                {% if row.fb_count > 0 %}
+                  <span class="sb-fb-chips" title="{{ _('First bloods') }}">
+                    {% for fb_task in row.fb_tasks %}
+                      <a class="sb-fb-chip-link" href="{{ fb_task.url }}" title="{{ fb_task.title }}">
+                        <span class="sb-chip solved first-solution sb-fb-chip"></span>
+                      </a>
+                    {% endfor %}
+                  </span>
+                {% else %}
+                {% endif %}
+              </td>
+              <td>
+                {% if row.last_task %}
+                  <span class="sb-last-task">
+                    <span>
+                      <a class="sb-last-task-name"
+                         href="{{ row.last_task.url }}"
+                         title="{{ row.last_task.name }}">{{ row.last_task.name }}</a>
+                      <small class="sb-last-task-time">{{ row.last_task.time }}</small>
+                    </span>
+                    <span class="sb-last-task-points"
+                          title="{{ row.last_task.points }} {{ _("points") }}">{{ row.last_task.points }}</span>
+                  </span>
+                {% else %}
+                  -
+                {% endif %}
+              </td>
+              <td class="sb-solutions-col">
+                <details class="sb-tasks-details">
+                  <summary>
+                    <span class="sb-expand-btn">{{ _("Show") }}</span>
+                  </summary>
+                  <div class="sb-task-list"
+                       hx-get="{{ row.solutions_url }}"
+                       hx-trigger="toggle once from:closest details"
+                       hx-target="this"
+                       hx-swap="innerHTML">
+                    <span class="sb-muted">{{ _("Loading...") }}</span>
+                  </div>
+                </details>
+              </td>
+              {% if curr_user %}
+                <td>
+                  {% if row.user_id != str(curr_user.user_id) %}
+                    <a href="{{ compare_url }}?user_a={{ curr_user.user_id }}&user_b={{ row.user_id }}">{{ _("vs me") }}</a>
+                  {% else %}
+                    -
+                  {% endif %}
+                </td>
+              {% endif %}
+            </tr>
+          {% endfor %}
+        </tbody>
+      </table>
+    </div>
+  </div>
+  <script>
   (function () {
     function applyLegendFilter(val) {
       const rows = document.querySelectorAll('.sb-table tbody tr[data-solved]');
@@ -366,5 +368,5 @@
       applyLegendFilter(target.value);
     });
   })();
-    </script>
+  </script>
 {% endblock content %}

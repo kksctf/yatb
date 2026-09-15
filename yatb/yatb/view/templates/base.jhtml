@@ -1,0 +1,265 @@
+<!DOCTYPE html>
+<html lang="{{ ui.lang }}"
+      {% if ui.theme != 'auto' %}data-theme="{{ ui.theme }}"{% endif %}>
+  <head>
+    <meta charset="utf-8" />
+    <meta name="viewport" content="width=device-width, initial-scale=1" />
+    <title>
+
+      {% block title %}
+        {{ CTF_NAME }}
+      {% endblock title %}
+
+    </title>
+    <link rel="stylesheet"
+          href="https://cdn.jsdelivr.net/npm/bulma@1.0.1/css/bulma.min.css" />
+    <link rel="stylesheet" href="{{ url_for('static', path='layout.css') }}" />
+    <link rel="stylesheet" href="{{ url_for('static', path='style.css') }}" />
+    <script src="https://unpkg.com/htmx.org@2.0.4"></script>
+    <link rel="stylesheet"
+          href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/7.0.0/css/all.min.css"
+          integrity="sha512-DxV+EoADOkOygM4IR9yXP8Sb2qwgidEmeqAEmDKIOfPRQZOWbXCzLC6vjbZyy0vPisbH2SyW27+ddLVCN+OMzQ=="
+          crossorigin="anonymous"
+          referrerpolicy="no-referrer" />
+    <link rel="icon"
+          type="image/png"
+          href="{{ url_for('static', path='kksctf_logo_32.png') }}" />
+    {# optional per-page extra tags #}
+
+    {% block extra_head %}
+    {% endblock extra_head %}
+
+  </head>
+  <body>
+    <nav class="navbar" role="navigation" aria-label="main navigation">
+      <div class="navbar-brand">
+        <a class="navbar-item" href="{{ url_for('index') }}">
+          <figure class="image is-24x24">
+            <img src="{{ url_for('static', path='logo.png') }}" />
+          </figure>
+          {{ CTF_NAME }}
+        </a>
+        <a role="button"
+           class="navbar-burger"
+           aria-label="menu"
+           aria-expanded="false"
+           data-target="yatbNavbar">
+          <span aria-hidden="true"></span>
+          <span aria-hidden="true"></span>
+          <span aria-hidden="true"></span>
+          <span aria-hidden="true"></span>
+        </a>
+      </div>
+      <div id="yatbNavbar" class="navbar-menu">
+        <div class="navbar-start">
+          <a class="navbar-item" href="{{ url_for('tasks_page') }}">{{ _("Challenges") }}</a>
+          <a class="navbar-item" href="{{ url_for('scoreboard_page') }}">{{ _("Scoreboard") }}</a>
+        </div>
+        <div class="navbar-end">
+          {% if curr_user %}
+            <form id="flag-submit-form"
+                  class="navbar-item"
+                  method="post"
+                  action="{{ url_for('ui_task_submit_flag') }}"
+                  hx-post="{{ url_for('ui_task_submit_flag') }}"
+                  hx-swap="none"
+                  hx-on:yatb:flag-accepted="this.reset()">
+              <div class="field has-addons flag-input-group">
+                <p class="control">
+                  <span class="button is-static">{{ FLAG_BASE }}{</span>
+                </p>
+                <p class="control is-expanded">
+                  <input id="flag-submit-input"
+                         class="input"
+                         name="flag"
+                         aria-label="{{ _('Flag') }}"
+                         placeholder="sampl3_fl4g"
+                         required />
+                </p>
+                <p class="control">
+                  <span class="button is-static">}</span>
+                </p>
+              </div>
+              <button type="submit" class="button is-primary">{{ _("Submit") }}</button>
+            </form>
+          {% endif %}
+          <div id="settings-menu" class="navbar-item has-dropdown is-hoverable">
+            <a class="navbar-link is-arrowless"
+               role="button"
+               tabindex="0"
+               aria-haspopup="true"
+               title="{{ _('Settings') }}"
+               aria-label="{{ _('Settings') }}">
+              <span class="icon"><i class="fa-solid fa-gear"></i></span>
+              <span class="is-hidden-desktop">{{ _('Settings') }}</span>
+            </a>
+            <div class="navbar-dropdown is-right is-boxed settings-dropdown">{% include "partials/settings_menu.jhtml" %}</div>
+          </div>
+          {% if curr_user %}
+            <div class="navbar-item has-dropdown is-hoverable">
+              <a class="navbar-link" role="button" tabindex="0" aria-haspopup="true">
+                <span class="user-badge" aria-hidden="true">{{ (curr_user.display_name or curr_user.username)[0]|upper }}</span>
+                <span>{{ curr_user.display_name }}</span>
+              </a>
+              <div class="navbar-dropdown is-right is-boxed">
+                <a class="navbar-item" href="{{ url_for('profile_page') }}">
+                  <span class="icon"><i class="fa-solid fa-user"></i></span>
+                  <span>{{ _("Profile") }}</span>
+                </a>
+                {% if curr_user.is_admin %}
+                  <a class="navbar-item" href="{{ url_for('admin_ng_html_landing', path='') }}">
+                    <span class="icon"><i class="fa-solid fa-screwdriver-wrench"></i></span>
+                    <span>{{ _("Admin area") }}</span>
+                  </a>
+                  <!-- before_start = {{ EVENT_START_TIME - NOW() }}, before_end = {{ EVENT_END_TIME - NOW() }} -->
+                {% endif %}
+                <hr class="navbar-divider" />
+                <a class="navbar-item" href="{{ url_for('api_users_logout') }}">
+                  <span class="icon"><i class="fa-solid fa-arrow-right-from-bracket"></i></span>
+                  <span>{{ _("Logout") }}</span>
+                </a>
+              </div>
+            </div>
+          {% else %}
+            <a class="navbar-item" href="{{ url_for('login_page') }}">{{ _("Login") }}</a>
+          {% endif %}
+        </div>
+      </div>
+    </nav>
+    <section class="section">
+
+      {% block content %}
+      {% endblock content %}
+
+    </section>
+    <script src="{{ url_for('static', path='toasts.js') }}"
+            data-error-message="{{ _('Something went wrong.') }}"
+            data-offline-message="{{ _('Could not reach the server.') }}"
+            data-close-label="{{ _('Close') }}"></script>
+    {% if curr_user and curr_user.is_admin %}
+      <script>
+        (function () {
+            function reveal(el) {
+                var secret = el.closest ? el.closest('.debug-secret') : null;
+                if (secret) secret.classList.add('revealed');
+            }
+
+            document.addEventListener('click', function (event) {
+                reveal(event.target);
+            });
+
+            document.addEventListener('keydown', function (event) {
+                if (event.key !== 'Enter' && event.key !== ' ') return;
+                var secret = event.target.closest && event.target.closest('.debug-secret');
+                if (!secret || secret.classList.contains('revealed')) return;
+                event.preventDefault();
+                secret.classList.add('revealed');
+            });
+        })();
+      </script>
+    {% endif %}
+    <script>
+        (function () {
+            var root = document.documentElement;
+            var REOPEN_KEY = 'yatb:settings-menu-open';
+
+            function markSelected(selector, value) {
+                document.querySelectorAll(selector).forEach(function (btn) {
+                    var active = btn.dataset.value === value;
+                    btn.classList.toggle('is-primary', active);
+                    btn.classList.toggle('is-selected', active);
+                });
+            }
+
+            document.addEventListener('DOMContentLoaded', function () {
+                document.querySelectorAll('.js-theme-option').forEach(function (btn) {
+                    btn.addEventListener('click', function () {
+                        var value = btn.dataset.value;
+                        if (value === 'auto') {
+                            delete root.dataset.theme;
+                        } else {
+                            root.dataset.theme = value;
+                        }
+                        markSelected('.js-theme-option', value);
+                    });
+                });
+
+                var settingsMenu = document.getElementById('settings-menu');
+
+                document.querySelectorAll('.js-lang-option').forEach(function (btn) {
+                    btn.addEventListener('click', function () {
+                        try {
+                            sessionStorage.setItem(REOPEN_KEY, '1');
+                        } catch (_) {
+                            // private mode: the menu just closes on reload
+                        }
+                    });
+                });
+
+                if (settingsMenu) {
+                    var reopen = false;
+                    try {
+                        reopen = sessionStorage.getItem(REOPEN_KEY) === '1';
+                        sessionStorage.removeItem(REOPEN_KEY);
+                    } catch (_) { /* see above */ }
+
+                    if (reopen) {
+                        settingsMenu.classList.add('is-active');
+                        settingsMenu.addEventListener('mouseleave', function () {
+                            settingsMenu.classList.remove('is-active');
+                        });
+                        document.addEventListener('click', function (event) {
+                            if (!settingsMenu.contains(event.target)) {
+                                settingsMenu.classList.remove('is-active');
+                            }
+                        });
+                    }
+                }
+
+                var burger = document.querySelector('.navbar-burger');
+                var menu = burger && document.getElementById(burger.dataset.target);
+
+                if (burger && menu) {
+                    burger.addEventListener('click', function () {
+                        burger.classList.toggle('is-active');
+                        menu.classList.toggle('is-active');
+                        burger.setAttribute('aria-expanded', menu.classList.contains('is-active'));
+                    });
+                }
+            });
+        })();
+    </script>
+
+    {% block footer %}
+      <footer class="footer" role="contentinfo" aria-label="Site footer">
+        <div class="container">
+          <nav class="level is-mobile" aria-label="Footer navigation">
+            <div class="level-left">
+              <div class="level-item">
+                <span class="is-size-7 has-text-grey">&copy; 2026 kksctf</span>
+              </div>
+            </div>
+            <div class="level-item has-text-centered">
+              <span class="is-size-7">{{ version_string() }}</span>
+            </div>
+            <div class="level-right">
+              <div class="level-item">
+                <a href="https://github.com/kksctf/yatb"
+                   class="is-size-7"
+                   target="_blank"
+                   rel="noopener"
+                   aria-label="Open project on GitHub">
+                  <span class="icon is-small" aria-hidden="true" style="vertical-align:-2px;">
+                    <i class="fa-brands fa-github"></i>
+                  </span>
+                  <span>GitHub</span>
+                </a>
+              </div>
+            </div>
+          </nav>
+        </div>
+      </footer>
+    {% endblock footer %}
+
+  </body>
+</html>

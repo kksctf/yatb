@@ -6,11 +6,11 @@ from fastapi import status
 from fastapi.testclient import TestClient
 from httpx import Response
 
-from yatb import schema
-from yatb.app import app
-from yatb.config import settings
-from yatb.db import db
-from yatb.schema.feature_flags import active_feature_flags
+from yatb.yatb import schema
+from yatb.yatb.app import app
+from yatb.yatb.config import settings
+from yatb.yatb.db import db
+from yatb.yatb.schema.feature_flags import active_feature_flags
 
 settings.DB_NAME = "yatb_testing"
 active_feature_flags.force_rename = False

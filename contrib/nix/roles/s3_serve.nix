@@ -105,7 +105,7 @@ in
       };
 
       serviceConfig = {
-        ExecStart = "${rCfg.yatb.package}/bin/uvicorn dtc.s3_serve:app --host '${cfg.http.host}' --port '${toString (cfg.http.port)}' ${lib.strings.escapeShellArgs cfg.extraArgs}";
+        ExecStart = "${rCfg.yatb.package}/bin/uvicorn yatb.s3.app:app --host '${cfg.http.host}' --port '${toString (cfg.http.port)}' ${lib.strings.escapeShellArgs cfg.extraArgs}";
         Restart = "on-failure";
         KillSignal = "SIGINT";
         # DynamicUser = "yes";

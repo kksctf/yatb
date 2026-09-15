@@ -1,0 +1,62 @@
+body {
+    display: flex;
+    min-height: 100vh;
+    flex-direction: column;
+}
+
+body>.section {
+    flex: 1 0 auto;
+}
+
+footer.footer {
+    margin-top: auto;
+}
+
+/* Masonry-ish grid without JS */
+.task-grid {
+    display: grid;
+    grid-template-columns: repeat(auto-fill, minmax(min(260px, 100%), 1fr));
+    gap: 1rem;
+    /* space between cards */
+}
+
+/* override Bulma’s .column padding/margins inside the grid */
+.task-grid>.column {
+    margin: 0 !important;
+    padding: 0 !important;
+}
+
+.task-grid .card {
+    min-width: 0;
+    height: 100%;
+    /* all cards same column height */
+    display: flex;
+    /* stretch footer to bottom      */
+    flex-direction: column;
+}
+
+.task-grid .card-content {
+    flex-grow: 1;
+}
+
+.task-grid .card-header .card-header-title {
+    min-width: 0;
+}
+
+.task-grid .card-header .task-card-tags {
+    flex: 0 0 auto;
+    margin-left: auto;
+    padding: 0.75rem;
+    align-self: center;
+}
+
+@media (max-width: 768px) {
+    footer.footer .level {
+        flex-wrap: wrap;
+        gap: 0.75rem;
+    }
+}
+
+.task-grid .card-header .task-card-tags .tags {
+    flex-wrap: nowrap;
+}

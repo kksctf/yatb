@@ -1,0 +1,189 @@
+from collections.abc import Callable
+from typing import Annotated, Literal, cast
+
+from fastapi import APIRouter, Depends, Form, HTTPException, Request, Response, status
+
+from yatb.yatb import auth, schema, toasts
+from yatb.yatb.db import UserDB
+from yatb.yatb.i18n import _
+from yatb.yatb.utils import metrics
+from yatb.yatb.utils.httpx import IS_HTTPX
+
+from . import logger
+from .settings import apply_ui_settings_cookies
+
+router = APIRouter(
+    prefix="/auth",
+    tags=["auth"],
+)
+
+
+def apply_login_response(resp: Response, user: UserDB) -> None:
+    """
+    Issue the session cookie and reconcile tier-1 preferences.
+
+    Login is the single sync point between User.settings and the tier-1 cookies, and the
+    server wins: whatever this browser had picked while logged out is overwritten here.
+    """
+    access_token = auth.create_user_token(user)
+    resp.set_cookie(key="access_token", value=f"Bearer {access_token}", httponly=True)
+    apply_ui_settings_cookies(resp, user.settings)
+
+
+async def check_for_existing_model(
+    model: schema.auth.AuthBase.AuthModel,
+    check_for_class: type[schema.auth.AuthBase.AuthModel],
+):
+    username = model.generate_username()
+    user_by_username = await UserDB.find_by_username(username)
+    if user_by_username and not isinstance(user_by_username.auth_source, check_for_class):
+        raise HTTPException(
+            status_code=status.HTTP_403_FORBIDDEN,
+            detail="User/Team already exists. If you want to migrate between password <-> ctftime auth, contact orgs",
+        )
+
+
+def generic_handler_generator(cls: type[schema.auth.AuthBase]) -> Callable:
+    """
+    A little crazy "generic generator" for handling universal auth way.
+    Should work for most of possible authentification ways.
+    """
+
+    async def generic_handler(
+        req: Request,
+        resp: Response,
+        form: "schema.auth.AuthBase.Form" = Depends(),
+    ) -> Literal["ok"]:
+        # create model from form.
+        model = await form.populate(req, resp)
+
+        # check for team with same name, but from other reg source.
+        await check_for_existing_model(model, cls.AuthModel)
+
+        # extract primary (unique) field from model, and check
+        # is user with that field exists
+        user = await UserDB.get_user_uniq_field(cls.AuthModel, model.get_uniq_field())
+
+        if user is None:
+            # if not: create new user
+            user = await UserDB.populate(model)
+            metrics.users.inc()
+        elif user.admin_checker() and not user.is_admin:
+            # if users exists: check and promote to admin. conceptual shit.
+            logger.warning(f"Promoting old {user} to admin")
+            user.is_admin = True
+            await user.save()
+
+        metrics.logons_per_user.labels(user_id=user.user_id, username=user.username).inc()
+
+        # create token for user, and put it in cookie
+        apply_login_response(resp, user)
+
+        resp.status_code = status.HTTP_303_SEE_OTHER
+        resp.headers["Location"] = str(req.url_for("index"))
+
+        return "ok"
+
+    generic_handler.__annotations__["form"] = cls.Form
+    return generic_handler
+
+
+async def api_auth_simple_login(
+    req: Request,
+    resp: Response,
+    is_httpx: IS_HTTPX,
+    form: Annotated[schema.SimpleAuth.Form, Form()],
+):
+    # almost the same generic, but for login/password form, due to additional login.
+    model = await form.populate(req, resp)
+    user = await UserDB.get_user_uniq_field(schema.SimpleAuth.AuthModel, model.get_uniq_field())
+    if not user:
+        raise HTTPException(
+            status_code=status.HTTP_401_UNAUTHORIZED,
+            detail="Incorrect username or password",
+            headers=toasts.danger(_("Incorrect username or password.")),
+        )
+
+    auth_source = cast(schema.SimpleAuth.AuthModel, user.auth_source)
+    if not form.check_password(auth_source):
+        raise HTTPException(
+            status_code=status.HTTP_401_UNAUTHORIZED,
+            detail="Incorrect username or password",
+            headers=toasts.danger(_("Incorrect username or password.")),
+        )
+
+    metrics.logons_per_user.labels(user_id=user.user_id, username=user.username).inc()
+
+    apply_login_response(resp, user)
+
+    if is_httpx:
+        resp.headers["HX-Redirect"] = "/tasks"  # or "/"
+        return "ok"
+
+    resp.status_code = status.HTTP_303_SEE_OTHER
+    resp.headers["Location"] = str(req.url_for("index"))
+
+    return "ok"
+
+
+async def api_auth_simple_register(
+    req: Request,
+    resp: Response,
+    is_httpx: IS_HTTPX,
+    form: Annotated[schema.SimpleAuth.Form, Form()],
+):
+    # almost the same generic, but for login/password form, due to additional login.
+    model = await form.populate(req, resp)
+
+    # check for team with same name, but from other reg source.
+    await check_for_existing_model(model, schema.SimpleAuth.AuthModel)
+
+    user = await UserDB.get_user_uniq_field(schema.SimpleAuth.AuthModel, model.get_uniq_field())
+    if user:
+        raise HTTPException(
+            status_code=status.HTTP_403_FORBIDDEN,
+            detail="Team exists",
+            headers=toasts.danger(_("That name is already taken.")),
+        )
+
+    user = await UserDB.populate(model)
+    metrics.users.inc()
+
+    apply_login_response(resp, user)
+
+    if is_httpx:
+        resp.headers["HX-Redirect"] = "/tasks"  # or "/"
+        return "ok"
+
+    resp.status_code = status.HTTP_303_SEE_OTHER
+    resp.headers["Location"] = str(req.url_for("index"))
+
+    return "ok"
+
+
+# Create routes for all enabled auth ways
+# also, handle login/password way especially...
+for auth_way in schema.auth.ENABLED_AUTH_WAYS:
+    if auth_way.FAKE:
+        continue
+
+    if auth_way != schema.auth.SimpleAuth:
+        router.add_api_route(
+            endpoint=generic_handler_generator(auth_way),
+            **auth_way.router_params,  # type: ignore
+        )
+    else:
+        router.add_api_route(
+            endpoint=api_auth_simple_login,
+            path="/simple_login",
+            name="api_auth_simple_login",
+            methods=["POST"],
+            **auth_way.router_params,  # type: ignore
+        )
+        router.add_api_route(
+            endpoint=api_auth_simple_register,
+            path="/simple_register",
+            name="api_auth_simple_register",
+            methods=["POST"],
+            **auth_way.router_params,  # type: ignore
+        )

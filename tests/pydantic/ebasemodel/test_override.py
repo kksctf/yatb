@@ -1,6 +1,6 @@
 from typing import Annotated
 
-from yatb.ebasemodelv2 import EBaseModelV2, PresentationLevel
+from yatb.base.ebasemodelv2 import EBaseModelV2, PresentationLevel
 
 type PublicInt = Annotated[int, PresentationLevel.public]
 type AdminInt = Annotated[int, PresentationLevel.admin]

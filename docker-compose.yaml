@@ -57,7 +57,7 @@ services:
       - "127.0.0.1:8080:80"
     volumes:
       - "./contrib/docker/Caddyfile:/etc/caddy/Caddyfile:ro"
-      - "./src/yatb/view/static:/static:ro"
+      - "./yatb/yatb/view/static:/static:ro"
       - "caddy_data:/data"
       - "caddy_config:/config"
     links:

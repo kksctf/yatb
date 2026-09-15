@@ -32,6 +32,49 @@
   --bulma-link-l: 55%;
 }
 
+:root[data-theme="light"] {
+  color-scheme: light;
+}
+
+:root[data-theme="dark"] {
+  color-scheme: dark;
+}
+
+#flag-submit-form {
+  display: flex;
+  flex-wrap: wrap;
+  gap: 0.75rem;
+}
+
+#flag-submit-form .flag-input-group {
+  flex: 1 1 14rem;
+  min-width: 0;
+  margin-bottom: 0;
+}
+
+.flag-input-group .control.is-expanded {
+  min-width: 0;
+}
+
+.task-description {
+  overflow-wrap: anywhere;
+}
+
+.task-description pre {
+  white-space: pre-wrap;
+}
+
+.task-description table {
+  display: block;
+  max-width: 100%;
+  overflow-x: auto;
+}
+
+.task-grid .card,
+.task-detail {
+  border: 1px solid var(--bulma-border);
+}
+
 /* The navbar carries the flag form, so it needs to read as its own surface
    rather than blending into the page. */
 .navbar:not(.is-transparent) {
@@ -146,12 +189,6 @@
   background-image: none;
 }
 
-.card.task-hidden .card-content,
-.card.task-hidden .card-footer,
-.card.task-hidden .card-header .card-header-title {
-  opacity: 0.7;
-}
-
 /* Admin debug block: a tool bolted onto a player-facing card, so it gets its
    own inset surface to stop it reading as part of the task description. */
 /* scheme-main-bis, not --bulma-background: the latter is what a plain .tag uses,
@@ -230,7 +267,7 @@
 
 .app-toast-stack {
   position: fixed;
-  top: 1rem;
+  bottom: 1rem;
   right: 1rem;
   width: min(28rem, calc(100vw - 2rem));
   display: flex;
@@ -245,7 +282,7 @@
   box-shadow: 0 14px 34px rgba(0, 0, 0, 0.18);
   margin: 0;
   opacity: 0;
-  transform: translateY(-8px) scale(0.985);
+  transform: translateY(8px) scale(0.985);
   transition: opacity 180ms ease, transform 180ms ease;
 }
 
@@ -256,7 +293,7 @@
 
 .app-toast.notification.is-leaving {
   opacity: 0;
-  transform: translateY(-8px) scale(0.985);
+  transform: translateY(8px) scale(0.985);
 }
 
 /* The four kinds ride on Bulma's own .notification.is-* colours, so they follow
@@ -284,7 +321,7 @@
 
 @media (max-width: 768px) {
   .app-toast-stack {
-    top: 0.75rem;
+    bottom: 0.75rem;
     right: 0.75rem;
     left: 0.75rem;
     width: auto;

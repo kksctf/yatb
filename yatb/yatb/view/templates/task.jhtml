@@ -7,7 +7,7 @@
 {% block content %}
   <div class="container">
     <a class="button mb-4" href="{{ url_for('tasks_page') }}">{{ _("← Back to tasks") }}</a>
-    <div class="card">
+    <div class="card task-detail">
       <header class="card-header">
         <div class="card-header-title is-size-4">
           <div class="media">
@@ -21,7 +21,7 @@
         <span class="tag is-medium ml-2">{{ selected_task.scoring.points }} {{ _("pts") }} · {{ selected_task.solves }} {{ _("solves") }}</span>
       </header>
       <div class="card-content">
-        <div class="content">{{ selected_task.description_html | safe }}</div>
+        <div class="content task-description">{{ selected_task.description_html | safe }}</div>
         {% if selected_task.is_solved_by(curr_user) %}
           <article class="message is-success">
             <div class="message-body">{{ _("✅ You have already solved this challenge. Great job!") }}</div>

@@ -227,18 +227,4 @@ class SimpleAuth(AuthBase):
             });
           })();
         """
-        return """
-        $(".login_form").submit(function(event) {
-            event.preventDefault();
-            req(api_list["api_auth_simple_login"], { data: getFormData(this), })
-                .then(get_json)
-                .then(redirect, nok_toast_generator("login"))
-        });
-
-        $(".register_form").submit(function(event) {
-            event.preventDefault();
-            req(api_list["api_auth_simple_register"], { data: getFormData(this), })
-                .then(get_json)
-                .then(redirect, nok_toast_generator("register"))
-        });
-        """ + (debug_script if settings.DEBUG else "")
+        return debug_script if settings.DEBUG else ""

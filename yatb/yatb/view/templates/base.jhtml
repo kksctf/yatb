@@ -3,6 +3,7 @@
       {% if ui.theme != 'auto' %}data-theme="{{ ui.theme }}"{% endif %}>
   <head>
     <meta charset="utf-8" />
+    <meta name="viewport" content="width=device-width, initial-scale=1" />
     <title>
 
       {% block title %}
@@ -63,7 +64,7 @@
                   hx-post="{{ url_for('ui_task_submit_flag') }}"
                   hx-swap="none"
                   hx-on:yatb:flag-accepted="this.reset()">
-              <div class="field has-addons">
+              <div class="field has-addons flag-input-group">
                 <p class="control">
                   <span class="button is-static">{{ FLAG_BASE }}{</span>
                 </p>
@@ -71,16 +72,15 @@
                   <input id="flag-submit-input"
                          class="input"
                          name="flag"
+                         aria-label="{{ _('Flag') }}"
                          placeholder="sampl3_fl4g"
                          required />
                 </p>
                 <p class="control">
                   <span class="button is-static">}</span>
                 </p>
-                <p class="control">
-                  <button class="button is-primary">{{ _("Submit") }}</button>
-                </p>
               </div>
+              <button type="submit" class="button is-primary">{{ _("Submit") }}</button>
             </form>
           {% endif %}
           <div id="settings-menu" class="navbar-item has-dropdown is-hoverable">
@@ -223,6 +223,7 @@
                     burger.addEventListener('click', function () {
                         burger.classList.toggle('is-active');
                         menu.classList.toggle('is-active');
+                        burger.setAttribute('aria-expanded', menu.classList.contains('is-active'));
                     });
                 }
             });

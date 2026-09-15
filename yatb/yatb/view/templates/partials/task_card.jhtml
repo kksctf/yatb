@@ -15,7 +15,7 @@
         </div>
       </div>
     </a>
-    <div class="task-card-tags p-0">
+    <div class="task-card-tags">
       <div class="tags has-addons">
         <span class="tag {% if task.is_solved_by(curr_user) %}is-success{% endif %}"><i class="fa-solid fa-award"></i>{{ task.scoring.points }}</span>
         <span class="tag is-dark"><i class="fa-solid fa-check-double"></i>{{ task.solves }}</span>
@@ -24,7 +24,7 @@
   </header>
 
   <div class="card-content">
-    <div class="content">{{ task.description_html | safe }}</div>
+    <div class="content task-description">{{ task.description_html | safe }}</div>
 
     {% if curr_user and curr_user.is_admin %}
       <div hx-get="{{ url_for('api_admin_task_debug', task_id=task.task_id) }}"

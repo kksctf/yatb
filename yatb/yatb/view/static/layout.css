@@ -15,7 +15,7 @@ footer.footer {
 /* Masonry-ish grid without JS */
 .task-grid {
     display: grid;
-    grid-template-columns: repeat(auto-fill, minmax(260px, 1fr));
+    grid-template-columns: repeat(auto-fill, minmax(min(260px, 100%), 1fr));
     gap: 1rem;
     /* space between cards */
 }
@@ -27,6 +27,7 @@ footer.footer {
 }
 
 .task-grid .card {
+    min-width: 0;
     height: 100%;
     /* all cards same column height */
     display: flex;
@@ -46,6 +47,14 @@ footer.footer {
     flex: 0 0 auto;
     margin-left: auto;
     padding: 0.75rem;
+    align-self: center;
+}
+
+@media (max-width: 768px) {
+    footer.footer .level {
+        flex-wrap: wrap;
+        gap: 0.75rem;
+    }
 }
 
 .task-grid .card-header .task-card-tags .tags {

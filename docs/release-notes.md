@@ -6,6 +6,8 @@
   - A
 - Changed:
   - Docs
+  - Repo organization: now this is a yatb namespace with base/cli/dtc/s3/yatb
+  - Reformatted and cleaned frontend a little
 - Depricated:
   - C
 - Deleted:

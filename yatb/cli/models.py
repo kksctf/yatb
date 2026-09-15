@@ -45,14 +45,14 @@ class FileTask(YAMLModel):
 
     flag: str
 
-    dynamic_scoring: bool = True
-
     dynamic_features: list[DynamicTaskFeatures] = []
 
     vm_ports: list[int] = []
 
     hidden: bool = True
 
+    dynamic_scoring: bool = True
+    static_scoring_points: int = 1000
     dynamic_scoring_decay: int = 50
 
     @property
@@ -94,7 +94,7 @@ class FileTask(YAMLModel):
             return schema.DynamicKKSScoring(
                 decay=self.dynamic_scoring_decay,
             )
-        return schema.StaticScoring(static_points=50)
+        return schema.StaticScoring(static_points=self.static_scoring_points)
 
     def get_description(self) -> str:
         return self.description.strip().strip('"').strip("'")

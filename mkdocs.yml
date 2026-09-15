@@ -1,5 +1,5 @@
 site_name: YATB
-site_description: YATB - yet another fast and furious jeopardy-CTF taskboard
+site_description: YATB documentation for task authors and competition organizers
 site_url: https://kksctf.github.io/yatb
 
 repo_name: kksctf/yatb
@@ -11,10 +11,12 @@ plugins:
 
 nav:
   - YATB: index.md
-  - config.md
-  - Hacking:
-      - hacking/index.md
-  - release-notes.md
+  - Task files: tasks.md
+  - Release notes: release-notes.md
+  - Archive:
+      - Overview: old/index.md
+      - Configuration: old/config.md
+      - Hacking: old/hacking/index.md
 
 theme:
   name: material

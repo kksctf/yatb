@@ -12,6 +12,7 @@ from yatb.yatb.shared.dtc.models import DynamicTaskFeatures
 from yatb.yatb.utils import md
 from yatb.yatb.utils.log_helper import get_logger
 
+from .attachments import Attachment
 from .flags import DynamicKKSFlag, StaticFlag
 from .ids import ModelTaskID, TaskID, TaskIDField, UserID
 from .scoring import DynamicKKSScoring, StaticScoring
@@ -69,6 +70,8 @@ class Task(EBaseModelV2):
     author: Public[str]
 
     dti: Admin[DynamicTaskInfo | None] = None
+
+    attachments: Public[list[Attachment]] = []
 
     req_tasks: Admin[list[TaskID]] = []
 
@@ -185,10 +188,15 @@ class TaskForm(BaseModel):
 
     task_name: str
     category: str
-    scoring: ScoringUnion
+
     description: str
-    flag: FlagUnion
+
     author: str = ""
+
+    scoring: ScoringUnion
+    flag: FlagUnion
+
+    attachments: list[Attachment] = []
 
     dti: DynamicTaskInfo | None = None
 

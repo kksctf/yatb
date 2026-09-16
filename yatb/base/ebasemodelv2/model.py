@@ -189,6 +189,7 @@ class EBaseModelV2(RawBaseModel):
             # __validators__=cls.__pydantic_decorators__,
             __validators__={},
             __cls_kwargs__=None,
+            __qualname__=None,
             **new_fields,
         )
         ret.__pydantic_computed_fields__ = new_computed_fields

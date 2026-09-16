@@ -37,7 +37,7 @@ def update_private_catalogs(template_path: Path, locale_dir: Path) -> None:
             continue
         private.update(template, no_fuzzy_matching=True)
         with private_path.open("wb") as destination:
-            write_po(destination, private, sort_output=True, include_lineno=False)
+            write_po(destination, private, sort_output=True, include_lineno=True)
 
 
 if __name__ == "__main__":

@@ -16,7 +16,7 @@ cli *args:
     uv run -m yatb.cli {{ args }}
 
 babel-extract:
-    uv run pybabel extract -F pyproject.toml --add-location=file -o messages.pot yatb/yatb
+    uv run pybabel extract -F pyproject.toml --add-location=full -o messages.pot yatb/yatb
 
 babel-update:
     uv run pybabel update -i messages.pot -d yatb/yatb/locale -D messages
@@ -30,7 +30,7 @@ babel: babel-extract babel-update babel-compile
 # --- private features: run ONLY on the private branch ---
 # Public catalogs arrive through merges; only private.po is updated here.
 babel-extract-private:
-    uv run pybabel extract -F pyproject.toml --add-location=file -o private.pot yatb/yatb
+    uv run pybabel extract -F pyproject.toml --add-location=full -o private.pot yatb/yatb
 
 babel-update-private:
     uv run python contrib/update_private_catalog.py

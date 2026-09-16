@@ -1,6 +1,6 @@
 import datetime
 from collections.abc import Sequence
-from typing import Annotated, TypeAlias
+from typing import Annotated
 from zoneinfo import ZoneInfo
 
 from pydantic import BaseModel, Field, computed_field
@@ -31,12 +31,11 @@ def template_format_time(date: datetime.datetime) -> str:  # from alb1or1x_shit.
     return "unknown"
 
 
-# https://github.com/pydantic/pydantic/issues/11552
-ScoringUnion: TypeAlias = Annotated[  # noqa: UP040
+type ScoringUnion = Annotated[
     StaticScoring | DynamicKKSScoring,
     Field(discriminator="classtype"),
 ]
-FlagUnion: TypeAlias = Annotated[  # noqa: UP040
+type FlagUnion = Annotated[
     StaticFlag | DynamicKKSFlag,
     Field(discriminator="classtype"),
 ]

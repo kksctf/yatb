@@ -1,6 +1,6 @@
 import uuid
 from datetime import UTC, datetime, timedelta
-from typing import Annotated, TypeAlias
+from typing import Annotated
 
 from fastapi import Depends, Header, HTTPException, Query, Request, status
 from fastapi.security.utils import get_authorization_scheme_param
@@ -134,10 +134,9 @@ async def admin_checker(
     )
 
 
-# https://github.com/fastapi/fastapi/issues/10719, https://github.com/fastapi/fastapi/pull/13920
-CURR_USER: TypeAlias = Annotated[UserDB, Depends(get_current_user)]  # noqa: UP040
-CURR_USER_SAFE: TypeAlias = Annotated[UserDB | None, Depends(get_current_user_safe)]  # noqa: UP040
-CURR_USER_SCOREBOARD: TypeAlias = Annotated[UserDB | None, Depends(current_user_for_scoreboard)]  # noqa: UP040
-CURR_USER_OR_REDIRECT_LOGIN: TypeAlias = Annotated[UserDB, Depends(get_current_user_or_redirect_login)]  # noqa: UP040
+type CURR_USER = Annotated[UserDB, Depends(get_current_user)]
+type CURR_USER_SAFE = Annotated[UserDB | None, Depends(get_current_user_safe)]
+type CURR_USER_SCOREBOARD = Annotated[UserDB | None, Depends(current_user_for_scoreboard)]
+type CURR_USER_OR_REDIRECT_LOGIN = Annotated[UserDB, Depends(get_current_user_or_redirect_login)]
 
-CURR_ADMIN: TypeAlias = Annotated[schema.User, Depends(admin_checker)]  # noqa: UP040
+type CURR_ADMIN = Annotated[schema.User, Depends(admin_checker)]

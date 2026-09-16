@@ -8,6 +8,7 @@ from pydantic import BaseModel, RootModel
 
 from yatb.yatb import schema
 from yatb.yatb.config import settings as yatb_settings
+from yatb.yatb.schema.attachments import Attachment
 
 from .yaml import YAMLModel
 
@@ -44,6 +45,8 @@ class FileTask(YAMLModel):
     category: str
 
     flag: str
+
+    attachments: list[Attachment] = []  # noqa: RUF012 # Pydantic copies mutable defaults.
 
     dynamic_features: list[DynamicTaskFeatures] = []
 
@@ -111,6 +114,7 @@ class FileTask(YAMLModel):
             scoring=self.get_scoring(),
             description=self.get_description(),
             flag=self.get_flag(),
+            attachments=self.attachments,
             author=self.author,
             dti=self.get_dti(),
             req_tasks=req_tasks,

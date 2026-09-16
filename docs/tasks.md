@@ -89,9 +89,30 @@ Public files are shared by all players.
 The [upload code](https://github.com/kksctf/yatb/blob/master/yatb/cli/cmd/tasks.py) defines how these folders are processed:
 
 - `dev` contains the Dockerfile and source files for a builder task, or any possible files that required to develop task
-- `public` contains files to upload and link from the task description.
+- `public` contains files to upload as structured task attachments, with their size and SHA256.
 - `deploy` contains the service definition in `docker-compose.yml` and any files needed to build its images.
 - `solution` is an optional folder for solution notes, such as `README.md`, and the uploader does not process it.
+
+One or two files in `public` are uploaded individually. More files, or any subdirectory,
+are packed into `files.tar.gz`; its attachment describes the downloadable archive itself.
+
+Additional attachments can be declared in `task.yaml` using the
+[Pydantic attachment models](https://github.com/kksctf/yatb/blob/master/yatb/yatb/schema/attachments.py):
+
+```yaml
+attachments:
+  - type: web
+    label: Open challenge
+    url: https://challenge.example.org
+  - type: endpoint
+    label: TCP service
+    host: challenge.example.org
+    port: 31337
+```
+
+Declared attachments come first, followed by uploaded files sorted by name.
+Each sync replaces the attachment list, so removing a public file or a declared
+attachment also removes it from the task.
 
 ## Dynamic features
 

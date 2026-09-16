@@ -214,6 +214,7 @@ class TaskForm(BaseModel):
             description=self.description,
             description_html=cls.regenerate_md(self.description),
             flag=self.flag,
+            attachments=self.attachments,
             author=str_author,
             dti=self.dti,
             req_tasks=list(self.req_tasks),

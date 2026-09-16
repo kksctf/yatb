@@ -20,7 +20,7 @@ ADD yatb /app/yatb
 RUN --mount=type=cache,target=/root/.cache/uv \
     --mount=type=bind,source=uv.lock,target=uv.lock \
     --mount=type=bind,source=pyproject.toml,target=pyproject.toml \
-    uv sync --locked --no-editable --extra prod --extra s3
+    uv sync --locked --no-editable --extra prod --extra s3 --refresh-package yatb
 
 FROM python:3.12-slim
 

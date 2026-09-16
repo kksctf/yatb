@@ -1,5 +1,5 @@
 import datetime
-from typing import Annotated, Literal, Self
+from typing import Literal, Self
 
 from pydantic import Field, computed_field, model_validator
 
@@ -35,9 +35,9 @@ class User(EBaseModelV2):
 
     auth_source: Admin[ANNOTATED_TYPING_AUTH]  # pyright: ignore[reportInvalidTypeForm]
 
-    extra_info: Annotated[Public[ExtraInfo], Field(default_factory=ExtraInfo)]
+    extra_info: Public[ExtraInfo] = Field(default_factory=ExtraInfo)
 
-    settings: Annotated[Public[UISettings], Field(default_factory=UISettings)]
+    settings: Public[UISettings] = Field(default_factory=UISettings)
 
     @property
     def au_s(self) -> AuthBase.AuthModel:  # WTF: dirty hack... ;(

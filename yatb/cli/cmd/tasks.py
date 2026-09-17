@@ -1,7 +1,9 @@
-import io
-import subprocess
 from collections.abc import Sequence
+from io import SEEK_END
 from pathlib import Path
+from urllib.parse import quote
+
+from pydantic import HttpUrl
 
 from yatb.cli.base import app, c, settings
 from yatb.cli.client import YATB
@@ -9,6 +11,7 @@ from yatb.cli.models import FileTask, State
 from yatb.dtc.connectors.compose import load_compose
 from yatb.s3.config import settings as s3_settings
 from yatb.yatb.schema import DynamicTaskFeatures, Task, TaskID
+from yatb.yatb.schema.attachments import FileAttachment
 
 _TASKS_ARHIVE_LIMIT: int = 2
 
@@ -54,6 +57,7 @@ async def _upload_task(
     created_task.dti = task_info.get_dti()
     created_task.req_tasks = list(req_tasks)
     created_task.hidden = task_info.hidden
+    created_task.attachments = list(task_info.attachments)
 
     if created_task.dti:
         deploy_dir = task_src / "deploy"
@@ -88,68 +92,49 @@ async def _upload_task(
             c.print(f"ERR: task {task_info.name!r} as vm without customization data")
 
     public_dir = task_src / "public"
-    if public_dir.exists() and (files := list(public_dir.iterdir())):
-        files_hash = subprocess.check_output(  # noqa: ASYNC221, S603
-            "find ./public -type f -exec sha256sum {} \\;",  # noqa: S607
-            shell=True,
-            cwd=task_src,
-            stderr=subprocess.STDOUT,
-        )
+    if public_dir.exists() and (files := sorted(public_dir.iterdir())):
+        public_url = f"{settings.PUBLIC_FILES_DOMAIN.rstrip('/')}/shared/{created_task.task_id}"
 
-        created_task.description += "\n\n---\n\n"
-        created_task.description += '<div class="card-text row d-flex justify-content-between">'
-
-        _do_archive = False
-        if len(files) > _TASKS_ARHIVE_LIMIT:
-            _do_archive = True
-
-        for file in files:
-            if file.is_dir():
-                _do_archive = True
-                break
-
-        if _do_archive:
+        if len(files) > _TASKS_ARHIVE_LIMIT or any(file.is_dir() for file in files):
             archive_name = "files.tar.gz"
-            created_task.description += (
-                "<a class='btn btn-outline-primary btn-sm col-auto m-1 flex-fill' "
-                f"href='{settings.PUBLIC_FILES_DOMAIN}/shared/{created_task.task_id}/{archive_name}' "
-                f"rel='noopener noreferrer' target='_blank'>{archive_name}</a>\n"
-            )
-            await y.s3.upload_directory(
+            object_name = f"{created_task.task_id}/{archive_name}"
+            hash_digest = await y.s3.upload_directory(
                 public_dir,
                 s3_settings.STATIC_BUCKET_NAME,
-                f"{created_task.task_id}/{archive_name}",
+                object_name,
                 ignore_cache=False,
             )
-            c.print(f"[+] '{created_task.task_name}': uploaded archive ({len(files) = } > 2) from {public_dir!r}")
+            archive = await y.s3.stat_object(s3_settings.STATIC_BUCKET_NAME, object_name)
+            size_bytes = archive.size
+            if size_bytes is None:
+                raise ValueError(f"S3 did not return a size for {object_name}")
+            created_task.attachments.append(
+                FileAttachment(
+                    name=archive_name,
+                    url=HttpUrl(f"{public_url}/{archive_name}"),
+                    size_bytes=size_bytes,
+                    sha256=hash_digest,
+                ),
+            )
+            c.print(f"[+] '{created_task.task_name}': uploaded archive from {public_dir!r}")
         else:
             for file in files:
-                created_task.description += (
-                    "<a class='btn btn-outline-primary btn-sm col-auto m-1 flex-fill' "
-                    f"href='{settings.PUBLIC_FILES_DOMAIN}/shared/{created_task.task_id}/{file.name}' "
-                    f"rel='noopener noreferrer' target='_blank'>{file.name}</a>\n"
-                )
                 with file.open("rb") as f:
-                    await y.s3.intelligent_put_object(
+                    hash_digest = await y.s3.intelligent_put_object(
                         f,
                         s3_settings.STATIC_BUCKET_NAME,
                         f"{created_task.task_id}/{file.name}",
                     )
+                    size_bytes = f.seek(0, SEEK_END)
+                created_task.attachments.append(
+                    FileAttachment(
+                        name=file.name,
+                        url=HttpUrl(f"{public_url}/{quote(file.name, safe='')}"),
+                        size_bytes=size_bytes,
+                        sha256=hash_digest,
+                    ),
+                )
                 c.print(f"[+] '{created_task.task_name}': uploaded file {file}")
-
-        await y.s3.intelligent_put_object(
-            io.BytesIO(files_hash),
-            s3_settings.STATIC_BUCKET_NAME,
-            f"{created_task.task_id}/.sha256",
-        )
-
-        created_task.description += (
-            "<a class='btn btn-outline-primary btn-sm col-auto m-1 flex-fill' "
-            f"href='{settings.PUBLIC_FILES_DOMAIN}/shared/{created_task.task_id}/.sha256' rel='noopener noreferrer' "
-            "target='_blank'>.sha256</a>\n"
-        )
-
-        created_task.description = created_task.description.strip() + "</div>"
 
     created_task = await y.update_task(task=created_task)
 

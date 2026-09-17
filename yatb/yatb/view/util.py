@@ -11,6 +11,7 @@ from starlette.templating import _TemplateResponse
 
 from yatb.yatb import i18n, schema
 from yatb.yatb.config import settings
+from yatb.yatb.schema.attachments import EndpointAttachment
 from yatb.yatb.ui import get_ui_state
 
 _base_path = Path(__file__).resolve().parent
@@ -82,6 +83,12 @@ def version_string() -> str:
     return f"kks-tb-{settings.VERSION}"
 
 
+def format_endpoint(attachment: EndpointAttachment) -> str:
+    host = f"[{attachment.host}]" if ":" in attachment.host else attachment.host
+    return f"{host}:{attachment.port}"
+
+
+templates.env.filters["endpoint"] = format_endpoint
 templates.env.globals["version_string"] = version_string
 templates.env.globals["len"] = len
 templates.env.globals["template_format_time"] = schema.task.template_format_time

@@ -20,9 +20,9 @@ keywords = ["ctf", "jeopardy", "ctf-platform", "fastapi"]
 classifiers = ["Topic :: Software Development"]
 
 dependencies = [
-    "pydantic ~= 2.11.7",
+    "pydantic ~= 2.13.4",
     "pydantic-settings ~= 2.10.1",
-    "fastapi ~= 0.115.13",
+    "fastapi ~= 0.141.1",
     "aiohttp ~= 3.10.3",
     "aiofiles ~= 24.1.0",
     "python-jose[cryptography] ~= 3.3.0",
@@ -159,7 +159,7 @@ ignore = [
 ### PYTEST
 
 [tool.pytest.ini_options]
-addopts = "--cov=./yatb --cov-report=xml:coverage.xml -cov-config=.coveragerc"
+addopts = "--cov=./yatb --cov-report=xml:coverage.xml"
 env = ["DEBUG=0", "ENABLE_METRICS=0", "TESTING=1", "DB_NAME=yatb_unittesting"]
 filterwarnings = ["ignore::DeprecationWarning"]
 pythonpath = ["."]

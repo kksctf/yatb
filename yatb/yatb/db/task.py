@@ -4,7 +4,7 @@ from typing import ClassVar, Self
 import pymongo
 from beanie import BulkWriter
 from beanie.operators import In, Set
-from pydantic import BaseModel
+from pydantic import BaseModel, HttpUrl
 
 from yatb.yatb.schema import FlagCheckResult, Task, TaskForm, TaskID, User
 from yatb.yatb.utils.log_helper import get_logger
@@ -108,6 +108,7 @@ class TaskDB(DocumentEx[Task], Task):
 
     class Settings:
         name: ClassVar = "tasks"
+        bson_encoders: ClassVar = {HttpUrl: str}
         indexes: ClassVar = [
             [
                 ("task_id", pymongo.ASCENDING),

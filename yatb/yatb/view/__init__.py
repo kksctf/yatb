@@ -1,5 +1,5 @@
 from dataclasses import dataclass
-from typing import Annotated, TypeAlias
+from typing import Annotated
 
 from fastapi import Depends, Query, Request
 from fastapi.responses import HTMLResponse
@@ -41,7 +41,7 @@ async def get_cache(request: Request) -> _Cache:
     return _Cache(user_id_to_username=uid2name)
 
 
-Cache: TypeAlias = Annotated[_Cache, Depends(get_cache)]
+type Cache = Annotated[_Cache, Depends(get_cache)]
 
 
 @router.get("/")
@@ -103,6 +103,7 @@ async def one_task_page(
         {
             "curr_user": user,
             "selected_task": task,
+            "card_view": "detail",
             "uid2name": cache.user_id_to_username,
         },
     )

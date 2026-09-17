@@ -12,6 +12,7 @@ async def sync(
     *,
     drop: bool = False,
     # live: bool = True,
+    delete_orphane: bool = True,
     state_path: Path = Path() / "yatb_state.json",
 ) -> None:
     target = target.expanduser().resolve()
@@ -22,4 +23,9 @@ async def sync(
         if drop:
             await y.detele_everything()
 
-        await sync_tasks(y, state, target / "tasks")
+        await sync_tasks(
+            y,
+            state,
+            target / "tasks",
+            delete_orphane=delete_orphane,
+        )

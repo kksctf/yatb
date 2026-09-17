@@ -6,7 +6,7 @@ status codes and models, this module answers with toasts and out-of-band swaps. 
 thin mappers over the same service call, so the two can never drift apart.
 """
 
-from typing import Annotated
+from typing import Annotated, Literal
 
 from fastapi import APIRouter, Form, Request
 from fastapi.responses import HTMLResponse
@@ -28,6 +28,10 @@ router = APIRouter(
     tags=["ui"],
     include_in_schema=False,
 )
+
+
+class TaskFlagForm(FlagModel):
+    card_view: Literal["compact", "detail"] = "compact"
 
 
 def flag_toast(result: FlagResult) -> Toast:
@@ -92,7 +96,7 @@ async def _card_names(task: TaskDB) -> dict[UserID, str]:
 @router.post("/tasks/submit_flag")
 async def ui_task_submit_flag(
     req: Request,
-    flag: Annotated[FlagModel, Form()],
+    flag: Annotated[TaskFlagForm, Form()],
     user: auth.CURR_USER,
 ) -> Response:
     result = await submit_flag(user, flag.flag)
@@ -114,6 +118,7 @@ async def ui_task_submit_flag(
             "task": result.task,
             "uid2name": await _card_names(result.task),
             "oob": True,
+            "card_view": flag.card_view,
         },
         headers=headers,
     )

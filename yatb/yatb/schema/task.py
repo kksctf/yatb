@@ -1,6 +1,6 @@
 import datetime
 from collections.abc import Sequence
-from typing import Annotated, TypeAlias
+from typing import Annotated
 from zoneinfo import ZoneInfo
 
 from pydantic import BaseModel, Field, computed_field
@@ -12,6 +12,7 @@ from yatb.yatb.shared.dtc.models import DynamicTaskFeatures
 from yatb.yatb.utils import md
 from yatb.yatb.utils.log_helper import get_logger
 
+from .attachments import Attachment
 from .flags import DynamicKKSFlag, StaticFlag
 from .ids import ModelTaskID, TaskID, TaskIDField, UserID
 from .scoring import DynamicKKSScoring, StaticScoring
@@ -31,12 +32,11 @@ def template_format_time(date: datetime.datetime) -> str:  # from alb1or1x_shit.
     return "unknown"
 
 
-# https://github.com/pydantic/pydantic/issues/11552
-ScoringUnion: TypeAlias = Annotated[  # noqa: UP040
+type ScoringUnion = Annotated[
     StaticScoring | DynamicKKSScoring,
     Field(discriminator="classtype"),
 ]
-FlagUnion: TypeAlias = Annotated[  # noqa: UP040
+type FlagUnion = Annotated[
     StaticFlag | DynamicKKSFlag,
     Field(discriminator="classtype"),
 ]
@@ -70,6 +70,8 @@ class Task(EBaseModelV2):
     author: Public[str]
 
     dti: Admin[DynamicTaskInfo | None] = None
+
+    attachments: Public[list[Attachment]] = []
 
     req_tasks: Admin[list[TaskID]] = []
 
@@ -186,10 +188,15 @@ class TaskForm(BaseModel):
 
     task_name: str
     category: str
-    scoring: ScoringUnion
+
     description: str
-    flag: FlagUnion
+
     author: str = ""
+
+    scoring: ScoringUnion
+    flag: FlagUnion
+
+    attachments: list[Attachment] = []
 
     dti: DynamicTaskInfo | None = None
 
@@ -207,6 +214,7 @@ class TaskForm(BaseModel):
             description=self.description,
             description_html=cls.regenerate_md(self.description),
             flag=self.flag,
+            attachments=self.attachments,
             author=str_author,
             dti=self.dti,
             req_tasks=list(self.req_tasks),

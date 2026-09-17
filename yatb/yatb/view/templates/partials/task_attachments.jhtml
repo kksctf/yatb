@@ -1,0 +1,59 @@
+{% if attachments %}
+  <section class="task-attachments">
+    <h3 class="task-section-title">{{ _("Attachments") }}</h3>
+    <ul class="task-attachment-list">
+      {% for attachment in attachments %}
+        <li class="task-attachment">
+          <div class="task-attachment-row{% if attachment.type == 'file' %} task-attachment-file{% endif %}">
+            {% if attachment.type == "file" %}
+              <a class="task-attachment-main"
+                 href="{{ attachment.url }}"
+                 title="{{ attachment.name }}"
+                 target="_blank"
+                 rel="noopener noreferrer">
+                <i class="fa-solid fa-paperclip" aria-hidden="true"></i>
+                <span>{{ attachment.name }}</span>
+              </a>
+              <div class="task-attachment-meta">
+                <span class="tag" title="{{ _('%(size)d bytes', size=attachment.size_bytes) }}">{{ attachment.size_bytes | filesizeformat(binary=true) }}</span>
+                <button type="button"
+                        class="button is-small task-copy"
+                        data-copy-text="{{ attachment.sha256 }}"
+                        aria-label="{{ _('Copy SHA256') }}"
+                        title="{{ _('Copy SHA256') }}">SHA256</button>
+              </div>
+            {% elif attachment.type == "web" %}
+              <a class="task-attachment-main"
+                 href="{{ attachment.url }}"
+                 target="_blank"
+                 rel="noopener noreferrer">
+                <i class="fa-solid fa-globe" aria-hidden="true"></i>
+                <span>{{ attachment.label }}</span>
+              </a>
+              <button type="button"
+                      class="button is-small task-copy"
+                      data-copy-text="{{ attachment.url }}"
+                      aria-label="{{ _('Copy URL') }}"
+                      title="{{ _('Copy URL') }}">
+                <span class="icon is-small"><i class="fa-regular fa-copy" aria-hidden="true"></i></span>
+              </button>
+            {% elif attachment.type == "endpoint" %}
+              <span class="task-attachment-main">
+                <i class="fa-solid fa-network-wired" aria-hidden="true"></i>
+                <span>{{ attachment.label }}</span>
+              </span>
+              <button type="button"
+                      class="button is-small task-copy task-endpoint"
+                      data-copy-text="{{ attachment | endpoint }}"
+                      aria-label="{{ _('Copy endpoint: %(endpoint)s', endpoint=attachment | endpoint) }}"
+                      title="{{ _('Copy endpoint: %(endpoint)s', endpoint=attachment | endpoint) }}">
+                {{ attachment | endpoint }}
+              </button>
+            {% endif %}
+          </div>
+          <span class="task-copy-feedback is-size-7" role="status" aria-live="polite"></span>
+        </li>
+      {% endfor %}
+    </ul>
+  </section>
+{% endif %}

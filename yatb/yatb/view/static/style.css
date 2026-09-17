@@ -70,6 +70,121 @@
   overflow-x: auto;
 }
 
+.task-card .card-header {
+  flex-wrap: wrap;
+}
+
+.task-card .card-header-title {
+  min-width: 0;
+  flex: 1 1 0;
+  overflow-wrap: anywhere;
+}
+
+.task-card .task-card-tags {
+  padding: 0.75rem;
+  align-self: center;
+}
+
+.task-detail .card-header-title {
+  flex-basis: 16rem;
+}
+
+.task-card .card-content {
+  padding: 1rem;
+}
+
+.task-card .card-footer-item {
+  min-width: 0;
+}
+
+.task-attachments {
+  margin-top: 1rem;
+  padding-top: 0.75rem;
+  border-top: 1px solid var(--bulma-border);
+}
+
+.task-section-title {
+  font-weight: 600;
+  margin-bottom: 0.5rem;
+}
+
+.task-attachment-list {
+  list-style: none;
+  margin: 0;
+  padding: 0;
+  display: flex;
+  flex-direction: column;
+  gap: 0.75rem;
+}
+
+.task-attachment-row,
+.task-attachment-meta {
+  display: flex;
+  align-items: center;
+  flex-wrap: wrap;
+  gap: 0.4rem;
+  min-width: 0;
+}
+
+.task-attachment-main {
+  display: flex;
+  align-items: baseline;
+  flex: 1 1 10rem;
+  gap: 0.4rem;
+  min-width: 0;
+  overflow-wrap: anywhere;
+}
+
+.task-attachment-main > i {
+  flex: 0 0 auto;
+  color: var(--bulma-text-weak);
+}
+
+.task-attachment-main > span {
+  min-width: 0;
+}
+
+.task-attachment-file,
+.task-attachment-meta {
+  flex-wrap: nowrap;
+}
+
+.task-attachment-file .task-attachment-main {
+  flex: 1 1 0;
+}
+
+.task-attachment-file .task-attachment-main > span {
+  overflow: hidden;
+  text-overflow: ellipsis;
+  white-space: nowrap;
+}
+
+.task-attachment-meta {
+  flex: 0 0 auto;
+}
+
+.task-endpoint.button {
+  display: inline-block;
+  max-width: 100%;
+  height: auto;
+  white-space: normal;
+  overflow-wrap: anywhere;
+  text-align: left;
+}
+
+.task-copy-feedback {
+  color: var(--bulma-success-text);
+}
+
+.task-copy-feedback:empty {
+  display: none;
+}
+
+.task-attachments :focus-visible {
+  outline: 2px solid var(--bulma-link);
+  outline-offset: 2px;
+}
+
 .task-grid .card,
 .task-detail {
   border: 1px solid var(--bulma-border);

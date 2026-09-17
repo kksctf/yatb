@@ -103,6 +103,7 @@ async def one_task_page(
         {
             "curr_user": user,
             "selected_task": task,
+            "card_view": "detail",
             "uid2name": cache.user_id_to_username,
         },
     )

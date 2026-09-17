@@ -7,7 +7,7 @@ msgid ""
 msgstr ""
 "Project-Id-Version: PROJECT VERSION\n"
 "Report-Msgid-Bugs-To: EMAIL@ADDRESS\n"
-"POT-Creation-Date: 2026-09-16 19:26+0300\n"
+"POT-Creation-Date: 2026-09-17 04:15+0300\n"
 "PO-Revision-Date: 2025-05-30 17:06+0300\n"
 "Last-Translator: Maksim Anfinogenov <m.anfinogenov@cypol.dev>\n"
 "Language: en\n"
@@ -46,34 +46,34 @@ msgstr ""
 msgid "Settings saved."
 msgstr ""
 
-#: yatb/yatb/view/actions.py:46
+#: yatb/yatb/view/actions.py:50
 msgid "Flag accepted!"
 msgstr ""
 
-#: yatb/yatb/view/actions.py:47
+#: yatb/yatb/view/actions.py:51
 #, python-format
 msgid "+%(points)d point"
 msgid_plural "+%(points)d points"
 msgstr[0] ""
 msgstr[1] ""
 
-#: yatb/yatb/view/actions.py:53
+#: yatb/yatb/view/actions.py:57
 msgid "You have already solved this task."
 msgstr ""
 
-#: yatb/yatb/view/actions.py:59
+#: yatb/yatb/view/actions.py:63
 msgid "Wrong flag."
 msgstr ""
 
-#: yatb/yatb/view/actions.py:65
+#: yatb/yatb/view/actions.py:69
 msgid "The CTF has not started yet."
 msgstr ""
 
-#: yatb/yatb/view/actions.py:73
+#: yatb/yatb/view/actions.py:77
 msgid "Something went wrong on our side. Please submit the flag again."
 msgstr ""
 
-#: yatb/yatb/view/actions.py:130
+#: yatb/yatb/view/actions.py:135
 msgid "Profile saved."
 msgstr ""
 
@@ -89,50 +89,58 @@ msgstr ""
 msgid "Scoreboard"
 msgstr ""
 
-#: yatb/yatb/view/templates/base.jhtml:75
+#: yatb/yatb/view/templates/base.jhtml:76
 msgid "Flag"
 msgstr ""
 
-#: yatb/yatb/view/templates/base.jhtml:83
+#: yatb/yatb/view/templates/base.jhtml:84
 msgid "Submit"
 msgstr ""
 
-#: yatb/yatb/view/templates/base.jhtml:91
 #: yatb/yatb/view/templates/base.jhtml:92
-#: yatb/yatb/view/templates/base.jhtml:94
+#: yatb/yatb/view/templates/base.jhtml:93
+#: yatb/yatb/view/templates/base.jhtml:95
 #: yatb/yatb/view/templates/profile.jhtml:39
 msgid "Settings"
 msgstr ""
 
-#: yatb/yatb/view/templates/base.jhtml:107
+#: yatb/yatb/view/templates/base.jhtml:108
 #: yatb/yatb/view/templates/profile.jhtml:4
 #: yatb/yatb/view/templates/profile.jhtml:9
 msgid "Profile"
 msgstr ""
 
-#: yatb/yatb/view/templates/base.jhtml:112
+#: yatb/yatb/view/templates/base.jhtml:113
 msgid "Admin area"
 msgstr ""
 
-#: yatb/yatb/view/templates/base.jhtml:119
+#: yatb/yatb/view/templates/base.jhtml:120
 msgid "Logout"
 msgstr ""
 
-#: yatb/yatb/view/templates/base.jhtml:124
+#: yatb/yatb/view/templates/base.jhtml:125
 #: yatb/yatb/view/templates/login.jhtml:4
 msgid "Login"
 msgstr ""
 
-#: yatb/yatb/view/templates/base.jhtml:136
+#: yatb/yatb/view/templates/base.jhtml:137
 msgid "Something went wrong."
 msgstr ""
 
-#: yatb/yatb/view/templates/base.jhtml:137
+#: yatb/yatb/view/templates/base.jhtml:138
 msgid "Could not reach the server."
 msgstr ""
 
-#: yatb/yatb/view/templates/base.jhtml:138
+#: yatb/yatb/view/templates/base.jhtml:139
 msgid "Close"
+msgstr ""
+
+#: yatb/yatb/view/templates/base.jhtml:141
+msgid "Copied"
+msgstr ""
+
+#: yatb/yatb/view/templates/base.jhtml:142
+msgid "Could not copy."
 msgstr ""
 
 #: yatb/yatb/view/templates/login.jhtml:11
@@ -291,60 +299,6 @@ msgstr ""
 msgid "← Back to tasks"
 msgstr ""
 
-#: yatb/yatb/view/templates/task.jhtml:16
-msgid "Author:"
-msgstr ""
-
-#: yatb/yatb/view/templates/task.jhtml:17
-msgid "Category:"
-msgstr ""
-
-#: yatb/yatb/view/templates/task.jhtml:21
-msgid "pts"
-msgstr ""
-
-#: yatb/yatb/view/templates/task.jhtml:21
-msgid "solves"
-msgstr ""
-
-#: yatb/yatb/view/templates/task.jhtml:27
-msgid "✅ You have already solved this challenge. Great job!"
-msgstr ""
-
-#: yatb/yatb/view/templates/partials/task_card.jhtml:53
-#: yatb/yatb/view/templates/task.jhtml:53
-msgid "Start"
-msgstr ""
-
-#: yatb/yatb/view/templates/partials/task_card.jhtml:58
-#: yatb/yatb/view/templates/task.jhtml:62
-msgid "Restart"
-msgstr ""
-
-#: yatb/yatb/view/templates/partials/task_card.jhtml:63
-#: yatb/yatb/view/templates/task.jhtml:70
-msgid "Stop"
-msgstr ""
-
-#: yatb/yatb/view/templates/partials/task_card.jhtml:68
-#: yatb/yatb/view/templates/task.jhtml:78
-msgid "Extend"
-msgstr ""
-
-#: yatb/yatb/view/templates/partials/task_card.jhtml:73
-#: yatb/yatb/view/templates/task.jhtml:86
-msgid "Info"
-msgstr ""
-
-#: yatb/yatb/view/templates/partials/task_card.jhtml:80
-#: yatb/yatb/view/templates/task.jhtml:95
-msgid "Start with rebuild"
-msgstr ""
-
-#: yatb/yatb/view/templates/task.jhtml:106
-msgid "No dynamic task info yet"
-msgstr ""
-
 #: yatb/yatb/view/templates/tasks.jhtml:31
 msgid "Show solved"
 msgstr ""
@@ -382,12 +336,82 @@ msgstr ""
 msgid "Language"
 msgstr ""
 
+#: yatb/yatb/view/templates/partials/task_attachments.jhtml:3
+msgid "Attachments"
+msgstr ""
+
+#: yatb/yatb/view/templates/partials/task_attachments.jhtml:18
+#, python-format
+msgid "%(size)d bytes"
+msgstr ""
+
+#: yatb/yatb/view/templates/partials/task_attachments.jhtml:22
+#: yatb/yatb/view/templates/partials/task_attachments.jhtml:23
+msgid "Copy SHA256"
+msgstr ""
+
+#: yatb/yatb/view/templates/partials/task_attachments.jhtml:36
+#: yatb/yatb/view/templates/partials/task_attachments.jhtml:37
+msgid "Copy URL"
+msgstr ""
+
+#: yatb/yatb/view/templates/partials/task_attachments.jhtml:48
+#: yatb/yatb/view/templates/partials/task_attachments.jhtml:49
+#, python-format
+msgid "Copy endpoint: %(endpoint)s"
+msgstr ""
+
 #: yatb/yatb/view/templates/partials/task_card.jhtml:11
+#: yatb/yatb/view/templates/partials/task_card.jhtml:26
 msgid "Task is hidden"
 msgstr ""
 
-#: yatb/yatb/view/templates/partials/task_card.jhtml:39
-msgid "No info ;("
+#: yatb/yatb/view/templates/partials/task_card.jhtml:15
+msgid "Author:"
+msgstr ""
+
+#: yatb/yatb/view/templates/partials/task_card.jhtml:17
+msgid "Category:"
+msgstr ""
+
+#: yatb/yatb/view/templates/partials/task_card.jhtml:36
+msgid "pts"
+msgstr ""
+
+#: yatb/yatb/view/templates/partials/task_card.jhtml:36
+msgid "solves"
+msgstr ""
+
+#: yatb/yatb/view/templates/partials/task_card.jhtml:51
+msgid "✅ You have already solved this challenge. Great job!"
+msgstr ""
+
+#: yatb/yatb/view/templates/partials/task_card.jhtml:72
+msgid "Loading instance status…"
+msgstr "Loading instance status…"
+
+#: yatb/yatb/view/templates/partials/task_card.jhtml:85
+msgid "Start"
+msgstr ""
+
+#: yatb/yatb/view/templates/partials/task_card.jhtml:90
+msgid "Restart"
+msgstr ""
+
+#: yatb/yatb/view/templates/partials/task_card.jhtml:95
+msgid "Stop"
+msgstr ""
+
+#: yatb/yatb/view/templates/partials/task_card.jhtml:100
+msgid "Extend"
+msgstr ""
+
+#: yatb/yatb/view/templates/partials/task_card.jhtml:105
+msgid "Info"
+msgstr ""
+
+#: yatb/yatb/view/templates/partials/task_card.jhtml:112
+msgid "Start with rebuild"
 msgstr ""
 
 #: yatb/yatb/view/templates/partials/task_container.jhtml:5

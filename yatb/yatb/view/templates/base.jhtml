@@ -64,6 +64,7 @@
                   hx-post="{{ url_for('ui_task_submit_flag') }}"
                   hx-swap="none"
                   hx-on:yatb:flag-accepted="this.reset()">
+              <input type="hidden" name="card_view" value="{{ card_view | default('compact') }}" />
               <div class="field has-addons flag-input-group">
                 <p class="control">
                   <span class="button is-static">{{ FLAG_BASE }}{</span>
@@ -136,6 +137,9 @@
             data-error-message="{{ _('Something went wrong.') }}"
             data-offline-message="{{ _('Could not reach the server.') }}"
             data-close-label="{{ _('Close') }}"></script>
+    <script src="{{ url_for('static', path='attachments.js') }}"
+            data-copied-message="{{ _('Copied') }}"
+            data-copy-error-message="{{ _('Could not copy.') }}"></script>
     {% if curr_user and curr_user.is_admin %}
       <script>
         (function () {

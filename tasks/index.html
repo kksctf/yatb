@@ -1,0 +1,895 @@
+
+<!doctype html>
+<html lang="en" class="no-js">
+  <head>
+    
+      <meta charset="utf-8">
+      <meta name="viewport" content="width=device-width,initial-scale=1">
+      
+        <meta name="description" content="YATB documentation for task authors and competition organizers">
+      
+      
+      
+        <link rel="canonical" href="https://kksctf.github.io/yatb/tasks/">
+      
+      
+        <link rel="prev" href="..">
+      
+      
+        <link rel="next" href="../release-notes/">
+      
+      
+        
+      
+      
+      <link rel="icon" href="../assets/images/favicon.png">
+      <meta name="generator" content="mkdocs-1.6.1, mkdocs-material-9.7.7">
+    
+    
+      
+        <title>Task files - YATB</title>
+      
+    
+    
+      <link rel="stylesheet" href="../assets/stylesheets/main.ec1eaa64.min.css">
+      
+        
+        <link rel="stylesheet" href="../assets/stylesheets/palette.ab4e12ef.min.css">
+      
+      
+
+
+    
+    
+      
+    
+    
+      
+        
+        
+        <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+        <link rel="stylesheet" href="https://fonts.googleapis.com/css?family=Roboto:300,300i,400,400i,700,700i%7CRoboto+Mono:400,400i,700,700i&display=fallback">
+        <style>:root{--md-text-font:"Roboto";--md-code-font:"Roboto Mono"}</style>
+      
+    
+    
+    <script>__md_scope=new URL("..",location),__md_hash=e=>[...e].reduce(((e,_)=>(e<<5)-e+_.charCodeAt(0)),0),__md_get=(e,_=localStorage,t=__md_scope)=>JSON.parse(_.getItem(t.pathname+"."+e)),__md_set=(e,_,t=localStorage,a=__md_scope)=>{try{t.setItem(a.pathname+"."+e,JSON.stringify(_))}catch(e){}}</script>
+    
+      
+
+    
+    
+  </head>
+  
+  
+    
+    
+      
+    
+    
+    
+    
+    <body dir="ltr" data-md-color-scheme="slate" data-md-color-primary="indigo" data-md-color-accent="indigo">
+  
+    
+    <input class="md-toggle" data-md-toggle="drawer" type="checkbox" id="__drawer" autocomplete="off">
+    <input class="md-toggle" data-md-toggle="search" type="checkbox" id="__search" autocomplete="off">
+    <label class="md-overlay" for="__drawer"></label>
+    <div data-md-component="skip">
+      
+        
+        <a href="#task-files" class="md-skip">
+          Skip to content
+        </a>
+      
+    </div>
+    <div data-md-component="announce">
+      
+    </div>
+    
+    
+      
+
+  
+
+<header class="md-header md-header--shadow" data-md-component="header">
+  <nav class="md-header__inner md-grid" aria-label="Header">
+    <a href=".." title="YATB" class="md-header__button md-logo" aria-label="YATB" data-md-component="logo">
+      
+  
+  <svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 24 24"><path d="M12 8a3 3 0 0 0 3-3 3 3 0 0 0-3-3 3 3 0 0 0-3 3 3 3 0 0 0 3 3m0 3.54C9.64 9.35 6.5 8 3 8v11c3.5 0 6.64 1.35 9 3.54 2.36-2.19 5.5-3.54 9-3.54V8c-3.5 0-6.64 1.35-9 3.54"/></svg>
+
+    </a>
+    <label class="md-header__button md-icon" for="__drawer">
+      
+      <svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 24 24"><path d="M3 6h18v2H3zm0 5h18v2H3zm0 5h18v2H3z"/></svg>
+    </label>
+    <div class="md-header__title" data-md-component="header-title">
+      <div class="md-header__ellipsis">
+        <div class="md-header__topic">
+          <span class="md-ellipsis">
+            YATB
+          </span>
+        </div>
+        <div class="md-header__topic" data-md-component="header-topic">
+          <span class="md-ellipsis">
+            
+              Task files
+            
+          </span>
+        </div>
+      </div>
+    </div>
+    
+      
+        <form class="md-header__option" data-md-component="palette">
+  
+    
+    
+    
+    <input class="md-option" data-md-color-media="" data-md-color-scheme="slate" data-md-color-primary="indigo" data-md-color-accent="indigo"  aria-label="Switch to light mode"  type="radio" name="__palette" id="__palette_0">
+    
+      <label class="md-header__button md-icon" title="Switch to light mode" for="__palette_1" hidden>
+        <svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 24 24"><path d="M12 18c-.89 0-1.74-.2-2.5-.55C11.56 16.5 13 14.42 13 12s-1.44-4.5-3.5-5.45C10.26 6.2 11.11 6 12 6a6 6 0 0 1 6 6 6 6 0 0 1-6 6m8-9.31V4h-4.69L12 .69 8.69 4H4v4.69L.69 12 4 15.31V20h4.69L12 23.31 15.31 20H20v-4.69L23.31 12z"/></svg>
+      </label>
+    
+  
+    
+    
+    
+    <input class="md-option" data-md-color-media="" data-md-color-scheme="default" data-md-color-primary="indigo" data-md-color-accent="indigo"  aria-label="Switch to dark mode"  type="radio" name="__palette" id="__palette_1">
+    
+      <label class="md-header__button md-icon" title="Switch to dark mode" for="__palette_0" hidden>
+        <svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 24 24"><path d="M12 8a4 4 0 0 0-4 4 4 4 0 0 0 4 4 4 4 0 0 0 4-4 4 4 0 0 0-4-4m0 10a6 6 0 0 1-6-6 6 6 0 0 1 6-6 6 6 0 0 1 6 6 6 6 0 0 1-6 6m8-9.31V4h-4.69L12 .69 8.69 4H4v4.69L.69 12 4 15.31V20h4.69L12 23.31 15.31 20H20v-4.69L23.31 12z"/></svg>
+      </label>
+    
+  
+</form>
+      
+    
+    
+      <script>var palette=__md_get("__palette");if(palette&&palette.color){if("(prefers-color-scheme)"===palette.color.media){var media=matchMedia("(prefers-color-scheme: light)"),input=document.querySelector(media.matches?"[data-md-color-media='(prefers-color-scheme: light)']":"[data-md-color-media='(prefers-color-scheme: dark)']");palette.color.media=input.getAttribute("data-md-color-media"),palette.color.scheme=input.getAttribute("data-md-color-scheme"),palette.color.primary=input.getAttribute("data-md-color-primary"),palette.color.accent=input.getAttribute("data-md-color-accent")}for(var[key,value]of Object.entries(palette.color))document.body.setAttribute("data-md-color-"+key,value)}</script>
+    
+    
+    
+      
+      
+        <label class="md-header__button md-icon" for="__search">
+          
+          <svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 24 24"><path d="M9.5 3A6.5 6.5 0 0 1 16 9.5c0 1.61-.59 3.09-1.56 4.23l.27.27h.79l5 5-1.5 1.5-5-5v-.79l-.27-.27A6.52 6.52 0 0 1 9.5 16 6.5 6.5 0 0 1 3 9.5 6.5 6.5 0 0 1 9.5 3m0 2C7 5 5 7 5 9.5S7 14 9.5 14 14 12 14 9.5 12 5 9.5 5"/></svg>
+        </label>
+        <div class="md-search" data-md-component="search" role="dialog">
+  <label class="md-search__overlay" for="__search"></label>
+  <div class="md-search__inner" role="search">
+    <form class="md-search__form" name="search">
+      <input type="text" class="md-search__input" name="query" aria-label="Search" placeholder="Search" autocapitalize="off" autocorrect="off" autocomplete="off" spellcheck="false" data-md-component="search-query" required>
+      <label class="md-search__icon md-icon" for="__search">
+        
+        <svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 24 24"><path d="M9.5 3A6.5 6.5 0 0 1 16 9.5c0 1.61-.59 3.09-1.56 4.23l.27.27h.79l5 5-1.5 1.5-5-5v-.79l-.27-.27A6.52 6.52 0 0 1 9.5 16 6.5 6.5 0 0 1 3 9.5 6.5 6.5 0 0 1 9.5 3m0 2C7 5 5 7 5 9.5S7 14 9.5 14 14 12 14 9.5 12 5 9.5 5"/></svg>
+        
+        <svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 24 24"><path d="M20 11v2H8l5.5 5.5-1.42 1.42L4.16 12l7.92-7.92L13.5 5.5 8 11z"/></svg>
+      </label>
+      <nav class="md-search__options" aria-label="Search">
+        
+        <button type="reset" class="md-search__icon md-icon" title="Clear" aria-label="Clear" tabindex="-1">
+          
+          <svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 24 24"><path d="M19 6.41 17.59 5 12 10.59 6.41 5 5 6.41 10.59 12 5 17.59 6.41 19 12 13.41 17.59 19 19 17.59 13.41 12z"/></svg>
+        </button>
+      </nav>
+      
+    </form>
+    <div class="md-search__output">
+      <div class="md-search__scrollwrap" tabindex="0" data-md-scrollfix>
+        <div class="md-search-result" data-md-component="search-result">
+          <div class="md-search-result__meta">
+            Initializing search
+          </div>
+          <ol class="md-search-result__list" role="presentation"></ol>
+        </div>
+      </div>
+    </div>
+  </div>
+</div>
+      
+    
+    
+      <div class="md-header__source">
+        <a href="https://github.com/kksctf/yatb" title="Go to repository" class="md-source" data-md-component="source">
+  <div class="md-source__icon md-icon">
+    
+    <svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 448 512"><!--! Font Awesome Free 7.1.0 by @fontawesome - https://fontawesome.com License - https://fontawesome.com/license/free (Icons: CC BY 4.0, Fonts: SIL OFL 1.1, Code: MIT License) Copyright 2025 Fonticons, Inc.--><path d="M439.6 236.1 244 40.5c-5.4-5.5-12.8-8.5-20.4-8.5s-15 3-20.4 8.4L162.5 81l51.5 51.5c27.1-9.1 52.7 16.8 43.4 43.7l49.7 49.7c34.2-11.8 61.2 31 35.5 56.7-26.5 26.5-70.2-2.9-56-37.3L240.3 199v121.9c25.3 12.5 22.3 41.8 9.1 55-6.4 6.4-15.2 10.1-24.3 10.1s-17.8-3.6-24.3-10.1c-17.6-17.6-11.1-46.9 11.2-56v-123c-20.8-8.5-24.6-30.7-18.6-45L142.6 101 8.5 235.1C3 240.6 0 247.9 0 255.5s3 15 8.5 20.4l195.6 195.7c5.4 5.4 12.7 8.4 20.4 8.4s15-3 20.4-8.4l194.7-194.7c5.4-5.4 8.4-12.8 8.4-20.4s-3-15-8.4-20.4"/></svg>
+  </div>
+  <div class="md-source__repository">
+    kksctf/yatb
+  </div>
+</a>
+      </div>
+    
+  </nav>
+  
+</header>
+    
+    <div class="md-container" data-md-component="container">
+      
+      
+        
+          
+        
+      
+      <main class="md-main" data-md-component="main">
+        <div class="md-main__inner md-grid">
+          
+            
+              
+              <div class="md-sidebar md-sidebar--primary" data-md-component="sidebar" data-md-type="navigation" >
+                <div class="md-sidebar__scrollwrap">
+                  <div class="md-sidebar__inner">
+                    
+
+
+
+<nav class="md-nav md-nav--primary" aria-label="Navigation" data-md-level="0">
+  <label class="md-nav__title" for="__drawer">
+    <a href=".." title="YATB" class="md-nav__button md-logo" aria-label="YATB" data-md-component="logo">
+      
+  
+  <svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 24 24"><path d="M12 8a3 3 0 0 0 3-3 3 3 0 0 0-3-3 3 3 0 0 0-3 3 3 3 0 0 0 3 3m0 3.54C9.64 9.35 6.5 8 3 8v11c3.5 0 6.64 1.35 9 3.54 2.36-2.19 5.5-3.54 9-3.54V8c-3.5 0-6.64 1.35-9 3.54"/></svg>
+
+    </a>
+    YATB
+  </label>
+  
+    <div class="md-nav__source">
+      <a href="https://github.com/kksctf/yatb" title="Go to repository" class="md-source" data-md-component="source">
+  <div class="md-source__icon md-icon">
+    
+    <svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 448 512"><!--! Font Awesome Free 7.1.0 by @fontawesome - https://fontawesome.com License - https://fontawesome.com/license/free (Icons: CC BY 4.0, Fonts: SIL OFL 1.1, Code: MIT License) Copyright 2025 Fonticons, Inc.--><path d="M439.6 236.1 244 40.5c-5.4-5.5-12.8-8.5-20.4-8.5s-15 3-20.4 8.4L162.5 81l51.5 51.5c27.1-9.1 52.7 16.8 43.4 43.7l49.7 49.7c34.2-11.8 61.2 31 35.5 56.7-26.5 26.5-70.2-2.9-56-37.3L240.3 199v121.9c25.3 12.5 22.3 41.8 9.1 55-6.4 6.4-15.2 10.1-24.3 10.1s-17.8-3.6-24.3-10.1c-17.6-17.6-11.1-46.9 11.2-56v-123c-20.8-8.5-24.6-30.7-18.6-45L142.6 101 8.5 235.1C3 240.6 0 247.9 0 255.5s3 15 8.5 20.4l195.6 195.7c5.4 5.4 12.7 8.4 20.4 8.4s15-3 20.4-8.4l194.7-194.7c5.4-5.4 8.4-12.8 8.4-20.4s-3-15-8.4-20.4"/></svg>
+  </div>
+  <div class="md-source__repository">
+    kksctf/yatb
+  </div>
+</a>
+    </div>
+  
+  <ul class="md-nav__list" data-md-scrollfix>
+    
+      
+      
+  
+  
+  
+  
+    <li class="md-nav__item">
+      <a href=".." class="md-nav__link">
+        
+  
+  
+  <span class="md-ellipsis">
+    
+  
+    YATB
+  
+
+    
+  </span>
+  
+  
+
+      </a>
+    </li>
+  
+
+    
+      
+      
+  
+  
+    
+  
+  
+  
+    <li class="md-nav__item md-nav__item--active">
+      
+      <input class="md-nav__toggle md-toggle" type="checkbox" id="__toc">
+      
+      
+        
+      
+      
+        <label class="md-nav__link md-nav__link--active" for="__toc">
+          
+  
+  
+  <span class="md-ellipsis">
+    
+  
+    Task files
+  
+
+    
+  </span>
+  
+  
+
+          <span class="md-nav__icon md-icon"></span>
+        </label>
+      
+      <a href="./" class="md-nav__link md-nav__link--active">
+        
+  
+  
+  <span class="md-ellipsis">
+    
+  
+    Task files
+  
+
+    
+  </span>
+  
+  
+
+      </a>
+      
+        
+
+<nav class="md-nav md-nav--secondary" aria-label="Table of contents">
+  
+  
+  
+    
+  
+  
+    <label class="md-nav__title" for="__toc">
+      <span class="md-nav__icon md-icon"></span>
+      Table of contents
+    </label>
+    <ul class="md-nav__list" data-md-component="toc" data-md-scrollfix>
+      
+        <li class="md-nav__item">
+  <a href="#file-format" class="md-nav__link">
+    <span class="md-ellipsis">
+      
+        File format
+      
+    </span>
+  </a>
+  
+</li>
+      
+        <li class="md-nav__item">
+  <a href="#task-folders" class="md-nav__link">
+    <span class="md-ellipsis">
+      
+        Task folders
+      
+    </span>
+  </a>
+  
+</li>
+      
+        <li class="md-nav__item">
+  <a href="#dynamic-features" class="md-nav__link">
+    <span class="md-ellipsis">
+      
+        Dynamic features
+      
+    </span>
+  </a>
+  
+</li>
+      
+        <li class="md-nav__item">
+  <a href="#service-tasks" class="md-nav__link">
+    <span class="md-ellipsis">
+      
+        Service tasks
+      
+    </span>
+  </a>
+  
+</li>
+      
+        <li class="md-nav__item">
+  <a href="#builder-tasks" class="md-nav__link">
+    <span class="md-ellipsis">
+      
+        Builder tasks
+      
+    </span>
+  </a>
+  
+</li>
+      
+    </ul>
+  
+</nav>
+      
+    </li>
+  
+
+    
+      
+      
+  
+  
+  
+  
+    <li class="md-nav__item">
+      <a href="../release-notes/" class="md-nav__link">
+        
+  
+  
+  <span class="md-ellipsis">
+    
+  
+    Release notes
+  
+
+    
+  </span>
+  
+  
+
+      </a>
+    </li>
+  
+
+    
+      
+      
+  
+  
+  
+  
+    
+    
+    
+    
+    
+    <li class="md-nav__item md-nav__item--nested">
+      
+        
+        
+        <input class="md-nav__toggle md-toggle " type="checkbox" id="__nav_4" >
+        
+          
+          <label class="md-nav__link" for="__nav_4" id="__nav_4_label" tabindex="0">
+            
+  
+  
+  <span class="md-ellipsis">
+    
+  
+    Archive
+  
+
+    
+  </span>
+  
+  
+
+            <span class="md-nav__icon md-icon"></span>
+          </label>
+        
+        <nav class="md-nav" data-md-level="1" aria-labelledby="__nav_4_label" aria-expanded="false">
+          <label class="md-nav__title" for="__nav_4">
+            <span class="md-nav__icon md-icon"></span>
+            
+  
+    Archive
+  
+
+          </label>
+          <ul class="md-nav__list" data-md-scrollfix>
+            
+              
+                
+  
+  
+  
+  
+    <li class="md-nav__item">
+      <a href="../old/" class="md-nav__link">
+        
+  
+  
+  <span class="md-ellipsis">
+    
+  
+    Overview
+  
+
+    
+  </span>
+  
+  
+
+      </a>
+    </li>
+  
+
+              
+            
+              
+                
+  
+  
+  
+  
+    <li class="md-nav__item">
+      <a href="../old/config/" class="md-nav__link">
+        
+  
+  
+  <span class="md-ellipsis">
+    
+  
+    Configuration
+  
+
+    
+  </span>
+  
+  
+
+      </a>
+    </li>
+  
+
+              
+            
+              
+                
+  
+  
+  
+  
+    <li class="md-nav__item">
+      <a href="../old/hacking/" class="md-nav__link">
+        
+  
+  
+  <span class="md-ellipsis">
+    
+  
+    Hacking
+  
+
+    
+  </span>
+  
+  
+
+      </a>
+    </li>
+  
+
+              
+            
+          </ul>
+        </nav>
+      
+    </li>
+  
+
+    
+  </ul>
+</nav>
+                  </div>
+                </div>
+              </div>
+            
+            
+              
+              <div class="md-sidebar md-sidebar--secondary" data-md-component="sidebar" data-md-type="toc" >
+                <div class="md-sidebar__scrollwrap">
+                  <div class="md-sidebar__inner">
+                    
+
+<nav class="md-nav md-nav--secondary" aria-label="Table of contents">
+  
+  
+  
+    
+  
+  
+    <label class="md-nav__title" for="__toc">
+      <span class="md-nav__icon md-icon"></span>
+      Table of contents
+    </label>
+    <ul class="md-nav__list" data-md-component="toc" data-md-scrollfix>
+      
+        <li class="md-nav__item">
+  <a href="#file-format" class="md-nav__link">
+    <span class="md-ellipsis">
+      
+        File format
+      
+    </span>
+  </a>
+  
+</li>
+      
+        <li class="md-nav__item">
+  <a href="#task-folders" class="md-nav__link">
+    <span class="md-ellipsis">
+      
+        Task folders
+      
+    </span>
+  </a>
+  
+</li>
+      
+        <li class="md-nav__item">
+  <a href="#dynamic-features" class="md-nav__link">
+    <span class="md-ellipsis">
+      
+        Dynamic features
+      
+    </span>
+  </a>
+  
+</li>
+      
+        <li class="md-nav__item">
+  <a href="#service-tasks" class="md-nav__link">
+    <span class="md-ellipsis">
+      
+        Service tasks
+      
+    </span>
+  </a>
+  
+</li>
+      
+        <li class="md-nav__item">
+  <a href="#builder-tasks" class="md-nav__link">
+    <span class="md-ellipsis">
+      
+        Builder tasks
+      
+    </span>
+  </a>
+  
+</li>
+      
+    </ul>
+  
+</nav>
+                  </div>
+                </div>
+              </div>
+            
+          
+          
+            <div class="md-content" data-md-component="content">
+              
+              <article class="md-content__inner md-typeset">
+                
+                  
+
+
+
+<h1 id="task-files">Task files</h1>
+<p>YATB is intended to use with declarative task management: files describe the tasks on the board.
+The command-line interface (CLI) reads these files and updates YATB.
+The <code>sync</code> command reads the <code>tasks</code> folder inside its target repository.</p>
+<p>Use the complete task repository as the target for <code>sync</code>.
+Synchronization deletes board tasks that it does not find in that repository.
+Even an empty or missing <code>tasks</code> folder leaves all board tasks marked for deletion.</p>
+<h2 id="file-format">File format</h2>
+<p><strong>Any</strong> folder containing a file named <code>task.yaml</code> (yaml! not yml) is a task folder.
+The CLI searches for this exact name, including in nested folders.
+It skips a task if its immediate parent folder name starts with a dot.</p>
+<p>The <a href="https://github.com/kksctf/yatb/blob/master/yatb/cli/models.py#L14">FileTask model</a> defines the fields and their defaults:</p>
+<pre><code class="language-yaml">name: Task Name
+
+description: |-
+  Multiline Task Description. Hello &lt;https://yaml-multiline.info&gt;.
+  This is: 
+  1. Keep newlines
+  2. No newline at end
+  imho, this is the best possible option.
+  Renders as markdown -&gt; html inside YATB.
+
+author: '@Rubikoid'
+
+category: web # you can write here effectivly anything, but see below
+
+flag: prefix{flag} # if you didn't specify prefix and `{}` - it will autoselected based on upstream YATB CTF settings.
+
+dynamic_scoring: false
+static_scoring_points: 1000 # has effect only when dynamic_scoring=false
+dynamic_scoring_decay: 50 # has effect only when dynamic_scoring=true
+
+dynamic_features: []
+# flags of dynamic features, supported by task:
+# - service # task must be ran in k8s; see below
+# - builder # task data must be builded and returned to user; see below
+# - vm # broken
+# - vpn # broken
+
+hidden: true # show or not task to users. can be changed only here.
+
+# id: 123e4567-e89b-12d3-a456-426614174000 # this is autogenerated. you should never supply it by yourself. or you known what you doin; MUST BE UNIQ ACROSS ONE YATB INSTANCE
+# vm_ports: [] # also autogenerated
+</code></pre>
+<p>YATB renders <code>description</code> as Markdown.
+The <code>|-</code> marker preserves line breaks in the YAML value and removes the final newline.
+Markdown determines how those line breaks appear on the task page.</p>
+<p>If <code>dynamic_scoring</code> is omitted, it defaults to <code>true</code>.
+Dynamic scoring reduces the score as more players solve the task.
+The <code>dynamic_scoring_decay</code> field sets the solve count at which the score reaches its minimum.
+Its default is <code>50</code>.</p>
+<p>The <code>flag</code> field accepts a full flag, such as <code>prefix{flag}</code>, or its inner text.
+For inner text alone, the CLI uses <code>FLAG_BASE</code> from its local YATB configuration as the prefix.
+It does not fetch the prefix from the server.
+An empty <code>dynamic_features</code> list selects a fixed flag.
+A nonempty list selects a flag generated for each player.</p>
+<p>The <code>category</code> field accepts any string.
+YATB selects its display color without changing the stored category.
+The <a href="https://github.com/kksctf/yatb/blob/master/yatb/yatb/schema/task.py#L88">category mapping</a> ignores letter case:</p>
+<ul>
+<li><code>crypto</code>, <code>web</code>, and <code>forensic</code> each use their own color group.</li>
+<li><code>binary</code>, <code>reverse</code>, <code>pwn</code>, and <code>rev</code> use the <code>binary</code> color group.</li>
+<li>All other values use the <code>other</code> color group.</li>
+</ul>
+<p>The <code>hidden</code> field defaults to <code>true</code>.
+Synchronization copies this value to the board, including after an administrator changes visibility there.
+The <code>unhide</code> command can also make tasks visible.
+Event timing and required tasks still control what players can see.</p>
+<p>When the CLI creates a task, it writes the assigned <code>id</code> into <code>task.yaml</code>.
+Keep this ID for later updates and do not copy it to another task.
+The <code>vm_ports</code> field defaults to an empty list.</p>
+<h2 id="task-folders">Task folders</h2>
+<p>The CLI uses folders next to <code>task.yaml</code> for source files and player downloads.
+Public files are shared by all players.
+The <a href="https://github.com/kksctf/yatb/blob/master/yatb/cli/cmd/tasks.py">upload code</a> defines how these folders are processed:</p>
+<ul>
+<li><code>dev</code> contains the Dockerfile and source files for a builder task, or any possible files that required to develop task</li>
+<li><code>public</code> contains files to upload as structured task attachments, with their size and SHA256.</li>
+<li><code>deploy</code> contains the service definition in <code>docker-compose.yml</code> and any files needed to build its images.</li>
+<li><code>solution</code> is an optional folder for solution notes, such as <code>README.md</code>, and the uploader does not process it.</li>
+</ul>
+<p>One or two files in <code>public</code> are uploaded individually. More files, or any subdirectory,
+are packed into <code>files.tar.gz</code>; its attachment describes the downloadable archive itself.</p>
+<p>Additional attachments can be declared in <code>task.yaml</code> using the
+<a href="https://github.com/kksctf/yatb/blob/master/yatb/yatb/schema/attachments.py">Pydantic attachment models</a>:</p>
+<pre><code class="language-yaml">attachments:
+  - type: web
+    label: Open challenge
+    url: https://challenge.example.org
+  - type: endpoint
+    label: TCP service
+    host: challenge.example.org
+    port: 31337
+</code></pre>
+<p>Declared attachments come first, followed by uploaded files sorted by name.
+Each sync replaces the attachment list, so removing a public file or a declared
+attachment also removes it from the task.</p>
+<h2 id="dynamic-features">Dynamic features</h2>
+<p>A dynamic task runs a service or generates files for a player.
+The dynamic task controller (DTC) manages this work in Kubernetes.
+Set <code>dynamic_features</code> to <code>[service]</code>, <code>[builder]</code>, or <code>[service, builder]</code> to select these features.</p>
+<p>The file format also accepts <code>vm</code> and <code>vpn</code>.
+A virtual machine (VM) runs a separate operating system.
+The VM implementation is unfinished, and the task runner has no action for the VPN feature.
+This guide covers service and builder tasks.</p>
+<h2 id="service-tasks">Service tasks</h2>
+<p>For a service task, put <code>docker-compose.yml</code> in the <code>deploy</code> folder.
+DTC translates a subset of Docker Compose into Kubernetes objects.
+The <a href="https://github.com/kksctf/yatb/blob/master/yatb/dtc/connectors/compose.py#L99">Compose model</a> defines this subset.</p>
+<p>The file requires <code>version</code> as a string and a <code>services</code> mapping.
+Each service needs either <code>image</code> or <code>build</code>.
+The supported service fields are:</p>
+<ul>
+<li><code>image</code> names the container image.</li>
+<li><code>build</code> takes precedence over <code>image</code> and accepts a path or a mapping with <code>context</code> and optional <code>dockerfile</code>.</li>
+<li><code>command</code> supplies arguments to the image entry point and accepts a list or a string.</li>
+<li><code>ports</code> lists container ports that DTC makes available to players.</li>
+<li><code>environment</code> accepts a mapping of strings or a list of <code>NAME=value</code> strings.</li>
+<li><code>expose</code> lists integer ports for access between services.</li>
+<li><code>resource</code> sets <code>requests</code> and <code>limits</code>, each with <code>cpu</code> and <code>memory</code> strings.</li>
+</ul>
+<p>The <code>resource</code> field is a DTC extension, not the standard Compose resource configuration.
+Omit <code>vm</code>, or set it to <code>false</code>, for container services.
+The service runner skips entries with <code>vm: true</code>.</p>
+<p>DTC resolves <code>build</code> paths and <code>build.context</code> relative to <code>deploy</code>.
+The default Dockerfile is <code>Dockerfile</code> inside the build context.
+An explicitly supplied relative <code>build.dockerfile</code> is resolved against <code>deploy</code>.</p>
+<p>Use a list for <code>command</code> when an argument contains spaces.
+DTC splits a string command at spaces without shell parsing.
+The <a href="https://github.com/kksctf/yatb/blob/master/yatb/dtc/connectors/kub/api/service.py">service runner</a> passes the result as container arguments.</p>
+<p>Write each <code>ports</code> entry as a quoted string, such as <code>"8080"</code> or <code>"8080:80"</code>.
+For <code>"8080:80"</code>, DTC uses container port <code>80</code> and allocates the public port itself.
+The service inside the container must listen on that container port.
+The parser does not accept an IP address in a port entry.</p>
+<p>DTC runs each service in a separate Kubernetes deployment.
+A deployment manages the pods that run a container.
+Ports listed under <code>expose</code> create internal services that use the Compose service name.
+This provides communication between services without implementing all Docker Compose networking features.</p>
+<p>YATB generates a flag for each player.
+A Kubernetes Secret stores values that containers can read.
+DTC supplies it through a Kubernetes Secret as the environment variable <code>FLAG</code>.
+Read <code>FLAG</code> in the task program instead of embedding a fixed flag.
+A fixed flag will not match the generated flag that YATB expects.</p>
+<p>DTC starts a separate service instance for each player.
+A hash identifies the contents of the source archive.
+It reuses a built image when the registry contains a tag matching the source archive hash.
+Changed source files or a missing cached image can cause another build.</p>
+<h2 id="builder-tasks">Builder tasks</h2>
+<p>A builder task runs the image built from <code>dev/Dockerfile</code> to generate player files.
+The <a href="https://github.com/kksctf/yatb/blob/master/yatb/dtc/connectors/kub/api/oneshot.py">builder runner</a> stores the output in S3.
+If output already exists for that player and task, it reuses the first stored object instead of running the builder again.</p>
+<p>Write one output file directly into <code>EXPORT_PATH</code>.
+For several files, create an archive there yourself.
+The uploader does not process subfolders, and the task result links to one uploaded object.</p>
+<p>DTC supplies these environment variables to the builder:</p>
+<ul>
+<li><code>EXPORT_PATH</code> is the output folder, currently <code>/build</code>.</li>
+<li><code>FLAG</code> is the flag generated for this player.</li>
+<li><code>RANDOM_STRING_SEQ</code> is a string derived from the flag and stays the same while that flag stays the same.</li>
+<li><code>BACKEND_HOST</code> and <code>BACKEND_PORT</code> identify the first allocated service address, if the task starts a service with a public port.</li>
+</ul>
+<p>Service containers also receive <code>FLAG</code> and <code>RANDOM_STRING_SEQ</code>.
+DTC does not automatically supply <code>BACKEND_HOST</code> or <code>BACKEND_PORT</code> to service containers.
+The <a href="https://github.com/kksctf/yatb/blob/master/yatb/dtc/connectors/kub/__init__.py">Kubernetes connector</a> defines these environment variables.</p>
+
+
+
+
+
+
+
+
+
+
+
+
+                
+              </article>
+            </div>
+          
+          
+<script>var target=document.getElementById(location.hash.slice(1));target&&target.name&&(target.checked=target.name.startsWith("__tabbed_"))</script>
+        </div>
+        
+      </main>
+      
+        <footer class="md-footer">
+  
+  <div class="md-footer-meta md-typeset">
+    <div class="md-footer-meta__inner md-grid">
+      <div class="md-copyright">
+  
+  
+    Made with
+    <a href="https://squidfunk.github.io/mkdocs-material/" target="_blank" rel="noopener">
+      Material for MkDocs
+    </a>
+  
+</div>
+      
+    </div>
+  </div>
+</footer>
+      
+    </div>
+    <div class="md-dialog" data-md-component="dialog">
+      <div class="md-dialog__inner md-typeset"></div>
+    </div>
+    
+    
+    
+      
+      
+      <script id="__config" type="application/json">{"annotate": null, "base": "..", "features": [], "search": "../assets/javascripts/workers/search.2c215733.min.js", "tags": null, "translations": {"clipboard.copied": "Copied to clipboard", "clipboard.copy": "Copy to clipboard", "search.result.more.one": "1 more on this page", "search.result.more.other": "# more on this page", "search.result.none": "No matching documents", "search.result.one": "1 matching document", "search.result.other": "# matching documents", "search.result.placeholder": "Type to start searching", "search.result.term.missing": "Missing", "select.version": "Select version"}, "version": null}</script>
+    
+    
+      <script src="../assets/javascripts/bundle.d7400e89.min.js"></script>
+      
+    
+  </body>
+</html>
